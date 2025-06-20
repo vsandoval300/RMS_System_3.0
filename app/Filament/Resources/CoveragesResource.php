@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CompaniesResource\Pages;
-use App\Filament\Resources\CompaniesResource\RelationManagers;
-use App\Models\Companies;
+use App\Filament\Resources\CoveragesResource\Pages;
+use App\Filament\Resources\CoveragesResource\RelationManagers;
+use App\Models\Coverages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CompaniesResource extends Resource
+class CoveragesResource extends Resource
 {
-    protected static ?string $model = Companies::class;
+    protected static ?string $model = Coverages::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 
@@ -37,14 +37,14 @@ class CompaniesResource extends Resource
                     Forms\Components\TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->maxLength(2)
+                    ->maxLength(20)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('activity')
-                    ->label('Activity')
+                    Forms\Components\Textarea::make('description')
+                    ->label('Description')
                     ->required()
                     ->columnSpan('full')
                     ->autosize()
@@ -52,33 +52,15 @@ class CompaniesResource extends Resource
                     ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('country_id')
-                        ->label('Country')
-                        ->relationship('country','name')
-                        ->searchable()
-                        ->preload()
-                        ->required()
-                        ->extraAttributes(['class' => 'w-1/2']),
-
-
-
-
-                    Forms\Components\Select::make('industry_id')
-                        ->label('Sector')
-                        ->relationship('sector','name')
-                        ->searchable()
-                        ->preload()
-                        ->required()
-                        ->extraAttributes(['class' => 'w-1/2']),
+                    Forms\Components\Select::make('line_of_business_id')
+                    ->label('Line of Business')
+                    ->relationship('lineOfBusiness', 'name')
+                    ->searchable()
+                    ->required()
+                    ->preload()
+                    ->extraAttributes(['class' => 'w-1/2']),
 
                 ]),
-
-
-
-
-
-
-
             ]);
     }
 
@@ -93,22 +75,22 @@ class CompaniesResource extends Resource
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('activity')
-                    ->label('Activity')
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Description')
                     ->wrap()
                     ->extraAttributes([
-                        'style' => 'width: 550px; white-space: normal;', // ancho fijo de 300px
+                        'style' => 'width: 400px; white-space: normal;', // ancho fijo de 300px
                     ]),
-
-                Tables\Columns\TextColumn::make('sector.name')
-                    ->label('Sector')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('country.name')
-                    ->label('Country')
+                Tables\Columns\TextColumn::make('lineOfBusiness.name')
+                    ->label('Line of Business')
                     ->sortable()
                     ->searchable()
+                    ->extraAttributes([
+                        'style' => 'width: 100px; white-space: normal;', // ancho fijo de 300px
+                    ]),
+
+
+
 
 
             ])
@@ -135,9 +117,9 @@ class CompaniesResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCompanies::route('/'),
-            'create' => Pages\CreateCompanies::route('/create'),
-            'edit' => Pages\EditCompanies::route('/{record}/edit'),
+            'index' => Pages\ListCoverages::route('/'),
+            'create' => Pages\CreateCoverages::route('/create'),
+            'edit' => Pages\EditCoverages::route('/{record}/edit'),
         ];
     }
 }
