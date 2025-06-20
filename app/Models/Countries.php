@@ -20,4 +20,9 @@ class Countries extends Model
     {
         return $this->belongsTo(Clients::class);
     }
+
+    public function companie(): BelongsTo
+    {
+        return $this->belongsTo(Companies::class);
+    }
 }

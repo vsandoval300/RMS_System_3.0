@@ -7,16 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Sectors extends Model
+class Companies extends Model
 {
     //
     use HasFactory;
-    protected $table = 'industries'; // ✅ aquí redirigimos la tabla
-
-
-public function companie(): BelongsTo
+    public function country(): BelongsTo
     {
-        return $this->belongsTo(Companies::class);
+        return $this->belongsTo(Countries::class);
+    }
+
+    public function sector(): BelongsTo
+    {
+    return $this->belongsTo(Sectors::class, 'industry_id');
     }
 
 }
