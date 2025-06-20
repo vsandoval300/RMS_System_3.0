@@ -1,0 +1,24 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\business_doc;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class BusinessesDocsAdamasSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $business_doc=new business_doc();          $business_doc->id = '2014-ADA005-001-01';         $business_doc->business_doc_type_id = '1';        $business_doc->index = '1';         $business_doc->description = 'Facultative Reinsurance Contract';         $business_doc->inception_date = date('Y-m-d',strtotime('2014-12-22'));         $business_doc->expiration_date = date('Y-m-d',strtotime('2015-12-22'));         $business_doc->document_path =  'https://rmk-resources.s3.amazonaws.com/reinsurers/business_documents/2014-ADA005-001-01.pdf ' ;              $business_doc->roe = '1';           $business_doc->business_code = '2014-ADA005-001';            $business_doc->created_at = date('Y-m-d',strtotime('2014-12-26'));        $business_doc->save(); 
+        $business_doc=new business_doc();          $business_doc->id = '2014-ADA005-002-01';         $business_doc->business_doc_type_id = '1';        $business_doc->index = '1';         $business_doc->description = 'Facultative Reinsurance Contract';         $business_doc->inception_date = date('Y-m-d',strtotime('2015-04-15'));         $business_doc->expiration_date = date('Y-m-d',strtotime('2016-04-15'));         $business_doc->document_path =  'https://rmk-resources.s3.amazonaws.com/reinsurers/business_documents/2014-ADA005-002-01.pdf ' ;              $business_doc->roe = '1';           $business_doc->business_code = '2014-ADA005-002';            $business_doc->created_at = date('Y-m-d',strtotime('2015-09-09'));        $business_doc->save(); 
+        $business_doc=new business_doc();          $business_doc->id = '2015-ADA005-001-01';         $business_doc->business_doc_type_id = '1';        $business_doc->index = '1';         $business_doc->description = 'Facultative Reinsurance Contract';         $business_doc->inception_date = date('Y-m-d',strtotime('2015-04-15'));         $business_doc->expiration_date = date('Y-m-d',strtotime('2016-04-15'));         $business_doc->document_path =  'https://rmk-resources.s3.amazonaws.com/reinsurers/business_documents/2015-ADA005-001-01.pdf ' ;              $business_doc->roe = '1';           $business_doc->business_code = '2015-ADA005-001';            $business_doc->created_at = date('Y-m-d',strtotime('2015-09-09'));        $business_doc->save(); 
+        $business_doc=new business_doc();          $business_doc->id = '2015-ADA005-002-01';         $business_doc->business_doc_type_id = '1';        $business_doc->index = '1';         $business_doc->description = 'Facultative Reinsurance Contract';         $business_doc->inception_date = date('Y-m-d',strtotime('2015-09-01'));         $business_doc->expiration_date = date('Y-m-d',strtotime('2016-09-01'));         $business_doc->document_path =  'https://rmk-resources.s3.amazonaws.com/reinsurers/business_documents/2015-ADA005-002-01.pdf ' ;              $business_doc->roe = '1';           $business_doc->business_code = '2015-ADA005-002';            $business_doc->created_at = date('Y-m-d',strtotime('2015-12-24'));        $business_doc->save(); 
+        $business_doc=new business_doc();          $business_doc->id = '2015-ADA005-003-01';         $business_doc->business_doc_type_id = '1';        $business_doc->index = '1';         $business_doc->description = 'Facultative Reinsurance Contract';         $business_doc->inception_date = date('Y-m-d',strtotime('2015-12-22'));         $business_doc->expiration_date = date('Y-m-d',strtotime('2016-12-22'));         $business_doc->document_path =  'https://rmk-resources.s3.amazonaws.com/reinsurers/business_documents/2015-ADA005-003-01.pdf ' ;              $business_doc->roe = '1';           $business_doc->business_code = '2015-ADA005-003';            $business_doc->created_at = date('Y-m-d',strtotime('2015-12-24'));        $business_doc->save(); 
+        $business_doc=new business_doc();          $business_doc->id = '2016-ADA005-001-01';         $business_doc->business_doc_type_id = '1';        $business_doc->index = '1';         $business_doc->description = 'Facultative Reinsurance Contract';         $business_doc->inception_date = date('Y-m-d',strtotime('2015-05-04'));         $business_doc->expiration_date = date('Y-m-d',strtotime('2016-05-04'));         $business_doc->document_path =  'https://rmk-resources.s3.amazonaws.com/reinsurers/business_documents/2016-ADA005-001-01.pdf ' ;              $business_doc->roe = '1';           $business_doc->business_code = '2016-ADA005-001';            $business_doc->created_at = date('Y-m-d',strtotime('2016-03-30'));        $business_doc->save(); 
+    }
+}
