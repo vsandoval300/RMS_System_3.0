@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BankAccountsResource\Pages;
 use App\Filament\Resources\BankAccountsResource\RelationManagers;
 use App\Models\BankAccounts;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,7 +14,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
-//use App\Filament\Clusters\Resources;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class BankAccountsResource extends Resource
 {
@@ -31,9 +37,9 @@ class BankAccountsResource extends Resource
             ->schema([
                 //
                 
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\Select::make('status_account')
+                    Select::make('status_account')
                         ->label('Status Account') // Cambié el label para que tenga más sentido
                         ->required()
                         ->options([
@@ -45,7 +51,7 @@ class BankAccountsResource extends Resource
                         ->helperText('Please select the account status.')
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('currency_id')
+                    Select::make('currency_id')
                         ->label('Currency')
                         ->relationship('currency','name')
                         ->searchable()
@@ -53,7 +59,7 @@ class BankAccountsResource extends Resource
                         ->required()
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('intermediary_bank')
+                    Select::make('intermediary_bank')
                         ->label('Intermediary Bank')
                         ->relationship('bank','name')
                         ->searchable()
@@ -61,7 +67,7 @@ class BankAccountsResource extends Resource
                         ->required()
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('bank_id')
+                    Select::make('bank_id')
                         ->label('Bank / For Credit to')
                         ->relationship('bank','name')
                         ->searchable()
@@ -69,7 +75,7 @@ class BankAccountsResource extends Resource
                         ->required()
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('beneficiary_acct_name')
+                    TextInput::make('beneficiary_acct_name')
                         ->label('Beneficiay Name')
                         ->required()
                         ->maxLength(255)
@@ -77,7 +83,7 @@ class BankAccountsResource extends Resource
                         ->helperText('First letter of each word will be capitalised.')
                         ->extraAttributes(['class' => 'w-1/2']),
                        
-                    Forms\Components\Textarea::make('beneficiary_address')
+                    Textarea::make('beneficiary_address')
                         ->label('Beneficiary Address')
                         ->required()
                         ->columnSpan('full')
@@ -85,7 +91,7 @@ class BankAccountsResource extends Resource
                         ->helperText('Please provide address.')
                         ->extraAttributes(['class' => 'w-1/2']),        
 
-                    Forms\Components\TextInput::make('beneficiary_swift')
+                    TextInput::make('beneficiary_swift')
                         ->label('Beneficiary SWIFT code')
                         ->required()
                         ->maxLength(255)
@@ -93,7 +99,7 @@ class BankAccountsResource extends Resource
                         ->helperText('Please provide SWIFT code.')
                         ->extraAttributes(['class' => 'w-1/2']),  
 
-                    Forms\Components\TextInput::make('beneficiary_acct_no')
+                    TextInput::make('beneficiary_acct_no')
                         ->label('Beneficiary Account Number')
                         ->required()
                         ->maxLength(255)
@@ -101,7 +107,7 @@ class BankAccountsResource extends Resource
                         ->helperText('Please provide account number.')
                         ->extraAttributes(['class' => 'w-1/2']), 
 
-                    Forms\Components\TextInput::make('ffc_acct_name')
+                    TextInput::make('ffc_acct_name')
                         ->label('For Further Account Name')
                         ->required()
                         ->maxLength(255)
@@ -109,7 +115,7 @@ class BankAccountsResource extends Resource
                         ->helperText('First letter of each word will be capitalised.')
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('ffc_acct_no')
+                    TextInput::make('ffc_acct_no')
                         ->label('For Further Account Number')
                         ->required()
                         ->maxLength(255)
@@ -117,7 +123,7 @@ class BankAccountsResource extends Resource
                         ->helperText('Please provide account number.')
                         ->extraAttributes(['class' => 'w-1/2']), 
 
-                    Forms\Components\Textarea::make('ffc_acct_address')
+                    Textarea::make('ffc_acct_address')
                         ->label('For Further Account Address')
                         ->required()
                         ->columnSpan('full')
@@ -135,33 +141,33 @@ class BankAccountsResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
+                TextColumn::make('id')->sortable(),
 
-                Tables\Columns\TextColumn::make('status_account')
+                TextColumn::make('status_account')
                     ->label('Status')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('currency.name')
+                TextColumn::make('currency.name')
                     ->label('Currency')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('bank_inter.name')
+                TextColumn::make('bank_inter.name')
                     ->label('Intermediary Bank')
                     ->sortable()
                     ->searchable(),
                 
-                Tables\Columns\TextColumn::make('bank.name')
+                TextColumn::make('bank.name')
                     ->label('Banks')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('beneficiary_acct_name')
+                TextColumn::make('beneficiary_acct_name')
                     ->label('Beneficiary Name')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('beneficiary_address')
+                TextColumn::make('beneficiary_address')
                     ->label('Beneficiary Address')
                     ->sortable()
                     ->searchable()
@@ -170,17 +176,17 @@ class BankAccountsResource extends Resource
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
                     ]),
 
-                Tables\Columns\TextColumn::make('beneficiary_swift')
+                TextColumn::make('beneficiary_swift')
                     ->label('Beneficiary Swift')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('beneficiary_acct_no')
+                TextColumn::make('beneficiary_acct_no')
                     ->label('Beneficiary Account')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('ffc_acct_name')
+                TextColumn::make('ffc_acct_name')
                     ->label('For Further Account Name')
                     ->sortable()
                     ->searchable()
@@ -189,12 +195,12 @@ class BankAccountsResource extends Resource
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
                     ]),
 
-                Tables\Columns\TextColumn::make('ffc_acct_no')
+                TextColumn::make('ffc_acct_no')
                     ->label('For Further Account Number')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('ffc_acct_address')
+                TextColumn::make('ffc_acct_address')
                     ->label('For Further Account Address')
                     ->sortable()
                     ->searchable()
@@ -208,7 +214,7 @@ class BankAccountsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
 
                 Tables\Actions\Action::make('generate_pdf')
                     ->label('PDF')

@@ -12,6 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class BusinessDocTypesResource extends Resource
 {
@@ -24,24 +31,24 @@ class BusinessDocTypesResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    TextInput::make('name')
+                        ->label('Name')
+                        ->required()
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->helperText('First letter of each word will be capitalised.')
+                        ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('description')
-                    ->label('Description')
-                    ->required()
-                    ->columnSpan('full')
-                    ->autosize()
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    Textarea::make('description')
+                        ->label('Description')
+                        ->required()
+                        ->columnSpan('full')
+                        ->autosize()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
+                        ->extraAttributes(['class' => 'w-1/2']),
 
                 ]),
             ]);
@@ -52,12 +59,12 @@ class BusinessDocTypesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
-                ->extraAttributes([
-                        'style' => 'width: 180px; white-space: normal;', // ✅ Deja que el texto se envuelva
-                    ]),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable()
+                    ->extraAttributes([
+                            'style' => 'width: 180px; white-space: normal;', // ✅ Deja que el texto se envuelva
+                        ]),
+                TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([

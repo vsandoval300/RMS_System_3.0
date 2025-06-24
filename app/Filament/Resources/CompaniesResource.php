@@ -12,6 +12,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
 
 class CompaniesResource extends Resource
 {
@@ -24,9 +30,9 @@ class CompaniesResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -34,7 +40,7 @@ class CompaniesResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->maxLength(2)
@@ -43,7 +49,7 @@ class CompaniesResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('activity')
+                    Textarea::make('activity')
                     ->label('Activity')
                     ->required()
                     ->columnSpan('full')
@@ -52,7 +58,7 @@ class CompaniesResource extends Resource
                     ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('country_id')
+                    Select::make('country_id')
                         ->label('Country')
                         ->relationship('country','name')
                         ->searchable()
@@ -63,7 +69,7 @@ class CompaniesResource extends Resource
 
 
 
-                    Forms\Components\Select::make('industry_id')
+                    Select::make('industry_id')
                         ->label('Sector')
                         ->relationship('sector','name')
                         ->searchable()

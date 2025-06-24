@@ -12,6 +12,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 class CountriesResource extends Resource
 {
@@ -27,9 +33,9 @@ class CountriesResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -37,7 +43,7 @@ class CountriesResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('alpha_2')
+                    TextInput::make('alpha_2')
                     ->label('Alpha 2')
                     ->required()
                     ->maxLength(2)
@@ -46,7 +52,7 @@ class CountriesResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('alpha_3')
+                    TextInput::make('alpha_3')
                     ->label('Alpha 3')
                     ->required()
                     ->maxLength(3)
@@ -55,7 +61,7 @@ class CountriesResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('country_code')
+                    TextInput::make('country_code')
                     ->label('Country Code')
                     ->required()
                     ->numeric()
@@ -64,7 +70,7 @@ class CountriesResource extends Resource
                     ->helperText('Only whole numbers allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('iso_code')
+                    TextInput::make('iso_code')
                     ->label('Iso Code')
                     ->required()
                     ->maxLength(30)
@@ -73,7 +79,7 @@ class CountriesResource extends Resource
                     ->helperText('Only uppercase letters, numbers, dash (-), colon (:), and spaces allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('am_best_code')
+                    TextInput::make('am_best_code')
                     ->label('AM Best Code')
                     ->required()
                     ->maxLength(10)
@@ -82,7 +88,7 @@ class CountriesResource extends Resource
                     ->helperText('Only uppercase letters, numbers, dash (-), and spaces allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('latitude')
+                    TextInput::make('latitude')
                     ->label('Latitude')
                     ->required()
                     ->type('number') // ✅ convierte el input en <input type="number">
@@ -92,7 +98,7 @@ class CountriesResource extends Resource
                     ->helperText('Enter a decimal value between -90 and 90.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('longitude')
+                    TextInput::make('longitude')
                     ->label('longitude')
                     ->required()
                     ->type('number') // ✅ convierte el input en <input type="number">
@@ -102,7 +108,7 @@ class CountriesResource extends Resource
                     ->helperText('Enter a decimal value between -90 and 90.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('region_id')
+                    Select::make('region_id')
                     ->label('Region')
                     ->relationship('region', 'name')
                     ->searchable()
@@ -119,16 +125,16 @@ class CountriesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('alpha_2')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('alpha_3')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('country_code')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('iso_code')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('am_best_code')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('latitude')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('longitude')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('region.name')
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('alpha_2')->searchable()->sortable(),
+                TextColumn::make('alpha_3')->searchable()->sortable(),
+                TextColumn::make('country_code')->searchable()->sortable(),
+                TextColumn::make('iso_code')->searchable()->sortable(),
+                TextColumn::make('am_best_code')->searchable()->sortable(),
+                TextColumn::make('latitude')->searchable()->sortable(),
+                TextColumn::make('longitude')->searchable()->sortable(),
+                TextColumn::make('region.name')
                 ->label('Region')
                 ->sortable(),
 

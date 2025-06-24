@@ -13,6 +13,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 class CurrenciesResource extends Resource
 {
@@ -28,9 +34,9 @@ class CurrenciesResource extends Resource
             ->schema([
                 //
 
-                Forms\Components\Grid::make(1)->schema([    
+                Grid::make(1)->schema([    
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -38,7 +44,7 @@ class CurrenciesResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->maxLength(3)
@@ -56,9 +62,9 @@ class CurrenciesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('acronym')->searchable()->sortable(),
             ])
             ->filters([
                 //

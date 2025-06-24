@@ -12,6 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class LineOfBusinessResource extends Resource
 {
@@ -24,9 +31,9 @@ class LineOfBusinessResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -34,7 +41,7 @@ class LineOfBusinessResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('description')
+                    Textarea::make('description')
                     ->label('Description')
                     ->required()
                     ->columnSpan('full')
@@ -52,12 +59,12 @@ class LineOfBusinessResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable()
                 ->extraAttributes([
                         'style' => 'width: 180px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([

@@ -12,7 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-//use App\Filament\Clusters\Resources;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class BanksResource extends Resource
 {
@@ -27,9 +33,9 @@ class BanksResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
                     
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                         ->label('Name')
                         ->required()
                         ->maxLength(255)
@@ -37,7 +43,7 @@ class BanksResource extends Resource
                         ->helperText('First letter of each word will be capitalised.')
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('address')
+                    Textarea::make('address')
                         ->label('Address')
                         ->required()
                         ->columnSpan('full')
@@ -45,14 +51,14 @@ class BanksResource extends Resource
                         ->helperText('Please provide address.')
                         ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('aba_number')
+                    TextInput::make('aba_number')
                         ->label('ABA number')
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
                         ->helperText('Please provide ABA number.')
                         ->extraAttributes(['class' => 'w-1/2']),   
                         
-                    Forms\Components\TextInput::make('swift_code')
+                    TextInput::make('swift_code')
                         ->label('SWIFT code')
                         ->required()
                         ->maxLength(255)
@@ -60,10 +66,6 @@ class BanksResource extends Resource
                         ->helperText('Please provide SWIFT code.')
                         ->extraAttributes(['class' => 'w-1/2']),       
 
-
-
-
-                        
                 ]),
             ]);
     }
@@ -73,9 +75,9 @@ class BanksResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('address')
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('address')
                     ->label('Address')
                     ->sortable()
                     ->searchable()
@@ -83,8 +85,8 @@ class BanksResource extends Resource
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
                     ]),
-                Tables\Columns\TextColumn::make('aba_number')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('swift_code')->searchable()->sortable(),
+                TextColumn::make('aba_number')->searchable()->sortable(),
+                TextColumn::make('swift_code')->searchable()->sortable(),
 
 
 

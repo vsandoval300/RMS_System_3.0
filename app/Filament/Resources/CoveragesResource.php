@@ -12,6 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class CoveragesResource extends Resource
 {
@@ -24,9 +31,9 @@ class CoveragesResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -34,7 +41,7 @@ class CoveragesResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->maxLength(20)
@@ -43,7 +50,7 @@ class CoveragesResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('description')
+                    Textarea::make('description')
                     ->label('Description')
                     ->required()
                     ->columnSpan('full')
@@ -52,7 +59,7 @@ class CoveragesResource extends Resource
                     ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('line_of_business_id')
+                    Select::make('line_of_business_id')
                     ->label('Line of Business')
                     ->relationship('lineOfBusiness', 'name')
                     ->searchable()
@@ -69,19 +76,19 @@ class CoveragesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable()
                 ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 400px; white-space: normal;', // ancho fijo de 300px
                     ]),
-                Tables\Columns\TextColumn::make('lineOfBusiness.name')
+                TextColumn::make('lineOfBusiness.name')
                     ->label('Line of Business')
                     ->sortable()
                     ->searchable()

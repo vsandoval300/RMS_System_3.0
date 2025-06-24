@@ -12,6 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
+
 
 class PartnersResource extends Resource
 {
@@ -24,9 +31,9 @@ class PartnersResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -34,7 +41,7 @@ class PartnersResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('short_name')
+                    TextInput::make('short_name')
                     ->label('Short Name')
                     ->required()
                     ->maxLength(255)
@@ -42,7 +49,7 @@ class PartnersResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->maxLength(3)
@@ -51,7 +58,7 @@ class PartnersResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('partner_types_id')
+                    Select::make('partner_types_id')
                     ->label('Partner Type')
                     ->relationship('partnerType', 'name') // relación del modelo + campo visible
                     ->searchable()
@@ -59,12 +66,20 @@ class PartnersResource extends Resource
                     ->preload()
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('country_id')
+                    Select::make('country_id')
                     ->label('Country')
-                    ->relationship('country', 'name') // usa la relación 'country' para mostrar 'name'
+                    ->options(function () {
+                        return \App\Models\Countries::orderBy('name')
+                            ->get()
+                            ->mapWithKeys(fn ($country) => [
+                                $country->id => "{$country->alpha_3} - {$country->name}"
+                            ]);
+                    })
                     ->searchable()
-                    ->required()
                     ->preload()
+                    ->required()
+                    ->placeholder('Select a country')
+                    ->helperText('Choose the reinsurer\'s country.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
                 ]),
@@ -76,18 +91,18 @@ class PartnersResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable()
                 ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
-                Tables\Columns\TextColumn::make('short_name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('partnerType.name')
+                TextColumn::make('short_name')->searchable()->sortable(),
+                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('partnerType.name')
                     ->label('Partner Type')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('country.name')
+                TextColumn::make('country.name')
                     ->label('Country')
                     ->sortable()
                     ->searchable(),

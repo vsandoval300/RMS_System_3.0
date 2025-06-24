@@ -13,6 +13,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 class OperativeStatusesResource extends Resource
 {
@@ -27,9 +33,9 @@ class OperativeStatusesResource extends Resource
             ->schema([
                 //
                 
-                Forms\Components\Grid::make(1)->schema([
+                Grid::make(1)->schema([
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                         ->label('Acronym')
                         ->required()
                         ->maxLength(2)
@@ -39,7 +45,7 @@ class OperativeStatusesResource extends Resource
                         ->extraAttributes(['class' => 'w-1/2']),
                         //->extraAttributes(['class' => 'uppercase w-32']),
 
-                    Forms\Components\TextInput::make('description')
+                    TextInput::make('description')
                         ->label('Description')
                         ->required()
                         ->maxLength(255)
@@ -59,9 +65,9 @@ class OperativeStatusesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('description')->searchable()->sortable(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('description')->searchable()->sortable(),
             ])
             ->filters([
                 //
