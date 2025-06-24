@@ -17,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 class ReinsurerTypeResource extends Resource
 {
@@ -30,10 +31,11 @@ class ReinsurerTypeResource extends Resource
         return $form
             ->schema([
                 //
+                Section::make('Reinsurer Type Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
-                Forms\Components\Grid::make(1)->schema([
-
-                    Forms\Components\TextInput::make('type_acronym')
+                    TextInput::make('type_acronym')
                         ->label('Acronym')
                         ->required()
                         ->maxLength(2)
@@ -43,7 +45,7 @@ class ReinsurerTypeResource extends Resource
                         ->extraAttributes(['class' => 'w-1/2']),
                         //->extraAttributes(['class' => 'uppercase w-32']),
 
-                    Forms\Components\TextInput::make('description')
+                    TextInput::make('description')
                         ->label('Description')
                         ->required()
                         ->maxLength(255)
@@ -62,9 +64,9 @@ class ReinsurerTypeResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('type_acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('description')->searchable()->sortable(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('type_acronym')->searchable()->sortable(),
+                TextColumn::make('description')->searchable()->sortable(),
 
 
 

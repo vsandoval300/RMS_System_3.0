@@ -17,7 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
-
+use Filament\Tables\Columns\TextColumn;
 
 class ProducersResource extends Resource
 {
@@ -30,9 +30,11 @@ class ProducersResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Section::make('Producer Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -40,7 +42,7 @@ class ProducersResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->maxLength(3)
@@ -58,9 +60,9 @@ class ProducersResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->sortable(),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->sortable(),
+                TextColumn::make('acronym')->searchable()->sortable(),
             ])
             ->filters([
                 //

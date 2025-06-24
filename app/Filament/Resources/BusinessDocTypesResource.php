@@ -31,7 +31,9 @@ class BusinessDocTypesResource extends Resource
         return $form
             ->schema([
                 //
-                Grid::make(1)->schema([
+                Section::make('Business Document Type')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
                     TextInput::make('name')
                         ->label('Name')

@@ -36,8 +36,9 @@ class BankAccountsResource extends Resource
         return $form
             ->schema([
                 //
-                
-                Grid::make(1)->schema([
+                Section::make('Wire Instructions')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
                     Select::make('status_account')
                         ->label('Status Account') // Cambié el label para que tenga más sentido
@@ -75,6 +76,12 @@ class BankAccountsResource extends Resource
                         ->required()
                         ->extraAttributes(['class' => 'w-1/2']),
 
+                ]),
+
+                Section::make('Beneficiary Details')->schema([
+
+
+
                     TextInput::make('beneficiary_acct_name')
                         ->label('Beneficiay Name')
                         ->required()
@@ -106,6 +113,9 @@ class BankAccountsResource extends Resource
                         ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_no', ucwords(strtolower($state))))
                         ->helperText('Please provide account number.')
                         ->extraAttributes(['class' => 'w-1/2']), 
+                ]),
+
+                Section::make('For Further Account Details')->schema([
 
                     TextInput::make('ffc_acct_name')
                         ->label('For Further Account Name')
@@ -214,7 +224,7 @@ class BankAccountsResource extends Resource
                 //
             ])
             ->actions([
-                EditAction::make(),
+                Tables\Actions\EditAction::make(),
 
                 Tables\Actions\Action::make('generate_pdf')
                     ->label('PDF')

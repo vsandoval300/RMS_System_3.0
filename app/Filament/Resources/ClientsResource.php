@@ -28,9 +28,9 @@ class ClientsResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-                ->schema([
+            ->schema([
                 //
-                Section::make('Details')
+                Section::make('Client Details')
                 ->columns(1)    // ← aquí defines dos columnas
                 ->schema([
                     

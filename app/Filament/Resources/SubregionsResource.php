@@ -17,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 class SubregionsResource extends Resource
 {
@@ -32,10 +33,11 @@ class SubregionsResource extends Resource
         return $form
             ->schema([
                 //
-                
-                Forms\Components\Grid::make(1)->schema([
+                Section::make('Subregion Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
                     
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -43,7 +45,7 @@ class SubregionsResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('subregion_code')
+                    TextInput::make('subregion_code')
                     ->label('Subregion Code')
                     ->required()
                     ->numeric()
@@ -52,7 +54,7 @@ class SubregionsResource extends Resource
                     ->helperText('Only whole numbers allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Select::make('region_id')
+                    Select::make('region_id')
                     ->label('Region')
                     ->relationship('region', 'name')
                     ->searchable()
@@ -69,10 +71,10 @@ class SubregionsResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('subregion_code')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('region.name')
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('subregion_code')->searchable()->sortable(),
+                TextColumn::make('region.name')
                 ->label('Region')
                 ->sortable(),
 

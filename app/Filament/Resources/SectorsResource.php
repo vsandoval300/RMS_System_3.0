@@ -17,7 +17,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
-
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class SectorsResource extends Resource
 {
@@ -33,9 +34,11 @@ class SectorsResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Section::make('Sector Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -43,7 +46,7 @@ class SectorsResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('description')
+                    Textarea::make('description')
                     ->label('Description')
                     ->required()
                     ->columnSpan('full')
@@ -62,8 +65,8 @@ class SectorsResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')
                     ->label('Name')
                     ->sortable()
                     ->searchable()
@@ -71,7 +74,7 @@ class SectorsResource extends Resource
                         'class' => 'min-w-[12rem] whitespace-nowrap',
                     ]),
                 
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Description')
                     ->sortable()
                     ->searchable()

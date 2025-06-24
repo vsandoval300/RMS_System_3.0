@@ -17,6 +17,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class PartnerTypesResource extends Resource
 {
@@ -30,10 +32,11 @@ class PartnerTypesResource extends Resource
         return $form
             ->schema([
                 //
+                Section::make('Partner Type Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
-                Forms\Components\Grid::make(1)->schema([
-
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -41,7 +44,7 @@ class PartnerTypesResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('acronym')
+                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->maxLength(2)
@@ -50,7 +53,7 @@ class PartnerTypesResource extends Resource
                     ->helperText('Only uppercase letters allowed.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\Textarea::make('description')
+                    Textarea::make('description')
                     ->label('Description')
                     ->required()
                     ->columnSpan('full')
@@ -72,10 +75,10 @@ class PartnerTypesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->sortable(),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->sortable(),
+                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('description')
                     ->label('Description')
                     ->sortable()
                     ->searchable()

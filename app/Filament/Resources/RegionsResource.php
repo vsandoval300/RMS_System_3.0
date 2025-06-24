@@ -17,8 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
-
-
+use Filament\Tables\Columns\TextColumn;
 
 class RegionsResource extends Resource
 {
@@ -34,9 +33,11 @@ class RegionsResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\Grid::make(1)->schema([
+                Section::make('Region Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
@@ -44,7 +45,7 @@ class RegionsResource extends Resource
                     ->helperText('First letter of each word will be capitalised.')
                     ->extraAttributes(['class' => 'w-1/2']),
 
-                    Forms\Components\TextInput::make('region_code')
+                    TextInput::make('region_code')
                     ->label('Region Code')
                     ->required()
                     ->numeric()
@@ -63,9 +64,9 @@ class RegionsResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('region_code')->searchable()->sortable(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('region_code')->searchable()->sortable(),
             ])
             ->filters([
                 //

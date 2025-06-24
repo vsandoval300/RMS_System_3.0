@@ -17,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 class ManagerResource extends Resource
 {
@@ -30,6 +31,19 @@ class ManagerResource extends Resource
         return $form
             ->schema([
                 //
+                Section::make('Manager Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
+
+                    TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->maxLength(255)
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                    ->helperText('First letter of each word will be capitalised.')
+                    ->extraAttributes(['class' => 'w-1/2']),
+                //
+                ]),
             ]);
     }
 
@@ -38,6 +52,11 @@ class ManagerResource extends Resource
         return $table
             ->columns([
                 //
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->searchable()->sortable()
+                ->extraAttributes([
+                        'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
+                    ]),
             ])
             ->filters([
                 //

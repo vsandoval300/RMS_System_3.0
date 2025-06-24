@@ -32,8 +32,9 @@ class OperativeStatusesResource extends Resource
         return $form
             ->schema([
                 //
-                
-                Grid::make(1)->schema([
+                Section::make('Operative Status Details')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
                     TextInput::make('acronym')
                         ->label('Acronym')

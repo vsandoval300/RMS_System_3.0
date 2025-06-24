@@ -31,7 +31,9 @@ class LineOfBusinessResource extends Resource
         return $form
             ->schema([
                 //
-                Grid::make(1)->schema([
+                Section::make('Line of Business')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->schema([
 
                     TextInput::make('name')
                     ->label('Name')
