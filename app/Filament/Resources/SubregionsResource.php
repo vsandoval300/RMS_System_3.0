@@ -25,9 +25,12 @@ class SubregionsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 
-
+    public static function canCreate(): bool
+    {
+        // Devuelve false para ocultar el botón “New country”
+        return false;
+    }
     
-
     public static function form(Form $form): Form
     {
         return $form
@@ -43,7 +46,8 @@ class SubregionsResource extends Resource
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     TextInput::make('subregion_code')
                     ->label('Subregion Code')
@@ -52,7 +56,8 @@ class SubregionsResource extends Resource
                     ->minValue(1) // opcional: evita 0 o negativos
                     ->maxValue(999) // opcional: para limitar a 3 dígitos
                     ->helperText('Only whole numbers allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     Select::make('region_id')
                     ->label('Region')
@@ -60,7 +65,8 @@ class SubregionsResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                 ]),
             ]);
@@ -84,7 +90,7 @@ class SubregionsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -107,8 +113,8 @@ class SubregionsResource extends Resource
     {
         return [
             'index' => Pages\ListSubregions::route('/'),
-            'create' => Pages\CreateSubregions::route('/create'),
-            'edit' => Pages\EditSubregions::route('/{record}/edit'),
+            //'create' => Pages\CreateSubregions::route('/create'),
+            //'edit' => Pages\EditSubregions::route('/{record}/edit'),
         ];
     }
 }

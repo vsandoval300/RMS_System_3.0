@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\SectorsResource\Pages;
+namespace App\Filament\Resources\IndustryResource\Pages;
 
-use App\Filament\Resources\SectorsResource;
+use App\Filament\Resources\IndustryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditSectors extends EditRecord
+class EditIndustries extends EditRecord
 {
-    protected static string $resource = SectorsResource::class;
+    protected static string $resource = IndustryResource::class;
 
     protected function getHeaderActions(): array
     {

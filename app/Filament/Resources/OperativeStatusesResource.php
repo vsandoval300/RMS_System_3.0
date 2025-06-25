@@ -26,6 +26,11 @@ class OperativeStatusesResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 
+    public static function canCreate(): bool
+    {
+        // Devuelve false para ocultar el botón “New country”
+        return false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -42,17 +47,18 @@ class OperativeStatusesResource extends Resource
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                        ->helperText('Only uppercase letters allowed.')
-                        ->extraAttributes(['class' => 'w-1/2']),
-                        //->extraAttributes(['class' => 'uppercase w-32']),
+                        //->helperText('Only uppercase letters allowed.')
+                        ->disabled()
+                        ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     TextInput::make('description')
                         ->label('Description')
                         ->required()
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                        ->helperText('Please provide a brief description of the operative status.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        //->helperText('Please provide a brief description of the operative status.')
+                        ->disabled()
+                        ->dehydrated(false),   // evita que el valor se envíe al servidor
                         
                 ]),
 
@@ -74,7 +80,7 @@ class OperativeStatusesResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -94,8 +100,8 @@ class OperativeStatusesResource extends Resource
     {
         return [
             'index' => Pages\ListOperativeStatuses::route('/'),
-            'create' => Pages\CreateOperativeStatuses::route('/create'),
-            'edit' => Pages\EditOperativeStatuses::route('/{record}/edit'),
+            //'create' => Pages\CreateOperativeStatuses::route('/create'),
+            //'edit' => Pages\EditOperativeStatuses::route('/{record}/edit'),
         ];
     }
 }

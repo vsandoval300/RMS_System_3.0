@@ -24,6 +24,7 @@ class CorporateDocumentsResource extends Resource
 {
     protected static ?string $model = CorporateDoc::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Corporate Documents';
     protected static ?string $navigationGroup = 'Resources';
 
     
@@ -32,18 +33,17 @@ class CorporateDocumentsResource extends Resource
     {
         return $form
             ->schema([
-                //
-                Section::make('Corporate Document Details')
-                ->columns(1)    // ← aquí defines dos columnas
+                Forms\Components\Group::make() //Grupo 1
                 ->schema([
+                    Forms\Components\Section::make('Corporate Document Details') //Sección 1
+                    ->schema([
 
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('First letter of each word will be capitalised.'),
 
                    TextInput::make('acronym')
                     ->label('Acronym')
@@ -51,8 +51,7 @@ class CorporateDocumentsResource extends Resource
                     ->maxLength(2)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).'),
 
                     Textarea::make('description')
                     ->label('Description')
@@ -60,14 +59,11 @@ class CorporateDocumentsResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Please provide a brief description of the document.'),
 
                 ]),
-
-
-
-            ]);
+            ]),
+        ]);
     }
 
     public static function table(Table $table): Table

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SectorsResource\Pages;
+use App\Filament\Resources\IndustryResource\Pages;
 use App\Filament\Resources\SectorsResource\RelationManagers;
 use App\Models\Industry;
 use Filament\Forms;
@@ -20,21 +20,25 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 
-class SectorsResource extends Resource
+class IndustryResource extends Resource
 {
     protected static ?string $model = Industry::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+     protected static ?string $navigationLabel = 'Sectors';
     protected static ?string $navigationGroup = 'Resources';
 
-
+    public static function canCreate(): bool
+    {
+        // Devuelve false para ocultar el botón “New country”
+        return false;
+    }
     
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 //
-                Section::make('Sector Details')
+                Section::make('Industry Details')
                 ->columns(1)    // ← aquí defines dos columnas
                 ->schema([
 
@@ -43,8 +47,9 @@ class SectorsResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('First letter of each word will be capitalised.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     Textarea::make('description')
                     ->label('Description')
@@ -52,8 +57,9 @@ class SectorsResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                 ]),    
 
@@ -89,7 +95,7 @@ class SectorsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -108,9 +114,9 @@ class SectorsResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSectors::route('/'),
-            'create' => Pages\CreateSectors::route('/create'),
-            'edit' => Pages\EditSectors::route('/{record}/edit'),
+            'index' => Pages\ListIndustries::route('/'),
+            //'create' => Pages\CreateIndustries::route('/create'),
+            //'edit' => Pages\EditIndustries::route('/{record}/edit'),
         ];
     }
 }

@@ -25,7 +25,11 @@ class RegionsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 
-
+    public static function canCreate(): bool
+    {
+        // Devuelve false para ocultar el botón “New country”
+        return false;
+    }
     
 
     public static function form(Form $form): Form
@@ -43,7 +47,8 @@ class RegionsResource extends Resource
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     TextInput::make('region_code')
                     ->label('Region Code')
@@ -52,8 +57,9 @@ class RegionsResource extends Resource
                     ->minValue(1) // opcional: evita 0 o negativos
                     ->maxValue(999) // opcional: para limitar a 3 dígitos
                     ->helperText('Only whole numbers allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
-
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
+                    
                 ]),    
 
             ]);
@@ -72,7 +78,7 @@ class RegionsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -92,8 +98,8 @@ class RegionsResource extends Resource
     {
         return [
             'index' => Pages\ListRegions::route('/'),
-            'create' => Pages\CreateRegions::route('/create'),
-            'edit' => Pages\EditRegions::route('/{record}/edit'),
+            //'create' => Pages\CreateRegions::route('/create'),
+            //'edit' => Pages\EditRegions::route('/{record}/edit'),
         ];
     }
 }

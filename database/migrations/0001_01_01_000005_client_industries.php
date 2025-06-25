@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('client_industries', function (Blueprint $table) {
             $table->engine('InnoDB');
-            $table->bigIncrements('id');          
+            $table->bigIncrements('id');    
+                  
             $table->foreignId('client_id')
                 ->constrained('clients')
                 ->cascadeOnDelete();
             $table->foreignId('industry_id')
                 ->constrained('industries')
                 ->cascadeOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 

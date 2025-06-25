@@ -26,6 +26,11 @@ class PartnerTypesResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 
+    public static function canCreate(): bool
+    {
+        // Devuelve false para ocultar el botón “New country”
+        return false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -41,8 +46,9 @@ class PartnerTypesResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('First letter of each word will be capitalised.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     TextInput::make('acronym')
                     ->label('Acronym')
@@ -50,8 +56,9 @@ class PartnerTypesResource extends Resource
                     ->maxLength(2)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('Only uppercase letters allowed.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     Textarea::make('description')
                     ->label('Description')
@@ -59,8 +66,9 @@ class PartnerTypesResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                 ]),
 
@@ -91,7 +99,7 @@ class PartnerTypesResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -111,8 +119,8 @@ class PartnerTypesResource extends Resource
     {
         return [
             'index' => Pages\ListPartnerTypes::route('/'),
-            'create' => Pages\CreatePartnerTypes::route('/create'),
-            'edit' => Pages\EditPartnerTypes::route('/{record}/edit'),
+            //'create' => Pages\CreatePartnerTypes::route('/create'),
+            //'edit' => Pages\EditPartnerTypes::route('/{record}/edit'),
         ];
     }
 }

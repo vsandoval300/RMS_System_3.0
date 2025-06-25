@@ -26,7 +26,11 @@ class CurrenciesResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 
-    
+    public static function canCreate(): bool
+    {
+        // Devuelve false para ocultar el botón “New country”
+        return false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -42,8 +46,9 @@ class CurrenciesResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('First letter of each word will be capitalised.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     TextInput::make('acronym')
                     ->label('Acronym')
@@ -51,8 +56,9 @@ class CurrenciesResource extends Resource
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    //->helperText('Only uppercase letters allowed.')
+                    ->disabled()
+                    ->dehydrated(false),   // evita que el valor se envíe al servidor
                 ]),
 
             ]);
@@ -71,7 +77,7 @@ class CurrenciesResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -91,8 +97,8 @@ class CurrenciesResource extends Resource
     {
         return [
             'index' => Pages\ListCurrencies::route('/'),
-            'create' => Pages\CreateCurrencies::route('/create'),
-            'edit' => Pages\EditCurrencies::route('/{record}/edit'),
+            //'create' => Pages\CreateCurrencies::route('/create'),
+            //'edit' => Pages\EditCurrencies::route('/{record}/edit'),
         ];
     }
 }

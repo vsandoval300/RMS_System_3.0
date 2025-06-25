@@ -32,42 +32,39 @@ class BanksResource extends Resource
     {
         return $form
             ->schema([
-                //
-                Section::make('Bank Details')
-                ->columns(1)    // ← aquí defines dos columnas
+                Forms\Components\Group::make() //Grupo 1
                 ->schema([
+                    Forms\Components\Section::make('Bank Details')
+                    ->schema([
                     
                     TextInput::make('name')
                         ->label('Name')
                         ->required()
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
-
+                        ->helperText('First letter of each word will be capitalised.'),
+                        
                     Textarea::make('address')
                         ->label('Address')
                         ->required()
                         ->columnSpan('full')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state))))
-                        ->helperText('Please provide address.')
-                        ->extraAttributes(['class' => 'w-1/2']),
-
+                        ->helperText('Please provide address.'),
+                        
                     TextInput::make('aba_number')
                         ->label('ABA number')
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
-                        ->helperText('Please provide ABA number.')
-                        ->extraAttributes(['class' => 'w-1/2']),   
-                        
+                        ->helperText('Please provide ABA number.'),
+                           
                     TextInput::make('swift_code')
                         ->label('SWIFT code')
                         ->required()
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('swift_code', ucwords(strtolower($state))))
-                        ->helperText('Please provide SWIFT code.')
-                        ->extraAttributes(['class' => 'w-1/2']),       
-
+                        ->helperText('Please provide SWIFT code.'),
+                               
+                    ]),
                 ]),
             ]);
     }

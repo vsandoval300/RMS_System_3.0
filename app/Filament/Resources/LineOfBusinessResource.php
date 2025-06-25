@@ -24,6 +24,7 @@ class LineOfBusinessResource extends Resource
 {
     protected static ?string $model = LineOfBusiness::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Lines of Businesses';
     protected static ?string $navigationGroup = 'Underwritten';
 
     public static function form(Form $form): Form
