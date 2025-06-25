@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CountriesResource\Pages;
 use App\Filament\Resources\CountriesResource\RelationManagers;
-use App\Models\Countries;
+use App\Models\Country;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class CountriesResource extends Resource
 {
-    protected static ?string $model = Countries::class;
+    protected static ?string $model = Country::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 

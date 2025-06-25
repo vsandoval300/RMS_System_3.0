@@ -7,12 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Regions extends Model
+class Currency extends Model
 {
     //
-    use HasFactory;
-    public function subregions(): HasMany
+     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'acronym',
+    ];
+
+    public function bankaccounts(): HasMany
     {
-        return $this->hasMany(Subregions::class);
+        return $this->hasMany(bankAccount::class);
     }
 }

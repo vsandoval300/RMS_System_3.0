@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CompaniesResource\Pages;
 use App\Filament\Resources\CompaniesResource\RelationManagers;
-use App\Models\Companies;
+use App\Models\Company;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use Filament\Forms\Components\Textarea;
 
 class CompaniesResource extends Resource
 {
-    protected static ?string $model = Companies::class;
+    protected static ?string $model = Company::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 

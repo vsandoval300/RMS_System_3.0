@@ -4,7 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientsResource\Pages;
 use App\Filament\Resources\ClientsResource\RelationManagers;
-use App\Models\Clients;
+use App\Models\Client;
+use App\Models\Country;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,7 +22,7 @@ use Filament\Forms\Components\Textarea;
 
 class ClientsResource extends Resource
 {
-    protected static ?string $model = Clients::class;
+    protected static ?string $model = Client::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Clients';
 
@@ -71,7 +72,7 @@ class ClientsResource extends Resource
                     Select::make('country_id')
                         ->label('Country')
                         ->options(function () {
-                            return \App\Models\Countries::orderBy('name')
+                            return Country::orderBy('name')
                                 ->get()
                                 ->mapWithKeys(fn ($country) => [
                                     $country->id => "{$country->alpha_3} - {$country->name}"

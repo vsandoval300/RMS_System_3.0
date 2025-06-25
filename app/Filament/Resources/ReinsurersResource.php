@@ -4,9 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReinsurersResource\Pages;
 use App\Filament\Resources\ReinsurersResource\RelationManagers;
-use App\Models\Countries;
-use App\Models\Reinsurers;
-use App\Models\Managers;
+use App\Models\Country;
+use App\Models\Reinsurer;
+use App\Models\Manager;
+use App\Models\OperativeStatus;
+use App\Models\ReinsurerType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,16 +19,19 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile; // Livewire v3
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
-use Illuminate\Support\Facades\Storage;
+
 
 
 class ReinsurersResource extends Resource
 {
-    protected static ?string $model = Reinsurers::class;
+    protected static ?string $model = Reinsurer::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reinsurers';
 
@@ -78,7 +83,7 @@ class ReinsurersResource extends Resource
                     Select::make('parent_id')
                     ->label('Parent')
                     ->options(function () {
-                        return Reinsurers::orderBy('name')->pluck('name', 'id');
+                        return Reinsurer::orderBy('name')->pluck('name', 'id');
                     })
                     ->searchable()
                     ->preload()
@@ -111,7 +116,7 @@ class ReinsurersResource extends Resource
                     Select::make('manager_id')
                     ->label('Manager')
                     ->options(function () {
-                        return Managers::orderBy('name')->pluck('name', 'id');
+                        return Manager::orderBy('name')->pluck('name', 'id');
                     })
                     ->searchable()
                     ->preload()
@@ -123,7 +128,7 @@ class ReinsurersResource extends Resource
                     Select::make('country_id')
                     ->label('Country')
                     ->options(function () {
-                        return \App\Models\Countries::orderBy('name')
+                        return Country::orderBy('name')
                             ->get()
                             ->mapWithKeys(fn ($country) => [
                                 $country->id => "{$country->alpha_3} - {$country->name}"
@@ -154,7 +159,7 @@ class ReinsurersResource extends Resource
                     Select::make('operative_status_id')
                     ->label('Operative Status')
                     ->options(function () {
-                        return \App\Models\OperativeStats::orderBy('description')->get()
+                        return OperativeStatus::orderBy('description')->get()
                             ->mapWithKeys(function ($status) {
                                 return [$status->id => "{$status->acronym} - {$status->description}"];
                             });
@@ -168,63 +173,70 @@ class ReinsurersResource extends Resource
 
                 ]),
 
-                   Section::make('Images')->schema([
+                   Section::make('Images')
+                    ->columns(2)
+                    ->schema([
 
-                    FileUpload::make('logo')
-                    ->image()->preserveFilenames()
-                    ->columnSpan('full')
-                    ->required(),
+                        //====================================  
+                        // LOGO
+                        //====================================
+                        FileUpload::make('logo')
+                            ->label('Logo')
+                            ->disk('s3')
+                            ->directory('reinsurers/logos')
+                            ->visibility('public')
+                            ->image()
+                            ->imagePreviewHeight('100')
+                            ->previewable()
+                            ->required()
+                            ->default(fn ($record) => $record?->logo)
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
+                                // nombre original (ej. bauen.png)
+                                $fileName = $file->getClientOriginalName();
 
-                    FileUpload::make('icon')
-                    ->image()->preserveFilenames()
-                    ->columnSpan('full')
-                    ->required(),
+                                // sube con el nombre original
+                                $path = $file->storePubliclyAs(
+                                    'reinsurers/logos',     // carpeta dentro del bucket
+                                    $fileName,              // nombre del archivo
+                                    's3'                    // disco
+                                );
 
-                   
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    /* FileUpload::make('logo')
-                    ->label('Logo')
-                    ->disk('s3')
-                    ->directory('reinsurers/logos')
-                    ->image()
-                    ->visibility('public')
-                    ->default(fn ($record) => $record?->logo)
-                    ->imagePreviewHeight('100')
-                    ->previewable()
-                    ->extraAttributes(['class' => 'w-1/2']),
+                                // devuelve la URL completa para guardar en la BD
+                                return Storage::disk('s3')->url($path);
+                            }),
+                        //====================================
 
+                        
+                        //====================================
+                        // ICON
+                        //====================================
+                        FileUpload::make('icon')
+                            ->label('Icon')
+                            ->disk('s3')
+                            ->directory('reinsurers/icons')
+                            ->visibility('public')
+                            ->image()
+                            ->imagePreviewHeight('100')
+                            ->previewable()
+                            ->required()
+                            ->default(fn ($record) => $record?->icon)
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
+                                $fileName = $file->getClientOriginalName();
 
-                    FileUpload::make('icon')
-                    ->label('Icon')
-                    ->disk('s3')
-                    ->directory('reinsurers/icons')
-                    ->image()
-                    ->visibility('public')
-                    ->default(fn ($record) => $record?->icon)
-                    ->imagePreviewHeight('100')
-                    ->previewable()
-                    ->extraAttributes(['class' => 'w-1/2']),
+                                $path = $file->storePubliclyAs(
+                                    'reinsurers/icons',
+                                    $fileName,
+                                    's3'
+                                );
 
-                    */
+                                return Storage::disk('s3')->url($path);
+                            }),
+                        //====================================
+                            
 
-
-
-
-
-                ]),    
-
-
-            ]);
+                    ]),   // ← cierra schema() y luego la Sección
+                  
+                ]);
     }
 
     public static function table(Table $table): Table
@@ -317,7 +329,7 @@ class ReinsurersResource extends Resource
                 SelectFilter::make('country_id')
                 ->label('Country')
                 ->options(function () {
-                    return Countries::whereIn('id', \App\Models\Reinsurers::select('country_id'))
+                    return Country::whereIn('id', Reinsurer::select('country_id'))
                         ->orderBy('name')
                         ->pluck('name', 'id'); // 'id' como key, 'name' como etiqueta
                 })
@@ -329,8 +341,8 @@ class ReinsurersResource extends Resource
                 SelectFilter::make('operative_status_id')
                 ->label('Operative Status')
                 ->options(function () {
-                    return \App\Models\OperativeStats::whereIn('id', 
-                        \App\Models\Reinsurers::distinct()->pluck('operative_status_id')
+                    return OperativeStatus::whereIn('id', 
+                        Reinsurer::distinct()->pluck('operative_status_id')
                     )->pluck('description', 'id');
                 })
                 ->searchable()
@@ -340,8 +352,8 @@ class ReinsurersResource extends Resource
                 SelectFilter::make('reinsurer_type_id')
                 ->label('Type')
                 ->options(function () {
-                    return \App\Models\ReinsurerType::whereIn('id', 
-                        \App\Models\Reinsurers::distinct()->pluck('reinsurer_type_id')
+                    return ReinsurerType::whereIn('id', 
+                        Reinsurer::distinct()->pluck('reinsurer_type_id')
                     )->pluck('description', 'id');
                 })
                 ->searchable()

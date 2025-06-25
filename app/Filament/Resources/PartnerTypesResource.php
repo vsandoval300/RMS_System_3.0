@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PartnerTypesResource\Pages;
 use App\Filament\Resources\PartnerTypesResource\RelationManagers;
-use App\Models\PartnerTypes;
+use App\Models\PartnerType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class PartnerTypesResource extends Resource
 {
-    protected static ?string $model = PartnerTypes::class;
+    protected static ?string $model = PartnerType::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 

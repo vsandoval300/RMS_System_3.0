@@ -4,7 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PartnersResource\Pages;
 use App\Filament\Resources\PartnersResource\RelationManagers;
-use App\Models\Partners;
+use App\Models\Country;
+use App\Models\Partner;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,7 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class PartnersResource extends Resource
 {
-    protected static ?string $model = Partners::class;
+    protected static ?string $model = Partner::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 
@@ -71,7 +72,7 @@ class PartnersResource extends Resource
                     Select::make('country_id')
                     ->label('Country')
                     ->options(function () {
-                        return \App\Models\Countries::orderBy('name')
+                        return Country::orderBy('name')
                             ->get()
                             ->mapWithKeys(fn ($country) => [
                                 $country->id => "{$country->alpha_3} - {$country->name}"

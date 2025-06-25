@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OperativeStatusesResource\Pages;
 use App\Filament\Resources\OperativeStatusesResource\RelationManagers;
-use App\Models\OperativeStats;
+use App\Models\OperativeStatus;
 use App\Models\OperativeStatuses;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class OperativeStatusesResource extends Resource
 {
-    protected static ?string $model = OperativeStats::class;
+    protected static ?string $model = OperativeStatus::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 

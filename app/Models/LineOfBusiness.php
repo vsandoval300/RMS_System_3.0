@@ -9,5 +9,11 @@ class LineOfBusiness extends Model
 {
     //
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'description',
+    ];
+
     protected $table = 'line_of_businesses'; // ✅ aquí redirigimos la tabla
 }

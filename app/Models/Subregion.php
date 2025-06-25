@@ -7,12 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Coverages extends Model
+class Subregion extends Model
 {
     //
     use HasFactory;
-    public function lineOfBusiness(): BelongsTo
+
+    protected $fillable = [
+        'name',
+        'subregion_code',
+        'region_id',
+    ];
+
+    public function region(): BelongsTo
     {
-    return $this->belongsTo(LineOfBusiness::class, 'lob_id');
+        return $this->belongsTo(Region::class);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CurrenciesResource\Pages;
 use App\Filament\Resources\CurrenciesResource\RelationManagers;
-use App\Models\Currencies;
+use App\Models\Currency;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\FormsComponent;
@@ -22,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class CurrenciesResource extends Resource
 {
-    protected static ?string $model = Currencies::class;
+    protected static ?string $model = Currency::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 

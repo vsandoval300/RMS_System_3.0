@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SubregionsResource\Pages;
 use App\Filament\Resources\SubregionsResource\RelationManagers;
-use App\Models\Subregions;
+use App\Models\Subregion;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class SubregionsResource extends Resource
 {
-    protected static ?string $model = Subregions::class;
+    protected static ?string $model = Subregion::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 

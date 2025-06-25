@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CorporateDocumentsResource\Pages;
 use App\Filament\Resources\CorporateDocumentsResource\RelationManagers;
-use App\Models\CorporateDocs;
+use App\Models\CorporateDoc;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class CorporateDocumentsResource extends Resource
 {
-    protected static ?string $model = CorporateDocs::class;
+    protected static ?string $model = CorporateDoc::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
 

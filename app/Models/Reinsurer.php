@@ -2,17 +2,36 @@
 
 namespace App\Models;
 
-use App\Models\Manager;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Reinsurers extends Model
-
-
-
+class Reinsurer extends Model
 {
+    //
+    use HasFactory;
+
+    protected $fillable = [
+        'cns_reinsurer',
+        'name',
+        'short_name',
+        'parent_id',
+        'acronym',
+        'class',
+        'logo',
+        'icon',
+        'established',
+        'manager_id',
+        'country_id',
+        'reinsurer_type_id',
+        'operative_status_id',
+    ];
+
+    protected $table = 'reinsurers';
+
+
     public function reinsurer_type(): BelongsTo
     {
         return $this->belongsTo(ReinsurerType::class, 'reinsurer_type_id');
@@ -20,12 +39,12 @@ class Reinsurers extends Model
 
     public function country(): BelongsTo
     {
-    return $this->belongsTo(Countries::class, 'country_id');
+    return $this->belongsTo(Country::class, 'country_id');
     }
 
     public function operative_status(): BelongsTo
     {
-    return $this->belongsTo(OperativeStats::class, 'operative_status_id');
+    return $this->belongsTo(OperativeStatus::class, 'operative_status_id');
     }
 
     // 👉 Reasegurador Padre
@@ -42,7 +61,7 @@ class Reinsurers extends Model
 
     public function manager(): BelongsTo
     {
-    return $this->belongsTo(Managers::class, 'manager_id');
+    return $this->belongsTo(Manager::class, 'manager_id');
     }
 
 

@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\BanksResource\Pages;
 use App\Filament\Resources\BanksResource\RelationManagers;
-use App\Models\Banks;
+use App\Models\Bank;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class BanksResource extends Resource
 {
-    protected static ?string $model = Banks::class;
+    protected static ?string $model = Bank::class;
     // protected static ?string $cluster = Resources::class; // ✅ Vinculación correcta
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;

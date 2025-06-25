@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\BankAccountsResource\Pages;
 use App\Filament\Resources\BankAccountsResource\RelationManagers;
-use App\Models\BankAccounts;
+use App\Models\BankAccount;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -23,7 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class BankAccountsResource extends Resource
 {
-    protected static ?string $model = BankAccounts::class;
+    protected static ?string $model = BankAccount::class;
     //protected static ?string $cluster = Resources::class; // ✅ Vinculación correcta
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;
@@ -149,6 +149,8 @@ class BankAccountsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(null)          // ← sigue sin abrir la página de edición
+            ->selectable()             // ← habilita la selección con clic en la fila
             ->columns([
                 //
                 TextColumn::make('id')->sortable(),

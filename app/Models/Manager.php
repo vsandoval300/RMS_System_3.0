@@ -5,15 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ReinsurerType extends Model
+class Manager extends Model
 {
     //
     use HasFactory;
 
     protected $fillable = [
-        'type_acronym',
-        'description',
+        'name',
     ];
 
-    protected $table = 'reinsurer_types'; // ✅ aquí redirigimos la tabla
+    protected $table = 'managers'; // ✅ aquí redirigimos la tabla
 }

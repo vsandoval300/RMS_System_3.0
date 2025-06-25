@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CoveragesResource\Pages;
 use App\Filament\Resources\CoveragesResource\RelationManagers;
-use App\Models\Coverages;
+use App\Models\Coverage;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class CoveragesResource extends Resource
 {
-    protected static ?string $model = Coverages::class;
+    protected static ?string $model = Coverage::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 

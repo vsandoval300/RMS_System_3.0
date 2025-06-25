@@ -5,9 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Managers extends Model
+class ClientIndustry extends Model
 {
     //
     use HasFactory;
-    protected $table = 'managers'; // ✅ aquí redirigimos la tabla
+
+    protected $fillable = [
+        'client_id',
+        'industry_id',
+    ];
+
 }

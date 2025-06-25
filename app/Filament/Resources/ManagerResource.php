@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ManagerResource\Pages;
 use App\Filament\Resources\ManagerResource\RelationManagers;
-use App\Models\Managers;
+use App\Models\Manager;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class ManagerResource extends Resource
 {
-    protected static ?string $model = Managers::class;
+    protected static ?string $model = Manager::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
      protected static ?string $navigationGroup = 'Resources';

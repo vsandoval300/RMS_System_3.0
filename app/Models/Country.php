@@ -7,22 +7,35 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Countries extends Model
+class Country extends Model
 {
     //
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'alpha_2',
+        'alpha_3',
+        'country_code',
+        'iso_code',
+        'am_best_code',
+        'latitude',
+        'longitude',
+        'region_id',
+    ];
+
     public function region(): BelongsTo
     {
-        return $this->belongsTo(Regions::class);
+        return $this->belongsTo(Region::class);
     }
 
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Clients::class);
+        return $this->belongsTo(Client::class);
     }
 
     public function companie(): BelongsTo
     {
-        return $this->belongsTo(Companies::class);
+        return $this->belongsTo(Company::class);
     }
 }

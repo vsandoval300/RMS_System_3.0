@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProducersResource\Pages;
 use App\Filament\Resources\ProducersResource\RelationManagers;
-use App\Models\Producers;
+use App\Models\Producer;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class ProducersResource extends Resource
 {
-    protected static ?string $model = Producers::class;
+    protected static ?string $model = Producer::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 
