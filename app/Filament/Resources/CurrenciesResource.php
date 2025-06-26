@@ -25,6 +25,7 @@ class CurrenciesResource extends Resource
     protected static ?string $model = Currency::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 1;   // aparecerá primero
 
     public static function canCreate(): bool
     {
@@ -69,9 +70,14 @@ class CurrenciesResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('acronym')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //

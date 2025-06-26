@@ -39,6 +39,7 @@ class PartnersResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
@@ -47,6 +48,8 @@ class PartnersResource extends Resource
                     TextInput::make('short_name')
                     ->label('Short Name')
                     ->required()
+                    ->unique()
+                    ->live(onBlur: false)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', strtoupper($state)))
                     ->helperText('Only uppercase letters allowed.')
@@ -55,6 +58,8 @@ class PartnersResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
+                    ->unique()
+                    ->live(onBlur: false)
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
@@ -94,13 +99,20 @@ class PartnersResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable()
-                ->extraAttributes([
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
-                TextColumn::make('short_name')->searchable()->sortable(),
-                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('short_name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('acronym')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('partnerType.name')
                     ->label('Partner Type')
                     ->sortable()
@@ -115,7 +127,11 @@ class PartnersResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

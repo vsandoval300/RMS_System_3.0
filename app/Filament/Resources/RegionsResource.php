@@ -24,6 +24,7 @@ class RegionsResource extends Resource
     protected static ?string $model = Region::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 2;   // aparecerá primero
 
     public static function canCreate(): bool
     {
@@ -70,9 +71,14 @@ class RegionsResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('region_code')->searchable()->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('region_code')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //

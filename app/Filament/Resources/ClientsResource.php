@@ -19,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class ClientsResource extends Resource
 {
@@ -39,6 +40,7 @@ class ClientsResource extends Resource
                     TextInput::make('name')
                         ->label('Name')
                         ->required()
+                        ->unique()
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                         ->helperText('First letter of each word will be capitalised.')
@@ -48,6 +50,8 @@ class ClientsResource extends Resource
                     TextInput::make('short_name')
                         ->label('Short Name')
                         ->required()
+                        ->unique()
+                        ->live(onBlur: false)
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', ucwords(strtolower($state))))
                         ->helperText('First letter of each word will be capitalised.')
@@ -128,20 +132,27 @@ class ClientsResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
-                ->extraAttributes([
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
-                Tables\Columns\TextColumn::make('short_name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('short_name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 550px; white-space: normal;', // ancho fijo de 300px
                     ]),
-                Tables\Columns\TextColumn::make('webpage')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('country.name')
+                TextColumn::make('webpage')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('country.name')
                     ->label('Country')
                     ->sortable()
                     ->searchable()
@@ -150,7 +161,11 @@ class ClientsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -26,6 +26,7 @@ class IndustryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
      protected static ?string $navigationLabel = 'Sectors';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 5;   // aparecerá primero
 
     public static function canCreate(): bool
     {
@@ -71,7 +72,8 @@ class IndustryResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->sortable()

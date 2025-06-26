@@ -27,10 +27,10 @@ class BankAccountsResource extends Resource
     //protected static ?string $cluster = Resources::class; // ✅ Vinculación correcta
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;
-    protected static ?string $navigationGroup = 'Resources';
+    protected static ?string $navigationGroup = 'Banks';
+    protected static ?int    $navigationSort  = 10;   // aparecerá primero
    
-   
-    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -120,6 +120,7 @@ class BankAccountsResource extends Resource
                             TextInput::make('ffc_acct_no')
                                 ->label('For Further Account Number')
                                 ->required()
+                                ->unique()
                                 ->maxLength(255)
                                 ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_no', ucwords(strtolower($state))))
                                 ->helperText('Please provide account number.'), 
@@ -148,46 +149,16 @@ class BankAccountsResource extends Resource
             ]);
     }           
                 
-             /*   Section::make('Wire Instructions')
-                
 
-                Section::make('For Further Account Details')->schema([
-
-                    TextInput::make('ffc_acct_name')
-                        ->label('For Further Account Name')
-                        ->required()
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
-
-                    TextInput::make('ffc_acct_no')
-                        ->label('For Further Account Number')
-                        ->required()
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_no', ucwords(strtolower($state))))
-                        ->helperText('Please provide account number.')
-                        ->extraAttributes(['class' => 'w-1/2']), 
-
-                    Textarea::make('ffc_acct_address')
-                        ->label('For Further Account Address')
-                        ->required()
-                        ->columnSpan('full')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_address', ucfirst(strtolower($state))))
-                        ->helperText('Please provide address.')
-                        ->extraAttributes(['class' => 'w-1/2']),     
-
-                        ]),  
-                  
-                ]);
-    }*/
 
     public static function table(Table $table): Table
     {
         return $table
-            ->recordUrl(null)          // ← sigue sin abrir la página de edición
-            ->selectable()             // ← habilita la selección con clic en la fila
-            ->columns([
+            
+            ->recordUrl(null)        // ❌ sin enlace
+            ->recordAction(null)     // ❌ sin acción -> desactiva “edit” :contentReference[oaicite:0]{index=0}
+            ->selectable(true)           // ✅ el clic pasa a ser un toggle de selección
+            ->columns([           // usa el clic para seleccionar la fila
                 //
                 TextColumn::make('id')->sortable(),
 
@@ -199,26 +170,32 @@ class BankAccountsResource extends Resource
                 TextColumn::make('currency.name')
                     ->label('Currency')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('bank_inter.name')
                     ->label('Intermediary Bank')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 
                 TextColumn::make('bank.name')
                     ->label('Banks')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('beneficiary_acct_name')
                     ->label('Beneficiary Name')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('beneficiary_address')
                     ->label('Beneficiary Address')
                     ->sortable()
                     ->searchable()
+                    ->toggleable()
                     ->wrap() // ✅ Permite que se haga multilínea
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
@@ -227,17 +204,20 @@ class BankAccountsResource extends Resource
                 TextColumn::make('beneficiary_swift')
                     ->label('Beneficiary Swift')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('beneficiary_acct_no')
                     ->label('Beneficiary Account')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('ffc_acct_name')
                     ->label('For Further Account Name')
                     ->sortable()
                     ->searchable()
+                    ->toggleable()
                     ->wrap() // ✅ Permite que se haga multilínea
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
@@ -246,12 +226,14 @@ class BankAccountsResource extends Resource
                 TextColumn::make('ffc_acct_no')
                     ->label('For Further Account Number')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('ffc_acct_address')
                     ->label('For Further Account Address')
                     ->sortable()
                     ->searchable()
+                    ->toggleable()
                     ->wrap() // ✅ Permite que se haga multilínea
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
@@ -262,21 +244,25 @@ class BankAccountsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-
-                Tables\Actions\Action::make('generate_pdf')
-                    ->label('PDF')
-                    ->icon('heroicon-o-arrow-down-tray') // ícono de descarga
-                    ->tooltip('Download PDF of this record')
-                    ->color('gray') // o usa 'secondary', 'info', etc.
-                    ->action(function ($record) {
-                        // Aquí luego implementarás la lógica de generación de PDF
-                        // Por ahora puede ser un log, redirección o notificación
-                        \Filament\Notifications\Notification::make()
-                            ->title('PDF generation triggered for: ' . $record->id)
-                            ->success()
-                            ->send();
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\Action::make('generate_pdf')
+                        ->label('PDF')
+                        ->icon('heroicon-o-arrow-down-tray') // ícono de descarga
+                        ->tooltip('Download PDF of this record')
+                        ->color('gray') // o usa 'secondary', 'info', etc.
+                        ->action(function ($record) {
+                            // Aquí luego implementarás la lógica de generación de PDF
+                            // Por ahora puede ser un log, redirección o notificación
+                            \Filament\Notifications\Notification::make()
+                                ->title('PDF generation triggered for: ' . $record->id)
+                                ->success()
+                                ->send();
                     }),
+                ])
+   
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

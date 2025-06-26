@@ -20,12 +20,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile; // Livewire v3
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Columns\TextColumn;
 
 
 
@@ -49,37 +52,36 @@ class ReinsurersResource extends Resource
                     ->readOnly()
                     ->disabled(), // ❗️Esto lo hace visualmente "gris" y no editable
                     
-
                     TextInput::make('cns_reinsurer')
-                    ->label('CNS')
+                    ->label('LSK (Legacy Substitute Key)')
+                    ->unique()
                     ->nullable(),
                     
-
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
                     
-
                     TextInput::make('short_name')
                     ->label('Short Name')
+                    ->unique()
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
                     
-
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
+                    ->unique()
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
                     ->helperText('Only uppercase letters allowed.'),
                     
-
                     Select::make('parent_id')
                     ->label('Parent')
                     ->options(function () {
@@ -90,7 +92,6 @@ class ReinsurersResource extends Resource
                     ->nullable()
                     ->helperText('Select the parent reinsurer if applicable.'),
                     
-
                     Select::make('class')
                     ->label('Class')
                     ->options([
@@ -101,7 +102,6 @@ class ReinsurersResource extends Resource
                     ->searchable()
                     ->helperText('Select the reinsurer class.'),
                     
-
                     TextInput::make('established')
                     ->label('Established Year')
                     ->numeric()
@@ -112,7 +112,6 @@ class ReinsurersResource extends Resource
                     ->placeholder('e.g. 1995')
                     ->required(),
                     
-
                     Select::make('manager_id')
                     ->label('Manager')
                     ->options(function () {
@@ -124,7 +123,6 @@ class ReinsurersResource extends Resource
                     ->helperText('Select the manager assigned to this reinsurer.')
                     ->placeholder('Select a manager'),
                     
-
                     Select::make('country_id')
                     ->label('Country')
                     ->options(function () {
@@ -140,7 +138,6 @@ class ReinsurersResource extends Resource
                     ->placeholder('Select a country')
                     ->helperText('Choose the reinsurer\'s country.'),
                     
-
                     Select::make('reinsurer_type_id')
                     ->label('Type')
                     ->options(function () {
@@ -155,7 +152,6 @@ class ReinsurersResource extends Resource
                     ->placeholder('Select reinsurer type')
                     ->helperText('Choose the type of reinsurer.'),
                     
-
                     Select::make('operative_status_id')
                     ->label('Operative Status')
                     ->options(function () {
@@ -175,88 +171,118 @@ class ReinsurersResource extends Resource
 
                    Section::make('Images')
                     ->columns(2)
-                    ->schema([
+                    
+                        ->schema([
 
-                        //====================================  
-                        // LOGO
-                        //====================================
-                        FileUpload::make('logo')
-                            ->label('Logo')
-                            ->disk('s3')
-                            ->directory('reinsurers/logos')
-                            ->visibility('public')
-                            ->image()
-                            ->imagePreviewHeight('100')
-                            ->previewable()
-                            ->required()
-                            ->default(fn ($record) => $record?->logo)
-                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
-                                // nombre original (ej. bauen.png)
-                                $fileName = $file->getClientOriginalName();
+                            //====================================  
+                            // LOGO
+                            //====================================
+                            FileUpload::make('logo')
+                                ->label('Logo')
+                                ->disk('s3')
+                                ->directory('reinsurers/logos')
+                                ->visibility('public')
+                                ->image()
+                                //->imagePreviewHeight('100')
+                                ->previewable()
+                                ->required(),
+                            //====================================
+                            // ICON
+                            //====================================
+                            FileUpload::make('icon')
+                                ->label('Icon')
+                                ->disk('s3')
+                                ->directory('reinsurers/icons')
+                                ->visibility('public')
+                                ->image()
+                                //->imagePreviewHeight('100')
+                                ->previewable()
+                                ->required(), 
+                            //====================================                       
 
-                                // sube con el nombre original
-                                $path = $file->storePubliclyAs(
-                                    'reinsurers/logos',     // carpeta dentro del bucket
-                                    $fileName,              // nombre del archivo
-                                    's3'                    // disco
-                                );
-
-                                // devuelve la URL completa para guardar en la BD
-                                return Storage::disk('s3')->url($path);
-                            }),
-                        //====================================
-
-                        
-                        //====================================
-                        // ICON
-                        //====================================
-                        FileUpload::make('icon')
-                            ->label('Icon')
-                            ->disk('s3')
-                            ->directory('reinsurers/icons')
-                            ->visibility('public')
-                            ->image()
-                            ->imagePreviewHeight('100')
-                            ->previewable()
-                            ->required()
-                            ->default(fn ($record) => $record?->icon)
-                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
-                                $fileName = $file->getClientOriginalName();
-
-                                $path = $file->storePubliclyAs(
-                                    'reinsurers/icons',
-                                    $fileName,
-                                    's3'
-                                );
-
-                                return Storage::disk('s3')->url($path);
-                            }),
-                        //====================================
-                            
-
-                    ]),   // ← cierra schema() y luego la Sección
+                        ]),   // ← cierra schema() y luego la Sección
                   
                 ]);
     }
+
+
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable()
-                ->extraAttributes([
+                TextColumn::make('id')->sortable()
+                    ->extraAttributes([
                         'style' => 'width: 30px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
 
-                Tables\Columns\TextColumn::make('cns_reinsurer')->sortable()
-                ->label('Cns')
-                ->extraAttributes([
+                TextColumn::make('cns_reinsurer')->sortable()
+                    ->label('Lsk')
+                    ->extraAttributes([
                         'style' => 'width: 30px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
+                
+                TextColumn::make('short_name')
+                    ->label('Name')
+                    ->html()
+                    ->formatStateUsing(function ($state, $record) {
+                        $iconPath  = $record->icon;
+                        $shortName = $record->short_name;
+
+                        if (blank($iconPath)) {
+                            return "<span>{$shortName}</span>";
+                        }
+
+                        $iconUrl = Str::startsWith($iconPath, ['http://', 'https://'])
+                            ? $iconPath
+                            : rtrim(config('filesystems.disks.s3.url'), '/') . '/' . ltrim($iconPath, '/');
+
+                        return "<div style='display:flex;align-items:center;gap:8px;'>
+                                    <img src='{$iconUrl}'
+                                        alt='icon'
+                                        style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
+                                    <span>{$shortName}</span>
+                                </div>";
+                    })
+                    ->sortable()
+                    ->searchable(),
 
 
-                Tables\Columns\TextColumn::make('short_name')
+
+
+
+
+
+                /*
+                
+                TextColumn::make('short_name')
+                ->label('Name')
+                ->html()
+                ->formatStateUsing(function ($state, $record) {
+                    $iconPath   = $record->icon;       // puede ser URL o ruta relativa
+                    $shortName  = $record->short_name; // texto a mostrar
+
+                    // Si no hay icono, simplemente devuelve el nombre
+                    if (blank($iconPath)) {
+                        return "<span>{$shortName}</span>";
+                    }
+
+                    // Determina la URL final del icono
+                    $iconUrl = Str::startsWith($iconPath, ['http://', 'https://'])
+                        ? $iconPath                                   // ya es URL completa
+                        : Storage::disk('s3')->url($iconPath);        // convierte ruta relativa
+
+                    return "<div style='display:flex;align-items:center;gap:8px;'>
+                                <img src='{$iconUrl}'
+                                    alt='icon'
+                                    style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
+                                <span>{$shortName}</span>
+                            </div>";
+                }),
+                /*
+                TextColumn::make('short_name')
                 ->label('Name')
                 ->html()
                 ->formatStateUsing(function ($record) {
@@ -275,50 +301,57 @@ class ReinsurersResource extends Resource
                 })
                 ->sortable()
                 ->searchable(),
+                */
                 
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),   
-                Tables\Columns\TextColumn::make('established')->searchable()->sortable(), 
-                Tables\Columns\TextColumn::make('class')->searchable()->sortable(),
+                TextColumn::make('acronym')
+                    ->searchable()
+                    ->sortable(),   
+                TextColumn::make('established')
+                    ->searchable()
+                    ->sortable(), 
+                TextColumn::make('class')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('parent.short_name')
+                    ->label('Parent')
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('parent.short_name')
-                ->label('Parent')
-                ->sortable()
-                ->searchable(),
+                TextColumn::make('reinsurer_type.description')
+                    ->label('Type')
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('reinsurer_type.description')
-                ->label('Type')
-                ->sortable()
-                ->searchable(),
+                TextColumn::make('country.alpha_3')
+                    ->label('Country')
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('country.alpha_3')
-                ->label('Country')
-                ->sortable()
-                ->searchable(),
-
-                Tables\Columns\TextColumn::make('operative_status.description')
-                ->label('Operative Status')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'Operative' => 'success',
-                    'Pending license' => 'warning',
-                    'Pending incop.' => 'warning',
-                    'Transferred' => 'info',
-                    'Dissolved' => 'danger',
-                    'Run-off' => 'gray',
-                    'Dormant' => 'gray',
+                TextColumn::make('operative_status.description')
+                    ->label('Operative Status')
+                    ->searchable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Operative' => 'success',
+                        'Pending license' => 'warning',
+                        'Pending incop.' => 'warning',
+                        'Transferred' => 'info',
+                        'Dissolved' => 'danger',
+                        'Run-off' => 'gray',
+                        'Dormant' => 'gray',
                     default => 'secondary',
-                })
-                ->icon(fn (string $state): string => match ($state) {
-                    'Operative' => 'heroicon-o-check-circle',
-                    'Pending license', 'Pending incop.' => 'heroicon-o-clock',
-                    'Transferred' => 'heroicon-o-arrow-right-circle',
-                    'Dissolved' => 'heroicon-o-x-circle',
-                    'Run-off' => 'heroicon-o-pause-circle',
-                    'Dormant' => 'heroicon-o-moon',
-                    default => 'heroicon-o-question-mark-circle',
-                })
-                ->sortable()
-                ->searchable(),
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Operative' => 'heroicon-o-check-circle',
+                        'Pending license', 'Pending incop.' => 'heroicon-o-clock',
+                        'Transferred' => 'heroicon-o-arrow-right-circle',
+                        'Dissolved' => 'heroicon-o-x-circle',
+                        'Run-off' => 'heroicon-o-pause-circle',
+                        'Dormant' => 'heroicon-o-moon',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
+                    ->sortable()
+                    ->searchable(),
                 
     
     
@@ -379,7 +412,12 @@ class ReinsurersResource extends Resource
 
 
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

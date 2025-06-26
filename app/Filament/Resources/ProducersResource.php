@@ -37,6 +37,7 @@ class ProducersResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
@@ -45,6 +46,8 @@ class ProducersResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
+                    ->unique()
+                    ->live(onBlur: false)
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
@@ -60,15 +63,23 @@ class ProducersResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->sortable(),
-                TextColumn::make('acronym')->searchable()->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->sortable(),
+                TextColumn::make('acronym')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

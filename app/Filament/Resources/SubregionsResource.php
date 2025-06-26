@@ -24,6 +24,7 @@ class SubregionsResource extends Resource
     protected static ?string $model = Subregion::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 3;   // aparecerá primero
 
     public static function canCreate(): bool
     {
@@ -77,12 +78,17 @@ class SubregionsResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('subregion_code')->searchable()->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('subregion_code')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('region.name')
-                ->label('Region')
-                ->sortable(),
+                    ->label('Region')
+                    ->sortable(),
 
 
             ])

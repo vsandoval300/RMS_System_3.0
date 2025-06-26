@@ -26,6 +26,7 @@ class CorporateDocumentsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'Corporate Documents';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 6;   // aparecerá primero
 
     
 
@@ -42,15 +43,18 @@ class CorporateDocumentsResource extends Resource
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
+                    ->unique()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
 
                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
+                    ->live(onBlur: false)
                     ->maxLength(2)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                    ->unique()
                     ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).'),
 
                     Textarea::make('description')
@@ -71,7 +75,8 @@ class CorporateDocumentsResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->sortable()
@@ -80,8 +85,9 @@ class CorporateDocumentsResource extends Resource
                         'class' => 'min-w-[12rem] whitespace-nowrap',
                     ]),
                 
-                TextColumn::make('acronym')->searchable()->sortable(),
-                
+                TextColumn::make('acronym')
+                    ->searchable()
+                    ->sortable(),
                 
                 TextColumn::make('description')
                     ->label('Description')
@@ -102,7 +108,11 @@ class CorporateDocumentsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

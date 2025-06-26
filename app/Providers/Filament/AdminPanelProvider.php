@@ -35,6 +35,15 @@ class AdminPanelProvider extends PanelProvider
             ]);
 
         return $panel
+
+            ->navigationGroups([
+                'Dashboard',
+                'Resources',  // aquí irán Countries, BankAccounts, etc.
+                'Banks',
+                'Clients',
+                'Reinsurers',
+                'Underwritten',
+            ])
             ->default()
             ->id('admin')
             ->path('admin')

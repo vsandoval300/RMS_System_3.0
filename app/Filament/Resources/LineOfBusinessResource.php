@@ -39,6 +39,7 @@ class LineOfBusinessResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
@@ -62,9 +63,12 @@ class LineOfBusinessResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable()
-                ->extraAttributes([
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->extraAttributes([
                         'style' => 'width: 180px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 TextColumn::make('description')
@@ -78,7 +82,11 @@ class LineOfBusinessResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

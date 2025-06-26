@@ -18,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 
 class CompaniesResource extends Resource
 {
@@ -37,6 +38,7 @@ class CompaniesResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
@@ -45,6 +47,8 @@ class CompaniesResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
+                    ->unique()
+                    ->live(onBlur: false)
                     ->maxLength(2)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
@@ -95,25 +99,29 @@ class CompaniesResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
-                ->extraAttributes([
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
-                Tables\Columns\TextColumn::make('acronym')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('activity')
+                TextColumn::make('acronym')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('activity')
                     ->label('Activity')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 550px; white-space: normal;', // ancho fijo de 300px
                     ]),
-
-                Tables\Columns\TextColumn::make('sector.name')
+                TextColumn::make('sector.name')
                     ->label('Sector')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('country.name')
+                TextColumn::make('country.name')
                     ->label('Country')
                     ->sortable()
                     ->searchable()
@@ -124,7 +132,11 @@ class CompaniesResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

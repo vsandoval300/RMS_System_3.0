@@ -24,6 +24,7 @@ class ReinsurerTypeResource extends Resource
     protected static ?string $model = ReinsurerType::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 8;   // aparecerá primero
 
 
     public static function form(Form $form): Form
@@ -38,11 +39,13 @@ class ReinsurerTypeResource extends Resource
                     TextInput::make('type_acronym')
                         ->label('Acronym')
                         ->required()
+                        ->unique()
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
                         ->helperText('Only uppercase letters allowed.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->extraAttributes(['class' => 'w-1/2'])
+                        ->live(onBlur: false),
                         //->extraAttributes(['class' => 'uppercase w-32']),
 
                     TextInput::make('description')
@@ -64,9 +67,14 @@ class ReinsurerTypeResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('type_acronym')->searchable()->sortable(),
-                TextColumn::make('description')->searchable()->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('type_acronym')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('description')
+                    ->searchable()
+                    ->sortable(),
 
 
 
@@ -75,7 +83,12 @@ class ReinsurerTypeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

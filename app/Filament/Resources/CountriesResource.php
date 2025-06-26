@@ -24,6 +24,7 @@ class CountriesResource extends Resource
     protected static ?string $model = Country::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
+    protected static ?int    $navigationSort  = 4;   // aparecerá primero
 
     public static function canCreate(): bool
     {
@@ -138,15 +139,39 @@ class CountriesResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('alpha_2')->searchable()->sortable(),
-                TextColumn::make('alpha_3')->searchable()->sortable(),
-                TextColumn::make('country_code')->searchable()->sortable(),
-                TextColumn::make('iso_code')->searchable()->sortable(),
-                TextColumn::make('am_best_code')->searchable()->sortable(),
-                TextColumn::make('latitude')->searchable()->sortable(),
-                TextColumn::make('longitude')->searchable()->sortable(),
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('alpha_2')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('alpha_3')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('country_code')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('iso_code')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('am_best_code')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('latitude')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('longitude')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('region.name')
                 ->label('Region')
                 ->sortable(),

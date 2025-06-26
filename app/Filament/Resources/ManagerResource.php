@@ -25,6 +25,7 @@ class ManagerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
      protected static ?string $navigationGroup = 'Resources';
+     protected static ?int    $navigationSort  = 12;   // aparecerá primero
 
     public static function form(Form $form): Form
     {
@@ -38,6 +39,8 @@ class ManagerResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique()
+                    ->live(onBlur: false)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
@@ -52,9 +55,12 @@ class ManagerResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable()
-                ->extraAttributes([
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()  
+                    ->sortable()
+                    ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
             ])
@@ -62,7 +68,12 @@ class ManagerResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
