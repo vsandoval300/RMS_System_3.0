@@ -32,6 +32,8 @@ use Filament\Tables\Columns\TextColumn;
 
 
 
+
+
 class ReinsurersResource extends Resource
 {
     protected static ?string $model = Reinsurer::class;
@@ -84,9 +86,11 @@ class ReinsurersResource extends Resource
                     
                     Select::make('parent_id')
                     ->label('Parent')
-                    ->options(function () {
-                        return Reinsurer::orderBy('name')->pluck('name', 'id');
-                    })
+                    ->relationship(
+                        name: 'parent',          // nombre de la relación belongsTo
+                        titleAttribute: 'name', // el campo que Filament usará en la consulta
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'), // ← ordena A-Z
+                    )
                     ->searchable()
                     ->preload()
                     ->nullable()
@@ -105,18 +109,25 @@ class ReinsurersResource extends Resource
                     TextInput::make('established')
                     ->label('Established Year')
                     ->numeric()
-                    ->minLength(4)
-                    ->maxLength(4)
-                    ->rules(['regex:/^[12][0-9]{3}$/']) // años entre 1000–2999
-                    ->helperText('Enter the 4-digit year the company was established.')
-                    ->placeholder('e.g. 1995')
+                    ->step(1)                         // opcional: avanza de uno en uno
+                    ->minValue(2010)                  // límite inferior fijo
+                    ->maxValue(fn () => now()->year)  // límite superior dinámico (2025, 2026, …)
+                    ->rules([
+                        'required',
+                        'integer',
+                        'between:2010,' . now()->year, // refuerza la validación en el backend
+                    ])
+                    //->live(onBlur: true)  // evita validar en cada tecla; valida al perder foco
+                    ->placeholder('e.g. 2015')
+                    ->helperText('Enter a 4-digit year between 2010 and ' . now()->year . '.')
                     ->required(),
                     
                     Select::make('manager_id')
                     ->label('Manager')
-                    ->options(function () {
-                        return Manager::orderBy('name')->pluck('name', 'id');
-                    })
+                    ->relationship('manager','name')
+                    //->options(function () {
+                    //    return Manager::orderBy('name')->pluck('name', 'id');
+                    //})
                     ->searchable()
                     ->preload()
                     ->required()
@@ -125,13 +136,14 @@ class ReinsurersResource extends Resource
                     
                     Select::make('country_id')
                     ->label('Country')
-                    ->options(function () {
-                        return Country::orderBy('name')
-                            ->get()
-                            ->mapWithKeys(fn ($country) => [
-                                $country->id => "{$country->alpha_3} - {$country->name}"
-                            ]);
-                    })
+                    ->relationship(
+                        name: 'country',          // nombre de la relación belongsTo
+                        titleAttribute: 'alpha_3', // el campo que Filament usará en la consulta
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('alpha_3'), // ← ordena A-Z
+                    )
+                    ->getOptionLabelFromRecordUsing(      // <- aquí personalizas la etiqueta
+                        fn (Country $record) => "{$record->alpha_3} - {$record->name}"
+                    )
                     ->searchable()
                     ->preload()
                     ->required()
@@ -140,12 +152,13 @@ class ReinsurersResource extends Resource
                     
                     Select::make('reinsurer_type_id')
                     ->label('Type')
-                    ->options(function () {
-                        return \App\Models\ReinsurerType::orderBy('description')->get()
-                            ->mapWithKeys(function ($type) {
-                                return [$type->id => "{$type->type_acronym} - {$type->description}"];
-                            });
-                    })
+                    ->relationship(
+                        name: 'reinsurer_type',          // nombre de la relación belongsTo
+                        titleAttribute: 'type_acronym' // el campo que Filament usará en la consulta
+                    )
+                    ->getOptionLabelFromRecordUsing(      // <- aquí personalizas la etiqueta
+                        fn (ReinsurerType $record) => "{$record->type_acronym} - {$record->description}"
+                    )
                     ->searchable()
                     ->preload()
                     ->required()
@@ -154,12 +167,14 @@ class ReinsurersResource extends Resource
                     
                     Select::make('operative_status_id')
                     ->label('Operative Status')
-                    ->options(function () {
-                        return OperativeStatus::orderBy('description')->get()
-                            ->mapWithKeys(function ($status) {
-                                return [$status->id => "{$status->acronym} - {$status->description}"];
-                            });
-                    })
+                    ->relationship(
+                        name: 'operative_status',          // nombre de la relación belongsTo
+                        titleAttribute: 'acronym', // el campo que Filament usará en la consulta
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('acronym'), // ← ordena A-Z
+                    )
+                    ->getOptionLabelFromRecordUsing(      // <- aquí personalizas la etiqueta
+                        fn (OperativeStatus $record) => "{$record->acronym} - {$record->description}"
+                    )
                     ->searchable()
                     ->preload()
                     ->required()
@@ -184,8 +199,7 @@ class ReinsurersResource extends Resource
                                 ->visibility('public')
                                 ->image()
                                 //->imagePreviewHeight('100')
-                                ->previewable()
-                                ->required(),
+                                ->previewable(),
                             //====================================
                             // ICON
                             //====================================
@@ -196,8 +210,7 @@ class ReinsurersResource extends Resource
                                 ->visibility('public')
                                 ->image()
                                 //->imagePreviewHeight('100')
-                                ->previewable()
-                                ->required(), 
+                                ->previewable(),
                             //====================================                       
 
                         ]),   // ← cierra schema() y luego la Sección
@@ -430,6 +443,7 @@ class ReinsurersResource extends Resource
     {
         return [
             //
+            
         ];
     }
 

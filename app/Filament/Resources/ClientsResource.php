@@ -20,6 +20,8 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Resources\RelationManagers\Concerns\BelongsToManyRelationManager;
+
 
 class ClientsResource extends Resource
 {
@@ -33,7 +35,7 @@ class ClientsResource extends Resource
             ->schema([
                 //
                 Section::make('Client Details')
-                ->columns(1)    // ← aquí defines dos columnas
+                ->columns(2)    // ← aquí defines dos columnas
                 ->schema([
                     
 
@@ -43,10 +45,9 @@ class ClientsResource extends Resource
                         ->unique()
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('First letter of each word will be capitalised.'),
+                        
                     
-
                     TextInput::make('short_name')
                         ->label('Short Name')
                         ->required()
@@ -54,8 +55,8 @@ class ClientsResource extends Resource
                         ->live(onBlur: false)
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('First letter of each word will be capitalised.'),
+                       
                     
                     Textarea::make('description')
                         ->label('Description')
@@ -63,15 +64,15 @@ class ClientsResource extends Resource
                         ->columnSpan('full')
                         ->autosize()
                         ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                        
 
                     TextInput::make('webpage')
                         ->label('Web Page')
                         ->required()
                         ->maxLength(255)
-                        ->helperText('First letter of each word will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('First letter of each word will be capitalised.'),
+                        
 
                     Select::make('country_id')
                         ->label('Country')
@@ -86,8 +87,8 @@ class ClientsResource extends Resource
                         ->preload()
                         ->required()
                         ->placeholder('Select a country')
-                        ->helperText('Choose the reinsurer\'s country.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('Choose the reinsurer\'s country.'),
+                        
 
                 ]),
 
@@ -138,7 +139,7 @@ class ClientsResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
-                        'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
+                        'style' => 'width: 200px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 TextColumn::make('short_name')
                     ->searchable()
@@ -147,15 +148,18 @@ class ClientsResource extends Resource
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
-                        'style' => 'width: 550px; white-space: normal;', // ancho fijo de 300px
+                        'style' => 'width: 520px; white-space: normal;', // ancho fijo de 300px
                     ]),
                 TextColumn::make('webpage')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
+                    
                 TextColumn::make('country.name')
                     ->label('Country')
                     ->sortable()
                     ->searchable()
+                    ->toggleable()
             ])
             ->filters([
                 //
@@ -178,6 +182,9 @@ class ClientsResource extends Resource
     {
         return [
             //
+            
+           RelationManagers\IndustriesRelationManager::class,
+        
         ];
     }
 
