@@ -56,20 +56,20 @@ class ReinsurersResource extends Resource
                     
                     TextInput::make('cns_reinsurer')
                     ->label('LSK (Legacy Substitute Key)')
-                    ->unique()
+                    ->unique(ignoreRecord: true) 
                     ->nullable(),
                     
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true) 
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
                     
                     TextInput::make('short_name')
                     ->label('Short Name')
-                    ->unique()
+                    ->unique(ignoreRecord: true) 
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', ucwords(strtolower($state))))
@@ -78,7 +78,7 @@ class ReinsurersResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true) 
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
@@ -192,25 +192,95 @@ class ReinsurersResource extends Resource
                             //====================================  
                             // LOGO
                             //====================================
+                            /* FileUpload::make('logo')
+                            ->disk('s3')
+                            ->directory('reinsurers/logos'), */
                             FileUpload::make('logo')
-                                ->label('Logo')
                                 ->disk('s3')
                                 ->directory('reinsurers/logos')
-                                ->visibility('public')
+                                ->visibility('public')                 // si es privado → 'private'
                                 ->image()
-                                //->imagePreviewHeight('100')
-                                ->previewable(),
+                                ->previewable()
+
+                                /* 1️⃣  Vista previa cuando abres “Edit” */
+                                ->afterStateHydrated(function (FileUpload $component, $state) {
+                                    if (!$state) return;
+
+                                    $path = is_array($state) && isset($state['path'])
+                                        ? $state['path']
+                                        : $state;
+
+                                    $url = Storage::disk('s3')->url($path);
+
+                                    $component->state([
+                                        'name' => basename($path),
+                                        'size' => 1,
+                                        'url'  => $url,
+                                        'path' => $path,
+                                    ]);
+                                })
+                                /* 2️⃣  Guardar (con o sin subida nueva) */
+                                ->saveUploadedFileUsing(function ($file) {
+                                    // a) Subida nueva ---------------
+                                    if ($file instanceof TemporaryUploadedFile) {
+                                        return $file->storePublicly('reinsurers/logos', 's3'); // ruta relativa
+                                    }
+
+                                    // b) Guardar sin cambiar imagen -
+                                    if (is_array($file) && isset($file['path'])) {
+                                        return $file['path'];         // conserva la ruta existente
+                                    }
+
+                                    return $file;                     // fallback
+                                }),
                             //====================================
                             // ICON
                             //====================================
+                            /* FileUpload::make('icon')
+                            ->disk('s3')
+                            ->directory('reinsurers/icon'), */
                             FileUpload::make('icon')
-                                ->label('Icon')
                                 ->disk('s3')
                                 ->directory('reinsurers/icons')
-                                ->visibility('public')
+                                ->visibility('public')                 // si es privado → 'private'
                                 ->image()
-                                //->imagePreviewHeight('100')
-                                ->previewable(),
+                                ->previewable()
+
+                                /* 1️⃣  Vista previa cuando abres “Edit” */
+                               ->afterStateHydrated(function (FileUpload $component, $state) {
+                                    if (!$state) return;
+
+                                    $path = is_array($state) && isset($state['path'])
+                                        ? $state['path']
+                                        : $state;
+
+                                    $url = Storage::disk('s3')->url($path);
+
+                                    $component->state([
+                                        'name' => basename($path),
+                                        'size' => 1,
+                                        'url'  => $url,
+                                        'path' => $path,
+                                    ]);
+                                })
+
+                                /* 2️⃣  Guardar (con o sin subida nueva) */
+                                ->saveUploadedFileUsing(function ($file) {
+                                    // a) Subida nueva ---------------
+                                    if ($file instanceof TemporaryUploadedFile) {
+                                        return $file->storePublicly('reinsurers/icons', 's3'); // ruta relativa
+                                    }
+
+                                    // b) Guardar sin cambiar imagen -
+                                    if (is_array($file) && isset($file['path'])) {
+                                        return $file['path'];         // conserva la ruta existente
+                                    }
+
+                                    return $file;                     // fallback
+                                }),
+
+                           
+                                
                             //====================================                       
 
                         ]),   // ← cierra schema() y luego la Sección
@@ -442,10 +512,17 @@ class ReinsurersResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DocumentsRelationManager::class,   // ✅ nombre correcto
+            RelationManagers\ReinsurerBankAccountsRelationManager::class,   // ✅ nombre correcto
+            RelationManagers\FinancialStatementsRelationManager::class,   // ✅ nombre correcto
+            RelationManagers\ReinsurerHoldingsRelationManager::class,   // ✅ nombre correcto
+            RelationManagers\BoardsRelationManager::class,   // ✅ nombre correcto
+            
+
             
         ];
     }
+
 
     public static function getPages(): array
     {

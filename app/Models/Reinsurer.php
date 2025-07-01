@@ -6,7 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Reinsurer extends Model
 {
@@ -58,11 +61,51 @@ class Reinsurer extends Model
     {
         return $this->hasMany(self::class, 'parent_id');
     }
-
     public function manager(): BelongsTo
     {
     return $this->belongsTo(Manager::class, 'manager_id');
     }
+    // 👉 Reaseguradores y Documents
+    public function documents(): HasMany   // ← el nombre DEBE ser documents()
+    {
+        return $this->hasMany(ReinsurerDoc::class, 'reinsurer_id');
+    }
+    // 👉 Reaseguradores y Cuentas Bancarias
+    public function reinsurerBankAccounts(): HasMany
+    {
+        return $this->hasMany(ReinsurerBankAccount::class);
+    }
+    // 👉 Reaseguradores y Financial Statements
+    public function financialStatements()
+    {
+        return $this->hasMany(ReinsurerFinancialStatement::class);
+    }
+    // 👉 Reaseguradores y Holdings
+    public function reinsurerHoldings(): HasMany
+    {
+        return $this->hasMany(ReinsurerHolding::class);
+    }
+    // 👉 Reaseguradores y Boards
+    public function reinsurerBoards(): HasMany
+    {
+        return $this->hasMany(ReinsurerBoard::class);
+    }
+    public function boards(): BelongsToMany
+    {
+        return $this->belongsToMany(
+                Board::class,
+                'reinsurer_boards'
+            )
+            ->using(ReinsurerBoard::class)
+            ->withPivot(['id', 'appt_date'])
+            ->withTimestamps();
+    }
+
+
+
+    
+
+
 
 
 }

@@ -110,21 +110,6 @@ class ClientsResource extends Resource
                 ]),    
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             ]);
     }
 
@@ -166,7 +151,14 @@ class ClientsResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+
+                    Tables\Actions\ViewAction::make()
+                        ->label('View')
+                        ->url(fn (Client $record) =>
+                            ClientsResource::getUrl('view', ['record' => $record])
+                ),
+                       
+                    //Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
@@ -191,9 +183,10 @@ class ClientsResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClients::route('/'),
+            'index'  => Pages\ListClients::route('/'),
             'create' => Pages\CreateClients::route('/create'),
-            'edit' => Pages\EditClients::route('/{record}/edit'),
+            'view'   => Pages\ViewClients::route('/{record}'),  // 👈 nuevo
+            'edit'   => Pages\EditClients::route('/{record}/edit'),
         ];
     }
 }
