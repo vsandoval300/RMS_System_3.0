@@ -25,7 +25,7 @@ class OperativeStatusesResource extends Resource
     protected static ?string $model = OperativeStatus::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
-    protected static ?int    $navigationSort  = 7;   // aparecerá primero
+    protected static ?int    $navigationSort  = 6;   // aparecerá primero
 
     public static function canCreate(): bool
     {

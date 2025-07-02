@@ -26,7 +26,7 @@ class CorporateDocumentsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'Corporate Documents';
     protected static ?string $navigationGroup = 'Resources';
-    protected static ?int    $navigationSort  = 6;   // aparecerá primero
+    protected static ?int    $navigationSort  = 9;   // aparecerá primero
 
     
 
@@ -50,7 +50,7 @@ class CorporateDocumentsResource extends Resource
                    TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->live(onBlur: false)
+                    //->live(onBlur: false)
                     ->maxLength(2)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))

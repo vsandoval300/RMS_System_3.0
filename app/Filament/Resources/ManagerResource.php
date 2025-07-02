@@ -25,7 +25,7 @@ class ManagerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
      protected static ?string $navigationGroup = 'Resources';
-     protected static ?int    $navigationSort  = 12;   // aparecerá primero
+     protected static ?int    $navigationSort  = 10;   // aparecerá primero
 
     public static function form(Form $form): Form
     {

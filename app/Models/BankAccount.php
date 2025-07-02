@@ -32,7 +32,6 @@ class BankAccount extends Model
     return $this->belongsTo(Currency::class, 'currency_id');
     }
 
-
     public function bank(): BelongsTo
     {
         return $this->belongsTo(Bank::class);

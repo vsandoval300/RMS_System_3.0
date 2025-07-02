@@ -28,7 +28,7 @@ class BankAccountsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;
     protected static ?string $navigationGroup = 'Banks';
-    protected static ?int    $navigationSort  = 10;   // aparecerá primero
+    protected static ?int    $navigationSort  = 2;   // aparecerá primero
    
 
     public static function form(Form $form): Form
