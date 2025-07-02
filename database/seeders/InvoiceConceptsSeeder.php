@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\invoice_concept;
+use App\Models\InvoiceConcept;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,35 +14,35 @@ class InvoiceConceptsSeeder extends Seeder
     public function run(): void
     {
         //
-        $invoice_concept = new invoice_concept();
-        $invoice_concept->type = 'AF';
-        $invoice_concept->description = 'Access Fee';
-        $invoice_concept->save();
+        $InvoiceConcept = new InvoiceConcept();
+        $InvoiceConcept->type = 'AF';
+        $InvoiceConcept->description = 'Access Fee';
+        $InvoiceConcept->save();
 
-        $invoice_concept = new invoice_concept();
-        $invoice_concept->type = 'MF';
-        $invoice_concept->description = 'Management Fee';
-        $invoice_concept->save();
+        $InvoiceConcept = new InvoiceConcept();
+        $InvoiceConcept->type = 'MF';
+        $InvoiceConcept->description = 'Management Fee';
+        $InvoiceConcept->save();
 
-        $invoice_concept = new invoice_concept();
-        $invoice_concept->type = 'RiRF';
-        $invoice_concept->description = 'Retail Refererral Fee';
-        $invoice_concept->save();
+        $InvoiceConcept = new InvoiceConcept();
+        $InvoiceConcept->type = 'RiRF';
+        $InvoiceConcept->description = 'Retail Refererral Fee';
+        $InvoiceConcept->save();
 
-        $invoice_concept = new invoice_concept();
-        $invoice_concept->type = 'BkRF';
-        $invoice_concept->description = 'Broker Refererral Fee';
-        $invoice_concept->save();
+        $InvoiceConcept = new InvoiceConcept();
+        $InvoiceConcept->type = 'BkRF';
+        $InvoiceConcept->description = 'Broker Refererral Fee';
+        $InvoiceConcept->save();
 
-        $invoice_concept = new invoice_concept();
-        $invoice_concept->type = 'ReRF';
-        $invoice_concept->description = 'Reinsurer Refererral Fee';
-        $invoice_concept->save();
+        $InvoiceConcept = new InvoiceConcept();
+        $InvoiceConcept->type = 'ReRF';
+        $InvoiceConcept->description = 'Reinsurer Refererral Fee';
+        $InvoiceConcept->save();
 
-        $invoice_concept = new invoice_concept();
-        $invoice_concept->type = 'FeSt';
-        $invoice_concept->description = 'Feasibility Study';
-        $invoice_concept->save();
+        $InvoiceConcept = new InvoiceConcept();
+        $InvoiceConcept->type = 'FeSt';
+        $InvoiceConcept->description = 'Feasibility Study';
+        $InvoiceConcept->save();
 
     }
 }

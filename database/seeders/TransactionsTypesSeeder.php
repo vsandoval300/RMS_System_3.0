@@ -2,30 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\transactions_type;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
+use App\Models\TransactionsType;
 
 class TransactionsTypesSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
-        //
-        $transactions_type = new transactions_type();
-        $transactions_type->description ='Premium';
-        $transactions_type->save();
+        // ‼️  Estos valores DEBEN coincidir con los permitidos en el enum
+        $tipos = [
+            ['description' => 'Premium'],
+            ['description' => 'Claims'],
+            ['description' => 'Claims Reserve'],
+        ];
 
-        $transactions_type = new transactions_type();
-        $transactions_type->description ='Claims';
-        $transactions_type->save();
-
-        $transactions_type = new transactions_type();
-        $transactions_type->description ='Claims Reserve';
-        $transactions_type->save();
+        TransactionsType::insert($tipos);
     }
 }

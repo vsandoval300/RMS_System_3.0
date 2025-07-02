@@ -28,10 +28,10 @@ class DatabaseSeeder extends Seeder
             
             //Operative Tables 
             /*=============================================*/
-            RolesSeeder::class,
-            PermissionsSeeder::class,
-            RoleHasPermissions::class,
-            ModelHasRolesSeeder::class,            
+            //RolesSeeder::class,
+            //PermissionsSeeder::class,
+            //RoleHasPermissions::class,
+            //ModelHasRolesSeeder::class,            
             //Cátalogos de posición geografica
             /*=============================================*/
             RegionsSeeder::class,

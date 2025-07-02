@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\transaction_status;
+use App\Models\TransactionStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,17 +14,17 @@ class transactionsStatuses extends Seeder
     public function run(): void
     {
         //
-        $transaction_status = new transaction_status();
-        $transaction_status->transaction_status ='Pending';
-        $transaction_status->save();
+        $TransactionStatus = new TransactionStatus();
+        $TransactionStatus->transaction_status ='Pending';
+        $TransactionStatus->save();
 
-        $transaction_status = new transaction_status();
-        $transaction_status->transaction_status ='In process';
-        $transaction_status->save();
+        $TransactionStatus = new TransactionStatus();
+        $TransactionStatus->transaction_status ='In process';
+        $TransactionStatus->save();
 
-        $transaction_status = new transaction_status();
-        $transaction_status->transaction_status ='Completed';
-        $transaction_status->save();
+        $TransactionStatus = new TransactionStatus();
+        $TransactionStatus->transaction_status ='Completed';
+        $TransactionStatus->save();
 
     }
 }

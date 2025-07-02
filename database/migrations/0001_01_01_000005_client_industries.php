@@ -21,6 +21,8 @@ return new class extends Migration
             $table->foreignId('industry_id')
                 ->constrained('industries')
                 ->cascadeOnDelete();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\business_unit;
+use App\Models\BusinessUnit;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,10 +14,10 @@ class BusinessUnitsSeeder extends Seeder
     public function run(): void
     {
         //
-        $business_unit = new business_unit();
-        $business_unit->name = 'Alternative Risk Transfer Unit';
-        $business_unit->description = 'None';
-        $business_unit->client_id = '1';
-        $business_unit->save();
+        BusinessUnit::create([
+            'name'        => 'Alternative Risk Transfer Unit',
+            'description' => 'None',
+            'client_id'   => 1,
+        ]);
     }
 }
