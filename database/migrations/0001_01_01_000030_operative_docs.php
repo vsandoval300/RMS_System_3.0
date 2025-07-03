@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('business_docs', function (Blueprint $table) {
+        Schema::create('operative_docs', function (Blueprint $table) {
             $table->engine('InnoDB');
             //$table->bigInteger('id')->unsigned()->primary();
             $table->string('id', 19)->primary();
             
-            $table->foreignId('business_doc_type_id')->constrained('business_doc_types');
+            $table->foreignId('operative_doc_type_id')->constrained('business_doc_types');
             $table->integer('index');
             $table->text('description');
             $table->date('inception_date');
@@ -37,7 +37,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('business_docs');
+        Schema::dropIfExists('operative_docs');
     }
 };
 

@@ -22,11 +22,11 @@ return new class extends Migration
 
             $table->string('remmitance_code', 14)->nullable(); // Permitir nulos aquí
             $table->foreign('remmitance_code')->references('remmitance_code')->on('remmitance_codes')->onDelete('set null'); // Añadir comportamiento al eliminar
-            $table->string('biz_document_id', 19);
-            $table->foreign('biz_document_id')->references('id')->on('business_docs');
+            $table->string('op_document_id', 19);
+            $table->foreign('op_document_id')->references('id')->on('operative_docs');
 
             
-            $table->foreignId('transaction_type_id')->constrained('transactions_types');
+            $table->foreignId('transaction_type_id')->constrained('transaction_types');
             $table->foreignId('transaction_status_id')->constrained('transaction_statuses');
     
             

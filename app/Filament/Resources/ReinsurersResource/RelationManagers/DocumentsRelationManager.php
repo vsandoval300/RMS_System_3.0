@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ReinsurersResource\RelationManagers;
 
-use App\Models\DocumentCorpType;
+use App\Models\DocumentType;
 use Illuminate\Support\Facades\Storage;           // 👈 importa la facade
 use Filament\Forms;
 use Filament\Tables;
@@ -78,7 +78,7 @@ class DocumentsRelationManager extends RelationManager
                     Select::make('document_type_id')
                         ->label('Type')
                         ->options(fn () =>
-                            DocumentCorpType::orderBy('name')->pluck('name', 'id')
+                            DocumentType::orderBy('name')->pluck('name', 'id')
                         )
                         ->searchable()
                         ->preload()

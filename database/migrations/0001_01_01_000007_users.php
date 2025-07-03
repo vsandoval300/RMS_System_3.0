@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();//
             $table->timestamp('email_verified_at')->nullable();//
             $table->string('password');
-            $table->string('surname');//
+            /* $table->string('surname');//
             $table->string('phone')->nullable();
             $table->string('token')->nullable(); // Nuevo campo para el token
             $table->rememberToken();
@@ -27,9 +27,10 @@ return new class extends Migration
             $table->foreign('parent_id')->references('id')->on('users');
             $table->string('position'); // Este es nuevo campo
             $table->foreignId('country_id')->constrained('countries');
-            $table->boolean('status')->default(true);
+            $table->boolean('status')->default(true); */
+            $table->rememberToken();
             $table->timestamps();
-            $table->softDeletes();
+            //$table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

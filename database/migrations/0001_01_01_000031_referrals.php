@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('referral');
             $table->uuid('costnode_id'); // Cambia a uuid
             // Define la clave foránea referenciando costs_nodes
-            $table->foreign('costnode_id')->references('id')->on('costs_nodes')->onDelete('cascade');
+            $table->foreign('costnode_id')->references('id')->on('cost_nodes')->onDelete('cascade');
             
             $table->timestamps();
             $table->softDeletes();

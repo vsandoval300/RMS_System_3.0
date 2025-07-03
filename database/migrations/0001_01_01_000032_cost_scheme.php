@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cschemes', function (Blueprint $table) {
+        Schema::create('cost_schemes', function (Blueprint $table) {
             $table->engine('InnoDB');
             
             $table->string('id', 19)->primary();
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cschemes');
+        Schema::dropIfExists('cost_schemes');
     }
 };

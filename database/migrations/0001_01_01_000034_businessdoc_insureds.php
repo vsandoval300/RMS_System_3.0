@@ -16,8 +16,8 @@ return new class extends Migration
             $table->uuid('id')->primary(); // Cambia a uuid
             
             //$table->foreignId('business_docs_id')->constrained('business_docs')->cascadeOnDelete();
-            $table->string('biz_document_id', 19);
-            $table->foreign('biz_document_id')->references('id')->on('business_docs')->onDelete('cascade');
+            $table->string('op_document_id', 19);
+            $table->foreign('op_document_id')->references('id')->on('operative_docs')->onDelete('cascade');
             
             $table->foreignId('company_id')->constrained('companies');
             $table->foreignId('coverage_id')->constrained('coverages');

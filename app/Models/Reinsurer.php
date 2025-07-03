@@ -61,6 +61,7 @@ class Reinsurer extends Model
     {
         return $this->hasMany(self::class, 'parent_id');
     }
+    
     public function manager(): BelongsTo
     {
     return $this->belongsTo(Manager::class, 'manager_id');

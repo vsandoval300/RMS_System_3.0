@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cscheme_cnodes', function (Blueprint $table) {
+        Schema::create('cost_scheme_nodes', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->uuid('id')->primary(); // Cambia a uuid
             
             $table->string('cscheme_id', 19); // Cambia a uuid
-            $table->foreign('cscheme_id')->references('id')->on('cschemes')->onDelete('cascade');
+            $table->foreign('cscheme_id')->references('id')->on('cost_schemes')->onDelete('cascade');
             
             $table->uuid('costnode_id'); // Cambia a uuid
-            $table->foreign('costnode_id')->references('id')->on('costs_nodes')->onDelete('cascade');
+            $table->foreign('costnode_id')->references('id')->on('cost_nodes')->onDelete('cascade');
             $table->integer('index');
             
             $table->timestamps();
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cscheme_cnodes');
+        Schema::dropIfExists('cost_scheme_nodes');
     }
 };

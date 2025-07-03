@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionsType extends Model
+class TransactionType extends Model
 {
     // Si tu tabla se llama distinto, destápalo:
     // protected $table = 'transactions_type_catalog';

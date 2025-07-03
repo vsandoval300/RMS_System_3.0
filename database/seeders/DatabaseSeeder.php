@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
             DepartmentsSeeder::class,
             //Cátalogo de Usuarios
             /*=============================================*/
-            UserSeeder::class,
+            //UserSeeder::class,
             IndustriesSeeder::class,
             ClientIndustriesSeeder::class,
             PartnerTypesSeeder::class,

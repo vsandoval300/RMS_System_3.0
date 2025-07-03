@@ -17,13 +17,13 @@ return new class extends Migration
             
             $table->integer('index'); 
             
-            $table->string('business_doc_id', 19);
-            $table->foreign('business_doc_id')->references('id')->on('business_docs')->onDelete('cascade');
+            $table->string('op_document_id', 19);
+            $table->foreign('op_document_id')->references('id')->on('operative_docs')->onDelete('cascade');
 
             //$table->foreignId('cscheme_id')->constrained('cschemes')->cascadeOnDelete()
 
             $table->string('cscheme_id', 19); // Cambia a uuid
-            $table->foreign('cscheme_id')->references('id')->on('cschemes')->onDelete('cascade');
+            $table->foreign('cscheme_id')->references('id')->on('cost_schemes')->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();
