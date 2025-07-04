@@ -34,21 +34,48 @@ class ReinsurerHoldingsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            // 🏎 Eager-load para evitar N+1
+            ->modifyQueryUsing(fn (Builder $query) =>
+                $query->with(['holding.country', 'holding.client'])
+            )
+
+            // Muestra el nombre del holding como título de registro
             ->recordTitleAttribute('holding.name')
+
             ->columns([
-                TextColumn::make('holding.name')->label('Holding'),
-                TextColumn::make('percentage')->label('%'),
-        ])
-            ->filters([
-                //
+                // Holding
+                TextColumn::make('holding.name')
+                    ->label('Holding')
+                    ->searchable()
+                    ->sortable(),
+
+                // País
+                TextColumn::make('holding.country.name')
+                    ->label('Country')
+                    ->sortable(),
+
+                // Cliente
+                TextColumn::make('holding.client.name')
+                    ->label('Client')
+                    ->sortable(),
+
+                // % formateado
+                TextColumn::make('percentage')
+                    ->label('%')
+                    ->alignEnd()                       // alinea a la derecha
+                    ->formatStateUsing(fn ($state) => number_format($state * 100, 2) . '%')
+                    ->sortable(),
             ])
+
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

@@ -43,14 +43,17 @@ class DocumentsRelationManager extends RelationManager
                 ->label('')                         // sin encabezado
                 ->icon('heroicon-o-document')       // ícono PDF
                 ->color('danger')
-                ->url(fn ($record) =>               // genera la URL correcta
-                    Str::startsWith(
+                ->url(function ($record) {
+                    /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 */   // ← anotación
+                    $s3 = Storage::disk('s3');                                // ← ahora el IDE sabe su tipo
+
+                    return Str::startsWith(
                         $record->document_path,
                         ['http://', 'https://']
                     )
-                        ? $record->document_path                    // ya es URL completa
-                        : Storage::disk('s3')->url($record->document_path) // arma URL desde el disk
-                )
+                        ? $record->document_path            // ya es URL completa
+                        : $s3->url($record->document_path); // genera URL firmada
+                })
                 ->openUrlInNewTab()
                 ->tooltip('View PDF'),
             ])

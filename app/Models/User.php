@@ -11,6 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Panel; 
+use Laravel\Sanctum\HasApiTokens;
+
+
+
+
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -28,6 +33,11 @@ class User extends Authenticatable implements FilamentUser
         'password',
     ];
 
+    
+    
+    
+    
+    
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -55,4 +65,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return true;
     }
+
+
+
 }

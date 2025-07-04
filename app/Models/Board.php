@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Director;      // 👈  IMPORTANTE
 
 class Board extends Model
 {
@@ -30,5 +31,13 @@ class Board extends Model
             ->using(ReinsurerBoard::class)
             ->withPivot(['id', 'appt_date'])
             ->withTimestamps();
+    }
+
+   public function directors(): BelongsToMany   // 👈  RELACIÓN
+    {
+        return $this->belongsToMany(
+            Director::class,
+            'board_directors'
+        )->withTimestamps();
     }
 }
