@@ -6,21 +6,18 @@ use App\Filament\Resources\ClientsResource\Pages;
 use App\Filament\Resources\ClientsResource\RelationManagers;
 use App\Models\Client;
 use App\Models\Country;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Resources\RelationManagers\Concerns\BelongsToManyRelationManager;
+use Illuminate\Database\Eloquent\Model;
+
 
 
 class ClientsResource extends Resource
@@ -40,26 +37,28 @@ class ClientsResource extends Resource
                     
 
                     TextInput::make('name')
-                        ->label('Name')
+                        ->label(__('Name'))
                         ->required()
-                        ->unique()
+                        ->unique(ignorable: fn (?Model $record) => $record)   // 👈 ignora el registro actual
                         ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->afterStateUpdated(fn ($state, callable $set) => 
+                            $set('name', ucwords(strtolower($state))))
                         ->helperText('First letter of each word will be capitalised.'),
                         
                     
                     TextInput::make('short_name')
-                        ->label('Short Name')
+                        ->label(__('Short Name'))
                         ->required()
-                        ->unique()
+                        ->unique(ignorable: fn (?Model $record) => $record)   // 👈 ignora el registro actual
                         ->live(onBlur: false)
                         ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', ucwords(strtolower($state))))
+                        ->afterStateUpdated(fn ($state, callable $set) =>
+                             $set('short_name', ucwords(strtolower($state))))
                         ->helperText('First letter of each word will be capitalised.'),
                        
                     
                     Textarea::make('description')
-                        ->label('Description')
+                        ->label(__('Description'))
                         ->required()
                         ->columnSpan('full')
                         ->autosize()
@@ -68,14 +67,14 @@ class ClientsResource extends Resource
                         
 
                     TextInput::make('webpage')
-                        ->label('Web Page')
+                        ->label(__('Web Page'))
                         ->required()
                         ->maxLength(255)
                         ->helperText('First letter of each word will be capitalised.'),
                         
 
                     Select::make('country_id')
-                        ->label('Country')
+                        ->label(__('Country'))
                         ->options(function () {
                             return Country::orderBy('name')
                                 ->get()
@@ -89,13 +88,30 @@ class ClientsResource extends Resource
                         ->placeholder('Select a country')
                         ->helperText('Choose the reinsurer\'s country.'),
                         
+                    Select::make('industries')             // ① nombre del campo (puede ser cualquiera)
+                        ->label('Industries')              // ② texto mostrado
+                        ->relationship('industries', 'name') // ③ usa la rel. + columna a mostrar
+                        ->multiple()                       // ④ habilita selección múltiple
+                        ->preload()                        // ⑤ carga todas las opciones de golpe
+                        ->searchable()                     // ⑥ añade buscador
+                        ->columnSpan('full')               // ⑦ opcional: que ocupe todo el ancho
+                        ->visible(fn (string $context): bool => $context === 'create'),
+
+
+
+
+
+
+
+
+
 
                 ]),
 
                 Section::make('Images')->schema([
 
                     FileUpload::make('logo_path')
-                        ->label('Logo')
+                        ->label(__('Logo'))
                         ->disk('s3')
                         ->directory('reinsurers/logos')
                         ->image()
