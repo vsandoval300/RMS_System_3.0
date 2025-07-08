@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Navigation\NavigationGroup;   // ✅ Asegúrate de tener esta línea
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -37,14 +38,19 @@ class AdminPanelProvider extends PanelProvider
         return $panel
 
             ->navigationGroups([
-                'Dashboard',
-                'Resources',  // aquí irán Countries, BankAccounts, etc.
-                'Banks',
-                'Clients',
-                'Reinsurers',
-                'Underwritten',
+                NavigationGroup::make('Resources')->collapsed(),
+                NavigationGroup::make('Banks')->collapsed(),
+                NavigationGroup::make('Clients')->collapsed(),
+                NavigationGroup::make('Reinsurers')->collapsed(),
+                NavigationGroup::make('Underwritten')->collapsed(),
+                NavigationGroup::make('Filament Shield')
+                    ->collapsed(),
             ])
             ->default()
+            ->brandName('RMS-System') // ← aquí se define el título
+            ->brandLogo(asset('images/logo5.png'))
+            ->brandLogoHeight('55px')   // ⬅︎ más alto que el default (~20 px)
+            ->favicon(asset('images/result_favicon2.png'))  // ← AQUÍ
             ->id('admin')
             ->path('admin')
             ->login()

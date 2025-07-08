@@ -5,8 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OperativeStatusesResource\Pages;
 use App\Filament\Resources\OperativeStatusesResource\RelationManagers;
 use App\Models\OperativeStatus;
-use App\Models\OperativeStatuses;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -26,6 +24,13 @@ class OperativeStatusesResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 6;   // aparecerá primero
+
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return OperativeStatus::count();
+    }
 
     public static function canCreate(): bool
     {

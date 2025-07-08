@@ -25,6 +25,12 @@ class ProducersResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        return Producer::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form

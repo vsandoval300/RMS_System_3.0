@@ -26,6 +26,13 @@ class CoveragesResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return Coverage::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form

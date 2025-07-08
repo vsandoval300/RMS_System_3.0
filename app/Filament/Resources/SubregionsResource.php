@@ -26,6 +26,12 @@ class SubregionsResource extends Resource
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 3;   // aparecerá primero
 
+     /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        return Subregion::count();
+    }
+
     public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”

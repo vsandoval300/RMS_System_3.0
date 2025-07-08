@@ -29,6 +29,13 @@ class BankAccountsResource extends Resource
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;
     protected static ?string $navigationGroup = 'Banks';
     protected static ?int    $navigationSort  = 2;   // aparecerá primero
+
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return BankAccount::count();
+    }
    
 
     public static function form(Form $form): Form

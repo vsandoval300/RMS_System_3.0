@@ -26,6 +26,15 @@ class ClientsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Clients';
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return Client::count();
+    }
+
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -39,10 +48,18 @@ class ClientsResource extends Resource
                     TextInput::make('name')
                         ->label(__('Name'))
                         ->required()
-                        ->unique(ignorable: fn (?Model $record) => $record)   // 👈 ignora el registro actual
+                        ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => 
-                            $set('name', ucwords(strtolower($state))))
+                        // ───── Regla: alfanumérico + al menos una letra ─────
+                        ->rules(['regex:/^(?=.*[A-Za-z])[A-Za-z0-9]+$/'])
+                        ->validationMessages([
+                            'regex' => 'The name must contain letters and may include numbers, '
+                                    . 'but it cannot consist of numbers only.',
+                        ])
+                        // (opcional) formatea la capitalización
+                        ->afterStateUpdated(fn ($state, callable $set) =>
+                            $set('name', ucwords(strtolower($state)))
+                        )
                         ->helperText('First letter of each word will be capitalised.'),
                         
                     
@@ -97,15 +114,6 @@ class ClientsResource extends Resource
                         ->columnSpan('full')               // ⑦ opcional: que ocupe todo el ancho
                         ->visible(fn (string $context): bool => $context === 'create'),
 
-
-
-
-
-
-
-
-
-
                 ]),
 
                 Section::make('Images')->schema([
@@ -124,7 +132,6 @@ class ClientsResource extends Resource
                     
 
                 ]),    
-
 
             ]);
     }

@@ -27,6 +27,13 @@ class LineOfBusinessResource extends Resource
     protected static ?string $navigationLabel = 'Lines of Businesses';
     protected static ?string $navigationGroup = 'Underwritten';
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return LineOfBusiness::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form

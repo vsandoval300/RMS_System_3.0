@@ -27,6 +27,11 @@ class BusinessDocTypesResource extends Resource
      protected static ?string $navigationLabel = 'Business Document Types';
     protected static ?string $navigationGroup = 'Underwritten';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return BusinessDocType::count(); // o self::$model::count()
+    }
+
     public static function form(Form $form): Form
     {
         return $form

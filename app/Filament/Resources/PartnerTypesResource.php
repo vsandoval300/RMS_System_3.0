@@ -27,6 +27,12 @@ class PartnerTypesResource extends Resource
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 7;   // aparecerá primero
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        return PartnerType::count();
+    }
+
     public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”

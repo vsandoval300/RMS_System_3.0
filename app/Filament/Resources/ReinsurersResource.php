@@ -40,6 +40,13 @@ class ReinsurersResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reinsurers';
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return Reinsurer::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -332,59 +339,6 @@ class ReinsurersResource extends Resource
                     ->sortable()
                     ->searchable(),
 
-
-
-
-
-
-
-                /*
-                
-                TextColumn::make('short_name')
-                ->label('Name')
-                ->html()
-                ->formatStateUsing(function ($state, $record) {
-                    $iconPath   = $record->icon;       // puede ser URL o ruta relativa
-                    $shortName  = $record->short_name; // texto a mostrar
-
-                    // Si no hay icono, simplemente devuelve el nombre
-                    if (blank($iconPath)) {
-                        return "<span>{$shortName}</span>";
-                    }
-
-                    // Determina la URL final del icono
-                    $iconUrl = Str::startsWith($iconPath, ['http://', 'https://'])
-                        ? $iconPath                                   // ya es URL completa
-                        : Storage::disk('s3')->url($iconPath);        // convierte ruta relativa
-
-                    return "<div style='display:flex;align-items:center;gap:8px;'>
-                                <img src='{$iconUrl}'
-                                    alt='icon'
-                                    style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
-                                <span>{$shortName}</span>
-                            </div>";
-                }),
-                /*
-                TextColumn::make('short_name')
-                ->label('Name')
-                ->html()
-                ->formatStateUsing(function ($record) {
-                    $icon = $record->icon ?? '';
-                    $shortName = $record->short_name ?? '';
-
-                    // Si no hay icono, muestra solo el nombre corto
-                    if (!$icon) {
-                        return "<span>{$shortName}</span>";
-                    }
-
-                    return "<div style='display: flex; align-items: center; gap: 8px;'>
-                                <img src='{$icon}' alt='icon' style='width: 24px; height: 24px; border-radius: 50%; object-fit: cover;' />
-                                <span>{$shortName}</span>
-                            </div>";
-                })
-                ->sortable()
-                ->searchable(),
-                */
                 
                 TextColumn::make('acronym')
                     ->searchable()
@@ -496,7 +450,15 @@ class ReinsurersResource extends Resource
 
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\ViewAction::make()
+                    ->label('View')
+                    ->url(fn (Reinsurer $record) =>
+                        self::getUrl('view', ['record' => $record])
+                    )
+                    ->icon('heroicon-m-eye'),  // opcional
+
+
+
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
@@ -527,9 +489,10 @@ class ReinsurersResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListReinsurers::route('/'),
-            'create' => Pages\CreateReinsurers::route('/create'),
-            'edit' => Pages\EditReinsurers::route('/{record}/edit'),
+             'index'  => Pages\ListReinsurers::route('/'),
+             'create' => Pages\CreateReinsurers::route('/create'),
+             'view'   => Pages\ViewReinsurer::route('/{record}'), // 👈  NUEVO
+             'edit'   => Pages\EditReinsurers::route('/{record}/edit'),
         ];
     }
 }

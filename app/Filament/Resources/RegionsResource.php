@@ -26,6 +26,12 @@ class RegionsResource extends Resource
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 2;   // aparecerá primero
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        return Region::count();
+    }
+
     public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”

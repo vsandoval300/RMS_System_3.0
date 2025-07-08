@@ -29,6 +29,13 @@ class BanksResource extends Resource
     protected static ?string $navigationGroup = 'Banks';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return Bank::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
