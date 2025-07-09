@@ -26,6 +26,7 @@ class PartnersResource extends Resource
     protected static ?string $model = Partner::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
+    protected static ?int    $navigationSort  = 5;   // aparecerá primero
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string

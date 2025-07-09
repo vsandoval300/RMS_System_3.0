@@ -57,6 +57,7 @@ class DocumentsRelationManager extends RelationManager
                 ->openUrlInNewTab()
                 ->tooltip('View PDF'),
             ])
+            ->defaultSort('stamp_date', 'asc')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->modalHeading('Add document')

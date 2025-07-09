@@ -20,14 +20,25 @@ class Partner extends Model
         'country_id',
     ];
 
-
+    /* ---------------------------------------------------
+     |  ➜  Relaciones belongsTo
+     ---------------------------------------------------*/
     public function partnerType(): BelongsTo
     {
-    return $this->belongsTo(PartnerType::class, 'partner_types_id');
+        return $this->belongsTo(PartnerType::class, 'partner_types_id');
     }
     
     public function country(): BelongsTo
     {
-    return $this->belongsTo(Country::class, 'country_id');
+        return $this->belongsTo(Country::class, 'country_id');
     }
+
+    /* ---------------------------------------------------
+     |  ➜  Relaciones hasMany
+     ---------------------------------------------------*/
+    public function businesses()
+    {
+        return $this->hasMany(Business::class, 'producer_id');
+    }
+
 }

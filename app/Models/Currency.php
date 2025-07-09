@@ -17,8 +17,17 @@ class Currency extends Model
         'acronym',
     ];
 
+    /* ---------------------------------------------------
+     |  ➜  Relaciones hasMany
+     ---------------------------------------------------*/
     public function bankaccounts(): HasMany
     {
         return $this->hasMany(bankAccount::class);
     }
+
+    public function businesses()
+    {
+        return $this->hasMany(Business::class);
+    }
+
 }

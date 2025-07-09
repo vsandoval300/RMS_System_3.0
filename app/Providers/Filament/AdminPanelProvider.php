@@ -51,6 +51,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo5.png'))
             ->brandLogoHeight('55px')   // ⬅︎ más alto que el default (~20 px)
             ->favicon(asset('images/result_favicon2.png'))  // ← AQUÍ
+            ->renderHook(
+                    'panels::sidebar.footer',               // 👈 Hook válido en todas las v3
+                    fn () => view('filament.sidebar.powered-by'),
+                )
             ->id('admin')
             ->path('admin')
             ->login()

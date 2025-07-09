@@ -24,8 +24,9 @@ class BusinessDocTypesResource extends Resource
 {
     protected static ?string $model = BusinessDocType::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-     protected static ?string $navigationLabel = 'Business Document Types';
+    protected static ?string $navigationLabel = 'Business Document Types';
     protected static ?string $navigationGroup = 'Underwritten';
+    protected static ?int    $navigationSort  = 7;   // aparecerá primero
 
     public static function getNavigationBadge(): ?string
     {

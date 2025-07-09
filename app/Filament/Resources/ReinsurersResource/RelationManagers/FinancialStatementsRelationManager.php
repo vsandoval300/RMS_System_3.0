@@ -62,6 +62,7 @@ class FinancialStatementsRelationManager extends RelationManager
                     ->openUrlInNewTab()
                     ->tooltip('View PDF'),
             ])
+            ->defaultSort('start_date', 'asc')
             ->headerActions([
                 Tables\Actions\CreateAction::make()->label('New statement'),
             ])

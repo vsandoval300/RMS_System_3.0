@@ -17,8 +17,17 @@ class Region extends Model
         'region_code',
     ];
 
+    /* ---------------------------------------------------
+     |  ➜  Relaciones hasMany
+     ---------------------------------------------------*/
     public function subregions(): HasMany
     {
         return $this->hasMany(Subregion::class);
     }
+
+    public function businesses()
+    {
+        return $this->hasMany(Business::class);
+    }
+
 }

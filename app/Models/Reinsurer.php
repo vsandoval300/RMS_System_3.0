@@ -34,7 +34,9 @@ class Reinsurer extends Model
 
     protected $table = 'reinsurers';
 
-
+    /* ---------------------------------------------------
+     |  ➜  Relaciones belongsTo
+     ---------------------------------------------------*/
     public function reinsurer_type(): BelongsTo
     {
         return $this->belongsTo(ReinsurerType::class, 'reinsurer_type_id');
@@ -49,22 +51,23 @@ class Reinsurer extends Model
     {
     return $this->belongsTo(OperativeStatus::class, 'operative_status_id');
     }
-
     // 👉 Reasegurador Padre
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
+    }    
+    public function manager(): BelongsTo
+    {
+    return $this->belongsTo(Manager::class, 'manager_id');
     }
-
+    
+    /* ---------------------------------------------------
+     |  ➜  Relaciones hasMany
+     ---------------------------------------------------*/
     // 👉 Reaseguradores Hijos
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
-    }
-    
-    public function manager(): BelongsTo
-    {
-    return $this->belongsTo(Manager::class, 'manager_id');
     }
     // 👉 Reaseguradores y Documents
     public function documents(): HasMany   // ← el nombre DEBE ser documents()
@@ -91,6 +94,14 @@ class Reinsurer extends Model
     {
         return $this->hasMany(ReinsurerBoard::class);
     }
+    public function businesses()
+    {
+        return $this->hasMany(Business::class);
+    }
+
+    /* ---------------------------------------------------
+     |  ➜  Relaciones BelongsToMany
+     ---------------------------------------------------*/
     public function boards(): BelongsToMany
     {
         return $this->belongsToMany(

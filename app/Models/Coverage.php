@@ -4,23 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Coverage extends Model
 {
-    //
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'coverages';
 
     protected $fillable = [
         'name',
         'acronym',
         'description',
-        'lob_id',
+        'lob_id',           // FK → line_of_businesses.id
     ];
 
-    public function lineOfBusiness(): BelongsTo
+    /* ─── belongsTo ─── */
+    public function lineOfBusiness()
     {
-    return $this->belongsTo(LineOfBusiness::class, 'lob_id');
+        return $this->belongsTo(LineOfBusiness::class, 'lob_id');
+    }
+
+    /* ─── hasMany ─── */
+    public function insuredDocs()
+    {
+        return $this->hasMany(BusinessOpDocsInsured::class, 'coverage_id');
     }
 }
