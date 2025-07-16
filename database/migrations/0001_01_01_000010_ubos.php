@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('acronym',100);
             $table->string('gender',10);
             $table->date('birth_date');
-            $table->string('email',100);
+            $table->string('email',100)->unique();
             $table->string('phone',20);
             $table->string('address',200);
             $table->string('occupation',200);
@@ -28,7 +28,10 @@ return new class extends Migration
             $table->string('passport_num',200);
             $table->text('qualification');
             $table->string('image',200);
-            $table->foreignId('birthplace')->constrained('countries')->cascadeOnDelete();
+            // Relación a país de nacimiento
+            $table->foreignId('birthplace')
+                ->constrained('countries')
+                ->cascadeOnDelete();
             
             $table->timestamps();
             $table->softDeletes();

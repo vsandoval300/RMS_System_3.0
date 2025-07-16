@@ -6,29 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('board_meetings', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->date('meeting_date');
-	        $table->text('description'); 
-	        $table->text('document_path');
-            
+
+            $table->date('meeting_date')->index(); // 📅 se recomienda indexar si se listan por fecha
+            $table->text('description');
+            $table->text('document_path');
+
+            // 👉 Relación opcional si cada reunión está asociada a un board
+            // $table->foreignId('board_id')->constrained('boards')->cascadeOnDelete()->index();
+
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('board_meetings');
     }
 };
+

@@ -23,6 +23,13 @@ class DocumentsRelationManager extends RelationManager
     /** ← NUEVO: etiqueta del botón */
     protected static ?string $createButtonLabel = 'New corporate doc';
 
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with('documentCorpType'); // 👈 evita N+1
+    }
+
     /* ---------- Tabla ---------- */
     public function table(Tables\Table $table): Tables\Table
     {

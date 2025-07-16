@@ -16,7 +16,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             
             $table->string('name',150)->unique();
-            $table->string('acronym',10)->unique();
+            $table->string('acronym',10)->unique()->index();
             
             $table->timestamps();
             $table->softDeletes();

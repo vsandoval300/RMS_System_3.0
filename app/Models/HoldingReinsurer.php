@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class HoldingReinsurer extends Model
 {
+    
+    use SoftDeletes;
     /**
      * Si tu tabla se llama **holding_reinsurers** (plural, snake_case)
      * Laravel la deduce; si es singular (holding_reinsurer) o un nombre

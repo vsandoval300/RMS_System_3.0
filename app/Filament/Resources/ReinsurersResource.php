@@ -6,18 +6,14 @@ use App\Filament\Resources\ReinsurersResource\Pages;
 use App\Filament\Resources\ReinsurersResource\RelationManagers;
 use App\Models\Country;
 use App\Models\Reinsurer;
-use App\Models\Manager;
 use App\Models\OperativeStatus;
 use App\Models\ReinsurerType;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -45,6 +41,16 @@ class ReinsurersResource extends Resource
     {
         // Puedes usar self::$model::count() o Reinsurer::count()
         return Reinsurer::count();
+    }
+
+    public static function getTableQuery(): Builder
+    {
+        return Reinsurer::query()->with([
+            'parent',
+            'reinsurer_type',
+            'country',
+            'operative_status',
+        ]);
     }
 
     public static function form(Form $form): Form
@@ -439,12 +445,6 @@ class ReinsurersResource extends Resource
                 ->searchable()
                 ->indicator('Class'),
 
-
-
-
-
-
-
             ])
 
 
@@ -456,8 +456,6 @@ class ReinsurersResource extends Resource
                         self::getUrl('view', ['record' => $record])
                     )
                     ->icon('heroicon-m-eye'),  // opcional
-
-
 
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),

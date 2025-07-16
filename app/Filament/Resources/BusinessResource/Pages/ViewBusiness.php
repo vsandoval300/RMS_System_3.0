@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Filament\Resources\BusinessResource\Pages;
+
+use App\Filament\Resources\BusinessResource;
+use Filament\Resources\Pages\ViewRecord;
+use App\Models\Business;
+
+class ViewBusiness extends ViewRecord
+{
+    protected static string $resource = BusinessResource::class;
+
+    protected function resolveRecord(int|string $key): Business
+    {
+        return Business::with([
+            'reinsurer',
+            'producer',
+            'currency',
+            'region',
+            'operativeDocs',
+            'parent',
+            'renewedFrom',
+        ])->findOrFail($key);
+    }
+}

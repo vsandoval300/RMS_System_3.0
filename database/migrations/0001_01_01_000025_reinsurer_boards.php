@@ -16,9 +16,12 @@ return new class extends Migration
             $table->bigIncrements('id');
             
             $table->date('appt_date');
+
             $table->foreignId('reinsurer_id')->constrained('reinsurers')->cascadeOnDelete();
             $table->foreignId('board_id')->constrained('boards')->cascadeOnDelete();
-            
+
+            $table->unique(['reinsurer_id', 'board_id']); // 🟢 Mejora recomendada
+
             $table->timestamps();
             $table->softDeletes();
         });

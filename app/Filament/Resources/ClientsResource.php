@@ -6,6 +6,7 @@ use App\Filament\Resources\ClientsResource\Pages;
 use App\Filament\Resources\ClientsResource\RelationManagers;
 use App\Models\Client;
 use App\Models\Country;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -33,7 +34,10 @@ class ClientsResource extends Resource
         return Client::count();
     }
 
-
+    public static function getTableQuery(): Builder
+    {
+        return Client::query()->with('country');
+    }
 
     public static function form(Form $form): Form
     {

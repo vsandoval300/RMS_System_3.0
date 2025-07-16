@@ -6,26 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('reinsurer_types', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->string('type_acronym',5)->unique();
-            $table->text('description'); 
-            
+
+            $table->string('type_acronym', 5)->unique();  // ✔ clave única corta
+            $table->text('description');                  // ✔ descripción extendida
+
             $table->timestamps();
             $table->softDeletes();
+
+            // Opcional: índice fulltext si haces búsquedas de texto completo en descripción
+            // $table->fullText('description');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('reinsurer_types');

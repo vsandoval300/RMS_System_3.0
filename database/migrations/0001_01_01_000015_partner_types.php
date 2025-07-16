@@ -6,29 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('partner_types', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->string('name',100)->unique();
-            $table->text('description'); 
-            $table->string('acronym',10)->unique();
-            
+
+            $table->string('name', 100)->unique();    // 🔒 Unicidad explícita
+            $table->text('description');
+            $table->string('acronym', 10)->unique();  // 🔒 Asegura códigos únicos
+
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('partner_types');
     }
 };
+

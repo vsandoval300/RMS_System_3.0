@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Filament\Panel; 
-use Laravel\Sanctum\HasApiTokens;
+use Filament\Panel;
+
+
 
 
 
@@ -66,6 +67,6 @@ class User extends Authenticatable implements FilamentUser
         return true;
     }
 
-
+    
 
 }

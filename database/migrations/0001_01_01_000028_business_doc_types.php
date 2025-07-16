@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('business_doc_types', function (Blueprint $table) {
+       Schema::create('business_doc_types', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->string('name',200);
+            $table->string('name', 200)->unique(); // ← Protege contra duplicados
             $table->text('description');
 
             $table->timestamps();

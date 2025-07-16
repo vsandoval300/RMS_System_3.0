@@ -35,3 +35,5 @@ return new class extends Migration
         Schema::dropIfExists('cost_scheme_nodes');
     }
 };
+
+

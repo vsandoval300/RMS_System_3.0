@@ -13,12 +13,16 @@ return new class extends Migration
     {
         Schema::create('business_units', function (Blueprint $table) {
             $table->engine('InnoDB');
+
             $table->bigIncrements('id');
-            
-            $table->string('name',60)->unique();
-            $table->text('description'); 
-            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
-            
+
+            $table->string('name', 60)->unique();   // ✅ índice implícito por unique
+            $table->text('description');
+
+            $table->foreignId('client_id')
+                ->constrained('clients')
+                ->cascadeOnDelete();
+
             $table->timestamps();
             $table->softDeletes();
         });

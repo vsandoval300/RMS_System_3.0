@@ -4,17 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OperativeDoc extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /* --------------------------------------------------
      |  Tabla y asignación masiva
      --------------------------------------------------*/
     protected $table = 'operative_docs';
 
+    /** 🟢 Declaración correcta para IDs tipo string */
+    protected $primaryKey = 'id';
+    public $incrementing = false;     // 👈 ID no es autoincremental
+    protected $keyType = 'string';    // 👈 ID es string (varchar)
+
     protected $fillable = [
+        'id',
         'operative_doc_type_id',
         'index',
         'description',
@@ -83,5 +90,18 @@ class OperativeDoc extends Model
             'op_document_id'
         );
     }
+
+    public function operativeDocs()
+    {
+        return $this->hasMany(
+            OperativeDoc::class,
+            'business_code',   // FK en operative_docs
+            'business_code'    // PK en businesses
+        );
+    }
+
+
+
+
 }
 

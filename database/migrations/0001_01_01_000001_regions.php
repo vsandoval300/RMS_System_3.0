@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('regions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            
-            $table->string('name',30);
-            $table->integer('region_code');
+
+            $table->string('name', 30)->index();           // ✅ index si lo usas en buscador/filtro
+            $table->integer('region_code')->index();       // ✅ index si lo filtras o haces JOIN
 
             $table->timestamps();
             $table->softDeletes();

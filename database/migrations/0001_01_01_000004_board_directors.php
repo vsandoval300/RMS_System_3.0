@@ -14,10 +14,17 @@ return new class extends Migration
         Schema::create('board_directors', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->foreignId('board_id')->constrained('boards')->cascadeOnDelete();
-            $table->foreignId('director_id')->constrained('directors')->cascadeOnDelete();
-            
+
+            $table->foreignId('board_id')
+                ->constrained('boards')
+                ->cascadeOnDelete();
+
+            $table->foreignId('director_id')
+                ->constrained('directors')
+                ->cascadeOnDelete();
+
+            $table->unique(['board_id', 'director_id']); // Evita duplicados
+
             $table->timestamps();
             $table->softDeletes();
         });

@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ReinsurerDoc extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'reinsurer_docs';
 
     protected $fillable = [

@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
+
             $table->string('name');
-            $table->foreignId('business_unit_id')->constrained('business_units')->cascadeOnDelete();
-            
+
+            $table->foreignId('business_unit_id')
+                ->constrained('business_units')
+                ->cascadeOnDelete();
+
             $table->timestamps();
             $table->softDeletes();
         });

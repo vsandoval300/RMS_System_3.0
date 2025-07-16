@@ -13,15 +13,20 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->engine('InnoDB');
+
             $table->bigIncrements('id');
-            
-            $table->string('name',150)->nullable();
-            $table->string('short_name',150);
+
+            $table->string('name', 150)->nullable();
+            $table->string('short_name', 150)->index(); // ✅ indexed para búsquedas
             $table->text('description');
-            $table->text('webpage');
-            $table->text('logo_path');
-            $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
+            $table->string('webpage')->nullable();      // ✅ mejor como string si no es muy largo
+            $table->string('logo_path')->nullable();     // ✅ mejor como string si almacenas solo ruta
             
+            $table->foreignId('country_id')
+                  ->constrained('countries')
+                  ->cascadeOnDelete();
+                 
+
             $table->timestamps();
             $table->softDeletes();
         });

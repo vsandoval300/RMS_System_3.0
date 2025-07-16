@@ -18,6 +18,9 @@ return new class extends Migration
             $table->foreignId('reinsurer_id')->constrained('reinsurers')->cascadeOnDelete();
             $table->foreignId('bank_account_id')->constrained('bank_accounts')->cascadeOnDelete();
             
+            // ✅ Evita registros duplicados para la misma combinación
+            $table->unique(['reinsurer_id', 'bank_account_id']);
+
             $table->timestamps();
             $table->softDeletes();
         });

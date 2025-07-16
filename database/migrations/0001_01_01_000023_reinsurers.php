@@ -15,17 +15,19 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->integer('cns_reinsurer')->nullable(); // Asegúrate de que este tipo de dato es el adecuado
+            $table->integer('cns_reinsurer')->nullable();
             $table->string('name', 200);
             $table->string('short_name', 60);
-            $table->unsignedBigInteger('parent_id')->nullable(); // Cambiado a unsignedBigInteger
-            $table->foreign('parent_id')->references('id')->on('reinsurers'); // Agregado onDelete
+
+            $table->unsignedBigInteger('parent_id')->nullable()->index(); // ✅ index agregado
+            $table->foreign('parent_id')->references('id')->on('reinsurers');
 
             $table->string('acronym', 3);
             $table->string('class', 10);
             $table->text('logo')->nullable();
             $table->text('icon')->nullable();
             $table->integer('established');
+
             $table->foreignId('manager_id')->constrained('managers');
             $table->foreignId('country_id')->constrained('countries');
             $table->foreignId('reinsurer_type_id')->constrained('reinsurer_types');
@@ -35,6 +37,7 @@ return new class extends Migration
             $table->softDeletes();
         });
     }
+
 
 
     /**

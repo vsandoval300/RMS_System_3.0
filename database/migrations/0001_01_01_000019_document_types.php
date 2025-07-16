@@ -6,26 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('document_types', function (Blueprint $table) {
+            $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->string('name',100)->unique();
-            $table->string('acronym',3)->unique();
-            $table->text('description');
+
+            $table->string('name', 100)->unique();    // ✔ Nombre legible
+            $table->string('acronym', 3)->unique();   // ✔ Clave de 3 letras
+            $table->text('description');              // ✔ Descripción extendida
 
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('document_types');

@@ -14,15 +14,25 @@ return new class extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->string('name',200);
-            $table->string('acronym',30);
+
+            $table->string('name', 200);
+            $table->string('acronym', 30);
             $table->text('activity');
-            $table->foreignId('industry_id')->constrained('industries')->cascadeOnDelete();
-            $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
-            
+
+            $table->foreignId('industry_id')
+                ->constrained('industries')
+                ->cascadeOnDelete();
+                
+
+            $table->foreignId('country_id')
+                ->constrained('countries')
+                ->cascadeOnDelete();
+                
             $table->timestamps();
             $table->softDeletes();
+
+            // (Opcional) Índice combinado si haces muchas búsquedas por país + industria
+            // $table->index(['country_id', 'industry_id']);
         });
     }
 
@@ -34,4 +44,5 @@ return new class extends Migration
         Schema::dropIfExists('companies');
     }
 };
+
 

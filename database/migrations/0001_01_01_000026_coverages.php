@@ -15,8 +15,8 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->string('name',200);
-            $table->string('acronym',30);
+            $table->string('name', 200)->unique(); // Sugerido
+            $table->string('acronym', 30)->unique(); // Sugerido
             $table->text('description');
             $table->foreignId('lob_id')->constrained('line_of_businesses')->cascadeOnDelete();
             

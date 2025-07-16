@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('banks', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->string('name',100)->unique();
+
+            $table->string('name', 100)->unique();
             $table->text('address');
-            $table->string('aba_number',30);
-            $table->string('swift_code',30);
+
+            $table->string('aba_number', 30)->index();     // ✅ index si lo filtras o buscas
+            $table->string('swift_code', 30)->index();     // ✅ index si lo filtras o buscas
 
             $table->timestamps();
             $table->softDeletes();

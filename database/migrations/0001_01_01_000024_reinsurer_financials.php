@@ -20,6 +20,9 @@ return new class extends Migration
             $table->text('document_path');
             $table->foreignId('reinsurer_id')->constrained('reinsurers')->cascadeOnDelete();
             
+            // 🔒 Evita que haya duplicados del mismo período para el mismo reasegurador
+            $table->unique(['reinsurer_id', 'start_date', 'end_date']);
+            
             $table->timestamps();
             $table->softDeletes();
         });

@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->bigIncrements('id');
-            /**$table->id()->primary(); */
 
-            $table->string('name',70);
-            $table->string('acronym',3)->unique();
+            $table->string('name', 70)->index();        // ✅ agrega índice si se busca o ordena
+            $table->string('acronym', 3)->unique();     // ✅ ya está indexado por ser unique
 
             $table->timestamps();
             $table->softDeletes();

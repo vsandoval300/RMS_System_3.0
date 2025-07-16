@@ -15,7 +15,7 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->string('concept',50);
+            $table->string('concept',50)->unique();
             $table->text('description');
             
             $table->timestamps();

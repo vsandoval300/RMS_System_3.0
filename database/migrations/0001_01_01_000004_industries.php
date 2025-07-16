@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('industries', function (Blueprint $table) {
             $table->engine('InnoDB');
+
             $table->bigIncrements('id');
-            
-            $table->string('name',100)->unique();
-            $table->text('description'); 
-            
+
+            $table->string('name', 100)->unique(); // ✅ ya tiene índice implícito
+            $table->text('description');           // ✅ bien como texto largo
+
             $table->timestamps();
             $table->softDeletes();
         });

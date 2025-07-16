@@ -24,7 +24,9 @@ class ReinsurerHoldingsRelationManager extends RelationManager
         return $form->schema([
             Select::make('holding_id')
                 ->label('Holding')
-                ->options(Holding::pluck('name', 'id'))
+                ->relationship('holding', 'name')
+                ->searchable()
+                ->preload()
                 ->required(),
             TextInput::make('percentage')
                 ->numeric()->minValue(0)->maxValue(100)->required(),

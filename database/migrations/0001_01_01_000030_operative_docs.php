@@ -24,8 +24,12 @@ return new class extends Migration
             $table->string('document_path',200)->nullable();
             $table->boolean('client_payment_tracking')->default(false); // ← Campo booleano agregado
             $table->float('roe');
-            $table->string('business_code', 19);
-            $table->foreign('business_code')->references('business_code')->on('businesses');
+            $table->string('business_code', 19)->index();
+            
+            $table->foreign('business_code')
+                  ->references('business_code')
+                  ->on('businesses')
+                  ->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

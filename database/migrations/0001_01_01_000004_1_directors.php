@@ -14,17 +14,21 @@ return new class extends Migration
         Schema::create('directors', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->bigIncrements('id');
-            
-            $table->string('name',100);
-            $table->string('surname',100);
-            $table->string('gender',10);
-            $table->string('email',100);
-            $table->string('phone',20);
-            $table->string('address',200);
-            $table->string('occupation',200);
-            $table->string('image',200);
-            $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
-            
+
+            $table->string('name', 100);
+            $table->string('surname', 100)->index();   // ✅ Index si filtras por apellido
+            $table->string('gender', 10)->index();     // ✅ Index si haces filtros
+            $table->string('email', 100);
+            $table->string('phone', 20);
+            $table->string('address', 200);
+            $table->string('occupation', 200)->index(); // ✅ Index si haces filtros por ocupación
+            $table->string('image', 200);
+
+            $table->foreignId('country_id')
+                ->constrained('countries')
+                ->cascadeOnDelete();
+                
+
             $table->timestamps();
             $table->softDeletes();
         });

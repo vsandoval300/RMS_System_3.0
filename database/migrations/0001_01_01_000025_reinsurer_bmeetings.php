@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('board_meeting_id')->constrained('board_meetings')->cascadeOnDelete();
             $table->foreignId('reinsurer_id')->constrained('reinsurers')->cascadeOnDelete();
 
+            $table->unique(['board_meeting_id', 'reinsurer_id']); // 🟢 Mejora
+
             $table->timestamps();
             $table->softDeletes();
         });

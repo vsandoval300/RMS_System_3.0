@@ -14,6 +14,16 @@ class ReinsurerBankAccountsRelationManager extends RelationManager
     protected static string $relationship = 'reinsurerBankAccounts';
     protected static ?string $title       = 'Bank Accounts';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with([
+                'bankAccount:id,id,beneficiary_acct_name,beneficiary_swift,beneficiary_acct_no,status_account,currency_id,bank_id',
+                'bankAccount.currency:id,id,acronym',
+                'bankAccount.bank:id,id,name',
+            ]);
+    }
+
     /* ─────────────────────────  FORM  ───────────────────────── */
     public function form(Form $form): Form
     {

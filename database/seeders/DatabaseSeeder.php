@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             
             //Operative Tables 
             /*=============================================*/
+            UserSeeder::class,
             //RolesSeeder::class,
             //PermissionsSeeder::class,
             //RoleHasPermissions::class,
@@ -45,7 +46,6 @@ class DatabaseSeeder extends Seeder
             DepartmentsSeeder::class,
             //Cátalogo de Usuarios
             /*=============================================*/
-            //UserSeeder::class,
             IndustriesSeeder::class,
             ClientIndustriesSeeder::class,
             PartnerTypesSeeder::class,

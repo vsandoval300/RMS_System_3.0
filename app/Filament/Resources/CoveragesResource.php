@@ -8,6 +8,7 @@ use App\Models\Coverage;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,9 +21,11 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 
+
 class CoveragesResource extends Resource
 {
     protected static ?string $model = Coverage::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 3;   // aparecerá primero
@@ -87,6 +90,7 @@ class CoveragesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            
             ->columns([
                 //
                 TextColumn::make('id')
@@ -112,13 +116,18 @@ class CoveragesResource extends Resource
                     ->searchable()
                     ->extraAttributes([
                         'style' => 'width: 100px; white-space: normal;', // ancho fijo de 300px
-                    ]),
-
-
-
-
-
+                    ])
+                
             ])
+            ->defaultSort('lineOfBusiness.name','asc')
+            //->defaultGroup('lineOfBusiness.name')
+            ->groups([
+                Group::make('lineOfBusiness.name')
+                    ->label('Line of Business')
+                    ->collapsible(), // 👈 clave para colapsar
+            ])
+            ->defaultGroup('lineOfBusiness.name') // 👈 activa el grupo automáticamente
+            
             ->filters([
                 //
             ])

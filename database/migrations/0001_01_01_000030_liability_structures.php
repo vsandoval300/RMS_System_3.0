@@ -24,8 +24,12 @@ return new class extends Migration
             $table->text('sublimit_desc');
             $table->float('deductible');
             $table->text('deductible_desc');
-            $table->string('business_code', 19);
-            $table->foreign('business_code')->references('business_code')->on('businesses');
+            $table->string('business_code', 19)->index();
+            
+            $table->foreign('business_code')
+                  ->references('business_code')
+                  ->on('businesses')
+                  ->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

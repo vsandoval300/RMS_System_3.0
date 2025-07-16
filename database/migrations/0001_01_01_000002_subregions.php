@@ -14,21 +14,21 @@ return new class extends Migration
         Schema::create('subregions', function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            $table->string('name',60);
-            $table->integer('subregion_code');
-            $table->foreignId('region_id')->constrained('regions')->cascadeOnDelete();
+            $table->string('name', 60)->index();             // ✅ index si lo buscas o filtras
+            $table->integer('subregion_code')->index();      // ✅ index si lo filtras
+            $table->foreignId('region_id')
+                ->constrained('regions')
+                ->cascadeOnDelete()
+                ->index();                                 // ✅ asegura índice en la FK
 
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('subsregions');
+        Schema::dropIfExists('subregions'); // ✅ corregido
     }
 };
 

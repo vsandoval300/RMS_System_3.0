@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\ApprovalStatus;           // 👈 tu Enum PHP 8.1+
 use App\Enums\BusinessLifecycleStatus;  // 👈 tu Enum PHP 8.1+
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Business extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /* ---------------------------------------------------
      |  Tabla y PK
@@ -62,20 +63,12 @@ class Business extends Model
     ---------------------------------------------------*/
     public function parent()
     {
-        return $this->belongsTo(
-            self::class,
-            'parent_id',        // FK en esta tabla
-            'business_code'     // PK en la tabla destino
-        );
+        return $this->belongsTo(self::class,'parent_id');  
     }
 
     public function renewedFrom()
     {
-        return $this->belongsTo(
-            self::class,
-            'renewed_from_id',
-            'business_code'
-        );
+        return $this->belongsTo(self::class,'renewed_from_id');
     }
 
     /* ---------------------------------------------------
@@ -83,38 +76,22 @@ class Business extends Model
      ---------------------------------------------------*/
     public function children()   // inverso de parent()
     {
-        return $this->hasMany(
-            self::class,
-            'parent_id',
-            'business_code'
-        );
+        return $this->hasMany(self::class,'parent_id','business_code');
     }
 
     public function renewals()   // inverso de renewedFrom()
     {
-        return $this->hasMany(
-            self::class,
-            'renewed_from_id',
-            'business_code'
-        );
+        return $this->hasMany(self::class,'renewed_from_id','business_code');
     }
 
     public function liabilityStructures()
     {
-        return $this->hasMany(
-            LiabilityStructure::class,
-            'business_code',    // FK en liability_structures
-            'business_code'     // PK local
-        );
+        return $this->hasMany(LiabilityStructure::class,'business_code', 'business_code');
     }
 
     public function operativeDocs()
     {
-        return $this->hasMany(
-            OperativeDoc::class,
-            'business_code',
-            'business_code'
-        );
+        return $this->hasMany(OperativeDoc::class,'business_code','business_code');
     }
 }
 
