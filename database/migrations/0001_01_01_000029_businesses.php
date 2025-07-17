@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('index'); 
             $table->text('description');
             $table->enum('reinsurance_type', ['Facultative', 'Treaty']);
-            $table->enum('risk_covered', ['Live', 'Non-Life']);
+            $table->enum('risk_covered', ['Life', 'Non-Life']);
             $table->enum('business_type', ['Own', 'Third party']);
             $table->enum('premium_type', ['Fixed', 'Estimated']);
             $table->enum('purpose', ['Strategic', 'Normal']);

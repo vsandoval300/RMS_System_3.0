@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BusinessResource\Pages;
 use App\Filament\Resources\BusinessResource\RelationManagers;
 use App\Models\Business;
+use App\Models\Reinsurer;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
@@ -17,6 +19,9 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Str;
+use App\Filament\Resources\BusinessResource\Widgets;
+
 
 
 class BusinessResource extends Resource
@@ -61,12 +66,54 @@ class BusinessResource extends Resource
                     // 🟢 Panel izquierdo
                     Section::make()
                         ->schema([
+                        // ╔═════════════════════════════════════════════════════════════════════════╗
+                        // ║ Reinsurer field selector linked to Business Code                        ║
+                        // ╚═════════════════════════════════════════════════════════════════════════╝
                             Select::make('reinsurer_id')
                                 ->label('Reinsurer')
                                 ->relationship('reinsurer', 'name')
                                 ->searchable()
-                                ->preload()
-                                ->required(),
+                                ->preload() // 👈 fuerza la carga inmediata de los options
+                                 ->native(false)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
+                                    if ($operation !== 'create' || !$state) {
+                                        return;
+                                    }
+
+                                    $reinsurer = Reinsurer::find($state);
+
+                                    if (! $reinsurer) {
+                                        return;
+                                    }
+
+                                    $year = Carbon::now()->format('Y');
+                                    $acronym = Str::upper($reinsurer->acronym);
+                                    $number = str_pad($reinsurer->cns_reinsurer ?? $reinsurer->id, 3, '0', STR_PAD_LEFT);
+
+                                    $prefix = "{$year}-{$acronym}{$number}";
+
+                                    // Buscar el último código existente que empiece con ese prefijo
+                                    $lastBusiness = Business::query()
+                                        ->where('business_code', 'like', "$prefix-%")
+                                        ->orderByDesc('business_code')
+                                        ->first();
+
+                                    // Extraer el consecutivo y sumarle 1
+                                    $lastNumber = 0;
+
+                                    if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->business_code, $matches)) {
+                                        $lastNumber = (int)$matches[1];
+                                    }
+
+                                    $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+                                    $businessCode = "{$prefix}-{$consecutive}";
+
+                                    $set('business_code', $businessCode);
+                                }),
+                                
+                               
 
                             Textarea::make('description')
                                 ->label('Description')
@@ -94,12 +141,17 @@ class BusinessResource extends Resource
                                         ->required()
                                         ->numeric()
                                         ->default(fn () => \App\Models\Business::max('index') + 1 ?? 1)
-                                        ->disabledOn(['create', 'edit']),
-
+                                        ->disabledOn(['create', 'edit'])
+                                        ->dehydrated(), // 👈 esto asegura que se envíe el valor
+                                 // ╔═════════════════════════════════════════════════════════════════════════╗
+                                 // ║ Business Code que se va a crear dependiendo el reasegurador que exista  ║
+                                 // ╚═════════════════════════════════════════════════════════════════════════╝
                                     TextInput::make('business_code')
                                         ->label('Business Code')
+                                        ->disabled()
+                                        ->dehydrated()
                                         ->required()
-                                        ->maxLength(50),
+                                        ->unique(),
                                 ]),
 
                             // Segunda burbuja: Lifecycle status (una sola columna)
@@ -109,7 +161,9 @@ class BusinessResource extends Resource
                                         ->label('Business Lifecycle Status')
                                         ->required()
                                         ->maxLength(510)
-                                        ->default('On Hold'),
+                                        ->default('On Hold')
+                                        ->disabledOn(['create', 'edit'])
+                                        ->dehydrated(), // 👈 esto asegura que se envíe el valor
                                 ]),
                         ])
                         ->columnSpan(1),
@@ -127,8 +181,8 @@ class BusinessResource extends Resource
                             ->label('Reinsurer Type')
                             ->placeholder('Select a reinsurer type') // 👈 Aquí cambias el texto
                             ->options([
-                                'Type 1' => 'Facultative',
-                                'Type 2' => 'Treaty',
+                                'Facultative' => 'Facultative',
+                                'Treaty' => 'Treaty',
                             ])
                             ->required()
                             ->searchable(),        
@@ -137,8 +191,8 @@ class BusinessResource extends Resource
                             ->label('Risk Covered')
                             ->placeholder('Select the risk covered.') // 👈 Aquí cambias el texto
                             ->options([
-                                'Risk 1' => 'Life',
-                                'Risk 2' => 'Non-Life',
+                                'Life' => 'Life',
+                                'Non-Life' => 'Non-Life',
                             ])
                             ->required()
                             ->searchable(),
@@ -147,8 +201,8 @@ class BusinessResource extends Resource
                             ->label('Business Type')
                             ->placeholder('Select a business type.') // 👈 Aquí cambias el texto
                             ->options([
-                                'Btype 1' => 'Own',
-                                'Btype 2' => 'Third Party',
+                                'Own' => 'Own',
+                                'Third Party' => 'Third party',
                             ])
                             ->required()
                             ->searchable(),
@@ -157,8 +211,8 @@ class BusinessResource extends Resource
                             ->label('Premium Type')
                             ->placeholder('Select a premium type.') // 👈 Aquí cambias el texto
                             ->options([
-                                'Premium 1' => 'Fixed',
-                                'Premium 2' => 'Estimated',
+                                'Fixed' => 'Fixed',
+                                'Estimated' => 'Estimated',
                             ])
                             ->required()
                             ->searchable(),
@@ -167,8 +221,8 @@ class BusinessResource extends Resource
                             ->label('Purpose')
                             ->placeholder('Select business purpose.') // 👈 Aquí cambias el texto
                             ->options([
-                                'Purpose 1' => 'Normal',
-                                'Purpose 2' => 'Strategic',
+                                'Normal' => 'Normal',
+                                'Strategic' => 'Strategic',
                             ])
                             ->required()
                             ->searchable(),
@@ -177,14 +231,11 @@ class BusinessResource extends Resource
                             ->label('Claims Type')
                             ->placeholder('Select claims type.') // 👈 Aquí cambias el texto
                             ->options([
-                                'Claims 1' => 'Claims Ocurrence',
-                                'Claims 2' => 'Claims Made',
+                                'Claims Ocurrence' => 'Claims occurrence',
+                                'Claims Made' => 'Claims made',
                             ])
                             ->required()
                             ->searchable(),
-
-
-
 
                             Select::make('producer_id')
                                 ->label('Producer')
@@ -192,16 +243,17 @@ class BusinessResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->required(),
+
                             Select::make('currency_id')
                                 ->label('Currency')
                                 ->relationship(
                                     name: 'currency',         // ← relación en tu modelo
-                                    titleAttribute: 'name'    // ← lo sobreescribiremos más abajo
-                                )
+                                    titleAttribute: 'name')
                                 ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->acronym} - {$record->name}")
                                 ->searchable()
                                 ->preload()
                                 ->required(),
+
                             Select::make('region_id')
                                 ->label('Region')
                                 ->relationship('Region', 'name') // usa la relación en tu modelo
@@ -209,7 +261,6 @@ class BusinessResource extends Resource
                                 ->preload()
                                 ->required(),
                     
-
                  ]),   // ← cierra schema() y luego la Sección
 
                   Section::make()
@@ -274,6 +325,20 @@ class BusinessResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('business_lifecycle_status')
+                    ->label('Lifecycle')
+                    ->badge()
+                    ->color(fn ($state) => match ($state->value) {
+                        'On Hold'   => 'gray',
+                        'Pending'   => 'warning',
+                        'In Force'  => 'success',
+                        'To Expire' => 'info',
+                        'Expired'   => 'danger',
+                        'Cancelled' => 'gray',
+                        default     => 'secondary',
+                    })
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('operative_docs_count')
                     ->counts('operativeDocs')
                     ->label('Documents')
@@ -331,4 +396,15 @@ class BusinessResource extends Resource
             'view' => Pages\ViewBusiness::route('/{record}/view'), // 👈 Asegúrate que esto esté
         ];
     }
+
+    public static function getWidgets(): array
+    {
+        return [
+            Widgets\BusinessStatsOverview::class,
+        ];
+    }
+
+
+
+
 }

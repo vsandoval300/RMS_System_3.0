@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class Reinsurer extends Model
 {
@@ -113,12 +111,4 @@ class Reinsurer extends Model
             ->withPivot(['id', 'appt_date'])
             ->withTimestamps();
     }
-
-
-
-    
-
-
-
-
 }

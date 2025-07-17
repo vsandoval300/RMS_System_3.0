@@ -107,7 +107,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->wrap()         // 👈 permite varias líneas
                     ->extraAttributes([
-                        'style' => 'width: 280px; white-space: normal; vertical-align: top;',
+                        'style' => 'width: 275px; white-space: normal; vertical-align: top;',
                     ]),
 
                 Tables\Columns\TextColumn::make('sublimit')
@@ -122,7 +122,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->wrap()
                     ->extraAttributes([
-                        'style' => 'width: 280px; white-space: normal; vertical-align: top;',
+                        'style' => 'width: 275px; white-space: normal; vertical-align: top;',
                     ]),
 
                 Tables\Columns\TextColumn::make('deductible')
