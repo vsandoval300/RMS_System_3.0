@@ -11,52 +11,137 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\VerticalAlignment;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\TextInput;
+use Filament\Support\RawJs;
 
 class LiabilityStructuresRelationManager extends RelationManager
 {
     protected static string $relationship = 'LiabilityStructures';
 
+    public static function getCreateFormHeading(): string
+    {
+        return 'New Liability Structure';
+    }
+
+    public static function getEditFormHeading(): string
+    {
+        return 'Edit Liability Structure';
+    }
+
     public function form(Form $form): Form
     {
-        return $form
+       return $form
+        ->schema([
+            Section::make('Liability Details')
+                ->schema([
+                    Grid::make(12)
+                    ->schema([
+                        /* Forms\Components\TextInput::make('index')
+                            ->label('Index')
+                            ->disabled()
+                            ->dehydrated(false) // 👈 evita que se guarde desde el form
+                            ->columnSpan(2), */
+
+                        Forms\Components\Select::make('coverage_id')
+                            ->label('Coverage')
+                            ->options(fn () =>
+                                \App\Models\Coverage::query()
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                            )
+                            ->searchable()
+                            ->required()
+                            ->columnSpan(7),
+                        
+                        Section::make()
+                        ->schema([
+                            Forms\Components\Radio::make('cls')
+                            ->label('CSL')
+                            ->options([
+                                true => 'Yes',
+                                false => 'No',
+                            ])
+                            ->helperText('Combined Single Limit')
+                            ->inline() // horizontal
+                            ->default(false) // "No" preseleccionado
+                            ->required()
+                        ])
+                        ->columnSpan(5)
+                        ->compact()
+                        ->extraAttributes(['class' => 'h-full flex items-center justify-center bg-gray-800 rounded-lg'])
+                    ]),
+                ])
+                ->columns(1)
+                ->compact()
+                ->collapsible(), // opcional: permite colapsar la sección
+
+            Section::make('Liability Scope')
+    ->schema([
+        Grid::make(12)
             ->schema([
-                Forms\Components\TextInput::make('index')
-                ->required()
-                ->maxLength(255),
-
-                Forms\Components\Select::make('coverage_id')
-                    ->label('Coverage')
-                    ->relationship('coverage', 'name')
-                    ->searchable()
-                    ->required(),
-
-                Forms\Components\Toggle::make('cls')
-                    ->label('C.L.S.'),
-
                 Forms\Components\TextInput::make('limit')
-                    ->numeric()
-                    ->label('Limit'),
+                    ->label('Limit')
+                    ->required()
+                    ->mask(
+                        RawJs::make(<<<'JS'
+                            $money($input, '.', ',', 0)
+                        JS)
+                    )
+                    ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
+                    ->columnSpan(3), // mitad de lo que era antes (6 → 3)
+                    
 
                 Forms\Components\Textarea::make('limit_desc')
-                    ->label('Limit Description')
-                    ->rows(2),
+                    ->label('Description')
+                    ->required()
+                    ->rows(2)
+                    ->columnSpan(9), // 1.5x lo que era antes (6 → 9)
+            ]),
 
-                Forms\Components\TextInput::make('sublimit')
-                    ->numeric()
-                    ->label('Sublimit'),
+            Grid::make(12)
+                ->schema([
+                    Forms\Components\TextInput::make('sublimit')
+                        ->label('Sublimit')
+                        ->mask(
+                            RawJs::make(<<<'JS'
+                                $money($input, '.', ',', 0)
+                            JS)
+                        )
+                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
+                        ->columnSpan(3),
+                        
 
-                Forms\Components\Textarea::make('sublimit_desc')
-                    ->label('Sublimit Description')
-                    ->rows(2),
+                    Forms\Components\Textarea::make('sublimit_desc')
+                        ->label('Description')
+                        ->rows(2)
+                        ->columnSpan(9),
+                ]),
 
-                Forms\Components\TextInput::make('deductible')
-                    ->numeric()
-                    ->label('Deductible'),
+            Grid::make(12)
+                ->schema([
+                    Forms\Components\TextInput::make('deductible')
+                        ->label('Deductible')
+                        ->mask(
+                            RawJs::make(<<<'JS'
+                                $money($input, '.', ',', 0)
+                            JS)
+                        )
+                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
+                        ->columnSpan(3),
 
-                Forms\Components\Textarea::make('deductible_desc')
-                    ->label('Deductible Description')
-                    ->rows(2),
-            ]);
+                    Forms\Components\Textarea::make('deductible_desc')
+                        ->label('Description')
+                        ->rows(2)
+                        ->columnSpan(9),
+                ]),
+        ])
+        ->columns(1)
+        ->compact()
+        ->collapsible(),
+        ]);
     }
 
     public function table(Table $table): Table
@@ -141,6 +226,11 @@ class LiabilityStructuresRelationManager extends RelationManager
                     ]),    
             ])
 
+
+
+
+
+
             ->filters([
                 //
             ])
@@ -154,11 +244,11 @@ class LiabilityStructuresRelationManager extends RelationManager
                     Tables\Actions\DeleteAction::make(),
                     ]),
                
-            ])
-            ->bulkActions([
+                ]);
+            /* ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ]); */
     }
 }

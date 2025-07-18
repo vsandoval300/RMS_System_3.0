@@ -20,10 +20,10 @@ return new class extends Migration
             $table->boolean('cls')->default(false); 
             $table->float('limit');
             $table->text('limit_desc');
-            $table->float('sublimit');
-            $table->text('sublimit_desc');
-            $table->float('deductible');
-            $table->text('deductible_desc');
+            $table->float('sublimit')->nullable();
+            $table->text('sublimit_desc')->nullable();
+            $table->float('deductible')->nullable();
+            $table->text('deductible_desc')->nullable();
             $table->string('business_code', 19)->index();
             
             $table->foreign('business_code')

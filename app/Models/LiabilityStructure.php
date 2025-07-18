@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class LiabilityStructure extends Model
 {
     //
-    use SoftDeletes;
 
     protected $fillable = [
             'index',
@@ -33,6 +32,27 @@ class LiabilityStructure extends Model
     public function coverage()
     {
         return $this->belongsTo(Coverage::class, 'coverage_id');
+    }
+
+
+    protected static function booted(): void
+    {
+        // Paso 1: Asignar automáticamente el índice al crear
+        static::creating(function ($model) {
+            $maxIndex = self::where('business_code', $model->business_code)->max('index');
+            $model->index = $maxIndex ? $maxIndex + 1 : 1;
+        });
+
+        // Paso 2: Reordenar índices al eliminar
+        static::deleted(function ($model) {
+            self::where('business_code', $model->business_code)
+                ->orderBy('index')
+                ->get()
+                ->values()
+                ->each(function ($record, $key) {
+                    $record->update(['index' => $key + 1]);
+                });
+        });
     }
 
 

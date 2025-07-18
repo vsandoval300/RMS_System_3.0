@@ -30,4 +30,9 @@ class Coverage extends Model
     {
         return $this->hasMany(BusinessOpDocsInsured::class, 'coverage_id');
     }
+
+    public function liabilityStructures()
+    {
+        return $this->hasMany(LiabilityStructure::class, 'coverage_id');
+    }
 }

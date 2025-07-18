@@ -10,7 +10,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;           // 👈 importa la facade
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\FileUpload;
 use Filament\Support\Enums\VerticalAlignment;
@@ -21,6 +20,7 @@ class OperativeDocsRelationManager extends RelationManager
     protected static ?string $title = 'Operative Documents';
     protected static ?string $recordTitleAttribute = 'description';
 
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -30,36 +30,70 @@ class OperativeDocsRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('index')
-                ->required()
-                ->numeric()
-                ->label('Index'),
+            // Primera burbuja: solo Id Document
+            Forms\Components\Section::make()
+                ->schema([
+        Forms\Components\Grid::make(12)
+            ->schema([
+                Forms\Components\Placeholder::make('')
+                    ->columnSpan(6), // deja media fila vacía
 
-            Forms\Components\Select::make('operative_doc_type_id')
-                ->label('Doc Type')
-                ->relationship('docType', 'name') // Asegúrate de que `name` exista en `BusinessDocType`
-                ->required(),
+                Forms\Components\TextInput::make('id')
+                    ->label('Id Document')
+                    ->disabled()
+                    ->dehydrated() // <- muy importante para que aún así se envíe
+                    ->required()
+                    ->columnSpan(6),
+            ]),
+    ])
+    ->compact(),
 
-            Forms\Components\Textarea::make('description')
-                ->label('Description')
-                ->maxLength(255),
+            // Segunda burbuja: el resto de los campos
+            Forms\Components\Section::make('Document Details')
+                ->schema([
+                    // Title ocupa toda la fila
+                    Forms\Components\Textarea::make('description')
+                        ->label('Tittle')
+                        ->maxLength(255)
+                        ->columnSpanFull(), // 👈 ocupa ambas columnas (100%)
 
-            Forms\Components\DatePicker::make('inception_date')
-                ->required(),
+                    // El resto en 2 columnas
+                    Forms\Components\Select::make('operative_doc_type_id')
+                        ->label('Document Type')
+                        ->relationship('docType', 'name')
+                        ->required(),
 
-            Forms\Components\DatePicker::make('expiration_date')
-                ->required(),
+                    Forms\Components\Toggle::make('client_payment_tracking')
+                        ->label('Client Payment Tracking')
+                        ->default(false)
+                        ->helperText('Include tracking of payments from the
+                                     original client if this option is enabled.'),
+                    
+                    Forms\Components\DatePicker::make('inception_date')
+                        ->label('Inception Date')
+                        ->required(),
 
-            FileUpload::make('document_path')
-                    ->label('File')
-                    ->disk('s3')
-                    ->directory('reinsurers/OperativeDocuments')
-                    ->visibility('private'),
-                   
+                    Forms\Components\DatePicker::make('expiration_date')
+                        ->label('Expiration Date')
+                        ->required(),
 
-            Forms\Components\Toggle::make('client_payment_tracking')
-                ->label('Client Payment Tracking')
-                ->default(false),
+                    
+                ])
+                ->columns(2)
+                ->compact(),
+
+                // 🟦 Tercera burbuja: solo el archivo
+                    Forms\Components\Section::make('File Upload')
+                        ->schema([
+                            FileUpload::make('document_path')
+                                ->label('File')
+                                ->disk('s3')
+                                ->directory('reinsurers/OperativeDocuments')
+                                ->visibility('private')
+                                ->acceptedFileTypes(['application/pdf']) // ✅ Solo permite PDF
+                                ->helperText('Only PDF files are allowed.'),
+                        ])
+                        ->compact(),
         ]);
     }
 
@@ -142,6 +176,7 @@ class OperativeDocsRelationManager extends RelationManager
                     )
                         ? $record->document_path
                         : $s3->url($record->document_path);
+                    
                 })
                 ->openUrlInNewTab()
                 ->tooltip(fn ($record) =>
@@ -153,7 +188,28 @@ class OperativeDocsRelationManager extends RelationManager
             //
         ])
         ->headerActions([
-            Tables\Actions\CreateAction::make(),
+            Tables\Actions\CreateAction::make()
+                ->label('Create Operative Doc')
+                ->mutateFormDataUsing(function (array $data, $livewire) {
+                    // Este callback se ejecuta cuando se guarda el formulario
+                    if (! isset($data['id'])) {
+                        $business = $livewire->ownerRecord;
+                        $count = $business->operativeDocs()->count() + 1;
+                        $data['id'] = $business->business_code . '-' . str_pad($count, 2, '0', STR_PAD_LEFT);
+                    }
+                    return $data;
+                })
+                ->beforeFormFilled(function ($livewire, $action) {
+                    // Esto precarga el campo 'id' antes de abrir el modal
+                    $business = $livewire->ownerRecord;
+                    $count = $business->operativeDocs()->count() + 1;
+                    $generatedId = $business->business_code . '-' . str_pad($count, 2, '0', STR_PAD_LEFT);
+
+                    $action->fillForm([
+                        'id' => $generatedId,
+                    ]);
+                })
+                //->formModalWidth('xl') // opcional: para mayor espacio
         ])
         ->actions([
             Tables\Actions\ActionGroup::make([
