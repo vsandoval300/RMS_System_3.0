@@ -108,9 +108,10 @@ class DatabaseSeeder extends Seeder
             LiabilityStructureCellMayabSeeder::class, /*2*/
             //Files for Placement Schemes
             /*=============================================*/
-            CostNodesCellMayabSeeder::class, /*4*/
+           
             CschemeCellMayabSeeder::class, /*6*/
-            CschemeCnodesCellMayabSeeder::class, /*7*/
+            CostNodesxCellMayabSeeder::class, /*4*/
+            //CschemeCnodesCellMayabSeeder::class, /*7*/
             //Files for Business Documents
             /*=============================================*/
             BusinessesDocsCellMayabSeeder::class, /*Details*/

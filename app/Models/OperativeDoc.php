@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Seeders\BusinessDocInsuredsYelmoSeeder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -73,6 +74,8 @@ class OperativeDoc extends Model
         );
     }
 
+   
+
     /** Insureds + coverages (businessdoc_insureds) */
     public function insureds()
     {
@@ -81,6 +84,7 @@ class OperativeDoc extends Model
             'op_document_id'
         );
     }
+
 
     /** Transacciones (payments, etc.) */
     public function transactions()
@@ -100,6 +104,29 @@ class OperativeDoc extends Model
         );
     }
 
+
+    protected static function booted(): void
+    {
+        // Paso 1: Asignar automáticamente el índice al crear
+        static::creating(function ($model) {
+            $maxIndex = self::where('business_code', $model->business_code)
+                ->withoutTrashed() // Ignorar los eliminados al contar
+                ->max('index');
+            $model->index = $maxIndex ? $maxIndex + 1 : 1;
+        });
+
+        // Paso 2: Reordenar índices al eliminar
+        static::deleted(function ($model) {
+            self::where('business_code', $model->business_code)
+                ->withoutTrashed() // Ignorar los eliminados
+                ->orderBy('index')
+                ->get()
+                ->values()
+                ->each(function ($record, $key) {
+                    $record->update(['index' => $key + 1]);
+                });
+        });
+    }
 
 
 

@@ -13,6 +13,25 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\FileUpload;
 use Filament\Support\Enums\VerticalAlignment;
+use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
+use Filament\Support\RawJs;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
+use App\Models\CostScheme;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\View;
+
+
+use Nette\Utils\Html as UtilsHtml;
 
 class OperativeDocsRelationManager extends RelationManager
 {
@@ -24,76 +43,234 @@ class OperativeDocsRelationManager extends RelationManager
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with('docType'); // <- evita N+1
+            ->with([
+            'docType',
+            'schemes.costScheme.costNodexes', // 👈 esto es lo que faltaba para que precargue bien
+        ]);
     }
 
     public function form(Form $form): Form
     {
         return $form->schema([
-            // Primera burbuja: solo Id Document
-            Forms\Components\Section::make()
-                ->schema([
-        Forms\Components\Grid::make(12)
-            ->schema([
-                Forms\Components\Placeholder::make('')
-                    ->columnSpan(6), // deja media fila vacía
-
-                Forms\Components\TextInput::make('id')
-                    ->label('Id Document')
-                    ->disabled()
-                    ->dehydrated() // <- muy importante para que aún así se envíe
-                    ->required()
-                    ->columnSpan(6),
-            ]),
-    ])
-    ->compact(),
-
-            // Segunda burbuja: el resto de los campos
-            Forms\Components\Section::make('Document Details')
-                ->schema([
-                    // Title ocupa toda la fila
-                    Forms\Components\Textarea::make('description')
-                        ->label('Tittle')
-                        ->maxLength(255)
-                        ->columnSpanFull(), // 👈 ocupa ambas columnas (100%)
-
-                    // El resto en 2 columnas
-                    Forms\Components\Select::make('operative_doc_type_id')
-                        ->label('Document Type')
-                        ->relationship('docType', 'name')
-                        ->required(),
-
-                    Forms\Components\Toggle::make('client_payment_tracking')
-                        ->label('Client Payment Tracking')
-                        ->default(false)
-                        ->helperText('Include tracking of payments from the
-                                     original client if this option is enabled.'),
-                    
-                    Forms\Components\DatePicker::make('inception_date')
-                        ->label('Inception Date')
-                        ->required(),
-
-                    Forms\Components\DatePicker::make('expiration_date')
-                        ->label('Expiration Date')
-                        ->required(),
-
-                    
-                ])
-                ->columns(2)
-                ->compact(),
-
-                // 🟦 Tercera burbuja: solo el archivo
-                    Forms\Components\Section::make('File Upload')
+            Tabs::make('Operative Doc Form')
+                ->columnSpanFull()
+                ->tabs([
+                    // ╔═════════════════════════════════════════════════════════════════════════╗
+                    // ║ Tab for Document Details                                                ║
+                    // ╚═════════════════════════════════════════════════════════════════════════╝
+                    Tab::make('Document Details')
                         ->schema([
-                            FileUpload::make('document_path')
-                                ->label('File')
-                                ->disk('s3')
-                                ->directory('reinsurers/OperativeDocuments')
-                                ->visibility('private')
-                                ->acceptedFileTypes(['application/pdf']) // ✅ Solo permite PDF
-                                ->helperText('Only PDF files are allowed.'),
-                        ])
-                        ->compact(),
+
+                            // 🟦 Primera burbuja: solo Id Document
+                            Section::make()
+                                ->schema([
+                                    Grid::make(12)
+                                        ->schema([
+                                            Placeholder::make('')
+                                                ->columnSpan(6), // deja media fila vacía
+
+                                            TextInput::make('id')
+                                                ->label('Id Document')
+                                                ->disabled()
+                                                ->dehydrated()
+                                                ->required()
+                                                ->columnSpan(6),
+                                        ]),
+                                ])
+                                ->compact(),
+
+                            // 🟦 Segunda burbuja: el resto de los campos
+                            Section::make('Details')
+                                ->schema([
+                                    Textarea::make('description')
+                                        ->label('Tittle')
+                                        ->maxLength(255)
+                                        ->columnSpanFull(),
+
+                                    Select::make('operative_doc_type_id')
+                                        ->label('Document Type')
+                                        ->relationship('docType', 'name')
+                                        ->required(),
+
+                                    Toggle::make('client_payment_tracking')
+                                        ->label('Client Payment Tracking')
+                                        ->default(false)
+                                        ->helperText('Include tracking of payments from the original client if this option is enabled.'),
+
+                                    DatePicker::make('inception_date')
+                                        ->label('Inception Date')
+                                        ->required(),
+
+                                    DatePicker::make('expiration_date')
+                                        ->label('Expiration Date')
+                                        ->required()
+                                        ->date()
+                                        ->after('inception_date')
+                                        ->validationMessages([
+                                            'after' => 'The expiration date must be later than the inception date.',
+                                            'required' => 'You must provide an expiration date.',
+                                        ])
+                                        ->afterStateUpdated(function (callable $set, $state, $get) {
+                                            // lógica adicional opcional
+                                        }),
+
+                                    TextInput::make('roe')
+                                        ->label('roe')
+                                        ->required(),
+                                ])
+                                ->columns(2)
+                                ->compact(),
+
+                            // 🟦 Tercera burbuja: solo el archivo
+                            Section::make('File Upload')
+                                ->schema([
+                                    FileUpload::make('document_path')
+                                        ->label('File')
+                                        ->disk('s3')
+                                        ->directory('reinsurers/OperativeDocuments')
+                                        ->visibility('private')
+                                        ->acceptedFileTypes(['application/pdf'])
+                                        ->helperText('Only PDF files are allowed.'),
+                                ])
+                                ->compact(),
+
+                        ]),
+
+                    // 🟦 Cuarta burbuja: Insureds en otro Tab
+                    // ╔═════════════════════════════════════════════════════════════════════════╗
+                    // ║ Tab for Insured Members.                                                ║
+                    // ╚═════════════════════════════════════════════════════════════════════════╝
+                    Tab::make('Insured Members')
+                        ->schema([
+                            Grid::make(12)
+                                ->schema([
+                                    TableRepeater::make('insureds')
+                                        ->label('Insureds')
+                                        ->relationship()
+                                        ->schema([
+                                            Select::make('company_id')
+                                                ->label('Company')
+                                                ->relationship('company', 'name')
+                                                ->preload()
+                                                ->required()
+                                                ->searchable()
+                                                ->columnSpan(5),
+
+                                            Select::make('coverage_id')
+                                                ->label('Coverage')
+                                                ->relationship('coverage', 'name')
+                                                ->preload()
+                                                ->required()
+                                                ->searchable()
+                                                ->columnSpan(5),
+
+                                            TextInput::make('premium')
+                                                ->numeric()
+                                                ->prefix('$')
+                                                ->required()
+                                                ->mask(
+                                                    RawJs::make(<<<'JS'
+                                                        $money($input, '.', ',', 2)
+                                                    JS)
+                                                )
+                                                ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
+                                                ->columnSpan(2),
+                                        ])
+                                        ->defaultItems(1)
+                                        ->columns(12)
+                                        ->addActionLabel('Add Insured')
+                                        ->reorderable(false)
+                                        ->columnSpan(12) // 👈 fuerza a ocupar todo el ancho
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            $total = collect($state)
+                                                ->pluck('premium')
+                                                ->filter()
+                                                ->map(fn ($value) => floatval(str_replace(',', '', $value)))
+                                                ->sum();
+
+                                            $set('insureds_total', number_format($total, 2, '.', ','));
+                                        }),
+
+                                    Placeholder::make('')->columnSpan(8),
+
+                                    TextInput::make('insureds_total')
+                                        ->label('Grand Total Premium')
+                                        ->prefix('$')
+                                        ->disabled()
+                                        ->dehydrated(false)
+                                        ->columnSpan(4), // 👈 mismo span para alinear con el repeater
+                                ]),
+                        ]),
+                    // ╔═════════════════════════════════════════════════════════════════════════╗
+                    // ║ Tab for Placement Schemes                                               ║
+                    // ╚═════════════════════════════════════════════════════════════════════════╝
+                    Tab::make('Placement Schemes')
+                        ->schema([
+                            Repeater::make('schemes')
+                                ->label('Placement Schemes')
+                                ->relationship('schemes')
+                                ->schema([
+                                    Select::make('cscheme_id')
+                                        ->label('Placement Scheme')
+                                        ->options(
+                                            \App\Models\CostScheme::all()->pluck('id', 'id')
+                                        )
+                                        ->searchable()
+                                        ->preload()
+                                        ->reactive()
+                                        ->required(),
+
+                                    Group::make()
+                                        ->schema([
+                                            View::make('partials.scheme-nodes-preview')
+                                            ->viewData(fn ($get) => [
+                                            'schemeId' => $get('cscheme_id'),
+                                        ])
+                                            ->columnSpan('full'),
+                                        ]),
+                                ])
+                                ->columns(1)
+                                ->defaultItems(0)
+                                ->addActionLabel('Agregar esquema de colocación'),
+                    ]),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    // ╔═════════════════════════════════════════════════════════════════════════╗
+                    // ║ Tab for Installments.                                                   ║
+                    // ╚═════════════════════════════════════════════════════════════════════════╝
+                    Tab::make('Installments') // 👈 nueva pestaña
+                        ->schema([
+                            // Aquí va el contenido que quieras para Placement Schemes
+                            Placeholder::make('Installment_info')
+                                ->label('Installments Content')
+                                ->content('Aquí puedes agregar los pagos de colocación.')
+                    ]),
+
+
+
+                ]),
         ]);
     }
 
@@ -190,24 +367,43 @@ class OperativeDocsRelationManager extends RelationManager
         ->headerActions([
             Tables\Actions\CreateAction::make()
                 ->label('Create Operative Doc')
-                ->mutateFormDataUsing(function (array $data, $livewire) {
-                    // Este callback se ejecuta cuando se guarda el formulario
-                    if (! isset($data['id'])) {
-                        $business = $livewire->ownerRecord;
-                        $count = $business->operativeDocs()->count() + 1;
-                        $data['id'] = $business->business_code . '-' . str_pad($count, 2, '0', STR_PAD_LEFT);
-                    }
-                    return $data;
-                })
-                ->beforeFormFilled(function ($livewire, $action) {
-                    // Esto precarga el campo 'id' antes de abrir el modal
+               ->beforeFormFilled(function ($livewire, $action) {
                     $business = $livewire->ownerRecord;
-                    $count = $business->operativeDocs()->count() + 1;
-                    $generatedId = $business->business_code . '-' . str_pad($count, 2, '0', STR_PAD_LEFT);
+
+                    // Obtener el sufijo numérico más alto en IDs anteriores (incluyendo eliminados)
+                    $lastIndex = $business->operativeDocs()
+                        ->withTrashed()
+                        ->get()
+                        ->map(function ($doc) {
+                            // Extrae los últimos 2 o 3 dígitos del ID
+                            return intval(substr($doc->id, -2));
+                        })
+                        ->max();
+
+                    $newIndex = $lastIndex ? $lastIndex + 1 : 1;
+                    $generatedId = $business->business_code . '-' . str_pad($newIndex, 2, '0', STR_PAD_LEFT);
 
                     $action->fillForm([
                         'id' => $generatedId,
                     ]);
+                })
+                ->mutateFormDataUsing(function (array $data, $livewire) {
+                    if (! isset($data['id'])) {
+                        $business = $livewire->ownerRecord;
+
+                        $lastIndex = $business->operativeDocs()
+                            ->withTrashed()
+                            ->get()
+                            ->map(function ($doc) {
+                                return intval(substr($doc->id, -2));
+                            })
+                            ->max();
+
+                        $newIndex = $lastIndex ? $lastIndex + 1 : 1;
+                        $data['id'] = $business->business_code . '-' . str_pad($newIndex, 2, '0', STR_PAD_LEFT);
+                    }
+
+                    return $data;
                 })
                 //->formModalWidth('xl') // opcional: para mayor espacio
         ])
@@ -219,7 +415,7 @@ class OperativeDocsRelationManager extends RelationManager
             ]),
         ])
         ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
+            //Tables\Actions\DeleteBulkAction::make(),
         ]);
     }
 }

@@ -9,10 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CostScheme extends Model
 {
     use HasFactory, SoftDeletes;
+     protected $table = 'cost_schemes';
+    protected $primaryKey = 'id';
+    public    $incrementing = false;          // PK no autoincremental
+    protected $keyType      = 'string';       // PK tipo string
 
-    protected $table = 'cost_schemes';
+   
 
     protected $fillable = [
+        'id',
         'index',
         'share',
         'agreement_type',
@@ -21,23 +26,19 @@ class CostScheme extends Model
     /* ─── hasMany & belongsToMany ─── */
     public function businessDocSchemes()
     {
-        return $this->hasMany(BusinessOpDocsScheme::class, 'cscheme_id');
-    }
-
-    public function schemeNodes()
-    {
-        return $this->hasMany(CostSchemeNode::class, 'cscheme_id');
+        return $this->hasMany(BusinessOpDocsScheme::class, 'cost_scheme_id');
     }
 
     /** CostNodes relacionados (vía tabla pivote cost_scheme_nodes) */
-    public function costNodes()
+    public function costNodexes()
     {
-        return $this->belongsToMany(
-            CostNode::class,
-            'cost_scheme_nodes',
-            'cscheme_id',     // FK a este modelo en la pivote
-            'costnode_id'     // FK al otro modelo
-        )->withTimestamps()->withPivot('id', 'index');
+        return $this->hasMany(CostNodex::class, 'cscheme_id');
     }
+
+    /* public function costNodexes()
+    {
+        return $this->hasMany(CostNodex::class);
+    } */
+
 }
 

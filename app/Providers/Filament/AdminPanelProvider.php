@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ]);
 
         return $panel
-
+            
             ->navigationGroups([
                 NavigationGroup::make('Resources')->collapsed(),
                 NavigationGroup::make('Banks')->collapsed(),

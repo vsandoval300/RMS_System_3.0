@@ -13,6 +13,7 @@ class BusinessOpDocsScheme extends Model
     protected $table = 'businessdoc_schemes';
 
     protected $fillable = [
+        'id',
         'index',
         'op_document_id',   // FK → operative_docs.id
         'cscheme_id',       // FK → cost_schemes.id
@@ -28,6 +29,15 @@ class BusinessOpDocsScheme extends Model
     {
         return $this->belongsTo(CostScheme::class, 'cscheme_id');
     }
+
+    
+
+
+
+
 }
+
+
+
 
 

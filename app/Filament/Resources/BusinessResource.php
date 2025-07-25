@@ -30,7 +30,7 @@ class BusinessResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 8;   // aparecerá primero
+    protected static ?int    $navigationSort  = 9;   // aparecerá primero
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
