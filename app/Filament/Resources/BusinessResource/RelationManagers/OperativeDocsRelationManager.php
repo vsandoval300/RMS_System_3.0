@@ -29,6 +29,8 @@ use Filament\Forms\Components\Repeater;
 use App\Models\CostScheme;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\View;
+use Filament\Forms\Components\Hidden;
+
 
 
 use Nette\Utils\Html as UtilsHtml;
@@ -213,8 +215,14 @@ class OperativeDocsRelationManager extends RelationManager
                                     Select::make('cscheme_id')
                                         ->label('Placement Scheme')
                                         ->options(
-                                            \App\Models\CostScheme::all()->pluck('id', 'id')
+                                            \App\Models\CostScheme::all()->mapWithKeys(function ($scheme) {
+                                                $shareFormatted = number_format($scheme->share * 100, 2) . '%';
+                                                return [
+                                                    $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}"
+                                                ];
+                                            })
                                         )
+
                                         ->searchable()
                                         ->preload()
                                         ->reactive()
@@ -235,42 +243,116 @@ class OperativeDocsRelationManager extends RelationManager
                     ]),
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     // ╔═════════════════════════════════════════════════════════════════════════╗
                     // ║ Tab for Installments.                                                   ║
                     // ╚═════════════════════════════════════════════════════════════════════════╝
-                    Tab::make('Installments') // 👈 nueva pestaña
+                    Tab::make('Installments')
                         ->schema([
-                            // Aquí va el contenido que quieras para Placement Schemes
-                            Placeholder::make('Installment_info')
-                                ->label('Installments Content')
-                                ->content('Aquí puedes agregar los pagos de colocación.')
-                    ]),
+                            TableRepeater::make('transactions')
+                                ->label('Installments')
+                                ->relationship()
+                                ->schema([
+                                   TextInput::make('index')
+                                        ->label('Index')
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->required()
+                                        ->numeric()
+                                        ->columnSpan(1),
+
+                                                    
+                                    TextInput::make('proportion')
+                                        ->label('Proportion')
+                                        ->prefix('%')
+                                        ->numeric()
+                                        ->required()
+                                        ->minValue(0)
+                                        ->maxValue(100)
+                                        ->step(0.01)
+                                        ->mask(RawJs::make('$money($input, ".", ",", 2)'))
+                                        ->reactive()
+                                        ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null)
+                                        ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100)
+                                        ->columnSpan(1),
+
+
+
+                                   TextInput::make('exch_rate')
+                                        ->label('Exchange Rate')
+                                        ->numeric()
+                                        ->required()
+                                        ->step(0.00001)
+                                        ->columnSpan(1),
+
+                                    DatePicker::make('due_date')
+                                        ->label('Due Date')
+                                        ->required()
+                                        ->columnSpan(1),
+
+                                    // Campos ocultos: se asignan automáticamente
+                                    Hidden::make('remittance_code')->default(null),
+                                    Hidden::make('transaction_type_id')->default(1),
+                                    Hidden::make('transaction_status_id')->default(1),
+                                    Hidden::make('op_document_id')->default(fn () => $this->getOwnerRecord()?->id),
+                                ])
+                                ->defaultItems(0)
+                                ->columns(4)
+                                ->addActionLabel('New Installment')
+                                ->afterStateUpdated(function (array $state, callable $set) {
+                                    $newState = [];
+                                    $index = 1;
+
+                                    foreach ($state as $key => $item) {
+                                        if (is_array($item)) {
+                                            $item['index'] = $index;
+                                            $newState[$key] = $item;
+                                            $index++;
+                                        }
+                                    }
+
+                                    $set('transactions', $newState);
+                                })
+
+                                // 🔐 Validación personalizada para 100%
+                                ->rules([
+                                    function (\Filament\Forms\Get $get) {
+                                        return function (string $attribute, $value, \Closure $fail) use ($get) {
+                                            $total = collect($get('transactions'))
+                                                ->pluck('proportion')
+                                                ->map(fn ($value) => floatval(str_replace(',', '', $value)))
+                                                ->sum();
+
+                                            if (abs($total - 1) > 0.0001) {
+                                                $fail('La suma de las proporciones debe ser exactamente 100%.');
+                                            }
+                                        };
+                                    }
+                                ]),
+                        ]),
+
+
+                    Tab::make('Calculations')
+                        ->schema([
+                            View::make('filament.resources.business.summary-html')
+                                ->viewData(fn ($get, $record) => [
+                                    'id' => $get('id'),
+                                    'createdAt' => optional($record)->created_at,
+                                    'documentType' => optional($record->docType)->name,
+                                    'inceptionDate' => $get('inception_date'),
+                                    'expirationDate' => $get('expiration_date'),
+                                    'premiumType' => optional($record->business)->premium_type ?? '-', // ← ✅ importante cambio aquí
+                                ]),
+                            ]),
+
+
+
 
 
 
                 ]),
+
+                
+
         ]);
     }
 

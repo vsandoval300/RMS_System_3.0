@@ -45,8 +45,7 @@ class OperativeDoc extends Model
     /** Negocio (Business) al que pertenece este documento */
     public function business()
     {
-        return $this->belongsTo(
-            Business::class,
+        return $this->belongsTo(Business::class,
             'business_code',      // FK en operative_docs
             'business_code'       // PK en businesses
         );
@@ -55,10 +54,7 @@ class OperativeDoc extends Model
     /** Tipo de documento operativo (business_doc_types) */
     public function docType()
     {
-        return $this->belongsTo(
-            BusinessDocType::class,
-            'operative_doc_type_id'
-        );
+        return $this->belongsTo(BusinessDocType::class,'operative_doc_type_id');
     }
 
     /* --------------------------------------------------
@@ -68,10 +64,7 @@ class OperativeDoc extends Model
     /** Esquemas asociados (businessdoc_schemes) */
     public function schemes()
     {
-        return $this->hasMany(
-            BusinessOpDocsScheme::class,
-            'op_document_id'
-        );
+        return $this->hasMany(BusinessOpDocsScheme::class,'op_document_id');
     }
 
    
@@ -79,26 +72,19 @@ class OperativeDoc extends Model
     /** Insureds + coverages (businessdoc_insureds) */
     public function insureds()
     {
-        return $this->hasMany(
-            BusinessOpDocsInsured::class,
-            'op_document_id'
-        );
+        return $this->hasMany(BusinessOpDocsInsured::class,'op_document_id');
     }
 
 
     /** Transacciones (payments, etc.) */
     public function transactions()
     {
-        return $this->hasMany(
-            Transaction::class,
-            'op_document_id'
-        );
+        return $this->hasMany(Transaction::class,'op_document_id');
     }
 
     public function operativeDocs()
     {
-        return $this->hasMany(
-            OperativeDoc::class,
+        return $this->hasMany(OperativeDoc::class,
             'business_code',   // FK en operative_docs
             'business_code'    // PK en businesses
         );
