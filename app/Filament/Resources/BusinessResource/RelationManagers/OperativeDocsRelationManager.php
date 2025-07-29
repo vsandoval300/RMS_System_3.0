@@ -341,6 +341,22 @@ class OperativeDocsRelationManager extends RelationManager
                                     'inceptionDate' => $get('inception_date'),
                                     'expirationDate' => $get('expiration_date'),
                                     'premiumType' => optional($record->business)->premium_type ?? '-', // ← ✅ importante cambio aquí
+                                    'insureds' => $record->insureds()->with(['company.country', 'coverage', 'transactions'])->get(),
+                                    'totalPremium' => $record->insureds()->sum('premium'), // 👈 nuevo dato para Allocation
+                                    'costSchemes' => $record->schemes()->with('costScheme')->get(),
+
+                                    // 🔽 NUEVO BLOQUE para nodos de costos con partner
+                                    'costNodes' => $record->schemes()
+                                        ->with('costScheme.costNodexes.partner', 'costScheme.costNodexes.deduction')
+                                        ->get()
+                                        ->pluck('costScheme')
+                                        ->flatMap(fn ($cs) => $cs->costNodexes),
+                                    'convertedPremium' => $record->transactions->sum(function ($txn) use ($record) {
+                            return $record->insureds->sum(function ($insured) use ($txn) {
+                                return $insured->premium * $txn->proportion * $txn->exch_rate;
+                            });
+                        }),
+
                                 ]),
                             ]),
 

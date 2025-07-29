@@ -38,5 +38,11 @@ class BusinessOpDocsInsured extends Model
     {
         return $this->belongsTo(Coverage::class);
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'op_document_id', 'op_document_id');
+    }
+
 }
 
