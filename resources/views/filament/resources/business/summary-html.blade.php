@@ -100,7 +100,17 @@
         $totalPremiumFts = 0;
         $totalConvertedPremium = 0; // ⭐️ NUEVA VARIABLE ACUMULADORA
 
-        
+        // 🟢 Calculamos $totalPremium y $totalPremiumFts una sola vez
+        $totalPremium = $insureds->sum('premium');
+        $totalPremiumFtp = ($totalPremium / $daysInYear) * $coverageDays;
+        $totalPremiumFts = $totalPremiumFtp * $share;
+
+        // 🟢 Calculamos $totalConvertedPremium en base a transacciones del documento
+        $transactions = $record->transactions ?? collect();
+        foreach ($transactions as $txn) {
+            $converted = $totalPremiumFts * $txn->proportion * $txn->exch_rate;
+            $totalConvertedPremium += $converted;
+        }
 
 
 
@@ -117,21 +127,12 @@
             $premiumFts = $premiumFtp * $share;
 
             // ⭐️ NUEVO CÁLCULO DEL MONTO CONVERTIDO POR TRANSACCIONES
-            $convertedPremium = 0;
-            foreach ($insureds as $insured) {
-                foreach ($insured->operativeDoc?->transactions ?? [] as $txn) {
-                    $totalConvertedPremium += $insured->premium * $txn->proportion * $txn->exch_rate;
-                }
-            }
-
-
+            
+            $transactions = $record->transactions;
 
             // Acumuladores
             $totalAllocation += $allocation;
-            $totalPremium += $premium;
-            $totalPremiumFtp += $premiumFtp;
-            $totalPremiumFts += $premiumFts;
-            $totalConvertedPremium += $convertedPremium; // ⭐️ SUMAMOS AL NUEVO ACUMULADOR
+           
         @endphp
 
         <tr class="bg-gray-800 rounded">
@@ -178,30 +179,27 @@
 
             {{-- COSTS BREAKDOWN --}}
 
-            {{-- Fila informativa previa --}}
-            <tr>
-                <th class="px-2 py-1 text-right text-gray-400 font-medium" colspan="4"></th>
-                <th class="px-2 py-1 text-right text-gray-400 font-medium">
-                    ${{ number_format($totalPremiumFts, 2) }}
-                </th>
-                <th class="px-2 py-1 text-right text-gray-400 font-medium">
-                    ${{ number_format($totalConvertedPremium, 2) }}
-                </th>
-            </tr>
+            
 
 
             {{-- Encabezados reales --}}
             <tr>
                 <th class="px-2 py-1 text-left text-gray-400">#</th>
                 <th class="px-2 py-1 text-left text-gray-400">Partner</th>
-                <th class="px-2 py-1 text-left text-gray-400">Concept</th> 
-                <th class="px-2 py-1 text-right text-gray-400">Value (%)</th>
+                <th class="px-2 py-1 text-left text-gray-400"></th> 
                 <th class="px-2 py-1 text-right text-gray-400"></th>
-                <th class="px-2 py-1 text-right text-gray-400"></th>
-
-
+                <th class="px-2 py-1 text-center text-gray-400">
+                    Orig. Curr.<br>
+                    <span class="text-gray-400 font-semibold">${{ number_format($totalPremiumFts, 2) }}</span>
+                </th>
+                <th class="px-2 py-1 text-center text-gray-400">
+                    US Dollars<br>
+                    <span class="text-gray-400 font-semibold">${{ number_format($totalConvertedPremium, 2) }}</span>
+                </th>
             </tr>
+
         </thead>
+        {{-- Valores de la Tabla --}}
         <tbody>
             @forelse ($costNodes as $node)
                 <tr class="bg-gray-800 rounded">

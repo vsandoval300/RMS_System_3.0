@@ -47,6 +47,7 @@ class OperativeDocsRelationManager extends RelationManager
         return parent::getEloquentQuery()
             ->with([
             'docType',
+            'business',
             'schemes.costScheme.costNodexes', // 👈 esto es lo que faltaba para que precargue bien
         ]);
     }
@@ -92,33 +93,45 @@ class OperativeDocsRelationManager extends RelationManager
                                     Select::make('operative_doc_type_id')
                                         ->label('Document Type')
                                         ->relationship('docType', 'name')
-                                        ->required(),
+                                        ->required()
+                                        ->live(),
 
                                     Toggle::make('client_payment_tracking')
                                         ->label('Client Payment Tracking')
                                         ->default(false)
                                         ->helperText('Include tracking of payments from the original client if this option is enabled.'),
 
+                                    // 🟡 MODIFICACIÓN: inception_date ahora con afterStateUpdated
                                     DatePicker::make('inception_date')
                                         ->label('Inception Date')
-                                        ->required(),
+                                        ->required()
+                                        ->live() // 🟨 ✅ importante para reactividad EN VIVO
+                                        ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
+                                            // opcional: puedes actualizar otro campo si quieres
+                                        }),
+                                        
+                                    
 
                                     DatePicker::make('expiration_date')
                                         ->label('Expiration Date')
                                         ->required()
+                                        ->live() // 🟨 ✅ importante para reactividad EN VIVO
                                         ->date()
                                         ->after('inception_date')
                                         ->validationMessages([
                                             'after' => 'The expiration date must be later than the inception date.',
                                             'required' => 'You must provide an expiration date.',
                                         ])
-                                        ->afterStateUpdated(function (callable $set, $state, $get) {
-                                            // lógica adicional opcional
+                                        ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
+                                            // opcional: puedes actualizar otro campo si quieres
                                         }),
 
                                     TextInput::make('roe')
                                         ->label('roe')
                                         ->required(),
+                                    
+                                    
+
                                 ])
                                 ->columns(2)
                                 ->compact(),
@@ -334,40 +347,60 @@ class OperativeDocsRelationManager extends RelationManager
                     Tab::make('Calculations')
                         ->schema([
                             View::make('filament.resources.business.summary-html')
+                                ->reactive()
                                 ->viewData(fn ($get, $record) => [
                                     'id' => $get('id'),
                                     'createdAt' => optional($record)->created_at,
-                                    'documentType' => optional($record->docType)->name,
+                                    'documentType' => $record && $record->docType ? $record->docType->name : '-',
                                     'inceptionDate' => $get('inception_date'),
                                     'expirationDate' => $get('expiration_date'),
-                                    'premiumType' => optional($record->business)->premium_type ?? '-', // ← ✅ importante cambio aquí
-                                    'insureds' => $record->insureds()->with(['company.country', 'coverage', 'transactions'])->get(),
-                                    'totalPremium' => $record->insureds()->sum('premium'), // 👈 nuevo dato para Allocation
-                                    'costSchemes' => $record->schemes()->with('costScheme')->get(),
+                                    'premiumType' => $record && $record->business ? $record->business->premium_type : '-',
 
-                                    // 🔽 NUEVO BLOQUE para nodos de costos con partner
-                                    'costNodes' => $record->schemes()
-                                        ->with('costScheme.costNodexes.partner', 'costScheme.costNodexes.deduction')
-                                        ->get()
-                                        ->pluck('costScheme')
-                                        ->flatMap(fn ($cs) => $cs->costNodexes),
-                                    'convertedPremium' => $record->transactions->sum(function ($txn) use ($record) {
-                            return $record->insureds->sum(function ($insured) use ($txn) {
-                                return $insured->premium * $txn->proportion * $txn->exch_rate;
-                            });
-                        }),
+                                    // ✅ Evitamos errores si $record es null
+                                    'insureds' => $record?->insureds()?->with(['company.country', 'coverage', 'transactions'])->get() ?? collect(),
+                                    'totalPremium' => $record?->insureds()?->sum('premium') ?? 0,
+                                    'costSchemes' => $record?->schemes()?->with('costScheme')->get() ?? collect(),
+
+                                    // ✅ Evitamos error en cascada
+                                    'costNodes' => $record?->schemes()
+                                        ?->with('costScheme.costNodexes.partner', 'costScheme.costNodexes.deduction')
+                                        ?->get()
+                                        ?->pluck('costScheme')
+                                        ?->flatMap(fn ($cs) => $cs->costNodexes) ?? collect(),
+
+                                    // ✅ sigue siendo útil tener el record
+                                    'record' => $record,
 
                                 ]),
                             ]),
-
-
-
-
-
-
                 ]),
 
-                
+               // 🟡 NUEVA sección reactiva para mostrar fecha en vivo
+            Section::make('Summary')
+                ->label('Document Details')
+                ->schema([
+                    View::make('filament.resources.business.operative-doc-summary')
+                        ->reactive()
+                        ->viewData(function ($get, $record, $livewire) {
+                            $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
+
+                            return [
+                                'id' => $get('id'),
+                                'createdAt' => $record?->created_at ?? now(),
+                                'documentType' => ($docTypeId = $get('operative_doc_type_id'))
+                                    ? \App\Models\BusinessDocType::find($docTypeId)?->name ?? '-'
+                                    : '-',
+                                'inceptionDate' => $get('inception_date'),
+                                'expirationDate' => $get('expiration_date'),
+                                'premiumType' => $record?->business?->premium_type
+                                    ?? $business?->premium_type
+                                    ?? '-',
+                            ];
+                        }),
+
+                ])
+                ->columnSpanFull(),
+
 
         ]);
     }
