@@ -44,4 +44,21 @@ class EditReinsurers extends EditRecord
     {
         return [];              // así ya no se duplican abajo :contentReference[oaicite:1]{index=1}
     }
+
+    /*--------------------------------------------------------------
+     | Gathered Relation Managers with Resource 
+     --------------------------------------------------------------*/
+    public function getContentTabLabel(): ?string
+    {
+        return 'Reinsurer Details';
+    }
+
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
+
+
+
 }

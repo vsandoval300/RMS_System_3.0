@@ -48,9 +48,18 @@ class OperativeDocsRelationManager extends RelationManager
             ->with([
             'docType',
             'business',
-            'schemes.costScheme.costNodexes', // 👈 esto es lo que faltaba para que precargue bien
+            'schemes.costScheme.costNodexes', 
+            'transactions',
         ]);
     }
+
+    
+
+
+
+
+
+
 
     public function form(Form $form): Form
     {
@@ -150,6 +159,55 @@ class OperativeDocsRelationManager extends RelationManager
                                 ->compact(),
 
                         ]),
+                    
+                    // ╔═════════════════════════════════════════════════════════════════════════╗
+                    // ║ Tab for Placement Schemes                                               ║
+                    // ╚═════════════════════════════════════════════════════════════════════════╝
+                    Tab::make('Placement Schemes')
+                        ->schema([
+                            Repeater::make('schemes')
+                                ->label('Placement Schemes')
+                                ->live()
+                                ->relationship('schemes')
+                                ->schema([
+                                    Select::make('cscheme_id')
+                                        ->label('Placement Scheme')
+                                        ->options(
+                                            \App\Models\CostScheme::all()->mapWithKeys(function ($scheme) {
+                                                $shareFormatted = number_format($scheme->share * 100, 2) . '%';
+                                                return [
+                                                    $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}"
+                                                ];
+                                            })
+                                        )
+
+                                        ->searchable()
+                                        ->preload()
+                                        ->reactive()
+                                        ->required(),
+
+                                    Group::make()
+                                        ->schema([
+                                            View::make('partials.scheme-nodes-preview')
+                                            ->viewData(fn ($get) => [
+                                            'schemeId' => $get('cscheme_id'),
+                                        ])
+                                            ->columnSpan('full'),
+                                        ]),
+                                ])
+                                ->columns(1)
+                                ->defaultItems(0)
+                                ->addActionLabel('Agregar esquema de colocación')
+                                ->reorderable(false)
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    // 👇 Este callback permite que se refresque el resumen en vivo
+                                    $set('schemes', $state);
+                                }),
+
+                    ]),
+
+
+
 
                     // 🟦 Cuarta burbuja: Insureds en otro Tab
                     // ╔═════════════════════════════════════════════════════════════════════════╗
@@ -180,22 +238,23 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->columnSpan(5),
 
                                             TextInput::make('premium')
-                                                ->numeric()
                                                 ->prefix('$')
                                                 ->required()
+                                                ->live()
                                                 ->mask(
                                                     RawJs::make(<<<'JS'
                                                         $money($input, '.', ',', 2)
                                                     JS)
                                                 )
-                                                ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
-                                                ->columnSpan(2),
+                                                ->dehydrateStateUsing(fn ($state) => floatval(preg_replace('/[^0-9.]/', '', $state)))
+                                               ->columnSpan(2),
                                         ])
                                         ->defaultItems(1)
                                         ->columns(12)
                                         ->addActionLabel('Add Insured')
                                         ->reorderable(false)
                                         ->columnSpan(12) // 👈 fuerza a ocupar todo el ancho
+                                        ->live()
                                         ->afterStateUpdated(function ($state, callable $set) {
                                             $total = collect($state)
                                                 ->pluck('premium')
@@ -216,49 +275,12 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->columnSpan(4), // 👈 mismo span para alinear con el repeater
                                 ]),
                         ]),
-                    // ╔═════════════════════════════════════════════════════════════════════════╗
-                    // ║ Tab for Placement Schemes                                               ║
-                    // ╚═════════════════════════════════════════════════════════════════════════╝
-                    Tab::make('Placement Schemes')
-                        ->schema([
-                            Repeater::make('schemes')
-                                ->label('Placement Schemes')
-                                ->relationship('schemes')
-                                ->schema([
-                                    Select::make('cscheme_id')
-                                        ->label('Placement Scheme')
-                                        ->options(
-                                            \App\Models\CostScheme::all()->mapWithKeys(function ($scheme) {
-                                                $shareFormatted = number_format($scheme->share * 100, 2) . '%';
-                                                return [
-                                                    $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}"
-                                                ];
-                                            })
-                                        )
-
-                                        ->searchable()
-                                        ->preload()
-                                        ->reactive()
-                                        ->required(),
-
-                                    Group::make()
-                                        ->schema([
-                                            View::make('partials.scheme-nodes-preview')
-                                            ->viewData(fn ($get) => [
-                                            'schemeId' => $get('cscheme_id'),
-                                        ])
-                                            ->columnSpan('full'),
-                                        ]),
-                                ])
-                                ->columns(1)
-                                ->defaultItems(0)
-                                ->addActionLabel('Agregar esquema de colocación'),
-                    ]),
+                    
 
 
-                    // ╔═════════════════════════════════════════════════════════════════════════╗
+                   
                     // ║ Tab for Installments.                                                   ║
-                    // ╚═════════════════════════════════════════════════════════════════════════╝
+                   
                     Tab::make('Installments')
                         ->schema([
                             TableRepeater::make('transactions')
@@ -272,23 +294,19 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->required()
                                         ->numeric()
                                         ->columnSpan(1),
-
-                                                    
+                    
                                     TextInput::make('proportion')
                                         ->label('Proportion')
                                         ->prefix('%')
-                                        ->numeric()
                                         ->required()
                                         ->minValue(0)
                                         ->maxValue(100)
                                         ->step(0.01)
-                                        ->mask(RawJs::make('$money($input, ".", ",", 2)'))
+                                        ->mask(RawJs::make('$money($input, ".", ",", 2)')) // se ve como 70.00
                                         ->reactive()
-                                        ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null)
-                                        ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100)
+                                        ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null) // decimal → porcentaje
+                                        ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100) // porcentaje → decimal
                                         ->columnSpan(1),
-
-
 
                                    TextInput::make('exch_rate')
                                         ->label('Exchange Rate')
@@ -303,7 +321,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->columnSpan(1),
 
                                     // Campos ocultos: se asignan automáticamente
-                                    Hidden::make('remittance_code')->default(null),
+                                    Hidden::make('remmitance_code')->default(null),
                                     Hidden::make('transaction_type_id')->default(1),
                                     Hidden::make('transaction_status_id')->default(1),
                                     Hidden::make('op_document_id')->default(fn () => $this->getOwnerRecord()?->id),
@@ -327,20 +345,21 @@ class OperativeDocsRelationManager extends RelationManager
                                 })
 
                                 // 🔐 Validación personalizada para 100%
-                                ->rules([
+                                /* ->rules([
                                     function (\Filament\Forms\Get $get) {
                                         return function (string $attribute, $value, \Closure $fail) use ($get) {
                                             $total = collect($get('transactions'))
                                                 ->pluck('proportion')
-                                                ->map(fn ($value) => floatval(str_replace(',', '', $value)))
+                                                ->filter()
+                                                ->map(fn ($v) => floatval(str_replace(',', '', $v)) * 100) // decimal → porcentaje
                                                 ->sum();
 
-                                            if (abs($total - 1) > 0.0001) {
-                                                $fail('La suma de las proporciones debe ser exactamente 100%.');
+                                            if (round($total, 2) !== 100.0) {
+                                                $fail('La suma de las proporciones debe ser exactamente 100 %.');
                                             }
                                         };
                                     }
-                                ]),
+                                ]), */
                         ]),
 
 
@@ -374,15 +393,163 @@ class OperativeDocsRelationManager extends RelationManager
                                 ]),
                             ]),
                 ]),
-
-               // 🟡 NUEVA sección reactiva para mostrar fecha en vivo
+            
+            // 🟡 SPACE 
+            //-------------------------------------------------------
+            Placeholder::make('')
+                ->content('')
+                ->columnSpanFull()
+                ->extraAttributes(['class' => 'my-4']), // 👈 margen vertical
+            
+            
+            //-------------------------------------------------------
+            // 🟡 SUMMARY Section
+            //-------------------------------------------------------
             Section::make('Summary')
                 ->label('Document Details')
                 ->schema([
                     View::make('filament.resources.business.operative-doc-summary')
+                        ->extraAttributes([
+                            'class' => 'max-h-[500px] overflow-y-auto pb-32'
+                        ])
                         ->reactive()
                         ->viewData(function ($get, $record, $livewire) {
                             $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
+
+                            // 🔸 Schemes con datos relevantes ya cargados
+                            $schemes = collect($get('schemes') ?? [])
+                                ->map(function ($scheme) {
+                                    $model = \App\Models\CostScheme::find($scheme['cscheme_id'] ?? null);
+                                    return $model ? [
+                                        'id' => $model->id,
+                                        'share' => $model->share,
+                                        'agreement_type' => $model->agreement_type,
+                                    ] : null;
+                                })
+                                ->filter()
+                                ->values()
+                                ->toArray();
+                            
+                            $totalShare = collect($schemes)->sum('share'); // 🔹 total calculado
+
+
+                            // 🔹 Insureds con limpieza de premium
+                            $insureds = collect($get('insureds') ?? [])->map(function ($insured) {
+                                $company = \App\Models\Company::with('country')->find($insured['company_id'] ?? null);
+                                $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
+
+                                $raw = $insured['premium'] ?? 0;
+                                $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
+                                if (is_string($clean)) {
+                                    $parts = explode('.', $clean, 3);
+                                    $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
+                                }
+                                $premium = floatval($clean);
+
+                                return [
+                                    'company' => $company
+                                        ? [
+                                            'name' => $company->name,
+                                            'country' => ['name' => optional($company->country)->name],
+                                        ]
+                                        : ['name' => '-', 'country' => ['name' => '-']],
+                                    'coverage' => $coverage
+                                        ? ['name' => $coverage->name]
+                                        : ['name' => '-'],
+                                    'premium' => $premium,
+                                ];
+                            })->toArray();
+
+                            $costNodes = collect($get('schemes') ?? [])
+                                ->map(fn ($scheme) => \App\Models\CostScheme::with('costNodexes.costScheme', 'costNodexes.partner', 'costNodexes.deduction')
+                                    ->find($scheme['cscheme_id'] ?? null))
+                                ->filter()
+                                ->flatMap(fn ($scheme) => $scheme->costNodexes ?? collect())
+                                ->values();
+
+                            // 📊 Cálculos generales
+                            $inception = $get('inception_date');
+                            $expiration = $get('expiration_date');
+                            $start = $inception ? \Carbon\Carbon::parse($inception) : null;
+                            $end = $expiration ? \Carbon\Carbon::parse($expiration) : null;
+                            $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+                            $daysInYear = $start && $start->isLeapYear() ? 366 : 365;
+
+                            $totalPremium = collect($insureds)->sum('premium');
+                            $insureds = collect($insureds)->map(function ($insured) use ($totalPremium, $coverageDays, $daysInYear, $schemes) {
+                                $allocation = $totalPremium > 0 ? $insured['premium'] / $totalPremium : 0;
+                                $premiumFtp = ($daysInYear > 0) ? ($insured['premium'] / $daysInYear) * $coverageDays : 0;
+
+                                // Aplica todos los shares al insured individual para calcular su FTS
+                                $premiumFts = 0;
+                                foreach ($schemes as $s) {
+                                    $premiumFts += $premiumFtp * ($s['share'] ?? 0);
+                                }
+
+                                return array_merge($insured, [
+                                    'allocation_percent' => $allocation,
+                                    'premium_ftp' => $premiumFtp,
+                                    'premium_fts' => $premiumFts,
+                                ]);
+                            })->toArray();
+                            
+                            
+                            $totalPremiumFtp = ($daysInYear > 0) ? ($totalPremium / $daysInYear) * $coverageDays : 0;
+
+                            
+                            
+                            $totalPremiumFts = 0;
+                            foreach ($schemes as $s) {
+                                $totalPremiumFts += $totalPremiumFtp * ($s['share'] ?? 0);
+                            }
+
+
+
+
+                            $transactions = $record?->transactions ?? collect();
+                            $totalConvertedPremium = 0;
+                            foreach ($transactions as $txn) {
+                                $totalConvertedPremium += $totalPremiumFts * $txn->proportion * $txn->exch_rate;
+                            }
+
+                            $totalDeductionOrig = 0;
+                            $totalDeductionUsd = 0;
+
+                            $groupedCostNodes = $costNodes->groupBy(fn ($node) => $node->costSchemes->share ?? 0)
+                                ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
+                                    $shareFloat = floatval($share);
+
+                                    $nodeList = $nodes->map(function ($node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
+                                        $deduction = $totalPremiumFts * $node->value * $shareFloat;
+                                        $deductionConverted = $totalConvertedPremium * $node->value * $shareFloat;
+
+                                        return [
+                                            'index' => $node->index,
+                                            'partner' => $node->partner?->name ?? '-',
+                                            'deduction' => $node->deduction?->concept ?? '-',
+                                            'value' => $node->value,
+                                            'share' => $shareFloat,
+                                            'deduction_amount' => $deduction,
+                                            'deduction_usd' => $deductionConverted,
+                                        ];
+                                    })->values();
+
+                                    $subtotalOrig = $nodeList->sum('deduction_amount');
+                                    $subtotalUsd = $nodeList->sum('deduction_usd');
+
+                                    $totalDeductionOrig += $subtotalOrig;
+                                    $totalDeductionUsd += $subtotalUsd;
+
+                                    return [
+                                        'share' => $shareFloat,
+                                        'nodes' => $nodeList,
+                                        'subtotal_orig' => $subtotalOrig,
+                                        'subtotal_usd' => $subtotalUsd,
+                                    ];
+                                })
+                                ->sortKeys()
+                                ->values()
+                                ->toArray();
 
                             return [
                                 'id' => $get('id'),
@@ -390,17 +557,31 @@ class OperativeDocsRelationManager extends RelationManager
                                 'documentType' => ($docTypeId = $get('operative_doc_type_id'))
                                     ? \App\Models\BusinessDocType::find($docTypeId)?->name ?? '-'
                                     : '-',
-                                'inceptionDate' => $get('inception_date'),
-                                'expirationDate' => $get('expiration_date'),
+                                'inceptionDate' => $inception,
+                                'expirationDate' => $expiration,
                                 'premiumType' => $record?->business?->premium_type
                                     ?? $business?->premium_type
                                     ?? '-',
+                                'insureds' => array_values($insureds),
+                                'costSchemes' => $schemes,
+                                'groupedCostNodes' => $groupedCostNodes,
+                                'totalPremiumFts' => $totalPremiumFts,
+                                'totalPremiumFtp' => $totalPremiumFtp,
+                                'totalConvertedPremium' => $totalConvertedPremium,
+                                'coverageDays' => $coverageDays,
+                                'totalDeductionOrig' => $totalDeductionOrig,
+                                'totalDeductionUsd' => $totalDeductionUsd,
+                                'totalShare' => $totalShare,
                             ];
                         }),
-
                 ])
-                ->columnSpanFull(),
+                ->columnSpanFull()
+                ->collapsible()
+                ->collapsed(),
 
+
+
+                
 
         ]);
     }

@@ -22,4 +22,14 @@ class ViewBusiness extends ViewRecord
             'renewedFrom',
         ])->findOrFail($key);
     }
+
+    public function getContentTabLabel(): ?string
+    {
+        return 'Business Details';
+    }
+
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
 }

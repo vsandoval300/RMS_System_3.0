@@ -57,7 +57,7 @@ class Transaction extends Model
             // Asignaciones forzadas por defecto
             $model->transaction_type_id ??= 1;
             $model->transaction_status_id ??= 1;
-            $model->remittance_code ??= null;
+            $model->remmitance_code ??= null;
         });
 
         // Reordenamiento al eliminar

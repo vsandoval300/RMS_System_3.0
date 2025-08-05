@@ -46,6 +46,10 @@ class CostNodex extends Model
         return $this->belongsTo(Deduction::class, 'concept');
     }
 
+    public function costScheme()
+    {
+        return $this->belongsTo(CostScheme::class, 'cscheme_id');
+    }
     
 }
 
