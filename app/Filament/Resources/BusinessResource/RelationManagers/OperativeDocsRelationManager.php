@@ -282,6 +282,8 @@ class OperativeDocsRelationManager extends RelationManager
                     // ║ Tab for Installments.                                                   ║
                    
                     Tab::make('Installments')
+                        ->reactive()
+                        ->live()
                         ->schema([
                             TableRepeater::make('transactions')
                                 ->label('Installments')
@@ -292,6 +294,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->disabled()
                                         ->dehydrated()
                                         ->required()
+                                        ->live()
                                         ->numeric()
                                         ->columnSpan(1),
                     
@@ -299,6 +302,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->label('Proportion')
                                         ->prefix('%')
                                         ->required()
+                                         ->live()
                                         ->minValue(0)
                                         ->maxValue(100)
                                         ->step(0.01)
@@ -312,12 +316,14 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->label('Exchange Rate')
                                         ->numeric()
                                         ->required()
+                                         ->live()
                                         ->step(0.00001)
                                         ->columnSpan(1),
 
                                     DatePicker::make('due_date')
                                         ->label('Due Date')
                                         ->required()
+                                        ->live()
                                         ->columnSpan(1),
 
                                     // Campos ocultos: se asignan automáticamente
@@ -363,7 +369,7 @@ class OperativeDocsRelationManager extends RelationManager
                         ]),
 
 
-                    Tab::make('Calculations')
+                    /* Tab::make('Calculations')
                         ->schema([
                             View::make('filament.resources.business.summary-html')
                                 ->reactive()
@@ -391,7 +397,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     'record' => $record,
 
                                 ]),
-                            ]),
+                            ]), */
                 ]),
             
             // 🟡 SPACE 
@@ -399,7 +405,7 @@ class OperativeDocsRelationManager extends RelationManager
             Placeholder::make('')
                 ->content('')
                 ->columnSpanFull()
-                ->extraAttributes(['class' => 'my-4']), // 👈 margen vertical
+                ->extraAttributes(['class' => 'my-1']), // 👈 margen vertical
             
             
             //-------------------------------------------------------
@@ -409,9 +415,6 @@ class OperativeDocsRelationManager extends RelationManager
                 ->label('Document Details')
                 ->schema([
                     View::make('filament.resources.business.operative-doc-summary')
-                        ->extraAttributes([
-                            'class' => 'max-h-[500px] overflow-y-auto pb-32'
-                        ])
                         ->reactive()
                         ->viewData(function ($get, $record, $livewire) {
                             $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
@@ -505,11 +508,16 @@ class OperativeDocsRelationManager extends RelationManager
 
 
 
-
-                            $transactions = $record?->transactions ?? collect();
+                            //Converted Premium Formula
+                            // -Transform Annual Premium Fts according their installments parameters//
+                            $transactions = collect($get('transactions') ?? []);
                             $totalConvertedPremium = 0;
+
                             foreach ($transactions as $txn) {
-                                $totalConvertedPremium += $totalPremiumFts * $txn->proportion * $txn->exch_rate;
+                                $proportion = floatval($txn['proportion'] ?? 0) / 100; // 👈 CORRECTO
+                                $rate = floatval($txn['exch_rate'] ?? 0);
+
+                                $totalConvertedPremium += $totalPremiumFts * $proportion * $rate;
                             }
 
                             $totalDeductionOrig = 0;
@@ -551,6 +559,9 @@ class OperativeDocsRelationManager extends RelationManager
                                 ->values()
                                 ->toArray();
 
+
+
+
                             return [
                                 'id' => $get('id'),
                                 'createdAt' => $record?->created_at ?? now(),
@@ -572,13 +583,16 @@ class OperativeDocsRelationManager extends RelationManager
                                 'totalDeductionOrig' => $totalDeductionOrig,
                                 'totalDeductionUsd' => $totalDeductionUsd,
                                 'totalShare' => $totalShare,
+                                'transactions' => collect($get('transactions') ?? [])->values(),
                             ];
                         }),
                 ])
                 ->columnSpanFull()
                 ->collapsible()
-                ->collapsed(),
-
+                ->collapsed()
+                ->extraAttributes([
+                    'class' => 'max-h-[550px] overflow-y-auto'
+                ]),
 
 
                 
