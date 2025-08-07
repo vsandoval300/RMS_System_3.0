@@ -71,6 +71,7 @@ class OperativeDocsRelationManager extends RelationManager
                     // ║ Tab for Document Details                                                ║
                     // ╚═════════════════════════════════════════════════════════════════════════╝
                     Tab::make('Document Details')
+                        ->icon('document')->icon('heroicon-o-document-text')
                         ->schema([
 
                             // 🟦 Primera burbuja: solo Id Document
@@ -135,18 +136,38 @@ class OperativeDocsRelationManager extends RelationManager
                                             // opcional: puedes actualizar otro campo si quieres
                                         }),
 
-                                    TextInput::make('roe')
-                                        ->label('roe')
-                                        ->required(),
-                                    
+                                     Hidden::make('roe')
+                                        ->default(1),
                                     
 
                                 ])
                                 ->columns(2)
                                 ->compact(),
 
-                            // 🟦 Tercera burbuja: solo el archivo
-                            Section::make('File Upload')
+                                // 🟦 Tercera burbuja: solo el archivo
+                                Section::make('File Upload')
+                                    ->schema([
+                                        FileUpload::make('document_path')
+                                            ->label('File')
+                                            ->disk('s3')
+                                            ->directory('reinsurers/OperativeDocuments')
+                                            ->visibility('private')
+                                            ->acceptedFileTypes(['application/pdf'])
+                                            ->preserveFilenames()
+                                            ->downloadable()
+                                            ->openable()
+                                            ->previewable(true)
+                                            ->hint(function ($record) {
+                                                return $record?->document_path
+                                                    ? 'Existing file: ' . basename($record->document_path)
+                                                    : 'No file uploaded yet.';
+                                            })
+                                            ->dehydrated(fn ($state) => filled($state)) // <- solo guarda si hay nuevo valor
+                                            ->helperText('Only PDF files are allowed.'),
+                                    ])
+                                    ->compact(),
+
+                           /*  Section::make('File Upload')
                                 ->schema([
                                     FileUpload::make('document_path')
                                         ->label('File')
@@ -156,7 +177,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->acceptedFileTypes(['application/pdf'])
                                         ->helperText('Only PDF files are allowed.'),
                                 ])
-                                ->compact(),
+                                ->compact(), */
 
                         ]),
                     
@@ -164,6 +185,7 @@ class OperativeDocsRelationManager extends RelationManager
                     // ║ Tab for Placement Schemes                                               ║
                     // ╚═════════════════════════════════════════════════════════════════════════╝
                     Tab::make('Placement Schemes')
+                        ->icon('heroicon-o-puzzle-piece')
                         ->schema([
                             Repeater::make('schemes')
                                 ->label('Placement Schemes')
@@ -214,6 +236,7 @@ class OperativeDocsRelationManager extends RelationManager
                     // ║ Tab for Insured Members.                                                ║
                     // ╚═════════════════════════════════════════════════════════════════════════╝
                     Tab::make('Insured Members')
+                        ->icon('heroicon-o-users')
                         ->schema([
                             Grid::make(12)
                                 ->schema([
@@ -282,6 +305,7 @@ class OperativeDocsRelationManager extends RelationManager
                     // ║ Tab for Installments.                                                   ║
                    
                     Tab::make('Installments')
+                        ->icon('heroicon-o-banknotes')
                         ->reactive()
                         ->live()
                         ->schema([
@@ -411,10 +435,14 @@ class OperativeDocsRelationManager extends RelationManager
             //-------------------------------------------------------
             // 🟡 SUMMARY Section
             //-------------------------------------------------------
-            Section::make('Summary')
+            Section::make('Overview')
                 ->label('Document Details')
                 ->schema([
                     View::make('filament.resources.business.operative-doc-summary')
+                        ->extraAttributes([
+                            'class' => 'bg-[#dfe0e2] text-black p-4 rounded-md'
+                        ])
+                        ->reactive()
                         ->reactive()
                         ->viewData(function ($get, $record, $livewire) {
                             $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
@@ -517,7 +545,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 $proportion = floatval($txn['proportion'] ?? 0) / 100; // 👈 CORRECTO
                                 $rate = floatval($txn['exch_rate'] ?? 0);
 
-                                $totalConvertedPremium += $totalPremiumFts * $proportion * $rate;
+                                $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
                             }
 
                             $totalDeductionOrig = 0;
@@ -572,6 +600,9 @@ class OperativeDocsRelationManager extends RelationManager
                                 'expirationDate' => $expiration,
                                 'premiumType' => $record?->business?->premium_type
                                     ?? $business?->premium_type
+                                    ?? '-',
+                                'originalCurrency' => $record?->business?->currency?->acronym
+                                    ?? $business?->currency?->acronym
                                     ?? '-',
                                 'insureds' => array_values($insureds),
                                 'costSchemes' => $schemes,
@@ -687,6 +718,8 @@ class OperativeDocsRelationManager extends RelationManager
                 ),
 
         ])
+
+
         ->filters([
             //
         ])
@@ -735,8 +768,14 @@ class OperativeDocsRelationManager extends RelationManager
         ])
         ->actions([
             Tables\Actions\ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make('view')
+                    ->label('View')
+                    ->modalHeading(fn ($record) => '📄 Reviewing ' . $record->docType->name .' — '. $record->id ),
+
+
+                Tables\Actions\EditAction::make('edit')
+                    ->label('Edit')
+                    ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id ),
                 Tables\Actions\DeleteAction::make(),
             ]),
         ])
