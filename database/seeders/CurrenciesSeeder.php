@@ -877,5 +877,10 @@ class CurrenciesSeeder extends Seeder
         $currency->name = 'Guatemala Quetzal';
         $currency->acronym = 'QTZ';
         $currency->save();
+
+        $currency = new currency();
+        $currency->name = 'Chili Udi';
+        $currency->acronym = 'UF';
+        $currency->save();
     }
 }

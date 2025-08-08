@@ -21,7 +21,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Str;
 use App\Filament\Resources\BusinessResource\Widgets;
-
+use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 
 
 class BusinessResource extends Resource
@@ -350,9 +351,63 @@ class BusinessResource extends Resource
 
 
             ])
+            
             ->filters([
                 //
             ])
+            
+            // ╔═════════════════════════════════════════════════════════════════════════╗
+            // ║ Underwritten Report                                                     ║
+            // ╚═════════════════════════════════════════════════════════════════════════╝
+
+            ->headerActions([
+                Action::make('export')
+                    ->label('Export Report')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Select::make('report_type')
+                            ->label('Report Type')
+                            ->options([
+                                'summary' => 'Summary',
+                                'detailed' => 'Detailed',
+                            ])
+                            ->required(),
+
+                        Select::make('format')
+                            ->label('Export Format')
+                            ->options([
+                                'pdf' => 'PDF',
+                                'xlsx' => 'Excel'
+                            ])
+                            ->default('pdf')
+                            ->required(),
+
+                        DatePicker::make('from_date')->label('From Date'),
+                        DatePicker::make('to_date')->label('To Date'),
+                    ])
+                    ->modalHeading('Export Business Report')
+                    ->modalSubmitActionLabel('Generate')
+                    ->action(function (array $data) {
+                        // Aquí generas y descargas el reporte según $data
+
+                        $from = $data['from_date'] ?? null;
+                        $to = $data['to_date'] ?? null;
+                        $type = $data['report_type'];
+                        $format = $data['format'];
+
+                        $query = \App\Models\Business::query();
+
+                        if ($from) $query->whereDate('created_at', '>=', $from);
+                        if ($to) $query->whereDate('created_at', '<=', $to);
+
+                        $businesses = $query->get();
+
+                        // Aquí puedes usar Laravel Excel o DomPDF para exportar
+                        // return response()->download(...);
+                    }),
+            ])
+
+
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make()

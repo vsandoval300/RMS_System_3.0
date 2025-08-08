@@ -424,6 +424,9 @@ class OperativeDocsRelationManager extends RelationManager
                             ]), */
                 ]),
             
+
+                
+
             // 🟡 SPACE 
             //-------------------------------------------------------
             Placeholder::make('')
@@ -745,6 +748,8 @@ class OperativeDocsRelationManager extends RelationManager
                     $action->fillForm([
                         'id' => $generatedId,
                     ]);
+
+
                 })
                 ->mutateFormDataUsing(function (array $data, $livewire) {
                     if (! isset($data['id'])) {
