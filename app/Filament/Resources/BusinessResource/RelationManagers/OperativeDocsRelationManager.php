@@ -30,7 +30,13 @@ use App\Models\CostScheme;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\View;
 use Filament\Forms\Components\Hidden;
-
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Get;
+use Filament\Forms\Components\Actions\Action as FormAction;
+use App\Models\CostScheme as CostSchemeModel;
+use App\Models\Company;
+use App\Models\Coverage;
+use Carbon\Carbon;
 
 
 use Nette\Utils\Html as UtilsHtml;
@@ -425,7 +431,26 @@ class OperativeDocsRelationManager extends RelationManager
                 ]),
             
 
-                
+            // 🔵 Button that opens modal with the Overview Blade
+           /*  Actions::make([
+                FormAction::make('overview_modal')
+                    ->label('Overview')
+                    ->icon('heroicon-o-rectangle-group')
+                    ->modalHeading('Overview')
+                    ->modalSubmitAction(false)           // no submit button
+                    ->modalCancelActionLabel('Close')    // only a Close button
+                    ->modalWidth('7xl')                  // roomy modal
+                    ->action(fn () => null)              // no-op
+                    ->modalContent(function (Get $get, $record, $livewire) {
+                        // Build the same payload you use for the Overview section
+                        $data = $this->buildOverviewData($get, $record, $livewire);
+
+                        return view('filament.resources.business.operative-doc-summary', $data);
+                    }),
+            ])
+                ->alignment('left')
+                ->columnSpanFull(),
+  */
 
             // 🟡 SPACE 
             //-------------------------------------------------------
@@ -633,6 +658,180 @@ class OperativeDocsRelationManager extends RelationManager
 
         ]);
     }
+
+//NEW Button para renderizar el informe
+
+/* protected function buildOverviewData(Get $get, $record, $livewire): array
+{
+    $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
+
+    // 🔸 Schemes with relevant data
+    $schemes = collect($get('schemes') ?? [])
+        ->map(function ($scheme) {
+            $model = CostSchemeModel::find($scheme['cscheme_id'] ?? null);
+            return $model ? [
+                'id' => $model->id,
+                'share' => $model->share,
+                'agreement_type' => $model->agreement_type,
+            ] : null;
+        })
+        ->filter()
+        ->values()
+        ->toArray();
+
+    $totalShare = collect($schemes)->sum('share');
+
+    // 🔹 Insureds with cleaned premium
+    $insureds = collect($get('insureds') ?? [])->map(function ($insured) {
+        $company = Company::with('country')->find($insured['company_id'] ?? null);
+        $coverage = Coverage::find($insured['coverage_id'] ?? null);
+
+        $raw = $insured['premium'] ?? 0;
+        $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
+        if (is_string($clean)) {
+            $parts = explode('.', $clean, 3);
+            $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
+        }
+        $premium = floatval($clean);
+
+        return [
+            'company' => $company
+                ? [
+                    'name' => $company->name,
+                    'country' => ['name' => optional($company->country)->name],
+                ]
+                : ['name' => '-', 'country' => ['name' => '-']],
+            'coverage' => $coverage
+                ? ['name' => $coverage->name]
+                : ['name' => '-'],
+            'premium' => $premium,
+        ];
+    })->toArray();
+
+    $costNodes = collect($get('schemes') ?? [])
+        ->map(fn ($scheme) => \App\Models\CostScheme::with('costNodexes.costScheme', 'costNodexes.partner', 'costNodexes.deduction')
+            ->find($scheme['cscheme_id'] ?? null))
+        ->filter()
+        ->flatMap(fn ($scheme) => $scheme->costNodexes ?? collect())
+        ->values();
+
+    // 📊 General calculations
+    $inception = $get('inception_date');
+    $expiration = $get('expiration_date');
+    $start = $inception ? Carbon::parse($inception) : null;
+    $end = $expiration ? Carbon::parse($expiration) : null;
+    $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+    $daysInYear = $start && $start->isLeapYear() ? 366 : 365;
+
+    $totalPremium = collect($insureds)->sum('premium');
+    $insureds = collect($insureds)->map(function ($insured) use ($totalPremium, $coverageDays, $daysInYear, $schemes) {
+        $allocation = $totalPremium > 0 ? $insured['premium'] / $totalPremium : 0;
+        $premiumFtp = ($daysInYear > 0) ? ($insured['premium'] / $daysInYear) * $coverageDays : 0;
+
+        $premiumFts = 0;
+        foreach ($schemes as $s) {
+            $premiumFts += $premiumFtp * ($s['share'] ?? 0);
+        }
+
+        return array_merge($insured, [
+            'allocation_percent' => $allocation,
+            'premium_ftp' => $premiumFtp,
+            'premium_fts' => $premiumFts,
+        ]);
+    })->toArray();
+
+    $totalPremiumFtp = ($daysInYear > 0) ? ($totalPremium / $daysInYear) * $coverageDays : 0;
+
+    $totalPremiumFts = 0;
+    foreach ($schemes as $s) {
+        $totalPremiumFts += $totalPremiumFtp * ($s['share'] ?? 0);
+    }
+
+    // Converted Premium Formula (per installments)
+    $transactions = collect($get('transactions') ?? []);
+    $totalConvertedPremium = 0;
+    foreach ($transactions as $txn) {
+        $proportion = floatval($txn['proportion'] ?? 0) / 100; // porcentual → decimal
+        $rate = floatval($txn['exch_rate'] ?? 0);
+        $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
+    }
+
+    $totalDeductionOrig = 0;
+    $totalDeductionUsd = 0;
+
+    $groupedCostNodes = $costNodes->groupBy(fn ($node) => $node->costSchemes->share ?? 0)
+        ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
+            $shareFloat = floatval($share);
+
+            $nodeList = $nodes->map(function ($node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
+                $deduction = $totalPremiumFts * $node->value * $shareFloat;
+                $deductionConverted = $totalConvertedPremium * $node->value * $shareFloat;
+
+                return [
+                    'index' => $node->index,
+                    'partner' => $node->partner?->name ?? '-',
+                    'deduction' => $node->deduction?->concept ?? '-',
+                    'value' => $node->value,
+                    'share' => $shareFloat,
+                    'deduction_amount' => $deduction,
+                    'deduction_usd' => $deductionConverted,
+                ];
+            })->values();
+
+            $subtotalOrig = $nodeList->sum('deduction_amount');
+            $subtotalUsd = $nodeList->sum('deduction_usd');
+
+            $totalDeductionOrig += $subtotalOrig;
+            $totalDeductionUsd += $subtotalUsd;
+
+            return [
+                'share' => $shareFloat,
+                'nodes' => $nodeList,
+                'subtotal_orig' => $subtotalOrig,
+                'subtotal_usd' => $subtotalUsd,
+            ];
+        })
+        ->sortKeys()
+        ->values()
+        ->toArray();
+
+    return [
+        'id' => $get('id'),
+        'createdAt' => $record?->created_at ?? now(),
+        'documentType' => ($docTypeId = $get('operative_doc_type_id'))
+            ? BusinessDocType::find($docTypeId)?->name ?? '-'
+            : '-',
+        'inceptionDate' => $inception,
+        'expirationDate' => $expiration,
+        'premiumType' => $record?->business?->premium_type
+            ?? $business?->premium_type
+            ?? '-',
+        'originalCurrency' => $record?->business?->currency?->acronym
+            ?? $business?->currency?->acronym
+            ?? '-',
+        'insureds' => array_values($insureds),
+        'costSchemes' => $schemes,
+        'groupedCostNodes' => $groupedCostNodes,
+        'totalPremiumFts' => $totalPremiumFts,
+        'totalPremiumFtp' => $totalPremiumFtp,
+        'totalConvertedPremium' => $totalConvertedPremium,
+        'coverageDays' => $coverageDays,
+        'totalDeductionOrig' => $totalDeductionOrig,
+        'totalDeductionUsd' => $totalDeductionUsd,
+        'totalShare' => $totalShare,
+        'transactions' => collect($get('transactions') ?? [])->values(),
+    ];
+} */
+//NEW
+
+
+
+
+
+
+
+
+
 
     public function table(Table $table): Table
     {

@@ -20,9 +20,13 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Str;
-use App\Filament\Resources\BusinessResource\Widgets;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Actions\Action;
+use App\Filament\Resources\BusinessResource\Widgets;
+use Filament\Notifications\Notification;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\OperativeDocsExport;
+use App\Models\OperativeDoc;
 
 
 class BusinessResource extends Resource
@@ -364,48 +368,121 @@ class BusinessResource extends Resource
                 Action::make('export')
                     ->label('Export Report')
                     ->icon('heroicon-o-arrow-down-tray')
+                    ->modalHeading('Export Reports')
+                    ->modalSubmitActionLabel('Generate')
                     ->form([
                         Select::make('report_type')
                             ->label('Report Type')
                             ->options([
-                                'summary' => 'Summary',
-                                'detailed' => 'Detailed',
+                                'operative_docs'  => 'Underwritten Report',
+                                // 'business_summary' => 'Business Summary',
+                                // 'claims_report'    => 'Claims Report',
                             ])
+                            ->default('operative_docs')
                             ->required(),
 
-                        Select::make('format')
-                            ->label('Export Format')
-                            ->options([
-                                'pdf' => 'PDF',
-                                'xlsx' => 'Excel'
-                            ])
-                            ->default('pdf')
+                        // 🔹 Nuevo selector múltiple de reaseguradores
+                        Select::make('reinsurer_ids')
+                            ->label('Reinsurer(s)')
+                            ->placeholder('All reinsurers')
+                            ->options(fn () => \App\Models\Reinsurer::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->multiple(),
+
+                        DatePicker::make('from_date')
+                            ->label('From date')
                             ->required(),
 
-                        DatePicker::make('from_date')->label('From Date'),
-                        DatePicker::make('to_date')->label('To Date'),
+                        DatePicker::make('to_date')
+                            ->label('To date')
+                            ->required(),
                     ])
-                    ->modalHeading('Export Business Report')
-                    ->modalSubmitActionLabel('Generate')
                     ->action(function (array $data) {
-                        // Aquí generas y descargas el reporte según $data
+                        $from   = $data['from_date'] ?? null;
+                        $to     = $data['to_date']   ?? null;
+                        $report = $data['report_type'] ?? null;
 
-                        $from = $data['from_date'] ?? null;
-                        $to = $data['to_date'] ?? null;
-                        $type = $data['report_type'];
-                        $format = $data['format'];
+                        if (!$from || !$to || !$report) {
+                            Notification::make()
+                                ->title('Please select report type and both dates.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
 
-                        $query = \App\Models\Business::query();
+                        $reinsurerIds = collect($data['reinsurer_ids'] ?? [])->filter()->values(); // vacío = All
 
-                        if ($from) $query->whereDate('created_at', '>=', $from);
-                        if ($to) $query->whereDate('created_at', '<=', $to);
+                        $scope = $reinsurerIds->isEmpty() ? 'all-reinsurers' : ('reinsurers-' . $reinsurerIds->implode('-'));
+                        $reportLabels = [
+                            'operative_docs' => 'Underwritten_report',
+                            // 'business_summary' => 'Business_Summary',
+                            // 'claims_report'    => 'Claims_Report',
+                        ];
 
-                        $businesses = $query->get();
+                        $reportLabel = $reportLabels[$report] ?? $report;
 
-                        // Aquí puedes usar Laravel Excel o DomPDF para exportar
-                        // return response()->download(...);
+                        $filename = sprintf(
+                            '%s_%s_%s_to_%s.xlsx',
+                            $reportLabel,
+                            $scope,
+                            \Illuminate\Support\Carbon::parse($from)->format('Ymd'),
+                            \Illuminate\Support\Carbon::parse($to)->format('Ymd')
+                        );
+
+                        switch ($report) {
+                            case 'operative_docs':
+                               $docs = OperativeDoc::query()
+                                    ->with([
+                                        'business.reinsurer',
+                                        'business.currency',
+                                        'business.liabilityStructures',
+                                        'docType',
+                                    ])
+                                    ->whereDate('inception_date', '>=', $from)
+                                    ->whereDate('inception_date', '<=', $to)
+                                    ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
+                                    ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
+                                        $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
+                                    )
+                                    // shares
+                                    ->leftJoin('businessdoc_schemes', 'businessdoc_schemes.op_document_id', '=', 'operative_docs.id')
+                                    ->leftJoin('cost_schemes', 'cost_schemes.id', '=', 'businessdoc_schemes.cscheme_id')
+                                    // insureds
+                                    ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
+                                    ->leftJoin('companies', 'companies.id', '=', 'businessdoc_insureds.company_id')
+                                    // country del insured
+                                    ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')   // 👈 nuevo
+                                    ->orderBy('businesses.business_code')
+                                    ->select([
+                                        'operative_docs.*',
+                                        'cost_schemes.share as share',
+                                        'companies.name as insured_name',
+                                        'countries.name as country_name',                                    // 👈 nuevo
+                                    ])
+                                    ->get();
+
+                                if ($docs->isEmpty()) {
+                                    Notification::make()
+                                        ->title('No records found for the selected range.')
+                                        ->info()
+                                        ->send();
+                                    return;
+                                }
+
+                                return Excel::download(new \App\Exports\OperativeDocsExport($docs), $filename);
+
+                            default:
+                                Notification::make()
+                                    ->title('Unsupported report type.')
+                                    ->danger()
+                                    ->send();
+                                return;
+                        }
                     }),
             ])
+
+
 
 
             ->actions([
