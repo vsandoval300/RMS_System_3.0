@@ -12,12 +12,6 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Panel;
 
-
-
-
-
-
-
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -32,13 +26,11 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'department_id',
+        'position_id',
     ];
 
-    
-    
-    
-    
-    
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -67,6 +59,15 @@ class User extends Authenticatable implements FilamentUser
         return true;
     }
 
-    
+    // 👇 relación con Department
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
+    // 👇 relación con Position
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
+    }
 }

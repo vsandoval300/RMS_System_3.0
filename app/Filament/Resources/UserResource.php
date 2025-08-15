@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Hash;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Grouping\Group;
 
 class UserResource extends Resource
 {
@@ -28,6 +30,13 @@ class UserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Security';
     protected static ?int    $navigationSort  = -110;   // aparecerá primero
+
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return User::count();
+    }
 
     public static function form(Form $form): Form
     {
@@ -84,13 +93,21 @@ class UserResource extends Resource
                 ->sortable(),
 
             TextColumn::make('email')
+                ->icon('heroicon-m-envelope')
                 ->label('Email')
                 ->searchable()
                 ->sortable(),
 
-            TextColumn::make('email_verified_at')
-                ->label('Email Verified')
-                ->dateTime()
+            TextColumn::make('position.position')
+                ->label('Position')
+                ->placeholder('-')     // por si viene null
+                ->searchable()
+                ->sortable(),
+
+            TextColumn::make('department.name')
+                ->label('Department')
+                ->placeholder('-')     // por si viene null
+                ->searchable()
                 ->sortable(),
 
             TextColumn::make('roles.name')
@@ -101,23 +118,34 @@ class UserResource extends Resource
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('created_at')
-                ->label('Created')
-                ->dateTime()
-                ->sortable(),
-
-            TextColumn::make('updated_at')
-                ->label('Updated')
-                ->dateTime()
-                ->sortable(),
         ])
+        ->defaultSort('department.name','asc')
+        ->groups([
+                Group::make('department.name')
+                    ->label('Department')
+                    ->collapsible(), // 👈 clave para colapsar
+        ])
+        ->defaultGroup('department.name') // 👈 activa el grupo automáticamente
+
+
+
+
+
+
+
+
+
         ->filters([
             // Puedes agregar filtros por rol aquí si lo deseas
         ])
         ->actions([
-            Tables\Actions\ViewAction::make(),
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
+
+            Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+            
         ])
         ->bulkActions([
             Tables\Actions\DeleteBulkAction::make(),

@@ -27,13 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             
             //Operative Tables 
-            /*=============================================*/
-            UserSeeder::class,
-            //RolesSeeder::class,
-            //PermissionsSeeder::class,
-            //RoleHasPermissions::class,
-            //ModelHasRolesSeeder::class,            
-            //Cátalogos de posición geografica
+            
             /*=============================================*/
             RegionsSeeder::class,
             SubRegionsSeeder::class, 
@@ -42,8 +36,18 @@ class DatabaseSeeder extends Seeder
             /*=============================================*/
             CurrenciesSeeder::class,
             ClientsSeeder::class,
+           
+            /*=============================================*/
             BusinessUnitsSeeder::class,
             DepartmentsSeeder::class,
+            PositionsSeeder::class,
+            UserSeeder::class,
+            //RolesSeeder::class,
+            //PermissionsSeeder::class,
+            //RoleHasPermissions::class,
+            //ModelHasRolesSeeder::class,            
+            //Cátalogos de posición geografica
+            
             //Cátalogo de Usuarios
             /*=============================================*/
             IndustriesSeeder::class,
@@ -106,14 +110,11 @@ class DatabaseSeeder extends Seeder
             /*=============================================*/
             BusinessesCellMayabSeeder::class, /*1*/
             LiabilityStructureCellMayabSeeder::class, /*2*/
-            //Files for Placement Schemes
-            /*=============================================*/
-           
+            /*Files for Placement Schemes==================*/
             CschemeCellMayabSeeder::class, /*6*/
             CostNodesxCellMayabSeeder::class, /*4*/
             //CschemeCnodesCellMayabSeeder::class, /*7*/
-            //Files for Business Documents
-            /*=============================================*/
+            /*Files for Business Documents=================*/
             BusinessesDocsCellMayabSeeder::class, /*Details*/
             BusinessDocInsuredsCellMayabSeeder::class, /*Insureds*/
             BusinessDocsSchemesCellMayabSeeder::class, /*Placement Schemes*/
@@ -130,21 +131,19 @@ class DatabaseSeeder extends Seeder
             /*=============================================*/
             //FILES FOR YELMO
             /*=============================================*/
-            
-            //BusinessesYelmoSeeder::class, /*1*/
-            //LiabilityStructureYelmoSeeder::class, /*2*/
-            
+            BusinessesYelmoSeeder::class, /*1*/
+            LiabilityStructureYelmoSeeder::class, /*2*/
             //Files for Placement Schemes
             /*=============================================*/
-            //CostNodesYelmoSeeder::class, /*4*/
-            //CschemeYelmoSeeder::class, /*6*/
+            CschemeYelmoSeeder::class, /*6*/
+            CostNodesxYelmoSeeder::class, /*4*
             //CschemeCnodesYelmoSeeder::class, /*7*/
             //Files for Business Documents
             /*=============================================*/
-            //BusinessesDocsYelmoSeeder::class, /*Details*/
-            //BusinessDocInsuredsYelmoSeeder::class, /*Insureds*/
-            //BusinessDocsSchemesYelmoSeeder::class, /*Placement Schemes*/
-            //TransactionsYelmoSeeder::class, /*9*/
+            BusinessesDocsYelmoSeeder::class, /*Details*/
+            BusinessDocInsuredsYelmoSeeder::class, /*Insureds*/
+            BusinessDocsSchemesYelmoSeeder::class, /*Placement Schemes*/
+            TransactionsYelmoSeeder::class, /*9*/
             //TransactionsLogYelmoSeeder::class, /*10*/
             
 
@@ -156,19 +155,19 @@ class DatabaseSeeder extends Seeder
             /*=============================================*/
             //FILES FOR ADAMAS
             /*=============================================*/
-            //BusinessesAdamasSeeder::class, /*1*/
-            //LiabilityStructureAdamasSeeder::class, /*2*/
+            BusinessesAdamasSeeder::class, /*1*/
+            LiabilityStructureAdamasSeeder::class, /*2*/
             //Files for Placement Schemes
             /*=============================================*/
-            //CostNodesAdamasSeeder::class, /*4*/
-            //CschemeAdamasSeeder::class, /*6*/
+            CschemeAdamasSeeder::class, /*6*/
+            CostNodesxAdamasSeeder::class, /*4*/
             //CschemeCnodesAdamasSeeder::class, /*7*/
             //Files for Business Documents
             /*=============================================*/
-            //BusinessesDocsAdamasSeeder::class, /*Details*/
-            //BusinessDocInsuredsAdamasSeeder::class, /*Insureds*/
-            //BusinessDocsSchemesAdamasSeeder::class, /*Placement Schemes*/
-            //TransactionsAdamasSeeder::class, /*9*/
+            BusinessesDocsAdamasSeeder::class, /*Details*/
+            BusinessDocInsuredsAdamasSeeder::class, /*Insureds*/
+            BusinessDocsSchemesAdamasSeeder::class, /*Placement Schemes*/
+            TransactionsAdamasSeeder::class, /*9*/
             //TransactionsLogAdamasSeeder::class, /*10*/
             
 

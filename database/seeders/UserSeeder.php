@@ -2,420 +2,106 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        
-        //-------------------------------------//
-        // IT Team
-        //-------------------------------------//
-        
-        // Crear usuario 1: Super Admin
-        $user1 = new User();
-        $user1->name = 'Víctor Sandoval';
-        $user1->email = 'vsa@rainmakergroup.com';
-        $user1->email_verified_at = Carbon::now();
-        $user1->password = 'Yahoo#03'; // Solo para desarrollo, sin hash
-        $user1->remember_token = Str::random(10);
-        $user1->created_at = Carbon::now();
-        $user1->updated_at = Carbon::now();
-        $user1->save();
+        // 0) Limpiar cache de permisos/roles
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Crear usuario 2: Panel User
-        $user2 = new User();
-        $user2->name = 'Dolores Velazquez';
-        $user2->email = 'dvm@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Mary123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+        // 1) Vaciar tabla users y pivotes de Spatie
+        Schema::disableForeignKeyConstraints();
+        DB::table('model_has_roles')->truncate();
+        DB::table('model_has_permissions')->truncate();
+        User::truncate();
+        Schema::enableForeignKeyConstraints();
 
-        // Crear usuario 2: Panel User
-        $user2 = new User();
-        $user2->name = 'Felipe de Jesús Lazaro Sánchez';
-        $user2->email = 'fls@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Fls123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+        // 2) Roles (guard web)
+        $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $panelUser  = Role::firstOrCreate(['name' => 'panel_user',  'guard_name' => 'web']);
+        $roles = [
+            'super_admin' => $superAdmin,
+            'panel_user'  => $panelUser,
+        ];
 
-        //-------------------------------------//
-        // Stakeholders
-        //-------------------------------------//
+        // 3) Usuarios (password en claro aquí, se hashea al crear)
+        $users = [
+            // --- IT Team ---
+            ['name' => 'Víctor Sandoval', 'email' => 'vsa@rainmakergroup.com', 'password' => 'Yahoo#03', 'role' => 'super_admin', 'department_id' => '13', 'position_id' => '53'],
+            ['name' => 'Dolores Velazquez', 'email' => 'dvm@rainmakergroup.com', 'password' => 'Mary123', 'role' => 'panel_user', 'department_id' => '13', 'position_id' => '54'],
+            ['name' => 'Felipe de Jesús Lazaro Sánchez', 'email' => 'fls@rainmakergroup.com', 'password' => 'Fls123', 'role' => 'panel_user', 'department_id' => '13', 'position_id' => '55'],
 
-        // Crear usuario 3: Panel User
-        $user2 = new User();
-        $user2->name = 'Gabriel Holschneider Osuna';
-        $user2->email = 'gho@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Gho123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+            // --- Stakeholders ---
+            ['name' => 'Gabriel Holschneider Osuna', 'email' => 'gho@rainmakergroup.com', 'password' => 'Gho123', 'role' => 'panel_user', 'department_id' => '12', 'position_id' => '56'],
+            ['name' => 'Mauricio Esquino Urdaneta', 'email' => 'me@rainmakergroup.com', 'password' => 'Meu123', 'role' => 'panel_user', 'department_id' => '12', 'position_id' => '56'],
+            ['name' => 'Crisoforo Lozano Luna', 'email' => 'cll@rainmakergroup.com', 'password' => 'Cll123', 'role' => 'panel_user', 'department_id' => '12', 'position_id' => '56'],
 
-        // Crear usuario 4: Panel User
-        $user2 = new User();
-        $user2->name = 'Mauricio Esquino Urdaneta';
-        $user2->email = 'me@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Meu123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+            // --- Directors ---
+            ['name' => 'Francisco Teodoro Oliveros', 'email' => 'fog@rainmakergroup.com', 'password' => 'Fto123', 'role' => 'panel_user', 'department_id' => '5', 'position_id' => '40'],
+            ['name' => 'Gonzalo García Septien', 'email' => 'gg@rainmakergroup.com', 'password' => 'Ggs123', 'role' => 'panel_user', 'department_id' => '5', 'position_id' => '41'],
 
-        // Crear usuario 5: Panel User
-        $user2 = new User();
-        $user2->name = 'Crisoforo Lozano Luna';
-        $user2->email = 'cll@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Cll123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+            // --- Sales Team ---
+            ['name' => 'Rodrigo Manuel Gutiérrez', 'email' => 'rgc@rainmakergroup.com', 'password' => 'Rmg123', 'role' => 'panel_user', 'department_id' => '3', 'position_id' => '50'],
+            ['name' => 'Vicente Tames', 'email' => 'vta@rainmakergroup.com', 'password' => 'Vta123', 'role' => 'panel_user', 'department_id' => '3', 'position_id' => '50'],
 
-        //-------------------------------------//
-        // Directors
-        //-------------------------------------//
+            // --- 1 Team ---
+            ['name' => 'Brayan Pelcastre Jordan', 'email' => 'bpj@rainmakergroup.com', 'password' => 'Bpj123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '19'],
+            ['name' => 'Edgar Iván Figueroa', 'email' => 'efe@rainmakergroup.com', 'password' => 'Eif123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '10'],
+            ['name' => 'Vanessa Martínez González', 'email' => 'vmg@rainmakergroup.com', 'password' => 'Vmg123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '10'],
+            ['name' => 'Noemi Viveros Bernal', 'email' => 'noemi.viveros@rainmakergroup.com', 'password' => 'Nvb123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '9'],
+            ['name' => 'Arturo Ramírez Sánchez Villar', 'email' => 'a.ramirez@rainmakergroup.com', 'password' => 'Ars123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '9'],
+            ['name' => 'Sandra Geraldine Castillo Dorantes', 'email' => 's.castillo@rainmakergroup.com', 'password' => 'Sgc123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '9'],
+            ['name' => 'Carlos Eduardo Lara Uribe', 'email' => 'c.lara@rainmakergroup.com', 'password' => 'Cel123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '9'],
+            ['name' => 'Elizabeth García Cruz', 'email' => 'elizabeth.garcia@rainmakergroup.com', 'password' => 'Egc123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '9'],
 
-        // Crear usuario 6: Panel User
-        $user2 = new User();
-        $user2->name = 'Francisco Teodoro Oliveros';
-        $user2->email = 'fog@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Fto123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+            // --- 2 Team ---
+            ['name' => 'José Luis Márquez', 'email' => 'jmf@rainmakergroup.com', 'password' => 'Jlm123', 'role' => 'panel_user', 'department_id' => '2', 'position_id' => '57'],
+            ['name' => 'Alan Morales', 'email' => 'amc@rainmakergroup.com', 'password' => 'Amc123', 'role' => 'panel_user', 'department_id' => '2', 'position_id' => '30'],
+            ['name' => 'Ana Sandoval Flores', 'email' => 'asf@rainmakergroup.com', 'password' => 'Asf123', 'role' => 'panel_user', 'department_id' => '2', 'position_id' => '30'],
+            ['name' => 'Luis Antonio Segura Villanueva', 'email' => 'lsv@rainmakergroup.com', 'password' => 'Lsv123', 'role' => 'panel_user', 'department_id' => '2', 'position_id' => '30'],
 
-        // Crear usuario 7: Panel User
-        $user2 = new User();
-        $user2->name = 'Gonzalo García Septien';
-        $user2->email = 'gg@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Ggs123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+            // --- Administration Barbados Team ---
+            ['name' => 'Carolyn Humphrey', 'email' => 'ch@integritymanagers.com', 'password' => 'Ch123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '32'],
+            ['name' => 'Kira Almendra Gonzalez Tello', 'email' => 'ago@rainmakergroup.com', 'password' => 'Kagt123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '37'],
+            ['name' => 'Maria Fernanda Romero Valdovinos', 'email' => 'mrv@rainmakergroup.com', 'password' => 'Mrv123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '16'],
+            ['name' => 'Marcia Barnard', 'email' => 'mc@integritymanagers.com', 'password' => 'Mb123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '44'],
+            ['name' => 'Esther Reyes', 'email' => 'er@integritymanagers.com', 'password' => 'Er123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '12'],
+            ['name' => 'Kristy-Ann King', 'email' => 'kak@integritymanagers.com', 'password' => 'Kak123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '12'],
+            ['name' => 'Maria Kirton', 'email' => 'mb@integritymanagers.com', 'password' => 'Mk123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '12'],
+            ['name' => 'Micah Sealy', 'email' => 'ms@integritymanagers.com', 'password' => 'Ms123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '12'],
+            ['name' => 'Shelley Cadogan', 'email' => 'sc@integritymanagers.com', 'password' => 'Sc123', 'role' => 'panel_user', 'department_id' => '6', 'position_id' => '31'],
+        ];
 
-        //-------------------------------------//
-        // Sales Team
-        //-------------------------------------//
+        // 4) Crear usuarios y asignar roles
+        foreach ($users as $u) {
+            $user = User::create([
+                'name' => $u['name'],
+                'email' => trim($u['email']),
+                'password' => Hash::make($u['password']), // siempre hash
+                'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
+                
+                'department_id'     => (int) $u['department_id'],
+                'position_id'       => (int) $u['position_id'],
+            ]);
 
-        // Crear usuario 9: Panel User
-        $user2 = new User();
-        $user2->name = 'Rodrigo Manuel Gutiérrez';
-        $user2->email = 'rgc@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Rmg123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
+            $roleKey = $u['role'] ?? 'panel_user';
+            if (isset($roles[$roleKey])) {
+                $user->assignRole($roles[$roleKey]);
+            }
+        }
 
-        // Crear usuario 16: Panel User
-        $user2 = new User();
-        $user2->name = 'Vicente Tames';
-        $user2->email = 'vta@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Vta123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        //-------------------------------------//
-        // Underwritten Team
-        //-------------------------------------//
-
-        // Crear usuario 10: Panel User
-        $user2 = new User();
-        $user2->name = 'Brayan Pelcastre Jordan';
-        $user2->email = 'bpj@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Bpj123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 14: Panel User
-        $user2 = new User();
-        $user2->name = 'Edgar Iván Figueroa';
-        $user2->email = 'efe@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Eif123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 15: Panel User
-        $user2 = new User();
-        $user2->name = 'Vanessa Martínez González';
-        $user2->email = 'vmg@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Vmg123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 28: Panel User
-        $user2 = new User();
-        $user2->name = 'Noemi Viveros Bernal';
-        $user2->email = 'noemi.viveros@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Nvb123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 28: Panel User
-        $user2 = new User();
-        $user2->name = 'Arturo Ramírez Sánchez Villar';
-        $user2->email = 'a.ramirez@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Ars123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 28: Panel User
-        $user2 = new User();
-        $user2->name = 'Sandra Geraldine Castillo Dorantes';
-        $user2->email = 's.castillo@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Sgc123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 28: Panel User
-        $user2 = new User();
-        $user2->name = 'Carlos Eduardo Lara Uribe';
-        $user2->email = 'c.lara@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Cel123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 28: Panel User
-        $user2 = new User();
-        $user2->name = 'Elizabeth García Cruz';
-        $user2->email = 'elizabeth.garcia@rainmakergroup.com ';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Egc123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        //-------------------------------------//
-        // Operations Team
-        //-------------------------------------//
-
-        // Crear usuario 11: Panel User
-        $user2 = new User();
-        $user2->name = 'José Luis Márquez';
-        $user2->email = 'jmf@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Jlm123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 17: Panel User
-        $user2 = new User();
-        $user2->name = 'Alan Morales';
-        $user2->email = 'amc@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Amc123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 18: Panel User
-        $user2 = new User();
-        $user2->name = 'Ana Sandoval Flores';
-        $user2->email = 'asf@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Asf123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 19: Panel User
-        $user2 = new User();
-        $user2->name = 'Luis Antonio Segura Villanueva';
-        $user2->email = 'lsv@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Lsv123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 19: Panel User
-        $user2 = new User();
-        $user2->name = 'Luis Antonio Segura Villanueva';
-        $user2->email = 'lsv@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Lsv123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        //-------------------------------------//
-        // Administration Barbados Team
-        //-------------------------------------//
-
-        // Crear usuario 12: Panel User
-        $user2 = new User();
-        $user2->name = 'Carolyn Humphrey';
-        $user2->email = 'ch@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Ch123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 13: Panel User
-        $user2 = new User();
-        $user2->name = 'Kira Almendra Gonzalez Tello';
-        $user2->email = 'ago@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Kagt123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 27: Panel User
-        $user2 = new User();
-        $user2->name = 'Maria Fernanda Romero Valdovinos';
-        $user2->email = 'mrv@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Mrv123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 20: Panel User
-        $user2 = new User();
-        $user2->name = 'Marcia Barnard';
-        $user2->email = 'mc@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Mb123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 21: Panel User
-        $user2 = new User();
-        $user2->name = 'Esther Reyes';
-        $user2->email = 'er@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Er123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 22: Panel User
-        $user2 = new User();
-        $user2->name = 'Kristy-Ann King';
-        $user2->email = 'kak@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Kak123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 23: Panel User
-        $user2 = new User();
-        $user2->name = 'Maria Kirton';
-        $user2->email = 'mb@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Mk123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 24: Panel User
-        $user2 = new User();
-        $user2->name = 'Micah Sealy';
-        $user2->email = 'ms@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Ms123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 25: Panel User
-        $user2 = new User();
-        $user2->name = 'Shelley Cadogan';
-        $user2->email = 'sc@integritymanagers.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Sc123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Crear usuario 28: Panel User
-        $user2 = new User();
-        $user2->name = 'Noemi Viveros Bernal';
-        $user2->email = 'noemi.viveros@rainmakergroup.com';
-        $user2->email_verified_at = Carbon::now();
-        $user2->password = 'Nvb123'; // Solo para desarrollo, sin hash
-        $user2->remember_token = Str::random(10);
-        $user2->created_at = Carbon::now();
-        $user2->updated_at = Carbon::now();
-        $user2->save();
-
-        // Buscar o crear roles
-        $superAdminRole = Role::findOrCreate('super_admin', 'web');
-        $panelUserRole = Role::findOrCreate('panel_user', 'web');
-
-        // Asignar roles
-        $user1->assignRole($superAdminRole);
-        $user2->assignRole($panelUserRole);
-
-        // Dar todos los permisos al rol super_admin
-        $allPermissions = Permission::pluck('name');
-        $superAdminRole->syncPermissions($allPermissions);
+        // 5) Otorgar todos los permisos existentes al rol super_admin
+        $superAdmin->syncPermissions(Permission::pluck('name')->toArray());
     }
 }

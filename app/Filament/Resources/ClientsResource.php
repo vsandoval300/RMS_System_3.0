@@ -153,15 +153,18 @@ class ClientsResource extends Resource
                     ->extraAttributes([
                         'style' => 'width: 200px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
+
                 TextColumn::make('short_name')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 520px; white-space: normal;', // ancho fijo de 300px
                     ]),
+                    
                 TextColumn::make('webpage')
                     ->searchable()
                     ->sortable()

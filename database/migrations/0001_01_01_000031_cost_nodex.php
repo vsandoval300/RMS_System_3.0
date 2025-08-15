@@ -24,8 +24,12 @@ return new class extends Migration
             $table->float('value');
             $table->foreignId('partner_id')->constrained('partners');
             $table->enum('referral_partner', ['Gatekeeper', 'Integrity', 'GMK-International'])->nullable();
+            
             $table->string('cscheme_id', 19); 
-            $table->foreign('cscheme_id')->references('id')->on('cost_schemes')->onDelete('cascade');
+            $table->foreign('cscheme_id')
+                  ->references('id')
+                  ->on('cost_schemes')
+                  ->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

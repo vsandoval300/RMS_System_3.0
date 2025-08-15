@@ -1,0 +1,39 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\CostNodex;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class CostNodesxAdamasSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20141226-0103-1';       $CostNodex->index = '1';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_id = '67';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20141226-0103';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20141226-0103-2';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.0125';         $CostNodex->partner_id = '80';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20141226-0103';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20141226-0103-3';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.025';         $CostNodex->partner_id = '40';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20141226-0103';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0104-1';       $CostNodex->index = '1';        $CostNodex->concept = '1';        $CostNodex->value = '0.015';         $CostNodex->partner_id = '67';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20150909-0104';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0104-2';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.01';         $CostNodex->partner_id = '80';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20150909-0104';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0104-3';       $CostNodex->index = '3';        $CostNodex->concept = '3';        $CostNodex->value = '0.005';         $CostNodex->partner_id = '80';        $CostNodex->referral_partner =  'Gatekeeper ' ;              $CostNodex->cscheme_id = 'SCHE-20150909-0104';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0104-4';       $CostNodex->index = '4';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_id = '50';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20150909-0104';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0105-1';       $CostNodex->index = '1';        $CostNodex->concept = '1';        $CostNodex->value = '0.015';         $CostNodex->partner_id = '67';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20150909-0105';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0105-2';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.01';         $CostNodex->partner_id = '80';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20150909-0105';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0105-3';       $CostNodex->index = '3';        $CostNodex->concept = '3';        $CostNodex->value = '0.005';         $CostNodex->partner_id = '80';        $CostNodex->referral_partner =  'Gatekeeper ' ;              $CostNodex->cscheme_id = 'SCHE-20150909-0105';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20150909-0105-4';       $CostNodex->index = '4';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_id = '50';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20150909-0105';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20151224-0106-1';       $CostNodex->index = '1';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_id = '67';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20151224-0106';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20151224-0106-2';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.0075';         $CostNodex->partner_id = '82';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20151224-0106';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20151224-0106-3';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.0175';         $CostNodex->partner_id = '13';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20151224-0106';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20151224-0107-1';       $CostNodex->index = '1';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_id = '67';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20151224-0107';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20151224-0107-2';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.0075';         $CostNodex->partner_id = '82';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20151224-0107';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20151224-0107-3';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.0175';         $CostNodex->partner_id = '13';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20151224-0107';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20160330-0108-1';       $CostNodex->index = '1';        $CostNodex->concept = '1';        $CostNodex->value = '0.015';         $CostNodex->partner_id = '67';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20160330-0108';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20160330-0108-2';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.0075';         $CostNodex->partner_id = '82';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20160330-0108';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20160330-0108-3';       $CostNodex->index = '3';        $CostNodex->concept = '3';        $CostNodex->value = '0.01';         $CostNodex->partner_id = '82';        $CostNodex->referral_partner =  'Gatekeeper ' ;              $CostNodex->cscheme_id = 'SCHE-20160330-0108';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20160330-0108-4';       $CostNodex->index = '4';        $CostNodex->concept = '1';        $CostNodex->value = '0.0175';         $CostNodex->partner_id = '13';        $CostNodex->referral_partner = null;             $CostNodex->cscheme_id = 'SCHE-20160330-0108';         $CostNodex->save(); 
+    }
+}

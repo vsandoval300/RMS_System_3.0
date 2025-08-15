@@ -17,11 +17,21 @@ return new class extends Migration
             $table->string('email')->unique();//
             $table->timestamp('email_verified_at')->nullable();//
             $table->string('password');
+
+            // 🔹 Nuevo: reemplazamos 'team' por 'department_id'
+            $table->foreignId('department_id')
+                ->constrained('departments')
+                ->cascadeOnDelete();
+
+            // 🔹 Nuevo: reemplazamos 'team' por 'department_id'
+          $table->foreignId('position_id')
+                ->constrained('positions')
+                ->cascadeOnDelete();
+
             /* $table->string('surname');//
             $table->string('phone')->nullable();
             $table->string('token')->nullable(); // Nuevo campo para el token
             $table->rememberToken();
-            $table->foreignId('department_id')->constrained('departments')->cascadeOnDelete(); //antes bunit_id de la tabla businessunits
             $table->enum('type', ['Internal', 'External'])->default('Internal');
             $table->unsignedBigInteger('parent_id')->nullable(); // En ves de supervisor se crea este.
             $table->foreign('parent_id')->references('id')->on('users');
@@ -54,8 +64,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('users');
     }
 };

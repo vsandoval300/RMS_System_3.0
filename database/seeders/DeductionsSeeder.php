@@ -40,12 +40,17 @@ class DeductionsSeeder extends Seeder
         $deduction->save();
 
         $deduction = new deduction();
-        $deduction->concept = 'retail';
+        $deduction->concept = 'retail fee';
         $deduction->description = '';
         $deduction->save();
 
         $deduction = new deduction();
-        $deduction->concept = 'other deduction';
+        $deduction->concept = 'other ded';
+        $deduction->description = '';
+        $deduction->save();
+
+        $deduction = new deduction();
+        $deduction->concept = 'exempt';
         $deduction->description = '';
         $deduction->save();
     }

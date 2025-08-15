@@ -21,6 +21,8 @@ return new class extends Migration
                 ->constrained('business_units')
                 ->cascadeOnDelete();
 
+            $table->text('description');
+
             $table->timestamps();
             $table->softDeletes();
         });
