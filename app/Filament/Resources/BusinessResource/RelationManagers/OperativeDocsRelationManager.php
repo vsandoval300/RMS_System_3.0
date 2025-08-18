@@ -142,8 +142,8 @@ class OperativeDocsRelationManager extends RelationManager
                                             // opcional: puedes actualizar otro campo si quieres
                                         }),
 
-                                     Hidden::make('roe')
-                                        ->default(1),
+                                     /* Hidden::make('roe')
+                                        ->default(1), */
                                     
 
                                 ])

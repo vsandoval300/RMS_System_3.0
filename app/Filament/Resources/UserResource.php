@@ -23,6 +23,7 @@ use Spatie\Permission\Models\Role;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Grouping\Group;
 
+
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -43,14 +44,17 @@ class UserResource extends Resource
         return $form
         ->schema([
             Section::make('User Information')
+                 ->description("Overview of the user's primary details.")
                 ->schema([
                     TextInput::make('name')
                         ->label('Name')
+                        //->inlineLabel()
                         ->required()
                         ->maxLength(255),
 
                     TextInput::make('email')
                         ->label('Email')
+                        //->inlineLabel()
                         ->email()
                         ->required()
                         ->maxLength(255)
@@ -58,6 +62,7 @@ class UserResource extends Resource
 
                     TextInput::make('password')
                         ->label('Password')
+                        ->visible(fn (string $context) => in_array($context, ['create','edit'], true))
                         ->password()
                         ->dehydrated(fn ($state) => filled($state)) // Solo guarda si hay input
                         ->maxLength(255)
@@ -65,21 +70,73 @@ class UserResource extends Resource
                         ->afterStateHydrated(fn ($component, $state) => $component->state('')) // Oculta valor actual
                         ->dehydrateStateUsing(fn ($state) => !empty($state) ? Hash::make($state) : null),
 
-                    DateTimePicker::make('email_verified_at')
-                        ->label('Email Verified At')
-                        ->nullable(),
-
-                    Select::make('roles')
-                        ->label('Roles')
-                        ->multiple()
-                        ->options(Role::pluck('name', 'name'))
-                        ->default(fn ($record) => $record?->getRoleNames())
-                        ->dehydrateStateUsing(fn ($state) => $state)
-                        ->afterStateUpdated(fn ($state, $record) => $record->syncRoles($state))
+                    Select::make('department_id')
+                        ->label('Department')
+                        //->inlineLabel()
+                        ->relationship('department', 'name')
                         ->searchable()
-                        ->preload(),
+                        ->preload()
+                        ->required()
+                        ->native(false),         
+
+                    Select::make('position_id')
+                        ->label('Position')
+                        //->inlineLabel()
+                        ->relationship('position', 'position')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->native(false),
+                                
                 ])
                 ->columns(2),
+            
+            Section::make('Audit Dates')
+                ->visible(fn (string $context) => $context === 'view') 
+                ->schema([
+                  
+                    DateTimePicker::make('email_verified_at')
+                        ->label('Email Verified At')
+                        //->inlineLabel()
+                        ->disabled() 
+                        ->dehydrated(false)
+                        ->visible(fn (string $context) => in_array($context, ['edit', 'view'], true))
+                        ->nullable(),
+
+                    DateTimePicker::make('created_at')
+                        ->label('Created At')
+                        //->inlineLabel()
+                        ->disabled() 
+                        ->dehydrated(false)
+                        ->visible(fn (string $context) => in_array($context, ['edit', 'view'], true))
+                        ->nullable(),
+
+                    DateTimePicker::make('updated_at')
+                        ->label('Updated At')
+                        //->inlineLabel()
+                        ->disabled() 
+                        ->dehydrated(false)
+                        ->visible(fn (string $context) => in_array($context, ['edit', 'view'], true))
+                        ->nullable(),
+
+                ])               
+                ->columns(3),
+
+            Section::make('Roles')
+                ->description('Grant or revoke roles to adjust access level.')
+                ->schema([
+                    Select::make('roles')
+                            ->label('Roles')
+                            ->multiple()
+                            ->relationship(
+                                name: 'roles',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->where('guard_name', 'web')
+                            )
+                            ->preload()
+                            ->searchable(),
+
+            ])
         ]);
     }
 
@@ -148,7 +205,7 @@ class UserResource extends Resource
             
         ])
         ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
+            //Tables\Actions\DeleteBulkAction::make(),
         ]);
     }
 
