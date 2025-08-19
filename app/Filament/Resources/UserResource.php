@@ -143,11 +143,34 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->modifyQueryUsing(fn (Builder $query) => $query->with('department'))
         ->columns([
             TextColumn::make('name')
                 ->label('Name')
+                ->formatStateUsing(function (string $state): string {
+                    $name = trim($state);
+                    $parts = preg_split('/\s+/', $name) ?: [];
+                    $first = mb_substr($parts[0] ?? '', 0, 1);
+                    $last  = mb_substr(($parts[count($parts) - 1] ?? ''), 0, 1);
+                    $initials = mb_strtoupper($first . ($last !== $first ? $last : ''));
+                    $escName = e($name);
+
+                    $circleBg = '#41a2c3'; // ← tu color
+
+                    return <<<HTML
+                        <span class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full text-white text-[10px] font-semibold"
+                                style="background: {$circleBg}">
+                                {$initials}
+                            </span>
+                            <span>{$escName}</span>
+                        </span>
+                    HTML;
+                })
+                ->html()
                 ->searchable()
                 ->sortable(),
+
 
             TextColumn::make('email')
                 ->icon('heroicon-m-envelope')
@@ -178,9 +201,13 @@ class UserResource extends Resource
         ])
         ->defaultSort('department.name','asc')
         ->groups([
-                Group::make('department.name')
-                    ->label('Department')
-                    ->collapsible(), // 👈 clave para colapsar
+            Group::make('department.name')
+                ->label('Department')
+                ->getDescriptionFromRecordUsing(
+                    fn (\App\Models\User $record): string =>
+                        Str::limit((string) ($record->department?->description ?? ''), 140) // ajusta 120–160
+                )
+                ->collapsible(),
         ])
         ->defaultGroup('department.name') // 👈 activa el grupo automáticamente
 

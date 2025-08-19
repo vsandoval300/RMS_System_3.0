@@ -10,6 +10,10 @@ use App\Models\country;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+// NUEVO: para poder invocar comandos Artisan desde el seeder
+use Illuminate\Support\Facades\Artisan;
+// NUEVO: para limpiar la caché de permisos al final
+use Spatie\Permission\PermissionRegistrar;
 
 class DatabaseSeeder extends Seeder
 {
@@ -136,7 +140,7 @@ class DatabaseSeeder extends Seeder
             //Files for Placement Schemes
             /*=============================================*/
             CschemeYelmoSeeder::class, /*6*/
-            CostNodesxYelmoSeeder::class, /*4*
+            CostNodesxYelmoSeeder::class, /*4*/
             //CschemeCnodesYelmoSeeder::class, /*7*/
             //Files for Business Documents
             /*=============================================*/
@@ -174,19 +178,6 @@ class DatabaseSeeder extends Seeder
             //ReferralsYelmoSeeder::class, /*5*/
             //InvoicesYelmoSeeder::class, /*11*/
             //InvoiceTransactionsYelmoSeeder::class, /*12*/
-
-
-
-
-
-
-
-
-
-
-
-
-
             
             //File of Activity
             /*=============================================*/
@@ -195,7 +186,23 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
+        // =========================
+        // NUEVO: Generar permisos de Shield con base en tus Resources/Pages/Widgets
+        // =========================
+        
+        $this->call([
+            // === Generar permisos de Shield (en seeder separado y no interactivo)
+            ShieldGenerateSeeder::class,
+            // === Asignar permisos a roles (tu seeder propio)
+            RolesAndPermissionsSeeder::class,
+        ]);
 
+        
+
+        // === Limpiar caché de permisos
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        \Illuminate\Support\Facades\Artisan::call('permission:cache-reset');
+        $this->command?->info('Permissions cache reset.');
 
     }
 }

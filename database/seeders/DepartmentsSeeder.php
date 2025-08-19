@@ -21,12 +21,12 @@ class DepartmentsSeeder extends Seeder
             ['name' => 'Marketing & Communications', 'description' => 'Marketing strategy, branding, and internal/external communications.', 'business_unit_id' => 1],
             ['name' => 'Client Services', 'description' => 'Customer support, relationship management, and retention.', 'business_unit_id' => 1],
             ['name' => 'Strategic Planning & Business', 'description' => 'Development of new business opportunities and long-term planning.', 'business_unit_id' => 1],
-            ['name' => 'Shareholders', 'description' => 'Department composed of the company’s shareholders, responsible for representing ownership interests, participating in strategic decision-making, and overseeing the organization’s overall direction.', 'business_unit_id' => 1],
+            ['name' => 'Shareholders',        'description' => 'Ownership representation and strategic oversight.', 'business_unit_id' => 1],
             ['name' => 'Information Technology', 'description' => 'Management of technology infrastructure, software development, cybersecurity, and IT support services.', 'business_unit_id' => 1],
             ['name' => 'Family Office', 'description' => 'Management of personal and family investments, estate planning, and financial administration.', 'business_unit_id' => 1],
-            ['name' => 'General Management', 'description' => 'Corporate leadership and governance: sets strategy and objectives, oversees executive performance, allocates resources, manages board and stakeholder relations, and ensures compliance and enterprise results.', 'business_unit_id' => 1],
-            ['name' => 'Country Management', 'description' => 'Country-level leadership and P&L ownership: leads local sales, operations and marketing, builds partnerships, ensures regulatory compliance, and delivers revenue growth and profitability.', 'business_unit_id' => 1],
-            ['name' => 'Corporate Governance', 'description' => 'Oversees board and committee governance, corporate policies, ethics & compliance, disclosures and corporate secretariat duties; ensures shareholder governance and adherence to laws, regulations and best practices.', 'business_unit_id' => 1],
+            ['name' => 'General Management',  'description' => 'Sets corporate strategy, leads executives, allocates resources, ensures results.', 'business_unit_id' => 1],
+            ['name' => 'Country Management',  'description' => 'Leads country operations and P&L; drives sales, compliance, and growth.', 'business_unit_id' => 1],
+            ['name' => 'Corporate Governance','description' => 'Governs boards and policies; ethics, compliance, and disclosures.', 'business_unit_id' => 1],
         ];
 
         foreach ($departments as $dept) {
