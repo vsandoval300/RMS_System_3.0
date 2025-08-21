@@ -572,8 +572,11 @@ class OperativeDocsRelationManager extends RelationManager
                             foreach ($transactions as $txn) {
                                 $proportion = floatval($txn['proportion'] ?? 0) / 100; // 👈 CORRECTO
                                 $rate = floatval($txn['exch_rate'] ?? 0);
-
-                                $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
+                                if ($rate > 0) {
+                                    $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
+                                } else {
+                                    $totalConvertedPremium = 1;
+                                }
                             }
 
                             $totalDeductionOrig = 0;
@@ -844,6 +847,7 @@ class OperativeDocsRelationManager extends RelationManager
             Tables\Columns\TextColumn::make('id')
                 ->label('Document code')
                 ->sortable()->verticalAlignment(VerticalAlignment::Start) 
+                ->copyable()
                 ->sortable()
                 ->searchable()
                 ->tooltip(fn ($state) => $state) 

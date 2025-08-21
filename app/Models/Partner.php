@@ -42,4 +42,16 @@ class Partner extends Model
         return $this->hasMany(Business::class, 'producer_id');
     }
 
+
+    public function logsFrom()
+    {
+        return $this->hasMany(TransactionLog::class, 'from_entity', 'id');
+    }
+
+    public function logsTo()
+    {
+        return $this->hasMany(TransactionLog::class, 'to_entity', 'id');
+    }
+
+
 }

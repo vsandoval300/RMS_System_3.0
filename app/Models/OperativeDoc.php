@@ -79,7 +79,7 @@ class OperativeDoc extends Model
     /** Transacciones (payments, etc.) */
     public function transactions()
     {
-        return $this->hasMany(Transaction::class,'op_document_id');
+        return $this->hasMany(Transaction::class,'op_document_id','id');
     }
 
     public function operativeDocs()

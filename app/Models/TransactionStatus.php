@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TransactionStatus extends Model
 {
@@ -20,7 +21,7 @@ class TransactionStatus extends Model
      * Campos que se pueden asignar masivamente.
      */
     protected $fillable = [
-        'transaction_status',
+        'transaction_statuses',
     ];
 
     /**
@@ -39,4 +40,10 @@ class TransactionStatus extends Model
         'transaction_status' => 'string',
         // 'transaction_status' => TransactionStatusEnum::class, // Versión con Enum nativo
     ];
+
+    public function transactions(): HasMany
+    {
+        // FK en transactions: transaction_status_id
+        return $this->hasMany(Transaction::class, 'transaction_status_id');
+    }
 }

@@ -27,6 +27,8 @@ use Filament\Notifications\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OperativeDocsExport;
 use App\Models\OperativeDoc;
+use Filament\Pages\SubNavigationPosition;     
+use Filament\Resources\Pages\Page; 
 
 
 class BusinessResource extends Resource
@@ -36,6 +38,7 @@ class BusinessResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 9;   // aparecerá primero
+    
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
@@ -330,6 +333,7 @@ class BusinessResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                    
                 Tables\Columns\TextColumn::make('business_lifecycle_status')
                     ->label('Lifecycle')
                     ->badge()
@@ -573,6 +577,8 @@ class BusinessResource extends Resource
         ];
     }
 
+
+
     public static function getPages(): array
     {
         return [
@@ -582,6 +588,7 @@ class BusinessResource extends Resource
             'view' => Pages\ViewBusiness::route('/{record}/view'), // 👈 Asegúrate que esto esté
         ];
     }
+
 
     public static function getWidgets(): array
     {

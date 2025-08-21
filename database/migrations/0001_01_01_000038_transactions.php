@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->engine('InnoDB');
-            $table->uuid('id')->primary(); // Cambia a uuid
+            $table->char('id', 36)->primary(); // UUID como string
 
             $table->integer('index'); 
             $table->float('proportion');

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('transaction_logs', function (Blueprint $table) {
             $table->engine('InnoDB');
-            $table->uuid('id')->primary(); // Cambia a uuid
+            $table->char('id', 36)->primary(); // UUID como string
 
 
-            $table->uuid('transaction_code'); // Cambia a uuid
-            $table->foreign('transaction_code')->references('id')->on('transactions')->onDelete('cascade');
+            $table->char('transaction_id', 36);
+            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
 
             $table->integer('index'); 
 

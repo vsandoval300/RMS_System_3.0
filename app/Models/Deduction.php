@@ -23,6 +23,12 @@ class Deduction extends Model
         'description',
     ];
 
+
+    public function transactionLogs()
+    {
+        return $this->hasMany(TransactionLog::class, 'deduction_type', 'id');
+    }
+
     /**
      * Ejemplo de relación, si en el futuro una deducción
      * pertenece a una factura:

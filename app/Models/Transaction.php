@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
 {
@@ -31,12 +33,42 @@ class Transaction extends Model
         'transaction_status_id',
     ];
     
+    protected $casts = [
+        'due_date' => 'datetime',
+        'proportion' => 'decimal:6',
+        'exch_rate' => 'decimal:6',
+    ];
     
-    
-    public function operativeDoc()
+    /* --------------------------------------------------
+     |  belongsTo
+     --------------------------------------------------*/
+    public function type(): BelongsTo
+    {
+        // FK: transactions.transaction_type_id → transaction_types.id
+        return $this->belongsTo(TransactionType::class, 'transaction_type_id');
+    }
+
+    public function status(): BelongsTo
+    {
+        // FK: transactions.transaction_status_id → transaction_statuses.id
+        return $this->belongsTo(TransactionStatus::class, 'transaction_status_id');
+    }
+
+    // (Extra, por tu contexto previo)
+    public function operativeDoc(): BelongsTo
     {
         return $this->belongsTo(OperativeDoc::class, 'op_document_id');
     }
+
+    /* --------------------------------------------------
+     |  hasMany
+     --------------------------------------------------*/
+    public function logs(): HasMany
+    {
+        // Enlaza por código: transaction_logs.transaction_code → transactions.remmitance_code
+        return $this->hasMany(TransactionLog::class, 'transaction_code');
+    }
+
 
     protected static function booted()
     {
@@ -72,6 +104,4 @@ class Transaction extends Model
                 });
         });
     }
-
-
 }

@@ -14,13 +14,13 @@ return new class extends Migration
         //
         Schema::create('transactions_logsupports', function (Blueprint $table) {
             $table->engine('InnoDB');
-            $table->uuid('id')->primary(); // Cambia a uuid
+            $table->char('id', 36)->primary(); // UUID como string
 
             $table->string('support_path',200)->nullable();
 
-            $table->uuid('transaction_log_id'); // Cambia a uuid
-            // Define la clave foránea referenciando costs_nodes
+            $table->char('transaction_log_id',36); // Cambia a uuid
             $table->foreign('transaction_log_id')->references('id')->on('transaction_logs')->onDelete('cascade');
+
 
             $table->timestamps();
             $table->softDeletes();

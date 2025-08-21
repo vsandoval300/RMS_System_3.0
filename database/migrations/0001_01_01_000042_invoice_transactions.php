@@ -13,13 +13,13 @@ return new class extends Migration
     {
          Schema::create('invoice_transactions', function (Blueprint $table) {
             $table->engine('InnoDB');
-            $table->uuid('id')->primary(); // Cambia a uuid
+            $table->char('id', 36)->primary(); // UUID como string
 
 
-            $table->uuid('invoice_id'); // Cambia a uuid
+            $table->char('invoice_id',36); // Cambia a uuid
             $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
             
-            $table->uuid('transaction_code'); // Cambia a uuid
+            $table->char('transaction_code',36); // Cambia a uuid
             $table->foreign('transaction_code')->references('id')->on('transactions')->onDelete('cascade');
 
             $table->foreignId('invoice_concept_id')->constrained('invoice_concepts')->cascadeOnDelete();

@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TransactionType extends Model
 {
     use SoftDeletes;
-    // Si tu tabla se llama distinto, destápalo:
-    // protected $table = 'transactions_type_catalog';
 
-    protected $fillable = ['description'];
+    protected $table = 'transaction_types';
 
-    // Si añadiste timestamps y/o soft deletes en la migración, déjalos;
-    // si tu tabla NO los tiene, desactíalos:
-    // public $timestamps = false;
+    public function transactions(): HasMany
+    {
+        // FK en transactions: transaction_type_id
+        return $this->hasMany(Transaction::class, 'transaction_type_id');
+    }
 }
-

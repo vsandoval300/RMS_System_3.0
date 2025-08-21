@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('transactions_supports', function (Blueprint $table) {
             $table->engine('InnoDB');
-            $table->uuid('id')->primary(); // Cambia a uuid
+            $table->char('id', 36)->primary(); // UUID como string
             
             $table->text('description');
             $table->string('support_path',200)->nullable();
-            $table->uuid('transaction_code'); // Cambia a uuid
-            // Define la clave foránea referenciando costs_nodes
+            
+            $table->char('transaction_code', 36);
             $table->foreign('transaction_code')->references('id')->on('transactions')->onDelete('cascade');
 
             $table->timestamps();

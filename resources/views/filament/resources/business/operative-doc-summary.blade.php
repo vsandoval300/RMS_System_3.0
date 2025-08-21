@@ -360,7 +360,8 @@
                     $dueDate = $txn['due_date'] ?? null;
 
                     $amountOrig = $netPremium * $proportion;
-                    $amountUsd = $amountOrig / $rate;
+                    
+                    $amountUsd = $rate > 0 ? ($amountOrig / $rate) : 0;
 
                     $grandOrig += $amountOrig;
                     $grandUsd += $amountUsd;
