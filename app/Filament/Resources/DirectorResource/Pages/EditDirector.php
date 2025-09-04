@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Resources\ReinsurersResource\Pages;
+namespace App\Filament\Resources\DirectorResource\Pages;
 
-use App\Filament\Resources\ReinsurersResource;
+use App\Filament\Resources\DirectorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 
-class EditReinsurers extends EditRecord
+class EditDirector extends EditRecord
 {
-    protected static string $resource = ReinsurersResource::class;
+    protected static string $resource = DirectorResource::class;
 
     /*--------------------------------------------------------------
      | 1. Ocultar el botón Delete
@@ -44,27 +44,4 @@ class EditReinsurers extends EditRecord
     {
         return [];              // así ya no se duplican abajo :contentReference[oaicite:1]{index=1}
     }
-
-    /*--------------------------------------------------------------
-     | Gathered Relation Managers with Resource 
-     --------------------------------------------------------------*/
-    public function getContentTabLabel(): ?string
-    {
-        return 'Reinsurer Details';
-    }
-
-    public function hasCombinedRelationManagerTabsWithContent(): bool
-    {
-        return true;
-    }
-
-    /*--------------------------------------------------------------
-     | Dinamic Name 
-     --------------------------------------------------------------*/
-    public function getTitle(): string
-    {
-        return 'Edit – ' . ($this->record?->name ?? 'Reinsurer');
-    }
-
-
 }

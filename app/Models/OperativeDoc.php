@@ -6,6 +6,7 @@ use Database\Seeders\BusinessDocInsuredsYelmoSeeder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class OperativeDoc extends Model
 {
@@ -111,7 +112,12 @@ class OperativeDoc extends Model
                 ->each(function ($record, $key) {
                     $record->update(['index' => $key + 1]);
                 });
+            // Paso 3: Eliminar archivo físico solo en forceDelete
+            if ($model->document_path && Storage::disk('s3')->exists($model->document_path)) {
+                Storage::disk('s3')->delete($model->document_path);
+            }    
         });
+
     }
 
 

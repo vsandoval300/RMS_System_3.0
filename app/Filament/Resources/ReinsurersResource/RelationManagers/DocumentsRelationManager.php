@@ -35,6 +35,12 @@ class DocumentsRelationManager extends RelationManager
     {
         return $table
             ->columns([
+                TextColumn::make('index')
+                    ->label('Index')
+                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
+                    ->sortable(false) // 👈 no tiene sentido ordenar este índice
+                    ->searchable(false), // 👈 tampoco buscarlo
+
                 // 🔧 1) Usamos TextColumn y le añadimos ->date()
                 TextColumn::make('stamp_date')
                     ->label('Date')
@@ -46,34 +52,42 @@ class DocumentsRelationManager extends RelationManager
                     ->label('Type')
                     ->searchable(),
 
-                IconColumn::make('document_path')
-                ->label('')                         // sin encabezado
-                ->icon('heroicon-o-document')       // ícono PDF
-                ->color('danger')
-                ->url(function ($record) {
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 */   // ← anotación
-                    $s3 = Storage::disk('s3');                                // ← ahora el IDE sabe su tipo
+                // Nos quedamos aqui en que no se renderiza la columna
+               TextColumn::make('document_path')
+                    ->label('File')
+                    ->icon('heroicon-o-document') // ícono PDF
+                    ->color('danger')
+                    ->url(function ($record) {
+                        /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 */
+                        $s3 = Storage::disk('s3');
 
-                    return Str::startsWith(
-                        $record->document_path,
-                        ['http://', 'https://']
-                    )
-                        ? $record->document_path            // ya es URL completa
-                        : $s3->url($record->document_path); // genera URL firmada
-                })
-                ->openUrlInNewTab()
-                ->tooltip('View PDF'),
-            ])
-            ->defaultSort('stamp_date', 'asc')
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->modalHeading('Add document')
-                    ->label('New corporate doc'), // ← Cambias el texto aquí
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ]);
+                        return Str::startsWith(
+                            $record->document_path,
+                            ['http://', 'https://']
+                        )
+                            ? $record->document_path
+                            : $s3->url($record->document_path);
+                    })
+                    ->openUrlInNewTab()
+                    ->tooltip('View PDF')
+                    ->formatStateUsing(fn ($state) => $state ? basename($state) : '—') // 👈 ahora sí funciona
+                    ->searchable()
+                    ->sortable(),
+
+                ])
+                ->defaultSort('stamp_date', 'asc')
+                ->headerActions([
+                    Tables\Actions\CreateAction::make()
+                        ->modalHeading('Add document')
+                        ->label('New Corporate Document'), // ← Cambias el texto aquí
+                ])
+                ->actions([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+                    ->bulkActions([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]);
     }
 
     /* ---------- Formulario ---------- */
@@ -97,11 +111,28 @@ class DocumentsRelationManager extends RelationManager
                 ]),
 
                 FileUpload::make('document_path')
-                    ->label('File')
+                    ->label('File (PDF)')
                     ->disk('s3')
-                    ->directory('reinsurers/docs')
+                    ->directory('reinsurers/corporate_documents')
                     ->visibility('private')
-                    ->required(),
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->getUploadedFileNameForStorageUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, $get) {
+                        $documentType = \App\Models\DocumentType::find($get('document_type_id'));
+                        $acronym = $documentType?->acronym ?? 'DOC';
+                        $date = now()->format('Ymd');
+                        $random = rand(10000, 99999);
+                        return "{$acronym}-{$date}-{$random}.pdf";
+                    })
+                    ->downloadable()
+                    ->openable()
+                    ->previewable(true)
+                    ->hint(fn ($record) => $record?->document_path
+                        ? 'Existing file: ' . basename($record->document_path)
+                        : 'No file uploaded yet.'
+                    )
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->helperText('Only PDF files are allowed.')
+                    ->columnSpanFull(),
             ]);
     }
 }

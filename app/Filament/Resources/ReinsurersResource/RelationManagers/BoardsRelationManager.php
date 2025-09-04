@@ -10,6 +10,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
+use App\Models\Director;
+use App\Models\Board;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 
 class BoardsRelationManager extends RelationManager
 {
@@ -17,12 +23,41 @@ class BoardsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->schema([
-            Forms\Components\TextInput::make('index')
-                ->required()
-                ->maxLength(255),
-        ]);
+        
+         return $form->schema([
+            TextInput::make('index')
+            ->label('Index')
+            ->default(fn () => 'BoD-' . now()->format('Ymd') . '-' . random_int(100000, 999999))
+            ->disabled()          // no editable
+            ->dehydrated(true)    // que sí se envíe al backend
+            ->required()
+            ->maxLength(255)
+            ->columnSpanFull(),
+
+            // 👇 Nuevo campo para la fecha de nombramiento
+            DatePicker::make('appt_date')
+            ->label('Appointment Date')
+            ->native(false)
+            ->closeOnDateSelection()
+            ->required()
+            ->columnSpanFull(),
+
+            Select::make('directors')
+            ->label('Directors')
+            ->relationship('directors', 'id') // relación belongsToMany en Board
+            ->getOptionLabelFromRecordUsing(
+                fn (Director $d) => trim($d->name . ' ' . $d->surname)
+            )
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->columnSpanFull(),
+        ]); 
     }
+
+
+
+
 
     public function table(Table $table): Table
     {
@@ -32,10 +67,19 @@ class BoardsRelationManager extends RelationManager
             ->recordTitleAttribute('index')
             ->columns([
                 /* ───── Index ───── */
-                TextColumn::make('index')
+                
+
+                TextColumn::make('row')
                     ->label('Index')
+                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
+                    ->sortable(false) // 👈 no tiene sentido ordenar este índice
+                    ->searchable(false), // 👈 tampoco buscarlo
+
+                TextColumn::make('index')
+                    ->label('Board Id')
                     ->verticalAlignment(VerticalAlignment::Start)
-                    ->sortable(),
+                    ->sortable() 
+                    ->searchable(),   
 
                 /* ───── Appointment ───── */
                 TextColumn::make('pivot.appt_date')
@@ -68,7 +112,24 @@ class BoardsRelationManager extends RelationManager
             ])
             ->defaultSort('index', 'asc')
             ->headerActions([
-                Tables\Actions\CreateAction::make()->label('New board'),
+                Tables\Actions\CreateAction::make()
+                    ->label('Add Board')
+                    ->using(function (array $data, RelationManager $livewire) {
+                        // usa el que vino del form; si no, genera uno nuevo
+                        $index = $data['index'] ?? ('BoD-' . now()->format('Ymd') . '-' . random_int(100000, 999999));
+
+                        $board = Board::create([
+                            'index' => $index,
+                        ]);
+
+                        $livewire->getOwnerRecord()
+                            ->boards()
+                            ->attach($board->getKey(), [
+                                'appt_date' => $data['appt_date'],
+                            ]);
+
+                        return $board;
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

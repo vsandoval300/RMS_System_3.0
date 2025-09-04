@@ -19,14 +19,22 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile; // Livewire v3
-use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
-
-
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\DatePicker;
+use Maatwebsite\Excel\Facades\Excel;
+use Filament\Notifications\Notification;
+use App\Exports\ReinsurersExport;
+use Carbon\Carbon;
+use Filament\Tables\Actions\Action;
+use Illuminate\Validation\Rule;
 
 
 
@@ -35,6 +43,7 @@ class ReinsurersResource extends Resource
     protected static ?string $model = Reinsurer::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reinsurers';
+    protected static ?int    $navigationSort  = 1;  
 
     /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
@@ -57,248 +66,295 @@ class ReinsurersResource extends Resource
     {
         return $form
             ->schema([
-                //
+
+                // ========== DETAILS ==========
                 Section::make('Details')
-                ->columns(2)    // ← aquí defines dos columnas
-                ->schema([
-
-                    TextInput::make('id')
-                    ->label('ID')
-                    ->readOnly()
-                    ->disabled(), // ❗️Esto lo hace visualmente "gris" y no editable
-                    
-                    TextInput::make('cns_reinsurer')
-                    ->label('LSK (Legacy Substitute Key)')
-                    ->unique(ignoreRecord: true) 
-                    ->nullable(),
-                    
-                    TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->unique(ignoreRecord: true) 
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.'),
-                    
-                    TextInput::make('short_name')
-                    ->label('Short Name')
-                    ->unique(ignoreRecord: true) 
-                    ->required()
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.'),
-                    
-                    TextInput::make('acronym')
-                    ->label('Acronym')
-                    ->required()
-                    ->unique(ignoreRecord: true) 
-                    ->maxLength(3)
-                    ->rule('regex:/^[A-Z]+$/')
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.'),
-                    
-                    Select::make('parent_id')
-                    ->label('Parent')
-                    ->relationship(
-                        name: 'parent',          // nombre de la relación belongsTo
-                        titleAttribute: 'name', // el campo que Filament usará en la consulta
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'), // ← ordena A-Z
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->nullable()
-                    ->helperText('Select the parent reinsurer if applicable.'),
-                    
-                    Select::make('class')
-                    ->label('Class')
-                    ->options([
-                        'Class 1' => 'Class 1',
-                        'Class 2' => 'Class 2',
-                    ])
-                    ->required()
-                    ->searchable()
-                    ->helperText('Select the reinsurer class.'),
-                    
-                    TextInput::make('established')
-                    ->label('Established Year')
-                    ->numeric()
-                    ->step(1)                         // opcional: avanza de uno en uno
-                    ->minValue(2010)                  // límite inferior fijo
-                    ->maxValue(fn () => now()->year)  // límite superior dinámico (2025, 2026, …)
-                    ->rules([
-                        'required',
-                        'integer',
-                        'between:2010,' . now()->year, // refuerza la validación en el backend
-                    ])
-                    //->live(onBlur: true)  // evita validar en cada tecla; valida al perder foco
-                    ->placeholder('e.g. 2015')
-                    ->helperText('Enter a 4-digit year between 2010 and ' . now()->year . '.')
-                    ->required(),
-                    
-                    Select::make('manager_id')
-                    ->label('Manager')
-                    ->relationship('manager','name')
-                    //->options(function () {
-                    //    return Manager::orderBy('name')->pluck('name', 'id');
-                    //})
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->helperText('Select the manager assigned to this reinsurer.')
-                    ->placeholder('Select a manager'),
-                    
-                    Select::make('country_id')
-                    ->label('Country')
-                    ->relationship(
-                        name: 'country',          // nombre de la relación belongsTo
-                        titleAttribute: 'alpha_3', // el campo que Filament usará en la consulta
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('alpha_3'), // ← ordena A-Z
-                    )
-                    ->getOptionLabelFromRecordUsing(      // <- aquí personalizas la etiqueta
-                        fn (Country $record) => "{$record->alpha_3} - {$record->name}"
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->placeholder('Select a country')
-                    ->helperText('Choose the reinsurer\'s country.'),
-                    
-                    Select::make('reinsurer_type_id')
-                    ->label('Type')
-                    ->relationship(
-                        name: 'reinsurer_type',          // nombre de la relación belongsTo
-                        titleAttribute: 'type_acronym' // el campo que Filament usará en la consulta
-                    )
-                    ->getOptionLabelFromRecordUsing(      // <- aquí personalizas la etiqueta
-                        fn (ReinsurerType $record) => "{$record->type_acronym} - {$record->description}"
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->placeholder('Select reinsurer type')
-                    ->helperText('Choose the type of reinsurer.'),
-                    
-                    Select::make('operative_status_id')
-                    ->label('Operative Status')
-                    ->relationship(
-                        name: 'operative_status',          // nombre de la relación belongsTo
-                        titleAttribute: 'acronym', // el campo que Filament usará en la consulta
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('acronym'), // ← ordena A-Z
-                    )
-                    ->getOptionLabelFromRecordUsing(      // <- aquí personalizas la etiqueta
-                        fn (OperativeStatus $record) => "{$record->acronym} - {$record->description}"
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->placeholder('Select operative status')
-                    ->helperText('Choose the reinsurer’s current operative status.'),
-                    
-
-                ]),
-
-                   Section::make('Images')
                     ->columns(2)
+                    ->schema([
+
+                        Section::make() // 👈 sin título
+                            ->columns(6)
+                            ->schema([
+                                TextInput::make('id')
+                                    ->label('ID')
+                                    ->default(fn ($record) => $record?->id ?? '(pending)')
+                                    ->readOnly()
+                                    ->disabled(),
+
+                                TextInput::make('cns_reinsurer')
+                                    ->label('LSK (Legacy Substitute Key)')
+                                    ->placeholder("Please provide LSK number if exist.")
+                                    ->unique(ignoreRecord: true)
+                                    ->nullable()
+                                    ->columnSpan(2),
+                            ])
+                            ->compact(),
+                     ]),
+
+
+
+                        Section::make('Basic Info')
+                            ->columns(6)
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Name')
+                                    ->placeholder("Please provide reinsurer's name")
+                                    ->required()
+                                    ->rules([
+                                        Rule::unique('reinsurers', 'name')
+                                            ->whereNull('deleted_at'),
+                                    ])
+                                    ->maxLength(255)
+                                    ->live(onBlur: true) // 👈 dispara solo cuando se pierde el foco
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if (blank($state)) {
+                                            return;
+                                        }
+
+                                        $exceptions = ['de', 'of', 'y'];
+
+                                        $formatted = preg_replace_callback(
+                                            '/\b(\p{L})(\p{L}*)/u',
+                                            function ($matches) use ($exceptions) {
+                                                $word = $matches[0];
+
+                                                if (in_array(mb_strtolower($word), $exceptions)) {
+                                                    return mb_strtolower($word);
+                                                }
+
+                                                return mb_strtoupper($matches[1]) . mb_substr($word, 1);
+                                            },
+                                            $state
+                                        );
+
+                                        $set('name', $formatted);
+                                    })
+                                    ->columnSpan(3),
+
+                                TextInput::make('short_name')
+                                    ->label('Short Name')
+                                    ->placeholder("Please provide reinsurer's short name")
+                                    ->rules([
+                                        Rule::unique('reinsurers', 'short_name')
+                                            ->whereNull('deleted_at'),
+                                    ])
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if (blank($state)) {
+                                            return;
+                                        }
+
+                                        $exceptions = ['de', 'of', 'y'];
+
+                                        $formatted = preg_replace_callback(
+                                            '/\b(\p{L})(\p{L}*)/u',
+                                            function ($matches) use ($exceptions) {
+                                                $word = $matches[0];
+
+                                                if (in_array(mb_strtolower($word), $exceptions)) {
+                                                    return mb_strtolower($word);
+                                                }
+
+                                                return mb_strtoupper($matches[1]) . mb_substr($word, 1);
+                                            },
+                                            $state
+                                        );
+
+                                        $set('short_name', $formatted);
+                                    })
+                                    ->columnSpan(1),
+
+                                TextInput::make('acronym')
+                                    ->label('Acronym')
+                                    ->placeholder('e.g. ABC')
+                                    ->required()
+                                    ->rules([
+                                        Rule::unique('reinsurers', 'short_name')
+                                            ->whereNull('deleted_at'),
+                                    ])
+                                    ->maxLength(3)
+                                    ->rule('regex:/^[A-Z]{3}$/')
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                                    ->helperText('Only three uppercase letters allowed.')
+                                    ->columnSpan(1),
+
+                                Select::make('reinsurer_type_id')
+                                    ->label('Type')
+                                    ->relationship(
+                                        name: 'reinsurer_type',
+                                        titleAttribute: 'type_acronym'
+                                    )
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn (ReinsurerType $record) => "{$record->type_acronym} - {$record->description}"
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->placeholder('Select type')
+                                    ->helperText('Choose reinsurer type.')
+                                    ->columnSpan(2),
+
+                                ToggleButtons::make('class')
+                                    ->label('Class')
+                                    ->options([
+                                        'Class 1' => 'Class 1',
+                                        'Class 2' => 'Class 2',
+                                    ])
+                                    ->required()
+                                    ->inline()
+                                    ->colors([
+                                        'Class 1' => 'primary',
+                                        'Class 2' => 'primary',
+                                    ])
+                                    ->helperText('Select reinsurer class.'),
+                            ])
+                            ->compact(),
                     
-                        ->schema([
 
-                            //====================================  
-                            // LOGO
-                            //====================================
-                            /* FileUpload::make('logo')
-                            ->disk('s3')
-                            ->directory('reinsurers/logos'), */
-                            FileUpload::make('logo')
-                                ->disk('s3')
-                                ->directory('reinsurers/logos')
-                                ->visibility('public')                 // si es privado → 'private'
-                                ->image()
-                                ->previewable()
+                                        // ========== ADMIN INFO ==========
+                        Section::make('Administrative Info')
+                            ->columns(6)
+                            ->schema([
+                                Select::make('parent_id')
+                                    ->label('Parent')
+                                    ->relationship(
+                                        name: 'parent',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->helperText('Select the parent reinsurer if applicable.')
+                                    ->columnSpan(3),
 
-                                /* 1️⃣  Vista previa cuando abres “Edit” */
-                                ->afterStateHydrated(function (FileUpload $component, $state) {
-                                    if (!$state) return;
+                                Select::make('established')
+                                    ->label('Established Year')
+                                    ->options(
+                                        collect(range(now()->year, 2010))->mapWithKeys(fn ($year) => [$year => $year])
+                                    )
+                                    ->searchable()
+                                    ->required()
+                                    ->placeholder('Select year')
+                                    ->placeholder('e.g. 2015')
+                                    ->helperText('Select year between 2010 and ' . now()->year . '.')
+                                    ->required()
+                                    ->columnSpan(1),
 
-                                    $path = is_array($state) && isset($state['path'])
-                                        ? $state['path']
-                                        : $state;
+                                Select::make('country_id')
+                                    ->label('Country')
+                                    ->relationship(
+                                        name: 'country',
+                                        titleAttribute: 'alpha_3',
+                                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('alpha_3'),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn (Country $record) => "{$record->alpha_3} - {$record->name}"
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->placeholder('Select a country')
+                                    ->helperText('Choose the reinsurer\'s country.')
+                                    ->columnSpan(2),
 
-                                    $url = Storage::disk('s3')->url($path);
+                                // 👇 segunda fila
+                                Select::make('manager_id')
+                                    ->label('Manager')
+                                    ->relationship('manager', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->helperText('Select the manager assigned to this reinsurer.')
+                                    ->placeholder('Select a manager')
+                                    ->columnSpan(3),  // 👈 ocupa media fila (3 de 6)
 
-                                    $component->state([
-                                        'name' => basename($path),
-                                        'size' => 1,
-                                        'url'  => $url,
-                                        'path' => $path,
-                                    ]);
-                                })
-                                /* 2️⃣  Guardar (con o sin subida nueva) */
-                                ->saveUploadedFileUsing(function ($file) {
-                                    // a) Subida nueva ---------------
-                                    if ($file instanceof TemporaryUploadedFile) {
-                                        return $file->storePublicly('reinsurers/logos', 's3'); // ruta relativa
-                                    }
+                                Select::make('operative_status_id')
+                                    ->label('Operative Status')
+                                    ->relationship(
+                                        name: 'operative_status',
+                                        titleAttribute: 'acronym',
+                                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('acronym'),
+                                    )
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn (OperativeStatus $record) => "{$record->acronym} - {$record->description}"
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->placeholder('Select status')
+                                    ->helperText('Choose reinsurer’s operative status.')
+                                    ->columnSpan(2),  // 👈 ocupa la otra media fila (3 de 6)
+                            ])
+                            ->compact(),
 
-                                    // b) Guardar sin cambiar imagen -
-                                    if (is_array($file) && isset($file['path'])) {
-                                        return $file['path'];         // conserva la ruta existente
-                                    }
 
-                                    return $file;                     // fallback
-                                }),
-                            //====================================
-                            // ICON
-                            //====================================
-                            /* FileUpload::make('icon')
-                            ->disk('s3')
-                            ->directory('reinsurers/icon'), */
-                            FileUpload::make('icon')
-                                ->disk('s3')
-                                ->directory('reinsurers/icons')
-                                ->visibility('public')                 // si es privado → 'private'
-                                ->image()
-                                ->previewable()
+                // ========== IMAGES ==========
+                Section::make('Branding')
+                    ->columns(2)
+                    ->schema([
+                        Section::make('Logo Upload')
+                            ->columnSpan(1)
+                            ->schema([
+                                FileUpload::make('logo')
+                                    ->label('Reinsurer Logo')
+                                    ->disk('s3')
+                                    ->directory('reinsurers/logos')
+                                    ->visibility('public')
+                                    ->image()
+                                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
+                                    ->preserveFilenames()
+                                    ->previewable(false)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->hint(function ($record) {
+                                        return $record?->logo
+                                            ? 'Existing logo: ' . basename($record->logo)
+                                            : 'No logo uploaded yet.';
+                                    })
+                                    ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
+                                    ->deleteUploadedFileUsing(function ($file) {
+                                        if ($file && Storage::disk('s3')->exists($file)) {
+                                            Storage::disk('s3')->delete($file);
+                                        }
+                                    }),
+                            ])
+                            ->compact(),
 
-                                /* 1️⃣  Vista previa cuando abres “Edit” */
-                               ->afterStateHydrated(function (FileUpload $component, $state) {
-                                    if (!$state) return;
+                        Section::make('Icon Upload')
+                            ->columnSpan(1)
+                            ->schema([
+                                FileUpload::make('icon')
+                                    ->label('Reinsurer Icon')
+                                    ->disk('s3')
+                                    ->directory('reinsurers/icons')
+                                    ->visibility('public')
+                                    ->image()
+                                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
+                                    ->preserveFilenames()
+                                    ->previewable(false)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->hint(function ($record) {
+                                        return $record?->icon
+                                            ? 'Existing icon: ' . basename($record->icon)
+                                            : 'No icon uploaded yet.';
+                                    })
+                                    ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
+                                    ->deleteUploadedFileUsing(function ($file) {
+                                        if ($file && Storage::disk('s3')->exists($file)) {
+                                            Storage::disk('s3')->delete($file);
+                                        }
+                                    }),
+                            ])
+                            ->compact(),
+                    ]),
 
-                                    $path = is_array($state) && isset($state['path'])
-                                        ? $state['path']
-                                        : $state;
 
-                                    $url = Storage::disk('s3')->url($path);
 
-                                    $component->state([
-                                        'name' => basename($path),
-                                        'size' => 1,
-                                        'url'  => $url,
-                                        'path' => $path,
-                                    ]);
-                                })
-
-                                /* 2️⃣  Guardar (con o sin subida nueva) */
-                                ->saveUploadedFileUsing(function ($file) {
-                                    // a) Subida nueva ---------------
-                                    if ($file instanceof TemporaryUploadedFile) {
-                                        return $file->storePublicly('reinsurers/icons', 's3'); // ruta relativa
-                                    }
-
-                                    // b) Guardar sin cambiar imagen -
-                                    if (is_array($file) && isset($file['path'])) {
-                                        return $file['path'];         // conserva la ruta existente
-                                    }
-
-                                    return $file;                     // fallback
-                                }),
-
-                           
-                                
-                            //====================================                       
-
-                        ]),   // ← cierra schema() y luego la Sección
-                  
-                ]);
+            ]);
     }
 
 
@@ -446,6 +502,42 @@ class ReinsurersResource extends Resource
                 ->indicator('Class'),
 
             ])
+
+
+
+
+            ->headerActions([
+                        Action::make('export')
+                            ->label('Export to Excel')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->color('primary')
+                            ->action(function () {
+                                $records = \App\Models\Reinsurer::query()
+                                    ->with(['parent', 'manager', 'country', 'reinsurer_type', 'operative_status'])
+                                    ->get();
+
+                                if ($records->isEmpty()) {
+                                    Notification::make()->title('No reinsurers found.')->info()->send();
+                                    return;
+                                }
+
+                                $filename = sprintf(
+                                    'Reinsurers_%s.xlsx',
+                                    Carbon::now()->format('Ymd_His')
+                                );
+
+                                return Excel::download(new ReinsurersExport($records), $filename);
+                            }),
+                    ])
+
+
+
+
+
+
+
+
+
 
 
             ->actions([

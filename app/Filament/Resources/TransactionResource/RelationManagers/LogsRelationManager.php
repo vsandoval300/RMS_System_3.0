@@ -20,8 +20,8 @@ class LogsRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form->schema([
-            TextInput::make('transaction_code')
-                ->label('Transaction Code')
+            TextInput::make('transaction_id')
+                ->label('Transaction Id')
                 ->required()
                 ->maxLength(50), 
 

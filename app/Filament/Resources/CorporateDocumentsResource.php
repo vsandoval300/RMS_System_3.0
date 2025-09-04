@@ -37,44 +37,42 @@ class CorporateDocumentsResource extends Resource
     
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\Group::make() //Grupo 1
+{
+    return $form
+        ->schema([
+            Forms\Components\Section::make('Corporate Document Details')
                 ->schema([
-                    Forms\Components\Section::make('Corporate Document Details') //Sección 1
-                    ->schema([
-
                     TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique()
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.'),
+                        ->label('Name')
+                        ->required()
+                        ->maxLength(255)
+                        ->unique()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->helperText('First letter of each word will be capitalised.')
+                        ->columnSpan('full'),
 
-                   TextInput::make('acronym')
-                    ->label('Acronym')
-                    ->required()
-                    //->live(onBlur: false)
-                    ->maxLength(2)
-                    ->rule('regex:/^[A-Z]+$/')
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->unique()
-                    ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).'),
+                    TextInput::make('acronym')
+                        ->label('Acronym')
+                        ->required()
+                        ->maxLength(2)
+                        ->rule('regex:/^[A-Z]+$/')
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                        ->unique()
+                        ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).')
+                        ->columnSpan('full'),
 
                     Textarea::make('description')
-                    ->label('Description')
-                    ->required()
-                    ->columnSpan('full')
-                    ->autosize()
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the document.'),
-
-                ]),
-            ]),
+                        ->label('Description')
+                        ->required()
+                        ->autosize()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                        ->helperText('Please provide a brief description of the document.')
+                        ->columnSpan('full'),
+                ])
+                ->columns(1)          // 👈 todos los campos ocupan fila completa
+                ->columnSpanFull(),   // 👈 fuerza a que la sección se estire al 100% del modal
         ]);
-    }
+}
 
     public static function table(Table $table): Table
     {
@@ -103,12 +101,6 @@ class CorporateDocumentsResource extends Resource
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
                     ]),
-
-
-
-
-
-
             ])
             ->filters([
                 //

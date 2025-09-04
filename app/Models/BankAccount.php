@@ -13,6 +13,8 @@ class BankAccount extends Model
     //
     use HasFactory, SoftDeletes;
 
+    protected $table = 'bank_accounts';
+
     protected $fillable = [
         'beneficiary_acct_name',
         'beneficiary_address',

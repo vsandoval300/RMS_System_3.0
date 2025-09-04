@@ -18,13 +18,19 @@ use Filament\Resources\RelationManagers\RelationManager;
 class FinancialStatementsRelationManager extends RelationManager
 {
     protected static string $relationship = 'financialStatements';
-    protected static ?string $title        = 'Financial Statements';
+    protected static ?string $title  = 'Financial Statements';
+    protected static ?string $recordTitleAttribute = 'start_date';
 
     /* ==========  TABLA  ========== */
     public function table(Table $table): Table
     {
         return $table
             ->columns([
+                TextColumn::make('index')
+                    ->label('Index')
+                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
+                    ->sortable(false) // 👈 no tiene sentido ordenar este índice
+                    ->searchable(false), // 👈 tampoco buscarlo
                 /*  Fechas  */
                 TextColumn::make('start_date')
                     ->label('Start date')
@@ -42,6 +48,7 @@ class FinancialStatementsRelationManager extends RelationManager
                     // ——— ÍCONO PDF
                     ->icon('heroicon-o-document')   // «document-text» si usas Heroicons Mini
                     ->iconColor('danger')           // rojo, igual que en Corporate Docs
+                    ->color('danger')
                     // ——— SOLO EL NOMBRE DEL ARCHIVO
                     ->formatStateUsing(fn ($state) => \Illuminate\Support\Str::afterLast($state, '/'))
                     // ——— LINK
@@ -64,11 +71,15 @@ class FinancialStatementsRelationManager extends RelationManager
             ])
             ->defaultSort('start_date', 'asc')
             ->headerActions([
-                Tables\Actions\CreateAction::make()->label('New statement'),
+                Tables\Actions\CreateAction::make()
+                    ->label('Add Financial Statement'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -87,11 +98,29 @@ class FinancialStatementsRelationManager extends RelationManager
 
                 FileUpload::make('document_path')
                     ->label('File (PDF)')
-                    ->disk('s3')                         // o 'public' según tu storage
-                    ->directory('reinsurers/financials') // carpeta en el bucket
-                    ->visibility('private')              // cámbialo si tu bucket es público
+                    ->disk('s3')
+                    ->directory('reinsurers/financials_statements')
+                    ->visibility('private')
                     ->acceptedFileTypes(['application/pdf'])
-                    ->required(),
+                    ->required()
+                    ->getUploadedFileNameForStorageUsing(function ($file, $record, $set, $get) {
+                        // ✅ Obtener reinsurer desde el relation manager
+                        $reinsurer = $this->getOwnerRecord(); // ← aquí viene el modelo padre
+                        $reinsurerName = $reinsurer?->short_name ?? 'unknown';
+
+                        $startDate = $get('start_date')
+                            ? \Carbon\Carbon::parse($get('start_date'))->format('Ymd')
+                            : 'nodate';
+
+                        $endDate = $get('end_date')
+                            ? \Carbon\Carbon::parse($get('end_date'))->format('Ymd')
+                            : 'nodate';
+
+                        $extension = $file->getClientOriginalExtension();
+
+                        return "{$reinsurerName}--{$startDate} to {$endDate}.{$extension}";
+                    })
+                    ->columnSpanFull(),
             ]);
     }
 }

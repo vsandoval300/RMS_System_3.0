@@ -52,6 +52,7 @@ class ClientsResource extends Resource
                     TextInput::make('name')
                         ->label(__('Name'))
                         ->required()
+                        ->placeholder("Please provide client's name")
                         ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(255)
                         // ───── Regla: alfanumérico + al menos una letra ─────
@@ -63,35 +64,39 @@ class ClientsResource extends Resource
                         // (opcional) formatea la capitalización
                         ->afterStateUpdated(fn ($state, callable $set) =>
                             $set('name', ucwords(strtolower($state)))
-                        )
-                        ->helperText('First letter of each word will be capitalised.'),
+                        ),
+                        //->helperText('First letter of each word will be capitalised.'),
                         
                     
                     TextInput::make('short_name')
                         ->label(__('Short Name'))
                         ->required()
+                        ->placeholder("Please provide client's short name")
                         ->unique(ignorable: fn (?Model $record) => $record)   // 👈 ignora el registro actual
                         ->live(onBlur: false)
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) =>
-                             $set('short_name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.'),
+                             $set('short_name', ucwords(strtolower($state)))),
+                        //->helperText('First letter of each word will be capitalised.'),
                        
                     
                     Textarea::make('description')
                         ->label(__('Description'))
                         ->required()
+                        ->placeholder('Enter your company’s main business activity.')
                         ->columnSpan('full')
                         ->autosize()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state)))),
+                        //->helperText('Please provide a brief description of the sector.'),
                         
 
                     TextInput::make('webpage')
                         ->label(__('Web Page'))
                         ->required()
+                        ->placeholder('https://www.example.com')
                         ->maxLength(255)
-                        ->helperText('First letter of each word will be capitalised.'),
+                        ->rule('url'),
+                        //->helperText('First letter of each word will be capitalised.'),
                         
 
                     Select::make('country_id')
@@ -105,15 +110,17 @@ class ClientsResource extends Resource
                         })
                         ->searchable()
                         ->preload()
+                        ->placeholder('Choose the reinsurer\'s country')
                         ->required()
-                        ->placeholder('Select a country')
-                        ->helperText('Choose the reinsurer\'s country.'),
+                        ->placeholder('Select a country'),
+                        //->helperText('Choose the reinsurer\'s country.'),
                         
                     Select::make('industries')             // ① nombre del campo (puede ser cualquiera)
                         ->label('Industries')              // ② texto mostrado
                         ->relationship('industries', 'name') // ③ usa la rel. + columna a mostrar
                         ->multiple()                       // ④ habilita selección múltiple
-                        ->preload()                        // ⑤ carga todas las opciones de golpe
+                        ->preload() 
+                        ->placeholder('Choose the reinsurer\'s industries')                       // ⑤ carga todas las opciones de golpe
                         ->searchable()                     // ⑥ añade buscador
                         ->columnSpan('full')               // ⑦ opcional: que ocupe todo el ancho
                         ->visible(fn (string $context): bool => $context === 'create'),

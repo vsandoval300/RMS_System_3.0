@@ -246,7 +246,8 @@ class OperativeDocsRelationManager extends RelationManager
                         ->schema([
                             Grid::make(12)
                                 ->schema([
-                                    TableRepeater::make('insureds')
+
+                                    Repeater::make('insureds')
                                         ->label('Insureds')
                                         ->relationship()
                                         ->schema([
@@ -264,24 +265,25 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->preload()
                                                 ->required()
                                                 ->searchable()
-                                                ->columnSpan(5),
+                                                ->columnSpan(4),
 
                                             TextInput::make('premium')
                                                 ->prefix('$')
                                                 ->required()
                                                 ->live()
-                                                ->mask(
-                                                    RawJs::make(<<<'JS'
-                                                        $money($input, '.', ',', 2)
-                                                    JS)
-                                                )
-                                                ->dehydrateStateUsing(fn ($state) => floatval(preg_replace('/[^0-9.]/', '', $state)))
-                                               ->columnSpan(2),
+                                                ->mask(RawJs::make('$money($input)'))
+                                                ->stripCharacters(',') 
+                                                ->dehydrateStateUsing(fn ($state) => $state !== null ? floatval(str_replace(',', '', $state)) : null)                                            
+                                                ->numeric()
+                                                //->dehydrateStateUsing(fn ($state) => floatval(preg_replace('/[^0-9.]/', '', $state)))
+                                                ->step(0.01)
+                                               ->columnSpan(3),
                                         ])
+                                        ->reorderableWithButtons()
                                         ->defaultItems(1)
                                         ->columns(12)
                                         ->addActionLabel('Add Insured')
-                                        ->reorderable(false)
+                                        //->reorderable(false)
                                         ->columnSpan(12) // 👈 fuerza a ocupar todo el ancho
                                         ->live()
                                         ->afterStateUpdated(function ($state, callable $set) {
@@ -315,7 +317,7 @@ class OperativeDocsRelationManager extends RelationManager
                         ->reactive()
                         ->live()
                         ->schema([
-                            TableRepeater::make('transactions')
+                            Repeater::make('transactions')
                                 ->label('Installments')
                                 ->relationship()
                                 ->schema([
@@ -330,7 +332,7 @@ class OperativeDocsRelationManager extends RelationManager
                     
                                     TextInput::make('proportion')
                                         ->label('Proportion')
-                                        ->prefix('%')
+                                        ->suffix('%')
                                         ->required()
                                          ->live()
                                         ->minValue(0)
@@ -362,6 +364,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     Hidden::make('transaction_status_id')->default(1),
                                     Hidden::make('op_document_id')->default(fn () => $this->getOwnerRecord()?->id),
                                 ])
+                                ->reorderableWithButtons()
                                 ->defaultItems(0)
                                 ->columns(4)
                                 ->addActionLabel('New Installment')

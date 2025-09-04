@@ -20,5 +20,10 @@ class ViewReinsurer extends ViewRecord
         return true;
     }
 
+    public function getTitle(): string
+    {
+        return 'View – ' . ($this->record?->name ?? 'Reinsurer');
+    }
+
 
 }

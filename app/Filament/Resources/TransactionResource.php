@@ -26,6 +26,14 @@ class TransactionResource extends Resource
     protected static ?string $navigationGroup = 'Transactions';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero
 
+    /* ───── NUEVO: burbuja con el total en el menú ───── */
+    public static function getNavigationBadge(): ?string
+    {
+        // Puedes usar self::$model::count() o Reinsurer::count()
+        return Transaction::count();
+    }
+   
+
 
    public static function getTableQuery(): Builder
     {
@@ -46,6 +54,8 @@ class TransactionResource extends Resource
             Section::make('Transaction Information')
                  ->description("Overview of the transaction's primary details.")
             ->schema([
+                TextInput::make('id'),
+
                 TextInput::make('index')
                     ->required()
                     ->numeric(),
@@ -81,6 +91,12 @@ class TransactionResource extends Resource
     {
         return $table
             ->columns([
+
+                TextColumn::make('id')
+                    ->label('Id transaction')
+                    ->copyable()
+                    ->sortable(),
+
                 TextColumn::make('operativeDoc.business.reinsurer.name')
                     ->label('Reinsurer')
                     ->sortable()
@@ -93,11 +109,6 @@ class TransactionResource extends Resource
 
                 TextColumn::make('index')
                     ->numeric()
-                    ->sortable(),
-
-                TextColumn::make('id')
-                    ->label('Id transaction')
-                    ->copyable()
                     ->sortable(),
 
                 TextColumn::make('proportion')

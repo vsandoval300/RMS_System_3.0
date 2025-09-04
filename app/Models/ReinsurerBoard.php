@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;   // 👈 importa Pivot
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReinsurerBoard extends Pivot
 {
     use SoftDeletes;
     
     protected $table = 'reinsurer_boards';
-
-    /** Si tu tabla pivot SÍ tiene columna id autoincremental */
     public $incrementing = true;
 
     protected $fillable = [

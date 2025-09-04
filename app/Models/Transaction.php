@@ -66,7 +66,7 @@ class Transaction extends Model
     public function logs(): HasMany
     {
         // Enlaza por código: transaction_logs.transaction_code → transactions.remmitance_code
-        return $this->hasMany(TransactionLog::class, 'transaction_code');
+        return $this->hasMany(TransactionLog::class, 'transaction_id');
     }
 
 
@@ -101,7 +101,7 @@ class Transaction extends Model
                 ->values()
                 ->each(function ($record, $key) {
                     $record->update(['index' => $key + 1]);
-                });
+            });
         });
     }
 }

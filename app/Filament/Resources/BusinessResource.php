@@ -29,6 +29,9 @@ use App\Exports\OperativeDocsExport;
 use App\Models\OperativeDoc;
 use Filament\Pages\SubNavigationPosition;     
 use Filament\Resources\Pages\Page; 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+
 
 
 class BusinessResource extends Resource
@@ -65,119 +68,109 @@ class BusinessResource extends Resource
         return $form
             ->schema([
 
-
                 Section::make('General Details')
-                ->columns(2)    // ← aquí defines dos columnas
-                
-                ->schema([
-
-                    // 🟢 Panel izquierdo
-                    Section::make()
-                        ->schema([
-                        // ╔═════════════════════════════════════════════════════════════════════════╗
-                        // ║ Reinsurer field selector linked to Business Code                        ║
-                        // ╚═════════════════════════════════════════════════════════════════════════╝
-                            Select::make('reinsurer_id')
-                                ->label('Reinsurer')
-                                ->relationship('reinsurer', 'name')
-                                ->searchable()
-                                ->preload() // 👈 fuerza la carga inmediata de los options
-                                 ->native(false)
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
-                                    if ($operation !== 'create' || !$state) {
-                                        return;
-                                    }
-
-                                    $reinsurer = Reinsurer::find($state);
-
-                                    if (! $reinsurer) {
-                                        return;
-                                    }
-
-                                    $year = Carbon::now()->format('Y');
-                                    $acronym = Str::upper($reinsurer->acronym);
-                                    $number = str_pad($reinsurer->cns_reinsurer ?? $reinsurer->id, 3, '0', STR_PAD_LEFT);
-
-                                    $prefix = "{$year}-{$acronym}{$number}";
-
-                                    // Buscar el último código existente que empiece con ese prefijo
-                                    $lastBusiness = Business::query()
-                                        ->where('business_code', 'like', "$prefix-%")
-                                        ->orderByDesc('business_code')
-                                        ->first();
-
-                                    // Extraer el consecutivo y sumarle 1
-                                    $lastNumber = 0;
-
-                                    if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->business_code, $matches)) {
-                                        $lastNumber = (int)$matches[1];
-                                    }
-
-                                    $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-
-                                    $businessCode = "{$prefix}-{$consecutive}";
-
-                                    $set('business_code', $businessCode);
-                                }),
-                                
-                               
-
-                            Textarea::make('description')
-                                ->label('Description')
-                                ->required()
-                                ->columnSpanFull()
-                                ->rows(5), // 👈 aumenta el número de líneas visibles
-
-                            // 👇 Este es el espaciador que empareja visualmente la altura
-                           /*  Placeholder::make('spacer')
-                                ->content('')
-                                ->hiddenLabel()
-                                ->extraAttributes(['style' => 'height: 3rem']), */
-                        ])
-                        ->columnSpan(1),
-
-                    // 🔵 Panel derecho (dos burbujas una debajo de otra)
-                    Section::make()
-                        ->schema([
-                            // Primera burbuja: Index + Business Code
-                            Section::make()
-                                ->columns(2)
-                                ->schema([
-                                    TextInput::make('index')
-                                        ->label('Index')
-                                        ->required()
-                                        ->numeric()
-                                        ->default(fn () => \App\Models\Business::max('index') + 1 ?? 1)
-                                        ->disabledOn(['create', 'edit'])
-                                        ->dehydrated(), // 👈 esto asegura que se envíe el valor
-                                 // ╔═════════════════════════════════════════════════════════════════════════╗
-                                 // ║ Business Code que se va a crear dependiendo el reasegurador que exista  ║
-                                 // ╚═════════════════════════════════════════════════════════════════════════╝
-                                    TextInput::make('business_code')
-                                        ->label('Business Code')
-                                        ->disabled()
-                                        ->dehydrated()
-                                        ->required()
-                                        ->unique(),
-                                ]),
-
-                            // Segunda burbuja: Lifecycle status (una sola columna)
-                            Section::make()
-                                ->schema([
-                                    TextInput::make('business_lifecycle_status')
-                                        ->label('Business Lifecycle Status')
-                                        ->required()
-                                        ->maxLength(510)
-                                        ->default('On Hold')
-                                        ->disabledOn(['create', 'edit'])
-                                        ->dehydrated(), // 👈 esto asegura que se envíe el valor
-                                ]),
-                        ])
-                        ->columnSpan(1),
+                    ->columns(3)    // ← aquí defines dos columnas
                     
+                    ->schema([
+                                Section::make()
+                                        ->columns(1) // subdivide la columna 3 en 2
+                                        ->schema([
+                                            Select::make('reinsurer_id')
+                                            ->label('Reinsurer')
+                                            //->hiddenLabel()
+                                            ->relationship('reinsurer', 'name')
+                                            ->required()
+                                            ->searchable()
+                                            ->preload() // 👈 fuerza la carga inmediata de los options
+                                            ->native(false)
+                                            ->placeholder('Select a reinsurer')
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
+                                                if ($operation !== 'create' || !$state) {
+                                                    return;
+                                                }
+
+                                                $reinsurer = Reinsurer::find($state);
+
+                                                if (! $reinsurer) {
+                                                    return;
+                                                }
+
+                                                $year = Carbon::now()->format('Y');
+                                                $acronym = Str::upper($reinsurer->acronym);
+                                                $number = str_pad($reinsurer->cns_reinsurer ?? $reinsurer->id, 3, '0', STR_PAD_LEFT);
+
+                                                $prefix = "{$year}-{$acronym}{$number}";
+
+                                                // Buscar el último código existente que empiece con ese prefijo
+                                                $lastBusiness = Business::query()
+                                                    ->where('business_code', 'like', "$prefix-%")
+                                                    ->orderByDesc('business_code')
+                                                    ->first();
+
+                                                // Extraer el consecutivo y sumarle 1
+                                                $lastNumber = 0;
+
+                                                if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->business_code, $matches)) {
+                                                    $lastNumber = (int)$matches[1];
+                                                }
+
+                                                $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+                                                $businessCode = "{$prefix}-{$consecutive}";
+
+                                                $set('business_code', $businessCode);
+                                            })
+                                            //->columnSpan(2),
+                                        ])
+                                        ->columnSpan(2),
+                                
+                                        Section::make()
+                                            ->columns(2) // subdivide la columna 3 en 2
+                                            ->schema([
+                                                TextInput::make('index')
+                                                ->label('Index')
+                                                //->inlineLabel()
+                                                //->hiddenLabel()
+                                                ->required()
+                                                ->numeric()
+                                                ->default(fn () => \App\Models\Business::max('index') + 1 ?? 1)
+                                                ->disabledOn(['create', 'edit'])
+                                                ->dehydrated(),
+                                                
+
+                                                TextInput::make('business_code')
+                                                ->label('Business Code')
+                                                //->hiddenLabel()
+                                                ->placeholder('Business code')
+                                                ->disabled()
+                                                ->dehydrated()
+                                                ->required()
+                                                ->unique(ignoreRecord: true),
+                                                
+                                         ])
+                                         ->columnSpan(1), 
+
+                                Section::make()
+                                    ->columns(3) // subdivide la columna 3 en 2
+                                    ->schema([
+                                        Textarea::make('description')
+                                        ->label('Description')
+                                        //->hiddenLabel()
+                                        ->placeholder('Fill in the business description')
+                                        ->required()
+                                        ->columnSpanFull()
+                                        ->rows(3), 
+                                    ])
+                                    //->columnSpan(1), 
+                                  
+                                
+                                
+                       
+                            ]),
+
                 
-                ]),
+
 
                    Section::make('Contract Details')
                     ->columns(3)
@@ -186,67 +179,82 @@ class BusinessResource extends Resource
                     
                         
                             Select::make('reinsurance_type')
-                            ->label('Reinsurer Type')
-                            ->placeholder('Select a reinsurer type') // 👈 Aquí cambias el texto
-                            ->options([
-                                'Facultative' => 'Facultative',
-                                'Treaty' => 'Treaty',
-                            ])
-                            ->required()
-                            ->searchable(),        
+                                ->label('Reinsurer Type')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select a reinsurer type') // 👈 Aquí cambias el texto
+                                ->options([
+                                    'Facultative' => 'Facultative',
+                                    'Treaty' => 'Treaty',
+                                ])
+                                ->required()
+                                ->searchable(),        
 
                             Select::make('risk_covered')
-                            ->label('Risk Covered')
-                            ->placeholder('Select the risk covered.') // 👈 Aquí cambias el texto
-                            ->options([
-                                'Life' => 'Life',
-                                'Non-Life' => 'Non-Life',
-                            ])
-                            ->required()
-                            ->searchable(),
+                                ->label('Risk Covered')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select the risk covered.') // 👈 Aquí cambias el texto
+                                ->options([
+                                    'Life' => 'Life',
+                                    'Non-Life' => 'Non-Life',
+                                ])
+                                ->required()
+                                ->searchable(),
                             
                             Select::make('business_type')
-                            ->label('Business Type')
-                            ->placeholder('Select a business type.') // 👈 Aquí cambias el texto
-                            ->options([
-                                'Own' => 'Own',
-                                'Third Party' => 'Third party',
-                            ])
-                            ->required()
-                            ->searchable(),
+                                ->label('Business Type')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select a business type.') // 👈 Aquí cambias el texto
+                                ->options([
+                                    'Own' => 'Own',
+                                    'Third Party' => 'Third party',
+                                ])
+                                ->required()
+                                ->searchable(),
 
                             Select::make('premium_type')
-                            ->label('Premium Type')
-                            ->placeholder('Select a premium type.') // 👈 Aquí cambias el texto
-                            ->options([
-                                'Fixed' => 'Fixed',
-                                'Estimated' => 'Estimated',
-                            ])
-                            ->required()
-                            ->searchable(),
+                                ->label('Premium Type')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select a premium type.') // 👈 Aquí cambias el texto
+                                ->options([
+                                    'Fixed' => 'Fixed',
+                                    'Estimated' => 'Estimated',
+                                ])
+                                ->required()
+                                ->searchable(),
 
                             Select::make('purpose')
-                            ->label('Purpose')
-                            ->placeholder('Select business purpose.') // 👈 Aquí cambias el texto
-                            ->options([
-                                'Normal' => 'Normal',
-                                'Strategic' => 'Strategic',
-                            ])
-                            ->required()
-                            ->searchable(),
+                                ->label('Purpose')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select business purpose.') // 👈 Aquí cambias el texto
+                                ->options([
+                                    'Normal' => 'Normal',
+                                    'Strategic' => 'Strategic',
+                                ])
+                                ->required()
+                                ->searchable(),
 
                             Select::make('claims_type')
-                            ->label('Claims Type')
-                            ->placeholder('Select claims type.') // 👈 Aquí cambias el texto
-                            ->options([
-                                'Claims Ocurrence' => 'Claims occurrence',
-                                'Claims Made' => 'Claims made',
-                            ])
-                            ->required()
-                            ->searchable(),
+                                ->label('Claims Type')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select claims type.') // 👈 Aquí cambias el texto
+                                ->options([
+                                    'Claims Occurrence' => 'Claims occurrence',
+                                    'Claims Made' => 'Claims made',
+                                ])
+                                ->required()
+                                ->searchable(),
 
                             Select::make('producer_id')
                                 ->label('Producer')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                 ->placeholder('Select business producer.') // 👈 Aquí cambias el texto
                                 ->relationship('Producer', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()
@@ -254,6 +262,9 @@ class BusinessResource extends Resource
 
                             Select::make('currency_id')
                                 ->label('Currency')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Business region.') // 👈 Aquí cambias el texto
                                 ->relationship(
                                     name: 'currency',         // ← relación en tu modelo
                                     titleAttribute: 'name')
@@ -264,6 +275,9 @@ class BusinessResource extends Resource
 
                             Select::make('region_id')
                                 ->label('Region')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                ->placeholder('Select business currency.') // 👈 Aquí cambias el texto
                                 ->relationship('Region', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()
@@ -271,70 +285,108 @@ class BusinessResource extends Resource
                     
                  ]),   // ← cierra schema() y luego la Sección
 
-                  Section::make()
+                 
+                Section::make('Relationship Info')
+                    ->columns(2)
+                    
+                        ->schema([ 
+                 
+                            Select::make('parent_id')
+                                ->label('Parent Business')
+                                //->inlineLabel()
+                                ->relationship('parent', 'business_code')
+                                ->searchable()
+                                ->preload()
+                                ->nullable(),
+
+                            Select::make('renewed_from_id')
+                                ->label('Renewed From')
+                                //->inlineLabel()
+                                ->relationship('renewedFrom', 'business_code')
+                                ->searchable()
+                                ->preload()
+                                ->nullable(),
+                        ]),
+                 
+                Section::make('Status Tracking')
+                    ->columns(3)
+                    ->hidden(fn (string $context): bool => $context === 'create')
+                        ->schema([ 
+                             TextInput::make('business_lifecycle_status')
+                                        ->label('Lifecycle Status')
+                                        //->hiddenLabel()
+                                        //->inlineLabel()
+                                        ->required()
+                                        ->maxLength(510)
+                                        ->default('On Hold')
+                                        ->disabledOn(['create', 'edit'])
+                                        ->dehydrated(), // 👈 esto asegura que se envíe el valor
+
+                                    TextInput::make('approval_status')
+                                        ->label('Approval Status')
+                                        //->hiddenLabel()
+                                        //->inlineLabel()
+                                        ->disabledOn(['create', 'edit'])
+                                        ->maxLength(510)
+                                        ->default('DFT'),
+
+                                    DatePicker::make('approval_status_updated_at')
+                                        ->label('Approval date')
+                                        //->hiddenLabel() 
+                                        ->disabledOn(['create', 'edit']),
+                                        //->inlineLabel(),
+                            
+
+                        ]),
+                  
+                 Section::make('Audit Info')
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
+                        Placeholder::make('created_at')
+                            ->label('Created at')
+                            ->content(fn ($record) => $record?->created_at?->format('d/m/Y H:i:s')),
 
-                                Section::make('Relationship Info')
-                                    ->schema([
-                                        Select::make('parent_id')
-                                            ->label('Parent Business')
-                                            ->relationship('parent', 'business_code')
-                                            ->searchable()
-                                            ->preload()
-                                            ->nullable(),
-
-                                        Select::make('renewed_from_id')
-                                            ->label('Renewed From')
-                                           ->relationship('renewedFrom', 'business_code')
-                                            ->searchable()
-                                            ->preload()
-                                            ->nullable(),
-                                    ])
-                                    ->columnSpan(1), // 👈 fuerza que la sección ocupe solo la mitad
-
-                                Section::make('Status Tracking')
-                                    ->schema([
-                                        Forms\Components\TextInput::make('approval_status')
-                                            ->required()
-                                            ->maxLength(510)
-                                            ->default('DFT'),
-
-                                        Forms\Components\DateTimePicker::make('approval_status_updated_at'),
-                                    ])
-                                    ->columnSpan(1), // 👈 también aquí
-                            ]),
-                    ]),
+                        Placeholder::make('updated_at')
+                            ->label('Last updated')
+                            ->content(fn ($record) => $record?->updated_at?->format('d/m/Y H:i:s')),
+                    ])
+                    ->columns(2)
+                    ->hidden(fn (string $context): bool => $context === 'create') 
+                 
+                 
+                 
 
             ]);
     }
+
+
+
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('index')
+                TextColumn::make('index')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('business_code')
+                TextColumn::make('business_code')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('reinsurance_type')
+                TextColumn::make('reinsurance_type')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('reinsurer.short_name')
+                TextColumn::make('reinsurer.short_name')
                     ->label('Reinsurer')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('renewed_from_id')
+                TextColumn::make('renewed_from_id')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('currency.acronym')
+                TextColumn::make('currency.acronym')
                     ->label('Currency')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                     
-                Tables\Columns\TextColumn::make('business_lifecycle_status')
+                TextColumn::make('business_lifecycle_status')
                     ->label('Lifecycle')
                     ->badge()
                     ->color(fn ($state) => match ($state->value) {
@@ -348,7 +400,7 @@ class BusinessResource extends Resource
                     })
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('operative_docs_count')
+                TextColumn::make('operative_docs_count')
                     ->counts('operativeDocs')
                     ->label('Documents')
                     ->sortable()
@@ -369,173 +421,173 @@ class BusinessResource extends Resource
             // ╚═════════════════════════════════════════════════════════════════════════╝
 
             ->headerActions([
-    Action::make('export')
-        ->label('Export Report')
-        ->icon('heroicon-o-arrow-down-tray')
-        ->modalHeading('Export Reports')
-        ->modalSubmitActionLabel('Generate')
-        ->form([
-            Select::make('report_type')
-                ->label('Report Type')
-                ->options([
-                    'operative_docs'     => 'Operative Docs (by Node Concept)',
-                    'underwritten_report'=> 'Underwritten Report (by Deduction)',
-                ])
-                ->default('operative_docs')
-                ->required(),
+                Action::make('export')
+                    ->label('Export Report')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->modalHeading('Export Reports')
+                    ->modalSubmitActionLabel('Generate')
+                    ->form([
+                        Select::make('report_type')
+                            ->label('Report Type')
+                            ->options([
+                                'operative_docs'     => 'Operative Docs (by Node Concept)',
+                                'underwritten_report'=> 'Underwritten Report (by Deduction)',
+                            ])
+                            ->default('operative_docs')
+                            ->required(),
 
-            // 🔹 Filtros
-            Select::make('reinsurer_ids')
-                ->label('Reinsurer(s)')
-                ->placeholder('All reinsurers')
-                ->options(fn () => \App\Models\Reinsurer::orderBy('name')->pluck('name', 'id'))
-                ->searchable()
-                ->preload()
-                ->multiple(),
+                        // 🔹 Filtros
+                        Select::make('reinsurer_ids')
+                            ->label('Reinsurer(s)')
+                            ->placeholder('All reinsurers')
+                            ->options(fn () => \App\Models\Reinsurer::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->multiple(),
 
-            DatePicker::make('from_date')->label('From date')->required(),
-            DatePicker::make('to_date')->label('To date')->required(),
-        ])
-        ->action(function (array $data) {
+                        DatePicker::make('from_date')->label('From date')->required(),
+                        DatePicker::make('to_date')->label('To date')->required(),
+                    ])
+                    ->action(function (array $data) {
 
-            $from   = $data['from_date'] ?? null;
-            $to     = $data['to_date']   ?? null;
-            $report = $data['report_type'] ?? null;
+                        $from   = $data['from_date'] ?? null;
+                        $to     = $data['to_date']   ?? null;
+                        $report = $data['report_type'] ?? null;
 
-            if (!$from || !$to || !$report) {
-                Notification::make()->title('Please select report type and both dates.')->warning()->send();
-                return;
-            }
+                        if (!$from || !$to || !$report) {
+                            Notification::make()->title('Please select report type and both dates.')->warning()->send();
+                            return;
+                        }
 
-            $reinsurerIds = collect($data['reinsurer_ids'] ?? [])->filter()->values();
+                        $reinsurerIds = collect($data['reinsurer_ids'] ?? [])->filter()->values();
 
-            $scope        = $reinsurerIds->isEmpty() ? 'all-reinsurers' : ('reinsurers-' . $reinsurerIds->implode('-'));
-            $reportLabels = [
-                'operative_docs'      => 'OperativeDocs_report',
-                'underwritten_report' => 'Underwritten_report',
-            ];
-            $reportLabel  = $reportLabels[$report] ?? $report;
+                        $scope        = $reinsurerIds->isEmpty() ? 'all-reinsurers' : ('reinsurers-' . $reinsurerIds->implode('-'));
+                        $reportLabels = [
+                            'operative_docs'      => 'OperativeDocs_report',
+                            'underwritten_report' => 'Underwritten_report',
+                        ];
+                        $reportLabel  = $reportLabels[$report] ?? $report;
 
-            $filename = sprintf(
-                '%s_%s_%s_to_%s.xlsx',
-                $reportLabel,
-                $scope,
-                Carbon::parse($from)->format('Ymd'),
-                Carbon::parse($to)->format('Ymd')
-            );
+                        $filename = sprintf(
+                            '%s_%s_%s_to_%s.xlsx',
+                            $reportLabel,
+                            $scope,
+                            Carbon::parse($from)->format('Ymd'),
+                            Carbon::parse($to)->format('Ymd')
+                        );
 
-            // 1) Consulta única con ambos conceptos disponibles
-            $flat = OperativeDoc::query()
-                ->with([
-                    'business.reinsurer',
-                    'business.currency',
-                    'business.liabilityStructures',
-                    'docType',
-                ])
-                ->whereDate('inception_date', '>=', $from)
-                ->whereDate('inception_date', '<=', $to)
-                ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
-                ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
-                    $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
-                )
+                        // 1) Consulta única con ambos conceptos disponibles
+                        $flat = OperativeDoc::query()
+                            ->with([
+                                'business.reinsurer',
+                                'business.currency',
+                                'business.liabilityStructures',
+                                'docType',
+                            ])
+                            ->whereDate('inception_date', '>=', $from)
+                            ->whereDate('inception_date', '<=', $to)
+                            ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
+                            ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
+                                $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
+                            )
 
-                // shares
-                ->leftJoin('businessdoc_schemes', 'businessdoc_schemes.op_document_id', '=', 'operative_docs.id')
-                ->leftJoin('cost_schemes', 'cost_schemes.id', '=', 'businessdoc_schemes.cscheme_id')
+                            // shares
+                            ->leftJoin('businessdoc_schemes', 'businessdoc_schemes.op_document_id', '=', 'operative_docs.id')
+                            ->leftJoin('cost_schemes', 'cost_schemes.id', '=', 'businessdoc_schemes.cscheme_id')
 
-                // insureds
-                ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
-                ->leftJoin('companies', 'companies.id', '=', 'businessdoc_insureds.company_id')
-                ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
-                ->leftJoin('coverages', 'coverages.id', '=', 'businessdoc_insureds.coverage_id')
+                            // insureds
+                            ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
+                            ->leftJoin('companies', 'companies.id', '=', 'businessdoc_insureds.company_id')
+                            ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
+                            ->leftJoin('coverages', 'coverages.id', '=', 'businessdoc_insureds.coverage_id')
 
-                // cost nodes + partner
-                ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'cost_schemes.id')
-                ->leftJoin('partners', 'partners.id', '=', 'cost_nodesx.partner_id')
+                            // cost nodes + partner
+                            ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'cost_schemes.id')
+                            ->leftJoin('partners', 'partners.id', '=', 'cost_nodesx.partner_id')
 
-                // deductions (para el segundo reporte)
-                ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
+                            // deductions (para el segundo reporte)
+                            ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
 
-                ->orderBy('businesses.business_code')
-                ->select([
-                    'operative_docs.*',
+                            ->orderBy('businesses.business_code')
+                            ->select([
+                                'operative_docs.*',
 
-                    // campos “planos”
-                    'cost_schemes.share as share',
-                    'companies.name   as insured_name',
-                    'countries.name   as country_name',
-                    'coverages.name   as coverage_name',
-                    'businessdoc_insureds.premium as insured_premium',
+                                // campos “planos”
+                                'cost_schemes.share as share',
+                                'companies.name   as insured_name',
+                                'countries.name   as country_name',
+                                'coverages.name   as coverage_name',
+                                'businessdoc_insureds.premium as insured_premium',
 
-                    // nodos de costo
-                    'partners.name           as partner_name',
-                    'partners.acronym        as partner_acronym',
-                    'cost_nodesx.concept     as node_concept',       // 👈 para OperativeDocsExport
-                    'deductions.concept      as deduction_concept',  // 👈 para UnderwrittenReportExport
-                    'cost_nodesx.value       as node_value',
-                ])
-                ->get();
+                                // nodos de costo
+                                'partners.name           as partner_name',
+                                'partners.acronym        as partner_acronym',
+                                'cost_nodesx.concept     as node_concept',       // 👈 para OperativeDocsExport
+                                'deductions.concept      as deduction_concept',  // 👈 para UnderwrittenReportExport
+                                'cost_nodesx.value       as node_value',
+                            ])
+                            ->get();
 
-            if ($flat->isEmpty()) {
-                Notification::make()->title('No records found for the selected range.')->info()->send();
-                return;
-            }
+                        if ($flat->isEmpty()) {
+                            Notification::make()->title('No records found for the selected range.')->info()->send();
+                            return;
+                        }
 
-            // 2) Ramificación por tipo de reporte
-            if ($report === 'operative_docs') {
-                // Encabezados dinámicos por CONCEPTO del nodo
-                $partners = $flat->pluck('partner_acronym')->filter()->unique()->values();
-                $concepts = $flat->pluck('node_concept')->filter()->unique()->values();
+                        // 2) Ramificación por tipo de reporte
+                        if ($report === 'operative_docs') {
+                            // Encabezados dinámicos por CONCEPTO del nodo
+                            $partners = $flat->pluck('partner_acronym')->filter()->unique()->values();
+                            $concepts = $flat->pluck('node_concept')->filter()->unique()->values();
 
-                // Pivot partner(node_acronym) × node_concept
-                $wide = $flat->groupBy('id')->map(function ($rows) {
-                    $first = $rows->first();
-                    $matrix = [];
-                    foreach ($rows as $r) {
-                        if (!$r->partner_acronym || !$r->node_concept) continue;
-                        $p = $r->partner_acronym;
-                        $c = $r->node_concept;
-                        $matrix[$p][$c] = ($matrix[$p][$c] ?? 0) + (float) ($r->node_value ?? 0);
-                    }
-                    $first->pc_matrix = $matrix;
-                    return $first;
-                })->values();
+                            // Pivot partner(node_acronym) × node_concept
+                            $wide = $flat->groupBy('id')->map(function ($rows) {
+                                $first = $rows->first();
+                                $matrix = [];
+                                foreach ($rows as $r) {
+                                    if (!$r->partner_acronym || !$r->node_concept) continue;
+                                    $p = $r->partner_acronym;
+                                    $c = $r->node_concept;
+                                    $matrix[$p][$c] = ($matrix[$p][$c] ?? 0) + (float) ($r->node_value ?? 0);
+                                }
+                                $first->pc_matrix = $matrix;
+                                return $first;
+                            })->values();
 
-                return Excel::download(
-                    new \App\Exports\OperativeDocsExport($wide, $partners, $concepts),
-                    $filename
-                );
-            }
+                            return Excel::download(
+                                new \App\Exports\OperativeDocsExport($wide, $partners, $concepts),
+                                $filename
+                            );
+                        }
 
-            if ($report === 'underwritten_report') {
-                // Encabezados dinámicos por CONCEPTO de deductions
-                $partners = $flat->pluck('partner_acronym')->filter()->unique()->values();
-                $concepts = $flat->pluck('deduction_concept')->filter()->unique()->values();
+                        if ($report === 'underwritten_report') {
+                            // Encabezados dinámicos por CONCEPTO de deductions
+                            $partners = $flat->pluck('partner_acronym')->filter()->unique()->values();
+                            $concepts = $flat->pluck('deduction_concept')->filter()->unique()->values();
 
-                // Pivot partner(node_acronym) × deduction_concept
-                $wide = $flat->groupBy('id')->map(function ($rows) {
-                    $first = $rows->first();
-                    $matrix = [];
-                    foreach ($rows as $r) {
-                        if (!$r->partner_acronym || !$r->deduction_concept) continue;
-                        $p = $r->partner_acronym;
-                        $c = $r->deduction_concept;
-                        $matrix[$p][$c] = ($matrix[$p][$c] ?? 0) + (float) ($r->node_value ?? 0);
-                    }
-                    $first->pc_matrix = $matrix;
-                    return $first;
-                })->values();
+                            // Pivot partner(node_acronym) × deduction_concept
+                            $wide = $flat->groupBy('id')->map(function ($rows) {
+                                $first = $rows->first();
+                                $matrix = [];
+                                foreach ($rows as $r) {
+                                    if (!$r->partner_acronym || !$r->deduction_concept) continue;
+                                    $p = $r->partner_acronym;
+                                    $c = $r->deduction_concept;
+                                    $matrix[$p][$c] = ($matrix[$p][$c] ?? 0) + (float) ($r->node_value ?? 0);
+                                }
+                                $first->pc_matrix = $matrix;
+                                return $first;
+                            })->values();
 
-                return Excel::download(
-                    new \App\Exports\UnderwrittenReportExport($wide, $partners, $concepts),
-                    $filename
-                );
-            }
+                            return Excel::download(
+                                new \App\Exports\UnderwrittenReportExport($wide, $partners, $concepts),
+                                $filename
+                            );
+                        }
 
-            // Fallback (por si llega un valor inesperado)
-            Notification::make()->title('Unsupported report type.')->danger()->send();
-            return;
-        }),
+                        // Fallback (por si llega un valor inesperado)
+                        Notification::make()->title('Unsupported report type.')->danger()->send();
+                        return;
+                    }),
 
 
             ])

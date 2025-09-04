@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Grouping\Group;
+use Filament\Support\RawJs;
 
 
 class UserResource extends Resource
@@ -48,21 +49,25 @@ class UserResource extends Resource
                 ->schema([
                     TextInput::make('name')
                         ->label('Name')
+                        ->placeholder('Please provide user name')
                         //->inlineLabel()
                         ->required()
                         ->maxLength(255),
 
                     TextInput::make('email')
                         ->label('Email')
-                        //->inlineLabel()
+                        ->placeholder('name@example.com')
                         ->email()
                         ->required()
                         ->maxLength(255)
+                        ->rule('regex:/^[\w\.-]+@[\w\.-]+\.\w+$/')
+                        ->live(onBlur: true)
                         ->unique(ignoreRecord: true),
-
+                        
                     TextInput::make('password')
                         ->label('Password')
                         ->visible(fn (string $context) => in_array($context, ['create','edit'], true))
+                        ->placeholder('Please provide password')
                         ->password()
                         ->dehydrated(fn ($state) => filled($state)) // Solo guarda si hay input
                         ->maxLength(255)
@@ -73,6 +78,7 @@ class UserResource extends Resource
                     Select::make('department_id')
                         ->label('Department')
                         //->inlineLabel()
+                        ->placeholder('Select department')
                         ->relationship('department', 'name')
                         ->searchable()
                         ->preload()
@@ -81,6 +87,7 @@ class UserResource extends Resource
 
                     Select::make('position_id')
                         ->label('Position')
+                        ->placeholder('Select position')
                         //->inlineLabel()
                         ->relationship('position', 'position')
                         ->searchable()

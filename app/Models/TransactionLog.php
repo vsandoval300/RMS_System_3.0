@@ -19,7 +19,7 @@ class TransactionLog extends Model
     protected $keyType = 'string';    // 👈 ID es string (varchar)
 
     protected $fillable = [
-        'transaction_code',   // 👈 clave que enlaza con transactions.remmitance_code
+        'transaction_id',   // 👈 clave que enlaza con transactions.remmitance_code
         'index',
         'deduction_type',
         'from_entity',
@@ -47,7 +47,7 @@ class TransactionLog extends Model
     // ✅ inversa, también por código
     public function transaction(): BelongsTo
     {
-        return $this->belongsTo(Transaction::class, 'transaction_code');
+        return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 
     public function deduction(): BelongsTo

@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Support\RawJs;
 
 class ReinsurerHoldingsRelationManager extends RelationManager
 {
@@ -28,10 +29,26 @@ class ReinsurerHoldingsRelationManager extends RelationManager
                 ->searchable()
                 ->preload()
                 ->required(),
+
             TextInput::make('percentage')
-                ->numeric()->minValue(0)->maxValue(100)->required(),
+                ->label('Participation Percentage')
+                ->suffix('%')
+                ->required()
+                ->live()
+                ->minValue(0)
+                ->maxValue(100)
+                ->step(0.01)
+                ->mask(RawJs::make('$money($input, ".", ",", 2)')) // se ve como 70.00
+                ->reactive()
+                ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null) // decimal → porcentaje
+                ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100) // porcentaje → decimal
+                ->columnSpan(1),
+
         ]);
     }
+
+
+
 
     public function table(Table $table): Table
     {
@@ -45,6 +62,11 @@ class ReinsurerHoldingsRelationManager extends RelationManager
             ->recordTitleAttribute('holding.name')
 
             ->columns([
+                TextColumn::make('index')
+                    ->label('Index')
+                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
+                    ->sortable(false) // 👈 no tiene sentido ordenar este índice
+                    ->searchable(false), // 👈 tampoco buscarlo
                 // Holding
                 TextColumn::make('holding.name')
                     ->label('Holding')
@@ -63,14 +85,15 @@ class ReinsurerHoldingsRelationManager extends RelationManager
 
                 // % formateado
                 TextColumn::make('percentage')
-                    ->label('%')
-                    ->alignEnd()                       // alinea a la derecha
+                    ->label('Participation Share')
+                    ->alignCenter()                      // alinea a la derecha
                     ->formatStateUsing(fn ($state) => number_format($state * 100, 2) . '%')
                     ->sortable(),
             ])
 
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->label('Add Holding'),
             ])
 
             ->actions([

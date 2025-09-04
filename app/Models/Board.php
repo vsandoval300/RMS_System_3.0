@@ -44,4 +44,9 @@ class Board extends Model
             'board_directors'
         )->withTimestamps();
     }
+
+    public function boardDirectors(): HasMany
+    {
+        return $this->hasMany(BoardDirector::class, 'board_id');
+    }
 }

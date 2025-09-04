@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('phone', 20);
             $table->string('address', 200);
             $table->string('occupation', 200)->index(); // ✅ Index si haces filtros por ocupación
-            $table->string('image', 200);
+            $table->string('image', 200)->nullable();
 
             $table->foreignId('country_id')
                 ->constrained('countries')

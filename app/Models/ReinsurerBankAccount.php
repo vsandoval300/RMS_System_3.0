@@ -22,11 +22,11 @@ class ReinsurerBankAccount extends Model
 
     public function reinsurer(): BelongsTo
     {
-        return $this->belongsTo(Reinsurer::class);
+        return $this->belongsTo(Reinsurer::class, 'reinsurer_id');
     }
 
     public function bankAccount(): BelongsTo
     {
-        return $this->belongsTo(BankAccount::class);
+        return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
 }

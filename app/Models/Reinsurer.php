@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Reinsurer extends Model
 {
@@ -73,26 +74,41 @@ class Reinsurer extends Model
     {
         return $this->hasMany(ReinsurerDoc::class, 'reinsurer_id');
     }
+
+
+
     // 👉 Reaseguradores y Cuentas Bancarias
     public function reinsurerBankAccounts(): HasMany
     {
-        return $this->hasMany(ReinsurerBankAccount::class);
+        return $this->hasMany(ReinsurerBankAccount::class, 'reinsurer_id');
     }
+
+
+
+
+    
     // 👉 Reaseguradores y Financial Statements
     public function financialStatements()
     {
-        return $this->hasMany(ReinsurerFinancialStatement::class);
+        return $this->hasMany(ReinsurerFinancialStatement::class, 'reinsurer_id');
     }
+
+
+
+
+
     // 👉 Reaseguradores y Holdings
     public function reinsurerHoldings(): HasMany
     {
         return $this->hasMany(ReinsurerHolding::class);
     }
+    
     // 👉 Reaseguradores y Boards
     public function reinsurerBoards(): HasMany
     {
-        return $this->hasMany(ReinsurerBoard::class);
+        return $this->hasMany(ReinsurerBoard::class, 'reinsurer_id');
     }
+    
     public function businesses()
     {
         return $this->hasMany(Business::class);
@@ -110,5 +126,24 @@ class Reinsurer extends Model
             ->using(ReinsurerBoard::class)
             ->withPivot(['id', 'appt_date'])
             ->withTimestamps();
+    }
+
+    /* ---------------------------------------------------
+     |  ➜  Eliminar las imagenes ligadas al ciclo 
+           de vida del modelo
+     ---------------------------------------------------*/
+    protected static function booted()
+    {
+        static::deleting(function ($reinsurer) {
+            // Si tiene logo, eliminarlo
+            if ($reinsurer->logo && Storage::disk('s3')->exists($reinsurer->logo)) {
+                Storage::disk('s3')->delete($reinsurer->logo);
+            }
+
+            // Si tiene icono, eliminarlo
+            if ($reinsurer->icon && Storage::disk('s3')->exists($reinsurer->icon)) {
+                Storage::disk('s3')->delete($reinsurer->icon);
+            }
+        });
     }
 }

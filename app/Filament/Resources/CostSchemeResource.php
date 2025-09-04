@@ -11,11 +11,17 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
+use Filament\Forms\Components\Repeater;
 use App\Models\Partner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 
 class CostSchemeResource extends Resource
 {
@@ -39,43 +45,50 @@ class CostSchemeResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('Structure Details')
+            Section::make('Structure Details')
                 ->schema([
                     Forms\Components\Grid::make()
                         ->schema([
                             // 🔹 Columna izquierda: Share & Structure Agreement
                             Forms\Components\Section::make()
                                 ->schema([
-                                    Forms\Components\TextInput::make('share')
-                                        ->label('Share (%)')
-                                        ->numeric()
-                                        ->required()
-                                        ->suffix('%')
-                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 2, '.', '') : null)
-                                        ->dehydrateStateUsing(fn ($state) => $state !== null ? $state / 100 : null),
+                                    Forms\Components\Grid::make(2)
+                                        ->schema([
+                                            Select::make('agreement_type')
+                                                ->label('Structure Agreement')
+                                                ->required()
+                                                ->options([
+                                                    'Quota Share'     => 'Quota Share',
+                                                    'Surplus'         => 'Surplus',
+                                                    'Excess of Loss'  => 'Excess of Loss',
+                                                    'Stop Loss'       => 'Stop Loss',
+                                                ])
+                                                ->native(false)
+                                                ->searchable(),
 
-                                    Forms\Components\Select::make('agreement_type')
-                                        ->label('Structure Agreement')
-                                        ->required()
-                                        ->options([
-                                            'Quota Share'     => 'Quota Share',
-                                            'Surplus'         => 'Surplus',
-                                            'Excess of Loss'  => 'Excess of Loss',
-                                            'Stop Loss'       => 'Stop Loss',
-                                        ])
-                                        ->native(false)
-                                        ->searchable(),
+                                            TextInput::make('share')
+                                                ->label('Share (%)')
+                                                ->numeric()
+                                                ->required()
+                                                ->suffix('%')
+                                                ->minValue(0)  
+                                                ->maxValue(100)
+                                                ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 2, '.', '') : null)
+                                                ->dehydrateStateUsing(fn ($state) => $state !== null ? $state / 100 : null),
+                                        ]),
                                 ])
                                 ->columns(1)
                                 ->columnSpan(6) // Mitad izquierda
                                 ->compact(),
+                            
+                            
 
                             // 🔹 Columna derecha: Index & Scheme Id
-                            Forms\Components\Section::make()
+                            Section::make()
                                 ->schema([
                                     Forms\Components\Grid::make(2)
                                         ->schema([
-                                            Forms\Components\TextInput::make('index')
+                                            TextInput::make('index')
                                                 ->label('Index')
                                                 ->numeric()
                                                 ->required()
@@ -83,7 +96,7 @@ class CostSchemeResource extends Resource
                                                 ->dehydrated()
                                                 ->columnSpan(1),
 
-                                            Forms\Components\TextInput::make('id')
+                                            TextInput::make('id')
                                                 ->label('Scheme Id')
                                                 ->disabled()
                                                 ->dehydrated()
@@ -101,97 +114,126 @@ class CostSchemeResource extends Resource
                 // ╔═════════════════════════════════════════════════════════════════════════╗
                 // ║ Table Repeater para Nodos de Costo                                      ║
                 // ╚═════════════════════════════════════════════════════════════════════════╝
-                Forms\Components\Section::make('Cost Nodes')
-                    ->description('Define los nodos de costo de este esquema')
-                    ->schema([
-                        TableRepeater::make('costNodexes')
-                            ->label('Cost Nodes')
-                            ->relationship('costNodexes')
-                            ->schema([
-                                // 👇 Campo oculto que sí se guarda
-                                Forms\Components\TextInput::make('id')
-                                    ->dehydrated(),
-                                    //->hidden(), // No se muestra, pero se guarda
+                Section::make('Cost Nodes')
+                    ->description('Define the cost nodes of this scheme')
+                        ->schema([
+                            Repeater::make('costNodexes')
+                                ->label('')
+                                ->relationship('costNodexes')
+                                ->default([])
+                                ->schema([
+                                    // 👇 Campo oculto que sí se guarda
+                                    Hidden::make('id')
+                                        ->dehydrated(),
+                                        //->hidden(), // No se muestra, pero se guarda
 
-                                Forms\Components\TextInput::make('index')
-                                    ->label('Index')
-                                    ->numeric()
-                                    ->required()
-                                    ->disabled()
-                                    ->dehydrated()
-                                    ->columnSpan(1),
+                                    Hidden::make('index')
+                                        ->dehydrated(), // 👈 este es el que se guarda en BD
 
-                                Forms\Components\Select::make('concept')
-                                    ->label('Deduction Type')
-                                    ->relationship('deduction', 'concept')
-                                    ->preload()
-                                    ->searchable()
-                                    ->required()
-                                    ->columnSpan(2),
+                                    Placeholder::make('index_display')
+                                        ->label('Index')
+                                        ->content(fn ($get) => $get('index'))
+                                        ->columnSpan(1),
 
-                                Forms\Components\Select::make('partner_id')
-                                    ->label('Partner')
-                                    ->options(Partner::all()->pluck('name', 'id'))
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->columnSpan(1),
+                                    Select::make('concept')
+                                        ->label('Deduction Type')
+                                        ->relationship('deduction', 'concept')
+                                        ->placeholder('Select deduction')
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->reactive() // 👈 necesario para disparar dependencias
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            if ($state != 3) {   // 👈 si NO es referral
+                                                $set('referral_partner', null); // 👈 limpia el valor
+                                            }
+                                        })
+                                        ->columnSpan(2),
 
-                                Forms\Components\TextInput::make('referral_partner')
-                                    ->label('Referral Partner')
-                                    ->maxLength(255)
-                                    ->nullable()
-                                    ->columnSpan(2),
+                                    Select::make('partner_id')
+                                        ->label('Partner')
+                                        ->options(Partner::all()->pluck('name', 'id'))
+                                        ->placeholder('Select partner')
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->columnSpan(3),
 
-                                Forms\Components\TextInput::make('value')
-                                    ->label('Value')
-                                    ->numeric()
-                                    ->required()
-                                    ->suffix('%')
-                                    ->columnSpan(1),
-                            ])
-                            ->columns(8)
-                            ->defaultItems(1)
-                            ->addActionLabel('Agregar nodo de costo')
-                            ->reorderable(false)
-                            ->deletable(true)
-                            ->addable(true)
+                                    Select::make('referral_partner')
+                                        ->label('Referral Partner')
+                                        ->options([
+                                            'Gatekeeper' => 'Gatekeeper',
+                                            'Integrity' => 'Integrity',
+                                            'GMK-International' => 'GMK-International',
+                                        ])
+                                        ->placeholder('Select the recipient')
+                                        ->nullable()
+                                        ->searchable()
+                                        ->columnSpan(2)
+                                        ->disabled(fn ($get) => $get('concept') != 3),
+                                    
+                                    TextInput::make('value')
+                                        ->label('Value')
+                                        ->required()
+                                        ->reactive()
+                                        ->numeric() // permite solo números
+                                        ->minValue(0) // no menos de 0
+                                        ->maxValue(100) // no más de 100
+                                        ->suffix('%')
+                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 2, '.', '') : null)
+                                        ->dehydrateStateUsing(fn ($state) => $state !== null ? $state / 100 : null) // guarda dividido entre 100
+                                        ->columnSpan(2),
 
-                            // 👇 Lógica automática para index y id
-                            ->afterStateUpdated(function (array $state, callable $set, callable $get) {
-                                $schemeId = $get('id'); // Asegúrate que este valor no es null
+                                ])
+                                ->columns(10)
+                                //->defaultItems(1)
+                                ->addActionLabel('Agregar nodo de costo')
+                                ->reorderable(false)
+                                ->deletable(true)
+                                ->addable(true)
 
-                                if (! $schemeId || ! is_string($schemeId)) {
-                                    return;
-                                }
+                                // 👇 Lógica automática para index y id
+                                ->afterStateUpdated(function (array $state, callable $set, callable $get) {
+                                    $schemeId = $get('id'); // Asegúrate que este valor no es null
 
-                                $newState = [];
-                                $index = 1;
-
-                                foreach ($state as $key => $item) {
-                                    if (is_array($item)) {
-                                        $item['index'] = $index;
-                                        $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
-                                        $newState[$key] = $item;
-                                        $index++;
+                                    if (! $schemeId || ! is_string($schemeId)) {
+                                        return;
                                     }
-                                }
 
-                                $set('costNodexes', $newState);
-                            }),
+                                    $newState = [];
+                                    $index = 1;
 
-                    ])
-                    ->collapsible(),
+                                    foreach ($state as $key => $item) {
+                                        if (is_array($item)) {
+                                            $item['index'] = $index;
+                                            $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+                                            $newState[$key] = $item;
+                                            $index++;
+                                        }
+                                    }
 
+                                    $set('costNodexes', $newState);
+                                }),
 
+                        
+                                Placeholder::make('total_values')
+                                    ->label('')
+                                    ->content(function ($get) {
+                                        $values = collect($get('costNodexes') ?? [])
+                                            ->pluck('value')
+                                            ->filter()
+                                            ->map(fn ($v) => floatval($v)); // 👈 multiplicamos porque en BD está dividido entre 100
+                                        $total = $values->sum();
+                                        return 'Total deductions: ' . $total . '%';
+                                    })
+                                    ->columnSpanFull()
+                                    ->extraAttributes(['class' => 'text-right font-bold']),
 
-
-
-
+                        ])
+                        ->collapsible(),
+                    
         ]);
     }
-
-
 
 
 
@@ -221,7 +263,8 @@ class CostSchemeResource extends Resource
                         self::getUrl('view', ['record' => $record])
                     )
                     ->icon('heroicon-m-eye'),  // opcional */
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\ViewAction::make()
+                     ->modalWidth('7xl'), // 👈 aumenta el ancho del modal
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])

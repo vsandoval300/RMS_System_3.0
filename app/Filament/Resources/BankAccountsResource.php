@@ -42,30 +42,42 @@ class BankAccountsResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Group::make() //Grupo 1
-                ->schema([
+
+                //Forms\Components\Group::make() //Grupo 1
+                //->schema([
                     Forms\Components\Section::make('Wire Instructions')
-                    ->schema([
+                        ->schema([
                             
                             Select::make('status_account')
                                 ->label('Status Account') // Cambié el label para que tenga más sentido
+                                ->inlineLabel()
                                 ->required()
                                 ->options([
-                                    'active' => 'Active',
-                                    'inactive' => 'Inactive',
+                                    'Active' => 'Active',
+                                    'Inactive' => 'Inactive',
                                     ])
                                 ->native(false) // Para que se vea como dropdown estilizado (opcional)
-                                ->helperText('Please select the account status.'),
+                                ->placeholder('Select account status'),
+                                /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? 'Please select the account status.' 
+                                : null), */
                                 
                             Select::make('currency_id')
                                 ->label('Currency')
-                                ->relationship('currency','name')
+                                ->inlineLabel()
+                                ->placeholder('Select currency')
+                                ->relationship('currency', 'name') // 👈 relación base
+                                ->getOptionLabelFromRecordUsing(
+                                    fn ($record) => $record->acronym . ' - ' . $record->name
+                                )
                                 ->searchable()
                                 ->preload()
                                 ->required(),
                                
                             Select::make('intermediary_bank')
                                 ->label('Intermediary Bank')
+                                ->inlineLabel()
+                                ->placeholder('Select intermediary bank')
                                 ->relationship('bank','name')
                                 ->searchable()
                                 ->preload()
@@ -73,85 +85,104 @@ class BankAccountsResource extends Resource
                                
                             Select::make('bank_id')
                                 ->label('Bank / For Credit to')
+                                ->inlineLabel()
+                                ->placeholder('Select bank')
                                 ->relationship('bank','name')
                                 ->searchable()
                                 ->preload()
                                 ->required(),
                                 
-                    ])->columns(1),
+                        ])
+                        ->columns(1)
+                        ->collapsible(),
+
                     
                     Forms\Components\Section::make('Beneficiary Details')
-                    ->schema([
+                        ->schema([
                             TextInput::make('beneficiary_acct_name')
                                 ->label('Beneficiay Name')
+                                ->inlineLabel()
+                                ->placeholder("Please provide the beneficiary's full name")
                                 ->required()
                                 ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_name', ucwords(strtolower($state))))
-                                ->helperText('First letter of each word will be capitalised.'),
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_name', ucwords(strtolower($state)))),
+                                //->helperText('First letter of each word will be capitalised.'),
                                 
-                            
                             Textarea::make('beneficiary_address')
                                 ->label('Beneficiary Address')
+                                ->inlineLabel()
+                                ->placeholder("Please provide beneficiary adress")
                                 ->required()
                                 ->columnSpan('full')
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_address', ucfirst(strtolower($state))))
-                                ->helperText('Please provide address.'),
-                                       
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_address', ucfirst(strtolower($state)))),
 
                             TextInput::make('beneficiary_swift')
                                 ->label('Beneficiary SWIFT code')
+                                ->inlineLabel()
+                                ->placeholder('Please provide SWIFT code.')
                                 ->required()
-                                ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_swift', ucwords(strtolower($state))))
-                                ->helperText('Please provide SWIFT code.'),
+                                ->rule('regex:/^[A-Z0-9]{8}([A-Z0-9]{3})?$/') // 8 o 11 caracteres alfanuméricos
+                                ->afterStateUpdated(fn ($state, callable $set) => 
+                                    $set('beneficiary_swift', strtoupper($state))
+                                )
+                                ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? '8 or 11 characters, e.g. DEUTDEFF500' 
+                                : null), 
                                  
-
                             TextInput::make('beneficiary_acct_no')
                                 ->label('Beneficiary Account Number')
+                                ->inlineLabel()
+                                ->placeholder('Please provide account number.')
                                 ->required()
                                 ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_no', ucwords(strtolower($state))))
-                                ->helperText('Please provide account number.'),
-                                
-                    ])->columns(1),
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_no', ucwords(strtolower($state)))),
+                        ])
+                        ->columns(1)
+                        ->collapsible(),
 
                     Forms\Components\Section::make('For Further Account Details')
-                    ->schema([
+                        ->schema([
                             TextInput::make('ffc_acct_name')
                                 ->label('For Further Account Name')
+                                ->inlineLabel()
+                                ->placeholder('Please provide account name.')
                                 ->required()
                                 ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_name', ucwords(strtolower($state))))
-                                ->helperText('First letter of each word will be capitalised.'),
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_name', ucwords(strtolower($state)))),
 
                             TextInput::make('ffc_acct_no')
                                 ->label('For Further Account Number')
+                                ->inlineLabel()
+                                ->placeholder('Please provide account number.')
                                 ->required()
                                 ->unique()
                                 ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_no', ucwords(strtolower($state))))
-                                ->helperText('Please provide account number.'), 
-
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_no', ucwords(strtolower($state)))),
+                               
                             Textarea::make('ffc_acct_address')
                                 ->label('For Further Account Address')
+                                ->inlineLabel()
+                                ->placeholder("Please provide adress")
                                 ->required()
                                 ->columnSpan('full')
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_address', ucfirst(strtolower($state))))
-                                ->helperText('Please provide address.'),
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_address', ucfirst(strtolower($state)))),
                                 
-                    ])->columns(1)
+                                
+                        ])
+                        ->columns(1)
+                        ->collapsible(),
                 
                 
                 
                 
-                ]),
-                Forms\Components\Group::make() //Grupo 2
+                //]),
+                /* Forms\Components\Group::make() //Grupo 2
                 ->schema([
                     Forms\Components\Section::make()
                     ->schema([
 
-                    ])->columns(2)
-                ])
+                    ])->columns(1)
+                ]) */
                    
             ]);
     }           

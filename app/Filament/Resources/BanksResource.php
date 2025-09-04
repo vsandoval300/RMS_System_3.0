@@ -45,38 +45,55 @@ class BanksResource extends Resource
                     Forms\Components\Section::make('Bank Details')
                     ->schema([
                     
-                    TextInput::make('name')
-                        ->label('Name')
-                        ->required()
-                        ->unique()
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.'),
-                        
-                    Textarea::make('address')
-                        ->label('Address')
-                        ->required()
-                        ->columnSpan('full')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state))))
-                        ->helperText('Please provide address.'),
-                        
-                    TextInput::make('aba_number')
-                        ->label('ABA number')
-                        ->unique()
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
-                        ->helperText('Please provide ABA number.'),
-                           
-                    TextInput::make('swift_code')
-                        ->label('SWIFT code')
-                        ->required()
-                        ->unique()
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('swift_code', ucwords(strtolower($state))))
-                        ->helperText('Please provide SWIFT code.'),
+                        TextInput::make('name')
+                            ->label('Name')
+                            ->placeholder('Please provide name')
+                            ->required()
+                            ->unique()
+                            ->maxLength(255)
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
+                            /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? 'First letter of each word will be capitalised.' 
+                                : null), */
+                            
+                        Textarea::make('address')
+                            ->label('Address')
+                            ->placeholder('Please provide bank address')
+                            ->required()
+                            ->columnSpan('full')
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state)))),
+                            /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? 'Please provide address.' 
+                                : null), */
+                            
+                        TextInput::make('aba_number')
+                            ->label('ABA number')
+                            ->placeholder('Please provide ABA number.')
+                            ->rule('digits:9') 
+                            ->unique()
+                            ->maxLength(255)
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
+                            ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? '9 digits, e.g. 123456789' 
+                                : null),
+                            
+                        TextInput::make('swift_code')
+                            ->label('SWIFT Code')
+                            ->placeholder('Please provide SWIFT code.')
+                            ->required()
+                            ->rule('regex:/^[A-Z0-9]{8}([A-Z0-9]{3})?$/') // 8 o 11 caracteres alfanuméricos
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(11) // 👈 opcional: restringir a máximo 11 chars
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('swift_code', strtoupper($state)))
+                            ->extraAttributes(['style' => 'text-transform:uppercase'])
+                            ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? '8 or 11 characters, e.g. DEUTDEFF500' 
+                                : null), 
                                
-                    ]),
-                ]),
+                    ])
+                    ->columns(2),
+                ])
+                ->columnSpanFull(),
             ]);
     }
 
@@ -114,6 +131,7 @@ class BanksResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
+                    //->modalWidth('md'),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])

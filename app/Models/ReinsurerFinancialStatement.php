@@ -22,6 +22,6 @@ use SoftDeletes;
 
     public function reinsurer()
     {
-        return $this->belongsTo(Reinsurer::class);
+        return $this->belongsTo(Reinsurer::class, 'reinsurer_id');
     }
 }
