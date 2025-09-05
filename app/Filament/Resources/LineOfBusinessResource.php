@@ -50,8 +50,8 @@ class LineOfBusinessResource extends Resource
                     ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('First letter of each word will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Textarea::make('description')
                     ->label('Description')
@@ -59,8 +59,8 @@ class LineOfBusinessResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                 ]),
             ]);

@@ -52,8 +52,8 @@ class CoveragesResource extends Resource
                     ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('First letter of each word will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('acronym')
                     ->label('Acronym')
@@ -63,8 +63,8 @@ class CoveragesResource extends Resource
                     ->maxLength(20)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Only uppercase letters allowed.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Textarea::make('description')
                     ->label('Description')
@@ -72,16 +72,16 @@ class CoveragesResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('line_of_business_id')
                     ->label('Line of Business')
                     ->relationship('lineOfBusiness', 'name')
                     ->searchable()
                     ->required()
-                    ->preload()
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->preload(),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                 ]),
             ]);

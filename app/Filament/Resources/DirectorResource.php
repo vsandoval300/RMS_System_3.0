@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DirectorResource\Pages;
-use App\Filament\Resources\DirectorResource\RelationManagers;
+use App\Models\Country;
 use App\Models\Director;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,17 +11,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Section;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Country;
+
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 
 class DirectorResource extends Resource
 {
@@ -29,23 +26,23 @@ class DirectorResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reinsurers';
-    protected static ?int    $navigationSort  = 2;   // aparecerá primero
+    protected static ?int    $navigationSort  = 2;
 
-    /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
     {
-        // Puedes usar self::$model::count() o Reinsurer::count()
         return Director::count();
     }
 
-   public static function form(Form $form): Form
+    /* =========================
+     *  FORM  (create / edit)
+     * ========================= */
+    public static function form(Form $form): Form
     {
         return $form->schema([
             Forms\Components\Section::make('Member Profile')
                 ->compact()
                 ->schema([
                     Forms\Components\Grid::make(2)->schema([
-                        // ── Identidad ───────────────────────────────
                         Forms\Components\TextInput::make('name')
                             ->label('Name')
                             ->placeholder('Please enter first name.')
@@ -65,10 +62,8 @@ class DirectorResource extends Resource
                                 'Female' => 'Female',
                             ])
                             ->inline()
-                            ->required()
-                            ->rule('in:M,F'),
+                            ->required(),
 
-                        // ── Contacto ────────────────────────────────
                         Forms\Components\TextInput::make('email')
                             ->label('Email address')
                             ->placeholder('name@example.com')
@@ -84,16 +79,15 @@ class DirectorResource extends Resource
                             ->required()
                             ->maxLength(40),
 
-                        // ── Ubicación ───────────────────────────────
                         Forms\Components\Select::make('country_id')
                             ->label('Country')
                             ->relationship(
                                 name: 'country',
                                 titleAttribute: 'alpha_3',
-                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('alpha_3'),
+                                modifyQueryUsing: fn (Builder $q) => $q->orderBy('alpha_3'),
                             )
                             ->getOptionLabelFromRecordUsing(
-                                fn (Country $record) => "{$record->alpha_3} - {$record->name}"
+                                fn (Country $r) => "{$r->alpha_3} - {$r->name}"
                             )
                             ->searchable()
                             ->preload()
@@ -105,9 +99,8 @@ class DirectorResource extends Resource
                             ->placeholder('Please fill address.')
                             ->required()
                             ->autosize()
-                            ->columnSpan(2), // ocupa toda la fila
+                            ->columnSpan(2),
 
-                        // ── Rol ─────────────────────────────────────
                         Forms\Components\TextInput::make('occupation')
                             ->label('Occupation')
                             ->placeholder('e.g., Chief Risk Officer')
@@ -124,7 +117,6 @@ class DirectorResource extends Resource
                             ->maxLength(400)
                             ->columnSpan(2),
 
-                        // ── Foto ────────────────────────────────────
                         Forms\Components\Section::make('Image')
                             ->columnSpan(2)
                             ->compact()
@@ -140,11 +132,6 @@ class DirectorResource extends Resource
                                     ->previewable(false)
                                     ->downloadable()
                                     ->openable()
-                                    ->hint(fn ($record) =>
-                                        $record?->icon
-                                            ? 'Existing photo: ' . basename($record->icon)
-                                            : 'No photo uploaded yet.'
-                                    )
                                     ->helperText("Upload director’s photo (PNG, JPG, or SVG, preferably square)."),
                             ]),
                     ]),
@@ -152,109 +139,251 @@ class DirectorResource extends Resource
         ]);
     }
 
+    /* =========================
+     *  INFOLIST  (VIEW PAGE)
+     * ========================= */
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist->schema([
+        InfoSection::make('Member Profile')->schema([
+            InfoGrid::make(3)
+                ->extraAttributes(['style' => 'gap: 6px;'])
+                ->schema([
+
+                // Cols 1–2: todas las filas (label + value con una sola línea por fila)
+                InfoGrid::make(1)
+                    ->columnSpan(2)
+                    ->extraAttributes(['style' => 'row-gap: 0;'])
+                    ->schema([
+
+                        // Name
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('name_label')
+                                    ->label('')
+                                    ->state('Name:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('name_value')
+                                    ->label('')
+                                    ->state(fn ($record) =>
+                                        trim(($record->name ?? '') . ' ' . ($record->surname ?? '')) ?: '—'
+                                    )
+                                    ->extraAttributes(['style' => 'margin:0;']),
+                            ]),
+
+                        // Gender
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('gender_label')
+                                    ->label('')
+                                    ->state('Gender:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('gender_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->gender ?? '—')
+                                    ->extraAttributes(['style' => 'margin:0;']),
+                            ]),
+
+                        // Email
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('email_label')
+                                    ->label('')
+                                    ->state('Email address:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('email_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->email ?? '—')
+                                    ->extraAttributes(['style' => 'margin:0;']),
+                            ]),
+
+                        // Phone
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('phone_label')
+                                    ->label('')
+                                    ->state('Phone:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('phone_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->phone ?? '—')
+                                    ->extraAttributes(['style' => 'margin:0;']),
+                            ]),
+
+                        // Country
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('country_label')
+                                    ->label('')
+                                    ->state('Country:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('country_value')
+                                    ->label('')
+                                    ->state(fn ($record) =>
+                                        $record->country
+                                            ? "{$record->country->alpha_3} - {$record->country->name}"
+                                            : '—'
+                                    )
+                                    ->extraAttributes(['style' => 'margin:0;']),
+                            ]),
+
+                        // Address (multi-línea; deja el mismo padding compacto)
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('address_label')
+                                    ->label('')
+                                    ->state('Address:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('address_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->address ?? '—')
+                                    ->extraAttributes(['style' => 'margin:0; line-height:1.2;']),
+                            ]),
+
+                        // Occupation
+                        InfoGrid::make(2)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('occupation_label')
+                                    ->label('')
+                                    ->state('Occupation:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->grow(false)
+                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
+                                TextEntry::make('occupation_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->occupation ?? '—')
+                                    ->extraAttributes(['style' => 'margin:0;']),
+                            ]),
+                    ]),
+
+                // Col 3: foto
+                ImageEntry::make('image')
+                    ->label('')
+                    ->columnSpan(1)
+                    ->height(190)
+                    ->circular(),
+            ]),
+        ])
+        ->maxWidth('4xl')
+        ->collapsible(),
+    ]);
+}
+
+
+
+
+
+
+
+    /* =========================
+     *  TABLE
+     * ========================= */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('Index')
                     ->label('Index')
-                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
-                    ->sortable(false) // 👈 no tiene sentido ordenar este índice
-                    ->searchable(false), // 👈 tampoco buscarlo
+                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration),
 
                 TextColumn::make('person')
                     ->label('Director')
-                    // ← define el valor de la columna virtual
-                    ->state(fn (Director $r) => trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—')
-
-                    // búsqueda por nombre y apellido
+                    ->state(fn (Director $r) =>
+                        trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—'
+                    )
                     ->searchable(query: function (Builder $q, string $search) {
                         $q->where(fn ($w) =>
                             $w->where('name', 'like', "%{$search}%")
-                            ->orWhere('surname', 'like', "%{$search}%")
+                              ->orWhere('surname', 'like', "%{$search}%")
                         );
                     })
-
-                    // orden por nombre y luego apellido
                     ->sortable(query: function (Builder $q, string $dir) {
                         $q->orderBy('name', $dir)->orderBy('surname', $dir);
                     }),
-                                TextColumn::make('gender')
-                                    ->searchable(),
-                                TextColumn::make('email')
-                    ->label('Email')
-                    ->formatStateUsing(fn ($state) => $state ?: '—')   // muestra guion si es null/vacío
-                    ->color(fn ($state) => blank($state) ? 'gray' : null)
-                    ->copyable()                                       // opcional: botón para copiar
-                    ->searchable(),    
-                /* TextColumn::make('phone')
-                    ->searchable(),
-                TextColumn::make('address')
-                    ->searchable(), */
-                TextColumn::make('occupation')
-                    ->searchable(),
-                /* ImageColumn::make('image'), */
-                TextColumn::make('country.alpha_3')
-                    ->label('Country')
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->defaultSort('name', 'asc') 
 
-            ->filters([
-                //
+                TextColumn::make('gender')->searchable(),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->formatStateUsing(fn ($state) => $state ?: '—')
+                    ->color(fn ($state) => blank($state) ? 'gray' : null)
+                    ->copyable()
+                    ->searchable(),
+
+                TextColumn::make('occupation')->searchable(),
+                TextColumn::make('country.alpha_3')->label('Country')->sortable()->searchable(),
+                TextColumn::make('created_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('name', 'asc')
             ->actions([
-                 Tables\Actions\ActionGroup::make([
+                Tables\Actions\ActionGroup::make([
+                    // 👉 Hacemos que View NAVEGUE a la página View (que usa el infolist):
                     Tables\Actions\ViewAction::make()
-                    ->label('View')
-                    ->url(fn (Director $record) =>
-                        self::getUrl('view', ['record' => $record])
-                    )
-                    ->icon('heroicon-m-eye'),  // opcional
+                        ->url(fn ($record) => static::getUrl('view', ['record' => $record]))
+                        ->openUrlInNewTab(false),
 
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
-                ])
-            ])
-
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
 
-
-
-
-
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
+    /* =========================
+     *  PAGES (incluye VIEW)
+     * ========================= */
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDirectors::route('/'),
+            'index'  => Pages\ListDirectors::route('/'),
             'create' => Pages\CreateDirector::route('/create'),
-            'view'   => Pages\ViewDirector::route('/{record}'), // 👈 agregar
-            'edit' => Pages\EditDirector::route('/{record}/edit'),
+            'view'   => Pages\ViewDirector::route('/{record}'), // 👈 importante
+            'edit'   => Pages\EditDirector::route('/{record}/edit'),
         ];
     }
 }

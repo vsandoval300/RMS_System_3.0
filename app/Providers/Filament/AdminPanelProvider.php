@@ -41,7 +41,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Resources')->collapsed(),
                 NavigationGroup::make('Banks')->collapsed(),
-                NavigationGroup::make('Clients')->collapsed(),
+                NavigationGroup::make('Customers')->collapsed(),
+                NavigationGroup::make('Compliance')->collapsed(),
                 NavigationGroup::make('Reinsurers')->collapsed(),
                 NavigationGroup::make('Underwritten')->collapsed(),
                 NavigationGroup::make('Transactions')->collapsed(),

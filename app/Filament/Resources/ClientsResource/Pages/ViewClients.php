@@ -9,4 +9,12 @@ use Filament\Resources\Pages\ViewRecord;
 class ViewClients extends ViewRecord
 {
     protected static string $resource = ClientsResource::class;
+
+
+    public function getTitle(): string
+    {
+        return 'View – ' . ($this->record?->name ?? 'Client');
+    }
 }
+
+

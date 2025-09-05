@@ -49,8 +49,8 @@ class CompaniesResource extends Resource
                     ->unique()
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('First letter of each word will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('acronym')
                     ->label('Acronym')
@@ -60,8 +60,8 @@ class CompaniesResource extends Resource
                     ->maxLength(2)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Only uppercase letters allowed.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Textarea::make('activity')
                     ->label('Activity')
@@ -69,16 +69,16 @@ class CompaniesResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('country_id')
                         ->label('Country')
                         ->relationship('country','name')
                         ->searchable()
                         ->preload()
-                        ->required()
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->required(),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
 
 
@@ -88,8 +88,8 @@ class CompaniesResource extends Resource
                         ->relationship('sector','name')
                         ->searchable()
                         ->preload()
-                        ->required()
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->required(),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                 ]),
 

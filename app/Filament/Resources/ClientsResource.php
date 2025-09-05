@@ -25,7 +25,7 @@ class ClientsResource extends Resource
 {
     protected static ?string $model = Client::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Clients';
+    protected static ?string $navigationGroup = 'Customers';
 
     /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
