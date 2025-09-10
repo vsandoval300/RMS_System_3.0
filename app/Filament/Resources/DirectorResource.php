@@ -84,11 +84,15 @@ class DirectorResource extends Resource
                             ->relationship(
                                 name: 'country',
                                 titleAttribute: 'alpha_3',
-                                modifyQueryUsing: fn (Builder $q) => $q->orderBy('alpha_3'),
+                                // Opción 1: por nombre
+                                // modifyQueryUsing: fn ($query) => $query->orderBy('alpha_3'),
+                                // Opción 2: por type-hint (recomendado)
+                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('alpha_3'),
                             )
-                            ->getOptionLabelFromRecordUsing(
-                                fn (Country $r) => "{$r->alpha_3} - {$r->name}"
-                            )
+                            // Opción 1: por nombre
+                            // ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->alpha_3} - {$record->name}")
+                            // Opción 2: por type-hint
+                            ->getOptionLabelFromRecordUsing(fn (Country $record) => "{$record->alpha_3} - {$record->name}")
                             ->searchable()
                             ->preload()
                             ->required()
@@ -139,175 +143,203 @@ class DirectorResource extends Resource
         ]);
     }
 
+   
+   
+   
+   
+   
+   
     /* =========================
      *  INFOLIST  (VIEW PAGE)
      * ========================= */
-public static function infolist(Infolist $infolist): Infolist
-{
-    return $infolist->schema([
-        InfoSection::make('Member Profile')->schema([
-            InfoGrid::make(3)
-                ->extraAttributes(['style' => 'gap: 6px;'])
-                ->schema([
-
-                // Cols 1–2: todas las filas (label + value con una sola línea por fila)
-                InfoGrid::make(1)
-                    ->columnSpan(2)
-                    ->extraAttributes(['style' => 'row-gap: 0;'])
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            InfoSection::make('Member Profile')->schema([
+                InfoGrid::make(3)
+                    ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
 
-                        // Name
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('name_label')
-                                    ->label('')
-                                    ->state('Name:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('name_value')
-                                    ->label('')
-                                    ->state(fn ($record) =>
-                                        trim(($record->name ?? '') . ' ' . ($record->surname ?? '')) ?: '—'
-                                    )
-                                    ->extraAttributes(['style' => 'margin:0;']),
-                            ]),
+                    // Cols 1–2: todas las filas (label + value con una sola línea por fila)
+                    InfoGrid::make(1)
+                        ->columnSpan(2)
+                        ->extraAttributes(['style' => 'row-gap: 0;'])
+                        ->schema([
 
-                        // Gender
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('gender_label')
-                                    ->label('')
-                                    ->state('Gender:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('gender_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->gender ?? '—')
-                                    ->extraAttributes(['style' => 'margin:0;']),
-                            ]),
+                                                        // Name
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('name_label')
+                                        ->label('')
+                                        ->state('Name:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('name_value')
+                                        ->label('')
+                                        ->state(fn ($record) =>
+                                            trim(($record->name ?? '') . ' ' . ($record->surname ?? '')) ?: '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]),
 
-                        // Email
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('email_label')
-                                    ->label('')
-                                    ->state('Email address:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('email_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->email ?? '—')
-                                    ->extraAttributes(['style' => 'margin:0;']),
-                            ]),
+                            // Gender
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('gender_label')
+                                        ->label('')
+                                        ->state('Gender:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('gender_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->gender ?? '—')
+                                        ->columnSpan(9),
+                                ]),
 
-                        // Phone
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('phone_label')
-                                    ->label('')
-                                    ->state('Phone:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('phone_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->phone ?? '—')
-                                    ->extraAttributes(['style' => 'margin:0;']),
-                            ]),
+                            // Email
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('email_label')
+                                        ->label('')
+                                        ->state('Email address:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('email_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->email ?? '—')
+                                        ->columnSpan(9),
+                                ]),
 
-                        // Country
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('country_label')
-                                    ->label('')
-                                    ->state('Country:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('country_value')
-                                    ->label('')
-                                    ->state(fn ($record) =>
-                                        $record->country
-                                            ? "{$record->country->alpha_3} - {$record->country->name}"
-                                            : '—'
-                                    )
-                                    ->extraAttributes(['style' => 'margin:0;']),
-                            ]),
+                            // Phone
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('phone_label')
+                                        ->label('')
+                                        ->state('Phone:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('phone_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->phone ?? '—')
+                                        ->columnSpan(9),
+                                ]),
 
-                        // Address (multi-línea; deja el mismo padding compacto)
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('address_label')
-                                    ->label('')
-                                    ->state('Address:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('address_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->address ?? '—')
-                                    ->extraAttributes(['style' => 'margin:0; line-height:1.2;']),
-                            ]),
+                            // Country
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('country_label')
+                                        ->label('')
+                                        ->state('Country:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('country_value')
+                                        ->label('')
+                                        ->state(fn ($record) =>
+                                            $record->country
+                                                ? "{$record->country->alpha_3} - {$record->country->name}"
+                                                : '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]),
 
-                        // Occupation
-                        InfoGrid::make(2)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('occupation_label')
-                                    ->label('')
-                                    ->state('Occupation:')
-                                    ->weight('bold')
-                                    ->alignment('right')
-                                    ->grow(false)
-                                    ->extraAttributes(['style' => 'width:170px; margin:0;']),
-                                TextEntry::make('occupation_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->occupation ?? '—')
-                                    ->extraAttributes(['style' => 'margin:0;']),
-                            ]),
+                            // Address (multi-línea)
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('address_label')
+                                        ->label('')
+                                        ->state('Address:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('address_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->address ?? '—')
+                                        ->extraAttributes(['style' => 'line-height:1.2;'])
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Occupation
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('occupation_label')
+                                        ->label('')
+                                        ->state('Occupation:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('occupation_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->occupation ?? '—')
+                                        ->columnSpan(9),
+                                ]),
+                        ]),
+
+                    // Col 3: foto
+                   
+                            InfoGrid::make(1)
+                                ->columnSpan(1)
+                                ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:6px;height:100%;'])
+                                ->schema([
+                                    TextEntry::make('photo_title')
+                                        ->label('')->state('Photo')->weight('bold')
+                                        ->extraAttributes(['style' => 'margin:0 0 4px 2px;']),
+
+                                    ImageEntry::make('user_image')
+                                        ->label('')
+                                        ->disk('s3')
+                                        ->visibility('public')
+                                        ->getStateUsing(fn ($record) => data_get($record, 'image'))
+                                        ->hidden(fn ($record) => blank(data_get($record, 'image')))
+                                        ->extraAttributes([
+                                            'style' => '
+                                                min-height:360px; width:100%;
+                                                border-radius:14px;
+                                                background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+                                                border:1px solid rgba(255,255,255,0.15);
+                                                display:flex; align-items:center; justify-content:center;
+                                                padding:6px; margin:0; overflow:hidden;
+                                            ',
+                                        ])
+                                        ->extraImgAttributes([
+                                            // ocupa más área sin recortar
+                                            'style' => 'width:100%;height:100%;object-fit:contain;display:block;',
+                                        ]),
+
+                                    TextEntry::make('user_image_placeholder')
+                                        ->label('')
+                                        ->html()
+                                        ->state('
+                                            <div style="
+                                                min-height:360px; width:100%;
+                                                border-radius:14px;
+                                                display:flex; align-items:center; justify-content:center;
+                                                margin:0;
+                                                border:1px dashed rgba(255,255,255,0.25);
+                                                background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+                                            "></div>
+                                        ')
+                                        ->visible(fn ($record) => blank(data_get($record, 'image')))
+                                        ->extraAttributes(['style' => 'margin:0; padding:0;']),
+                                ]),
+
                     ]),
-
-                // Col 3: foto
-                ImageEntry::make('image')
-                    ->label('')
-                    ->columnSpan(1)
-                    ->height(190)
-                    ->circular(),
-            ]),
-        ])
-        ->maxWidth('4xl')
-        ->collapsible(),
-    ]);
-}
+            ])
+            ->maxWidth('4xl')
+            ->collapsible(),
+        ]);
+    }
 
 
 
@@ -359,9 +391,9 @@ public static function infolist(Infolist $infolist): Infolist
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     // 👉 Hacemos que View NAVEGUE a la página View (que usa el infolist):
-                    Tables\Actions\ViewAction::make()
-                        ->url(fn ($record) => static::getUrl('view', ['record' => $record]))
-                        ->openUrlInNewTab(false),
+                    Tables\Actions\ViewAction::make(),
+                        //->url(fn ($record) => static::getUrl('view', ['record' => $record]))
+                        //->openUrlInNewTab(false),
 
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
@@ -382,7 +414,7 @@ public static function infolist(Infolist $infolist): Infolist
         return [
             'index'  => Pages\ListDirectors::route('/'),
             'create' => Pages\CreateDirector::route('/create'),
-            'view'   => Pages\ViewDirector::route('/{record}'), // 👈 importante
+            //'view'   => Pages\ViewDirector::route('/{record}'), // 👈 importante
             'edit'   => Pages\EditDirector::route('/{record}/edit'),
         ];
     }

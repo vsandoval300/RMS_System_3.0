@@ -28,8 +28,14 @@ class ViewBusiness extends ViewRecord
         return 'Business Details';
     }
 
-    public function hasCombinedRelationManagerTabsWithContent(): bool
+  /*   public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
+    } */
+
+    public function getTitle(): string
+    {
+        return 'Business – [ ' . ($this->record?->business_code ?? 'Business') . ' ]';
     }
+
 }

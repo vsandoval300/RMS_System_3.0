@@ -15,10 +15,10 @@ class ViewReinsurer extends ViewRecord
         return 'Reinsurer Details';
     }
 
-    public function hasCombinedRelationManagerTabsWithContent(): bool
+    /* public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
-    }
+    } */
 
     public function getTitle(): string
     {

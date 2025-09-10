@@ -33,6 +33,9 @@ class Business extends Model
     protected $casts = [
         'approval_status'           => ApprovalStatus::class,
         'business_lifecycle_status' => BusinessLifecycleStatus::class,
+        'approval_status_updated_at' => 'datetime',
+        'created_at'                 => 'datetime',
+        'updated_at'                 => 'datetime',
     ];
 
     /* ---------------------------------------------------
@@ -93,5 +96,14 @@ class Business extends Model
     {
         return $this->hasMany(OperativeDoc::class,'business_code','business_code');
     }
+
+    
+
+
+
+
 }
+
+
+
 

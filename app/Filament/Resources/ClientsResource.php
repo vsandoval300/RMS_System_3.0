@@ -19,6 +19,12 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
+
 
 
 class ClientsResource extends Resource
@@ -147,6 +153,208 @@ class ClientsResource extends Resource
             ]);
     }
 
+
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist->schema([
+        InfoSection::make('Client Profile')->schema([
+            InfoGrid::make(3)
+                ->extraAttributes(['style' => 'gap: 6px;'])
+                ->schema([
+
+                    /* ── Cols 1–2: filas “Label + Value” ── */
+                    InfoGrid::make(1)
+                        ->columnSpan(2)
+                        ->extraAttributes(['style' => 'row-gap: 0;'])
+                        ->schema([
+
+                            // Name
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('name_label')
+                                        ->label('')
+                                        ->state('Name:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('name_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->name ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Short Name
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('short_label')
+                                        ->label('')
+                                        ->state('Short Name:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('short_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->short_name ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Description
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('desc_label')
+                                        ->label('')
+                                        ->state('Description:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('desc_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->description ?: '—')
+                                        ->extraAttributes(['style' => 'line-height:1.35;'])
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Web Page (link)
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('web_label')
+                                        ->label('')
+                                        ->state('Web Page:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('web_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->webpage ?: '—')
+                                        ->url(fn ($record) => $record->webpage
+                                            ? (str_starts_with($record->webpage, 'http://') || str_starts_with($record->webpage, 'https://')
+                                                ? $record->webpage
+                                                : 'https://' . $record->webpage)
+                                            : null
+                                        )
+                                        ->openUrlInNewTab()
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Country
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('country_label')
+                                        ->label('')
+                                        ->state('Country:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('country_value')
+                                        ->label('')
+                                        ->state(fn ($record) => $record->country
+                                            ? "{$record->country->alpha_3} - {$record->country->name}"
+                                            : '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Industries (chips)
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('industries_label')
+                                        ->label('')
+                                        ->state('Industries:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('industries_value')
+                                        ->label('')
+                                        ->html()
+                                        ->state(function ($record) {
+                                            $names = $record->industries?->pluck('name')->all() ?? [];
+                                            if (empty($names)) return '—';
+                                            return collect($names)->map(fn ($n) =>
+                                                "<span style='display:inline-block;padding:2px 8px;border-radius:9999px;background:rgba(255,255,255,0.08);font-size:12px;margin-right:6px;'>{$n}</span>"
+                                            )->implode('');
+                                        })
+                                        ->columnSpan(9),
+                                ]),
+                        ]),
+
+
+                    /* ── Col 3: burbuja del logo ── */
+                    InfoGrid::make(1)
+                        ->columnSpan(1)
+                        ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:6px;height:100%;'])
+                        ->schema([
+                            TextEntry::make('logo_title')
+                                ->label('')->state('Logo')->weight('bold')
+                                ->extraAttributes(['style' => 'margin:0 0 4px 2px;']),
+
+                            ImageEntry::make('logo_img')
+                                ->label('')
+                                ->disk('s3')
+                                ->visibility('public')
+                                ->state(fn ($record) => $record->logo_path ?? $record->logo ?? null)
+                                ->hidden(fn ($record) => blank($record->logo_path ?? $record->logo))
+                                ->extraAttributes([
+                                    'style' => '
+                                        min-height:260px; width:100%;
+                                        border-radius:14px;
+                                        background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+                                        border:1px solid rgba(255,255,255,0.15);
+                                        display:flex; align-items:center; justify-content:center;
+                                        padding:8px; margin:0; overflow:hidden;
+                                    ',
+                                ])
+                                ->extraImgAttributes([
+                                    'style' => 'width:96%;height:96%;object-fit:contain;display:block;',
+                                ]),
+
+                            TextEntry::make('logo_placeholder')
+                                ->label('')->html()
+                                ->state('
+                                    <div style="
+                                        min-height:260px; width:100%;
+                                        border-radius:14px;
+                                        display:flex; align-items:center; justify-content:center;
+                                        margin:0;
+                                        border:1px dashed rgba(255,255,255,0.25);
+                                        background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+                                    "></div>
+                                ')
+                                ->visible(fn ($record) => blank($record->logo_path ?? $record->logo))
+                                ->extraAttributes(['style' => 'margin:0; padding:0;']),
+                        ]),
+                ]),
+        ])
+        ->maxWidth('7xl')
+        ->collapsible(),
+    ]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public static function table(Table $table): Table
     {
         return $table
@@ -163,25 +371,27 @@ class ClientsResource extends Resource
 
                 TextColumn::make('short_name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 520px; white-space: normal;', // ancho fijo de 300px
-                    ]),
+                    ])
+                    ->toggleable(),
                     
                 TextColumn::make('webpage')
                     ->searchable()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                     
                 TextColumn::make('country.name')
                     ->label('Country')
                     ->sortable()
                     ->searchable()
-                    ->toggleable()
+                    ->toggleable(),
             ])
             ->filters([
                 //

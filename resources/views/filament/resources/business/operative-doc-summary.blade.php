@@ -1,4 +1,4 @@
-<div class="overflow-y-auto border border-gray-800 rounded p-4 space-y-4" style="max-height: 550px; background-color: #f1efea; color: #1f262a;font-family: 'Montserrat', sans-serif;">
+<div class="overflow-y-auto border border-gray-800 rounded p-4 space-y-4" style="max-height: 1200px; background-color: #f1efea; color: #1f262a;font-family: 'Montserrat', sans-serif;">
 
     <head>
     <!-- Otras etiquetas head dfe0e2-->

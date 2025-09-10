@@ -23,6 +23,13 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+
 class CostSchemeResource extends Resource
 {
     protected static ?string $model = CostScheme::class;
@@ -41,6 +48,10 @@ class CostSchemeResource extends Resource
         return CostScheme::count();
     } 
     
+    
+
+
+
 
     public static function form(Form $form): Form
     {
@@ -234,6 +245,29 @@ class CostSchemeResource extends Resource
                     
         ]);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

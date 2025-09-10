@@ -21,6 +21,13 @@ use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 
 
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+
+
 class PartnersResource extends Resource
 {
     protected static ?string $model = Partner::class;
@@ -101,6 +108,126 @@ class PartnersResource extends Resource
                 ]),
             ]);
     }
+
+
+
+
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            /* ─────────────────────────  PROFILE  ───────────────────────── */
+            InfoSection::make('Partner Profile')->schema([
+                InfoGrid::make(2)
+                    ->extraAttributes(['style' => 'gap: 6px;'])
+                    ->schema([
+                        // Filas “Label (3) + Value (9)”
+                        InfoGrid::make(1)
+                            ->columnSpan(2)
+                            ->extraAttributes(['style' => 'row-gap: 0;'])
+                            ->schema([
+
+                                // Name
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('name_label')->label('')->state('Name:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('name_value')->label('')
+                                            ->state(fn ($record) => $record->name ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                // Short Name
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('short_label')->label('')->state('Short Name:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('short_value')->label('')
+                                            ->state(fn ($record) => $record->short_name ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                // Acronym
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('acr_label')->label('')->state('Acronym:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('acr_value')->label('')
+                                            ->state(fn ($record) => $record->acronym ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                // Partner Type
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('ptype_label')->label('')->state('Partner Type:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('ptype_value')->label('')
+                                            ->state(fn ($record) => $record->partnerType?->name ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                // Country
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('country_label')->label('')->state('Country:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('country_value')->label('')
+                                            ->state(fn ($record) =>
+                                                $record->country
+                                                    ? "{$record->country->alpha_3} - {$record->country->name}"
+                                                    : '—'
+                                            )
+                                            ->columnSpan(9),
+                                    ]),
+                            ]),
+                    ]),
+            ])
+            ->maxWidth('6xl')
+            ->collapsible(),
+
+            /* ─────────────────────────  AUDIT  ───────────────────────── */
+            InfoSection::make('Audit Dates')->schema([
+                InfoGrid::make(2)
+                    ->extraAttributes(['style' => 'gap: 12px;'])
+                    ->schema([
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('created_label')->label('')->state('Created At:')
+                                    ->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('created_value')->label('')
+                                    ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
+                                    ->columnSpan(9),
+                            ]),
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('updated_label')->label('')->state('Updated At:')
+                                    ->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('updated_value')->label('')
+                                    ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
+                                    ->columnSpan(9),
+                            ]),
+                    ]),
+            ])
+            ->maxWidth('6xl')
+            ->compact(),
+        ]);
+    }
+
+
+
+
+
+
+
+
 
     public static function table(Table $table): Table
     {

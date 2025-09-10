@@ -19,6 +19,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
+
 class ReinsurerTypeResource extends Resource
 {
     protected static ?string $model = ReinsurerType::class;
@@ -67,6 +74,87 @@ class ReinsurerTypeResource extends Resource
 
             ]);
     }
+
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist->schema([
+        /* ─────────────────────────  PROFILE  ───────────────────────── */
+        InfoSection::make('Reinsurer Type Profile')->schema([
+            InfoGrid::make(1)
+                ->extraAttributes(['style' => 'row-gap: 0;'])
+                ->schema([
+                    // Acronym
+                    InfoGrid::make(12)
+                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                        ->schema([
+                            TextEntry::make('acr_label')
+                                ->label('')
+                                ->state('Acronym:')
+                                ->weight('bold')
+                                ->alignment('right')
+                                ->columnSpan(3),
+                            TextEntry::make('acr_value')
+                                ->label('')
+                                ->state(fn ($record) => $record->type_acronym ? strtoupper($record->type_acronym) : '—')
+                                ->columnSpan(9),
+                        ]),
+
+                    // Description
+                    InfoGrid::make(12)
+                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                        ->schema([
+                            TextEntry::make('desc_label')
+                                ->label('')
+                                ->state('Description:')
+                                ->weight('bold')
+                                ->alignment('right')
+                                ->columnSpan(3),
+                            TextEntry::make('desc_value')
+                                ->label('')
+                                ->state(fn ($record) => $record->description ?: '—')
+                                ->columnSpan(9),
+                        ]),
+                ]),
+        ])
+        ->maxWidth('5xl')
+        ->collapsible(),
+
+        /* ─────────────────────────  AUDIT  ───────────────────────── */
+        InfoSection::make('Audit Dates')->schema([
+            InfoGrid::make(12)
+                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                ->schema([
+                    TextEntry::make('created_label')
+                        ->label('')->state('Created At:')->weight('bold')
+                        ->alignment('right')->columnSpan(3),
+                    TextEntry::make('created_value')
+                        ->label('')
+                        ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
+                        ->columnSpan(9),
+                ]),
+            InfoGrid::make(12)
+                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                ->schema([
+                    TextEntry::make('updated_label')
+                        ->label('')->state('Updated At:')->weight('bold')
+                        ->alignment('right')->columnSpan(3),
+                    TextEntry::make('updated_value')
+                        ->label('')
+                        ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
+                        ->columnSpan(9),
+                ]),
+        ])
+        ->maxWidth('5xl')
+        ->compact(),
+    ]);
+}
+
+
+
+
+
+
 
     public static function table(Table $table): Table
     {

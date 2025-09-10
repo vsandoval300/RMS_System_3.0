@@ -19,6 +19,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+
 class CountriesResource extends Resource
 {
     protected static ?string $model = Country::class;
@@ -140,6 +146,133 @@ class CountriesResource extends Resource
             
         ]);
     }
+
+
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist->schema([
+        /* ─────────────────────────  PROFILE  ───────────────────────── */
+        InfoSection::make('Country Profile')->schema([
+            InfoGrid::make(2)
+                ->extraAttributes(['style' => 'gap: 6px;'])
+                ->schema([
+
+                    // Cols 1–2: filas “Label (3) + Value (9)”
+                    InfoGrid::make(1)
+                        ->columnSpan(2)
+                        ->extraAttributes(['style' => 'row-gap: 0;'])
+                        ->schema([
+
+                            // Name
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('name_label')->label('')->state('Name:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('name_value')->label('')->state(fn ($record) => $record->name ?: '—')->columnSpan(9),
+                                ]),
+
+                            // Alpha 2
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('a2_label')->label('')->state('Alpha 2:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('a2_value')->label('')->state(fn ($record) => $record->alpha_2 ?: '—')->columnSpan(9),
+                                ]),
+
+                            // Alpha 3
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('a3_label')->label('')->state('Alpha 3:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('a3_value')->label('')->state(fn ($record) => $record->alpha_3 ?: '—')->columnSpan(9),
+                                ]),
+
+                            // Country Code
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('cc_label')->label('')->state('Country Code:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('cc_value')->label('')->state(fn ($record) => isset($record->country_code) ? (string) $record->country_code : '—')->columnSpan(9),
+                                ]),
+
+                            // ISO Code
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('iso_label')->label('')->state('ISO Code:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('iso_value')->label('')->state(fn ($record) => $record->iso_code ?: '—')->columnSpan(9),
+                                ]),
+
+                            // AM Best Code
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('amb_label')->label('')->state('AM Best Code:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('amb_value')->label('')->state(fn ($record) => $record->am_best_code ?: '—')->columnSpan(9),
+                                ]),
+
+                            // Latitude
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('lat_label')->label('')->state('Latitude:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('lat_value')->label('')->state(fn ($record) =>
+                                        is_numeric($record->latitude) ? number_format((float) $record->latitude, 6) : '—'
+                                    )->columnSpan(9),
+                                ]),
+
+                            // Longitude
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('lng_label')->label('')->state('Longitude:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('lng_value')->label('')->state(fn ($record) =>
+                                        is_numeric($record->longitude) ? number_format((float) $record->longitude, 6) : '—'
+                                    )->columnSpan(9),
+                                ]),
+
+                            // Region
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('region_label')->label('')->state('Region:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('region_value')->label('')->state(fn ($record) => $record->region?->name ?: '—')->columnSpan(9),
+                                ]),
+                        ]),
+                ]),
+        ])
+        ->maxWidth('5xl')
+        ->collapsible(),
+
+        /* ─────────────────────────  AUDIT  ───────────────────────── */
+        InfoSection::make('Audit Dates')
+            ->schema([
+                InfoGrid::make(2)
+                    ->extraAttributes(['style' => 'gap: 12px;'])
+                    ->schema([
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('created_label')->label('')->state('Created At:')->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('created_value')->label('')->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')->columnSpan(9),
+                            ]),
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('updated_label')->label('')->state('Updated At:')->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('updated_value')->label('')->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')->columnSpan(9),
+                            ]),
+                    ]),
+            ])
+            ->maxWidth('5xl')
+            ->compact(),
+    ]);
+}
+
+
+
+
 
     public static function table(Table $table): Table
     {

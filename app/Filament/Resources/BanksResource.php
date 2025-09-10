@@ -20,6 +20,12 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+
 class BanksResource extends Resource
 {
     protected static ?string $model = Bank::class;
@@ -96,6 +102,139 @@ class BanksResource extends Resource
                 ->columnSpanFull(),
             ]);
     }
+
+
+
+
+
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            /* ─────────────────────────  PROFILE  ───────────────────────── */
+            InfoSection::make('Bank Profile')->schema([
+                InfoGrid::make(1)
+                    ->extraAttributes(['style' => 'row-gap: 0;'])
+                    ->schema([
+
+                        // Name
+                        InfoGrid::make(12)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('name_label')
+                                    ->label('')
+                                    ->state('Name:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->columnSpan(3),
+                                TextEntry::make('name_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->name ?: '—')
+                                    ->columnSpan(9),
+                            ]),
+
+                        // Address
+                        InfoGrid::make(12)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('addr_label')
+                                    ->label('')
+                                    ->state('Address:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->columnSpan(3),
+                                TextEntry::make('addr_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->address ?: '—')
+                                    ->columnSpan(9),
+                            ]),
+
+                        // ABA Number
+                        InfoGrid::make(12)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('aba_label')
+                                    ->label('')
+                                    ->state('ABA Number:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->columnSpan(3),
+                                TextEntry::make('aba_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->aba_number ?: '—')
+                                    ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
+                                    ->columnSpan(9),
+                            ]),
+
+                        // SWIFT Code
+                        InfoGrid::make(12)
+                            ->extraAttributes([
+                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                            ])
+                            ->schema([
+                                TextEntry::make('swift_label')
+                                    ->label('')
+                                    ->state('SWIFT Code:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->columnSpan(3),
+                                TextEntry::make('swift_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->swift_code ? strtoupper($record->swift_code) : '—')
+                                    ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:0.5px;'])
+                                    ->columnSpan(9),
+                            ]),
+                    ]),
+            ])
+            ->maxWidth('6xl')
+            ->collapsible(),
+
+            /* ─────────────────────────  AUDIT  ───────────────────────── */
+            InfoSection::make('Audit Dates')->schema([
+                InfoGrid::make(12)
+                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                    ->schema([
+                        TextEntry::make('created_label')
+                            ->label('')->state('Created At:')->weight('bold')
+                            ->alignment('right')->columnSpan(3),
+                        TextEntry::make('created_value')
+                            ->label('')
+                            ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
+                            ->columnSpan(9),
+                    ]),
+                InfoGrid::make(12)
+                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                    ->schema([
+                        TextEntry::make('updated_label')
+                            ->label('')->state('Updated At:')->weight('bold')
+                            ->alignment('right')->columnSpan(3),
+                        TextEntry::make('updated_value')
+                            ->label('')
+                            ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
+                            ->columnSpan(9),
+                    ]),
+            ])
+            ->maxWidth('6xl')
+            ->compact(),
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     public static function table(Table $table): Table
     {

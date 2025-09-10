@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use Filament\Pages\Concerns\HasWidgets;
 
 class UnderwrittenDashboard extends Page
 {
@@ -10,6 +11,16 @@ class UnderwrittenDashboard extends Page
     protected static ?int $navigationSort = 1;
     protected static ?string $navigationGroup = 'Underwritten';
 
-    protected static string $view = 'filament.pages.underwritten-dashboard';
+    //protected static string $view = 'filament.pages.underwritten-dashboard';
+
+     /** Qué widgets mostrar en la página */
+    /* protected function getWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\UnderwrittenBusiness::class, // ← nuestro line chart
+        ];
+    }
+ */
+    
 
 }

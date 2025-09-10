@@ -36,6 +36,13 @@ use Carbon\Carbon;
 use Filament\Tables\Actions\Action;
 use Illuminate\Validation\Rule;
 
+// 👇 IMPORTS para INFOLIST
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
+
 
 
 class ReinsurersResource extends Resource
@@ -61,6 +68,9 @@ class ReinsurersResource extends Resource
             'operative_status',
         ]);
     }
+
+
+
 
     public static function form(Form $form): Form
     {
@@ -357,6 +367,281 @@ class ReinsurersResource extends Resource
             ]);
     }
 
+    
+
+
+
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist->schema([
+        InfoSection::make('Reinsurer Profile')->schema([
+            InfoGrid::make(3)
+                ->extraAttributes(['style' => 'gap: 6px;'])
+                ->schema([
+
+                    /* ── Cols 1–2: filas compactas "Label + Value" ── */
+                    InfoGrid::make(1)
+                        ->columnSpan(2)
+                        ->extraAttributes(['style' => 'row-gap: 0;'])
+                        ->schema([
+
+                            // Name
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('name_label')->label('')
+                                        ->state('Name:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('name_value')->label('')
+                                        ->state(fn ($record) => $record->name ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Short Name
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('short_label')->label('')
+                                        ->state('Short Name:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('short_value')->label('')
+                                        ->state(fn ($record) => $record->short_name ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Acronym
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('acr_label')->label('')
+                                        ->state('Acronym:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('acr_value')->label('')
+                                        ->state(fn ($record) => $record->acronym ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Type
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('type_label')->label('')
+                                        ->state('Type:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('type_value')->label('')
+                                        ->state(fn ($record) =>
+                                            $record->reinsurer_type
+                                                ? "{$record->reinsurer_type->type_acronym} - {$record->reinsurer_type->description}"
+                                                : '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Class
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('class_label')->label('')
+                                        ->state('Class:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('class_value')->label('')
+                                        ->state(fn ($record) => $record->class ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Parent
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('parent_label')->label('')
+                                        ->state('Parent:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('parent_value')->label('')
+                                        ->state(fn ($record) => $record->parent?->name ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Established
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('est_label')->label('')
+                                        ->state('Established:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('est_value')->label('')
+                                        ->state(fn ($record) => $record->established ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Country
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('country_label')->label('')
+                                        ->state('Country:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('country_value')->label('')
+                                        ->state(fn ($record) =>
+                                            $record->country
+                                                ? "{$record->country->alpha_3} - {$record->country->name}"
+                                                : '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Manager
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('manager_label')->label('')
+                                        ->state('Manager:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('manager_value')->label('')
+                                        ->state(fn ($record) => $record->manager?->name ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Operative Status
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('op_status_label')->label('')
+                                        ->state('Operative Status:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('op_status_value')->label('')
+                                        ->state(fn ($record) =>
+                                            $record->operative_status
+                                                ? "{$record->operative_status->acronym} - {$record->operative_status->description}"
+                                                : '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]),
+
+                            // LSK
+                            InfoGrid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('lsk_label')->label('')
+                                        ->state('LSK:')->weight('bold')->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('lsk_value')->label('')
+                                        ->state(fn ($record) => $record->cns_reinsurer ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+                        ]),
+
+                    /* ── Col 3: Branding (logo arriba / icon abajo, mismo alto) ── */
+                            InfoGrid::make(1)
+                                ->columnSpan(1)
+                                ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:12px;height:100%;'])
+                                ->schema([
+
+                                    // LOGO
+                                    ImageEntry::make('logo_img')
+                                        ->label('Logo')
+                                        ->disk('s3')
+                                        ->visibility('public')
+                                        ->getStateUsing(fn ($record) => $record->logo)
+                                        ->hidden(fn ($record) => blank($record->logo))
+                                        ->extraAttributes([
+                                            'style' => '
+                                                flex:1 1 0; min-height:240px; width:100%;
+                                                border-radius:14px;
+                                                background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+                                                border:1px solid rgba(255,255,255,0.15);
+                                                display:flex; align-items:center; justify-content:center;
+                                                padding:16px; margin:0; overflow:hidden;
+                                            ',
+                                        ])
+                                        ->extraImgAttributes([
+                                            'style' => 'max-width:100%; max-height:100%; object-fit:contain; display:block;',
+                                        ]),
+
+                                    TextEntry::make('logo_placeholder')
+                                        ->label('Logo')
+                                        ->weight('bold')
+                                        ->html()
+                                        ->state('
+                                            <div style="
+                                                flex:1 1 0; min-height:240px; width:100%;
+                                                border-radius:14px;
+                                                display:flex; align-items:center; justify-content:center;
+                                                margin:0;
+                                                border:1px dashed rgba(255,255,255,0.25); opacity:.7;
+                                                background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+                                            ">No logo</div>
+                                        ')
+                                        ->visible(fn ($record) => blank($record->logo))
+                                        ->extraAttributes(['style' => 'margin:0; padding:0;']),
+
+                                    // ICON
+                                    ImageEntry::make('icon_img')
+                                        ->label('Icon')
+                                        ->disk('s3')
+                                        ->visibility('public')
+                                        ->getStateUsing(fn ($record) => $record->icon)
+                                        ->hidden(fn ($record) => blank($record->icon))
+                                        ->extraAttributes([
+                                            'style' => '
+                                                flex:1 1 0; min-height:240px; width:100%;
+                                                border-radius:14px;
+                                                background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+                                                border:1px solid rgba(255,255,255,0.15);
+                                                display:flex; align-items:center; justify-content:center;
+                                                padding:16px; margin:0; overflow:hidden;
+                                            ',
+                                        ])
+                                        ->extraImgAttributes([
+                                            'style' => 'max-width:100%; max-height:100%; object-fit:contain; display:block;',
+                                        ]),
+
+                                    TextEntry::make('icon_fallback')
+                                        ->label('Icon')
+                                        ->weight('bold')
+                                        ->html()
+                                        ->state(function ($record) {
+                                            $seed = trim($record->acronym ?: $record->short_name ?: $record->name ?: 'R');
+                                            $initials = (mb_strlen($seed) === 3 && preg_match('/^[A-Z]{3}$/', $seed))
+                                                ? $seed
+                                                : collect(preg_split('/\s+/u', $seed))
+                                                    ->filter()
+                                                    ->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))
+                                                    ->take(2)
+                                                    ->implode('');
+
+                                            return "<div style=\"
+                                                flex:1 1 0; min-height:240px; width:100%;
+                                                border-radius:14px;
+                                                display:flex; align-items:center; justify-content:center;
+                                                margin:0;
+                                                background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+                                                border:1px solid rgba(255,255,255,0.15);
+                                                font-weight:700; font-size:28px;
+                                            \">{$initials}</div>";
+                                        })
+                                        ->visible(fn ($record) => blank($record->icon))
+                                        ->extraAttributes(['style' => 'margin:0; padding:0;']),
+                                ]),
+                    ]),
+            ])
+            ->maxWidth('7xl')
+            ->collapsible(),
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -547,7 +832,7 @@ class ReinsurersResource extends Resource
                     ->url(fn (Reinsurer $record) =>
                         self::getUrl('view', ['record' => $record])
                     )
-                    ->icon('heroicon-m-eye'),  // opcional
+                    ->icon('heroicon-m-eye'),  // opcional 
 
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
