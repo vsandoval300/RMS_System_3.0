@@ -30,7 +30,7 @@ class OperativeDoc extends Model
         'inception_date',
         'expiration_date',
         'document_path',
-        'client_payment_tracking',
+        //'client_payment_tracking',
         'business_code',          // FK hacia businesses
     ];
 

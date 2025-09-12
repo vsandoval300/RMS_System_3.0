@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('inception_date');
             $table->date('expiration_date');
             $table->string('document_path',200)->nullable();
-            $table->boolean('client_payment_tracking')->default(false); // ← Campo booleano agregado
+            //$table->boolean('client_payment_tracking')->default(false); // ← Campo booleano agregado
             $table->string('business_code', 19)->index();
             
             $table->foreign('business_code')

@@ -22,6 +22,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\TextInput\Mask;
+use Filament\Support\RawJs;
+
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -161,73 +165,80 @@ class CostSchemeResource extends Resource
                                         })
                                         ->columnSpan(2),
 
-                                    Select::make('partner_id')
-                                        ->label('Partner')
-                                        ->options(Partner::all()->pluck('name', 'id'))
+                                    Select::make('partner_source_id')
+                                        ->label('Source')
+                                        ->options(Partner::all()->pluck('short_name', 'id'))
                                         ->placeholder('Select partner')
                                         ->searchable()
                                         ->preload()
                                         ->required()
                                         ->columnSpan(3),
 
-                                    Select::make('referral_partner')
-                                        ->label('Referral Partner')
-                                        ->options([
-                                            'Gatekeeper' => 'Gatekeeper',
-                                            'Integrity' => 'Integrity',
-                                            'GMK-International' => 'GMK-International',
-                                        ])
-                                        ->placeholder('Select the recipient')
-                                        ->nullable()
+                                    Select::make('partner_destination_id')
+                                        ->label('Destination')
+                                        ->options(Partner::all()->pluck('short_name', 'id'))
+                                        ->placeholder('Select partner')
                                         ->searchable()
-                                        ->columnSpan(2)
-                                        ->disabled(fn ($get) => $get('concept') != 3),
-                                    
+                                        ->preload()
+                                        ->required()
+                                        ->columnSpan(3),
+
                                     TextInput::make('value')
                                         ->label('Value')
-                                        ->required()
-                                        ->reactive()
-                                        ->numeric() // permite solo números
-                                        ->minValue(0) // no menos de 0
-                                        ->maxValue(100) // no más de 100
                                         ->suffix('%')
-                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 2, '.', '') : null)
-                                        ->dehydrateStateUsing(fn ($state) => $state !== null ? $state / 100 : null) // guarda dividido entre 100
+                                        ->type('text')
+                                        ->inputMode('decimal') 
+                                        ->live(onBlur: true)
+                                        ->required()
+                                        ->minValue(0)
+                                        ->maxValue(100)
+                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 5, '.', '') : null)
+                                        ->dehydrateStateUsing(fn ($state) => $state !== null ? $state / 100 : null)
+                                        ->extraInputAttributes([
+                                            'class' => 'text-right tabular-nums', // ← alinea a la derecha y usa dígitos monoespaciados
+                                        ])
                                         ->columnSpan(2),
 
-                                ])
-                                ->columns(10)
-                                //->defaultItems(1)
-                                ->addActionLabel('Agregar nodo de costo')
-                                ->reorderable(false)
-                                ->deletable(true)
-                                ->addable(true)
+                            ])
+                            ->columns(11)
+                            ->addActionLabel('Agregar nodo de costo')
+                            ->reorderable(false)
+                            ->deletable(true)
+                            ->addable(true)
 
-                                // 👇 Lógica automática para index y id
-                                ->afterStateUpdated(function (array $state, callable $set, callable $get) {
-                                    $schemeId = $get('id'); // Asegúrate que este valor no es null
+                            // ⬇️ Al agregar/quitar filas, reindexas y luego recalculas el total
+                            ->afterStateUpdated(function (array $state, callable $set, callable $get) {
+                                $schemeId = $get('id');
 
-                                    if (! $schemeId || ! is_string($schemeId)) {
-                                        return;
+                                if (! $schemeId || ! is_string($schemeId)) {
+                                    return;
+                                }
+
+                                // Reindexación/ID (tu lógica)
+                                $newState = [];
+                                $index = 1;
+                                foreach ($state as $key => $item) {
+                                    if (is_array($item)) {
+                                        $item['index'] = $index;
+                                        $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+                                        $newState[$key] = $item;
+                                        $index++;
                                     }
+                                }
+                                $set('costNodexes', $newState);
 
-                                    $newState = [];
-                                    $index = 1;
+                                // 🟢 Recalcular total tras add/remove
+                                $total = collect($newState)
+                                    ->pluck('value')
+                                    ->filter()
+                                    ->map(fn ($v) => (float) $v)
+                                    ->sum();
 
-                                    foreach ($state as $key => $item) {
-                                        if (is_array($item)) {
-                                            $item['index'] = $index;
-                                            $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
-                                            $newState[$key] = $item;
-                                            $index++;
-                                        }
-                                    }
-
-                                    $set('costNodexes', $newState);
-                                }),
+                                $set('total_values', number_format($total, 5, '.', ''));
+                            }),
 
                         
-                                Placeholder::make('total_values')
+                                /* Placeholder::make('total_values')
                                     ->label('')
                                     ->content(function ($get) {
                                         $values = collect($get('costNodexes') ?? [])
@@ -238,7 +249,58 @@ class CostSchemeResource extends Resource
                                         return 'Total deductions: ' . $total . '%';
                                     })
                                     ->columnSpanFull()
-                                    ->extraAttributes(['class' => 'text-right font-bold']),
+                                    ->extraAttributes(['class' => 'text-right font-bold']), */
+
+                                
+
+                                
+
+                                Group::make()
+                                    ->schema([
+                                        TextInput::make('total_values')
+    ->label('Total deductions')
+    ->suffix('%')
+    ->readOnly()
+    ->dehydrated(false)
+    ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+    ->afterStateHydrated(function ($set, $get) {
+        $rows   = $get('costNodexes') ?? [];
+        $values = collect($rows)
+            ->pluck('value')
+            ->filter(fn ($v) => $v !== null && $v !== '');
+
+        if ($values->isEmpty()) {
+            $set('total_values', null);
+            return;
+        }
+
+        // 🔢 decimales máximos observados en los nodos
+        $maxDp = $values->map(function ($v) {
+            $s = str_replace(',', '', (string) $v);
+            $p = strpos($s, '.');
+            return $p === false ? 0 : strlen(substr($s, $p + 1));
+        })->max();
+
+        // ➕ suma con precisión y formatea con $maxDp
+        if (function_exists('bcadd')) {
+            $sum = '0';
+            foreach ($values as $v) {
+                $sum = bcadd($sum, (string) str_replace(',', '.', (string) $v), 20);
+            }
+            $display = bcadd($sum, '0', $maxDp);
+        } else {
+            $sum     = $values->reduce(fn ($c, $v) => $c + (float) str_replace(',', '.', (string) $v), 0.0);
+            $display = number_format($sum, $maxDp, '.', '');
+        }
+
+        $set('total_values', $display);
+                                            }),
+                                    ])
+                                    // ocupa el ancho de la fila pero alinea el input a la derecha
+                                    ->extraAttributes(['class' => 'w-full flex justify-end'])
+                                    ->columnSpanFull(),
+
+
 
                         ])
                         ->collapsible(),
@@ -279,12 +341,14 @@ class CostSchemeResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('id')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('share')
                     ->label('Share')
                     ->formatStateUsing(fn ($state) => number_format($state * 100, 2) . '%'),
                 Tables\Columns\TextColumn::make('agreement_type'),
                 Tables\Columns\TextColumn::make('created_at')->since(),
+                Tables\Columns\TextColumn::make('updated_at')->since(),
             ])
             ->defaultSort('index', 'asc')
             ->filters([])

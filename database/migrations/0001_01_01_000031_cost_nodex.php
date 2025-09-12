@@ -22,8 +22,8 @@ return new class extends Migration
             $table->foreign('concept')->references('id')->on('deductions');
 
             $table->float('value');
-            $table->foreignId('partner_id')->constrained('partners');
-            $table->enum('referral_partner', ['Gatekeeper', 'Integrity', 'GMK-International'])->nullable();
+            $table->foreignId('partner_source_id')->constrained('partners');
+            $table->foreignId('partner_destination_id')->constrained('partners');
             
             $table->string('cscheme_id', 19); 
             $table->foreign('cscheme_id')

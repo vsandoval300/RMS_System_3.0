@@ -143,10 +143,10 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->live()
                                         ->preload(),
 
-                                    Toggle::make('client_payment_tracking')
+                                    /* Toggle::make('client_payment_tracking')
                                         ->label('Client Payment Tracking')
                                         ->default(false)
-                                        ->helperText('Include tracking of payments from the original client if this option is enabled.'),
+                                        ->helperText('Include tracking of payments from the original client if this option is enabled.'), */
 
                                     // 🟡 MODIFICACIÓN: inception_date ahora con afterStateUpdated
                                     DatePicker::make('inception_date')
@@ -300,6 +300,23 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->columnSpan(4),
 
                                             TextInput::make('premium')
+                                                ->label('Premium')
+                                                ->prefix('$')
+                                                ->type('text')                 // evita <input type="number">
+                                                ->inputMode('decimal')         // teclado numérico en móvil
+                                                ->live(onBlur: true)           // o ->live(debounce: 500)
+                                                ->mask(RawJs::make('$money($input)'))   // solo para visual
+                                                // NO usar ->stripCharacters(',') aquí
+                                                // NO usar ->numeric() aquí
+                                                ->dehydrateStateUsing(fn ($state) => $state !== null
+                                                    ? (float) str_replace([',', '$', ' '], '', $state)
+                                                    : null
+                                                )
+                                                ->step(0.01)
+                                                ->required()
+                                                ->columnSpan(3),
+
+                                            /* TextInput::make('premium')
                                                 ->prefix('$')
                                                 ->required()
                                                 ->live()
@@ -309,7 +326,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->numeric()
                                                 //->dehydrateStateUsing(fn ($state) => floatval(preg_replace('/[^0-9.]/', '', $state)))
                                                 ->step(0.01)
-                                               ->columnSpan(3),
+                                               ->columnSpan(3), */
                                         ])
                                         ->reorderableWithButtons()
                                         ->defaultItems(1)
@@ -328,14 +345,14 @@ class OperativeDocsRelationManager extends RelationManager
                                             $set('insureds_total', number_format($total, 2, '.', ','));
                                         }),
 
-                                    Placeholder::make('')->columnSpan(8),
+                                    Placeholder::make('')->columnSpan(9),
 
                                     TextInput::make('insureds_total')
                                         ->label('Grand Total Premium')
                                         ->prefix('$')
                                         ->disabled()
                                         ->dehydrated(false)
-                                        ->columnSpan(4), // 👈 mismo span para alinear con el repeater
+                                        ->columnSpan(3), // 👈 mismo span para alinear con el repeater
                                 ]),
                         ]),
                     

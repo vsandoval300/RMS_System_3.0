@@ -21,7 +21,8 @@ class CostNodex extends Model
         'id',
         'concept',
         'value',
-        'partner_id',
+        'partner_source_id',
+        'partner_destination_id', // nuevo campo
         'referral_partner',
         'cscheme_id',
     ];
@@ -31,6 +32,18 @@ class CostNodex extends Model
     // ----------------------------------
 
     /* ─── belongsTo ─── */
+    // 🔁 Partner origen
+    public function partnerSource()
+    {
+        return $this->belongsTo(Partner::class, 'partner_source_id');
+    }
+
+    // 🔁 Partner destino
+    public function partnerDestination()
+    {
+        return $this->belongsTo(Partner::class, 'partner_destination_id');
+    }
+
     public function partner()
     {
         return $this->belongsTo(Partner::class);
