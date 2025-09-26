@@ -97,11 +97,15 @@ class Business extends Model
         return $this->hasMany(OperativeDoc::class,'business_code','business_code');
     }
 
+    public function coverages()
+    {
+        return $this->belongsToMany(Coverage::class, 'liability_structures',
+            'business_code', 'coverage_id', 'business_code', 'id'
+        )->distinct();
+    }
+
+
     
-
-
-
-
 }
 
 

@@ -14,9 +14,9 @@
             <thead class="bg-gray-700 text-white font-semibold">
                 <tr>
                     <th class="px-3 py-2 text-left  border-b border-gray-600">#</th>
-                    <th class="px-3 py-2 text-left  border-b border-gray-600">Partner</th>
-                    <th class="px-3 py-2 text-left  border-b border-gray-600">Concept</th>
-                    <th class="px-3 py-2 text-left  border-b border-gray-600">Referral Partner</th>
+                     <th class="px-3 py-2 text-left  border-b border-gray-600">Concept</th>
+                    <th class="px-3 py-2 text-left  border-b border-gray-600">Source</th>
+                    <th class="px-3 py-2 text-left  border-b border-gray-600">Destination</th>
                     <th class="px-3 py-2 text-right border-b border-gray-600">Value</th> {{-- ← Alineación derecha --}}
                 </tr>
             </thead>
@@ -24,9 +24,9 @@
                 @foreach ($nodes as $node)
                     <tr class="bg-gray-800 border-t border-gray-600">
                         <td class="px-3 py-2 font-semibold">{{ $node->index }}</td>
-                        <td class="px-3 py-2">{{ $node->partner->name ?? 'N/A' }}</td>
                         <td class="px-3 py-2">{{ $node->deduction?->concept ?? '—' }}</td>
-                        <td class="px-3 py-2">{{ $node->referral_partner ?? '—' }}</td>
+                        <td class="px-3 py-2">{{ $node->partnerSource->short_name ?? 'N/A' }}</td>
+                        <td class="px-3 py-2">{{ $node->partnerDestination->short_name ?? '—' }}</td>
                         <td class="px-3 py-2 text-right text-blue-400"> {{-- ← Alineación derecha --}}
                             {{ $fmtPct($node->value ?? 0) }}
                         </td>

@@ -109,75 +109,73 @@ class DatabaseSeeder extends Seeder
             
             
             
-            /*=============================================*/
+            //=============================================
             //FILES FOR CELL-MAYAB
-            /*=============================================*/
-            BusinessesCellMayabSeeder::class, /*1*/
-            LiabilityStructureCellMayabSeeder::class, /*2*/
-            /*Files for Placement Schemes==================*/
-            CschemeCellMayabSeeder::class, /*6*/
-            CostNodesxCellMayabSeeder::class, /*4*/
-            //CschemeCnodesCellMayabSeeder::class, /*7*/
-            /*Files for Business Documents=================*/
-            BusinessesDocsCellMayabSeeder::class, /*Details*/
-            BusinessDocInsuredsCellMayabSeeder::class, /*Insureds*/
-            BusinessDocsSchemesCellMayabSeeder::class, /*Placement Schemes*/
-            TransactionsCellMayabSeeder::class, /*9*/
-            TransactionsLogCellMayabSeeder::class, /*10*/
+            //=============================================
+           /*  BusinessesCellMayabSeeder::class, //1
+            LiabilityStructureCellMayabSeeder::class, //2
+            //Files for Placement Schemes==================
+            CschemeCellMayabSeeder::class, //6
+            CostNodesxCellMayabSeeder::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+            BusinessesDocsCellMayabSeeder::class, //Details
+            BusinessDocInsuredsCellMayabSeeder::class, //Insureds
+            BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
+            TransactionsCellMayabSeeder::class, //Transactions
+            TransactionsLogCellMayabSeeder::class, //TransactionLogs
             
-            //ReferralsCellMayabSeeder::class, /*5*/
-            //InvoicesCellMayabSeeder::class, /*11*/
-            //InvoiceTransactionsCellMayabSeeder::class, /*12*/
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
 
             
-            
-            
-            /*=============================================*/
+            //=============================================
             //FILES FOR YELMO
-            /*=============================================*/
-            BusinessesYelmoSeeder::class, /*1*/
-            LiabilityStructureYelmoSeeder::class, /*2*/
+            //=============================================
+            BusinessesYelmoSeeder::class, //1
+            LiabilityStructureYelmoSeeder::class, //2
             //Files for Placement Schemes
-            /*=============================================*/
-            CschemeYelmoSeeder::class, /*6*/
-            CostNodesxYelmoSeeder::class, /*4*/
-            //CschemeCnodesYelmoSeeder::class, /*7*/
+            //=============================================
+            CschemeYelmoSeeder::class, //6
+            CostNodesxYelmoSeeder::class, //4
+            //CschemeCnodesYelmoSeeder::class, //7
             //Files for Business Documents
-            /*=============================================*/
-            BusinessesDocsYelmoSeeder::class, /*Details*/
-            BusinessDocInsuredsYelmoSeeder::class, /*Insureds*/
-            BusinessDocsSchemesYelmoSeeder::class, /*Placement Schemes*/
-            TransactionsYelmoSeeder::class, /*9*/
-            //TransactionsLogYelmoSeeder::class, /*10*/
+            //=============================================
+            BusinessesDocsYelmoSeeder::class, //Details
+            BusinessDocInsuredsYelmoSeeder::class, //Insureds
+            BusinessDocsSchemesYelmoSeeder::class, //Placement Schemes
+            TransactionsYelmoSeeder::class, //9
+            //TransactionsLogYelmoSeeder::class, //10
             
 
-            //ReferralsYelmoSeeder::class, /*5*/
-            //InvoicesYelmoSeeder::class, /*11*/
-            //InvoiceTransactionsYelmoSeeder::class, /*12*/
+            //ReferralsYelmoSeeder::class, //5
+            //InvoicesYelmoSeeder::class, //11
+            //InvoiceTransactionsYelmoSeeder::class, //12
             
             
-            /*=============================================*/
+            //=============================================
             //FILES FOR ADAMAS
-            /*=============================================*/
-            BusinessesAdamasSeeder::class, /*1*/
-            LiabilityStructureAdamasSeeder::class, /*2*/
+            //=============================================
+            BusinessesAdamasSeeder::class, //1
+            LiabilityStructureAdamasSeeder::class, //2
             //Files for Placement Schemes
-            /*=============================================*/
-            CschemeAdamasSeeder::class, /*6*/
-            CostNodesxAdamasSeeder::class, /*4*/
-            //CschemeCnodesAdamasSeeder::class, /*7*/
+            //=============================================
+            CschemeAdamasSeeder::class, //6
+            CostNodesxAdamasSeeder::class, //4
+            //CschemeCnodesAdamasSeeder::class, //7
             //Files for Business Documents
-            /*=============================================*/
-            BusinessesDocsAdamasSeeder::class, /*Details*/
-            BusinessDocInsuredsAdamasSeeder::class, /*Insureds*/
-            BusinessDocsSchemesAdamasSeeder::class, /*Placement Schemes*/
-            TransactionsAdamasSeeder::class, /*9*/
-            //TransactionsLogAdamasSeeder::class, /*10*/
+            //=============================================
+            BusinessesDocsAdamasSeeder::class, //Details
+            BusinessDocInsuredsAdamasSeeder::class, //Insureds
+            BusinessDocsSchemesAdamasSeeder::class, //Placement Schemes
+            TransactionsAdamasSeeder::class, //9 */
+            //TransactionsLogAdamasSeeder::class, //10
             
 
-            //ReferralsYelmoSeeder::class, /*5*/
-            //InvoicesYelmoSeeder::class, /*11*/
-            //InvoiceTransactionsYelmoSeeder::class, /*12*/
+            //ReferralsYelmoSeeder::class, //5
+            //InvoicesYelmoSeeder::class, //11
+            //InvoiceTransactionsYelmoSeeder::class, //12
             
             //File of Activity
             /*=============================================*/

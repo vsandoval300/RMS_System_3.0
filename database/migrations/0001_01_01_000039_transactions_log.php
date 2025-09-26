@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('transaction_logs', function (Blueprint $table) {
             $table->engine('InnoDB');
+            //PK
             $table->char('id', 36)->primary(); // UUID como string
 
 
             $table->char('transaction_id', 36);
-            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
+            $table->foreign('transaction_id')
+                ->references('id')->on('transactions')
+                ->onDelete('cascade');
 
             $table->integer('index'); 
 
@@ -29,6 +32,8 @@ return new class extends Migration
 
             $table->bigInteger('to_entity')->unsigned();
             $table->foreign('to_entity')->references('id')->on('partners');
+            
+                
 
             $table->date('sent_date')->nullable();
             $table->date('received_date')->nullable();
@@ -37,7 +42,8 @@ return new class extends Migration
             $table->float('commission_discount');
             $table->float('banking_fee');
             $table->float('net_amount');
-            $table->enum('status',['Pending','Sent','Received','Completed']);
+            $table->enum('status',['Pending','Sent','Received','Completed'])
+                 ->default('Pending'); 
            
             $table->timestamps();
             $table->softDeletes();

@@ -64,6 +64,7 @@ class BusinessResource extends Resource
             ->with([
                 'reinsurer:id,short_name',
                 'currency:id,acronym,name',
+                'coverages:id,acronym,name',
             ])
             ->withCount([
                 'operativeDocs',
@@ -596,8 +597,9 @@ class BusinessResource extends Resource
 
 
 
-
-
+// ╔═════════════════════════════════════════════════════════════════════════╗
+// ║ Business Table                                                          ║
+// ╚═════════════════════════════════════════════════════════════════════════╝
 
     public static function table(Table $table): Table
     {
@@ -606,18 +608,60 @@ class BusinessResource extends Resource
                 TextColumn::make('index')
                     ->numeric()
                     ->sortable(),
+
                 TextColumn::make('business_code')
                     ->searchable(),
+
                 TextColumn::make('reinsurance_type')
                     ->searchable(),
+                    
                 TextColumn::make('reinsurer.short_name')
                     ->label('Reinsurer')
                     ->searchable(),
+
+                TextColumn::make('coverage_acronyms')
+                    ->label('Coverages')
+                    ->badge()
+                    ->getStateUsing(fn (\App\Models\Business $record) =>
+                        $record->coverages?->pluck('acronym')->filter()->unique()->values()->all() ?? []
+                    )
+                    ->tooltip(function (\App\Models\Business $record) {
+                        if (! $record->coverages) {
+                            return null;
+                        }
+
+                        $parts = $record->coverages
+                            ->map(function ($c) {
+                                $acronym = trim($c->acronym ?? '');
+                                $name    = trim($c->name ?? '');
+
+                                // agrega punto si no termina en . ! o ?
+                                if ($name !== '' && ! preg_match('/[.!?]$/u', $name)) {
+                                    $name .= '.';
+                                }
+
+                                return ($acronym !== '' && $name !== '') ? "{$acronym} = {$name}" : null;
+                            })
+                            ->filter()
+                            ->values();
+
+                        // Une cada par con un espacio
+                        return $parts->join(' ');
+                    })
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->whereHas('coverages', fn ($q) =>
+                            $q->where('acronym', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                        );
+                    }),
+
                 TextColumn::make('renewed_from_id')
                     ->searchable(),
+
                 TextColumn::make('currency.acronym')
                     ->label('Currency')
                     ->searchable(),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -637,6 +681,7 @@ class BusinessResource extends Resource
                     })
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('operative_docs_count')
                     ->counts('operativeDocs')
                     ->label('Documents')
@@ -652,6 +697,9 @@ class BusinessResource extends Resource
             ->filters([
                 //
             ])
+
+
+
             
             // ╔═════════════════════════════════════════════════════════════════════════╗
             // ║ Underwritten Report                                                     ║

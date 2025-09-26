@@ -112,7 +112,13 @@
         </tbody>
     </table>
 
-    {{-- INSUREDS --}}
+
+
+
+
+    {{-------------------------------------------------------------------------------}}
+    {{-- INSUREDS -------------------------------------------------------------------}}
+    {{-------------------------------------------------------------------------------}}
      <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
        Insureds
     </h4>
@@ -282,7 +288,7 @@
                 @foreach ($group['nodes'] as $node)
                     <tr class="bg-gray-800 text-gray-300 border-b border-gray-600">
                         <td class="px-2 py-1">{{ $node['index'] }}</td>
-                        <td class="px-2 py-1">{{ $node['partner'] ?? '-' }}</td>
+                        <td class="px-2 py-1">{{ $node['partner'] ?? '-' }}</td>                    <!-- VARIABLE NUEVA -->
                        {{-- <td class="px-2 py-1">{{ number_format($node['share'] * 100, 2) }}%</td> --}}
                         <td class="px-2 py-1">{{ $node['deduction'] ?? '-' }}</td>
                         <td class="px-2 py-1 text-right">{{ number_format($node['value'] * 100, 2) }}%</td>

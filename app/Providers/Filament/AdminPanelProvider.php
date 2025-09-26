@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             FilamentColor::register([
                 //'danger' => Color::Red,
                 //'gray' => Color::Zinc,
+                //'gray' => Color::hex('#27272a'),   // zinc-500
                 //'info' => Color::Blue,
                 'primary' => Color::hex('#41A2C3'), // puedes registrar más
                 //'success' => Color::Green,
@@ -50,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(),
             ])
             ->default()
+            ->maxContentWidth('screen-2xl') // <----Cambio para hacer mas ancho el CRUD
             ->brandName('RMS-System') // ← aquí se define el título
             ->brandLogo(asset('images/logo5.png'))
             ->brandLogoHeight('55px')   // ⬅︎ más alto que el default (~20 px)

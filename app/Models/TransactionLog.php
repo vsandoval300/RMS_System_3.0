@@ -35,8 +35,8 @@ class TransactionLog extends Model
     ];
 
     protected $casts = [
-        'sent_date'      => 'datetime',
-        'received_date'  => 'datetime',
+        'sent_date'      => 'date',
+        'received_date'  => 'date',
         'exch_rate'      => 'decimal:6',
         'gross_amount'   => 'decimal:2',
         'commission_discount' => 'decimal:2',

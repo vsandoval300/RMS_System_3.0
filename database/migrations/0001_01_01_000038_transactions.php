@@ -20,11 +20,17 @@ return new class extends Migration
             $table->float('exch_rate');
             $table->date('due_date')->nullable();
 
+            // remmitance_code (SET NULL si borran el código maestro)
             $table->string('remmitance_code', 14)->nullable(); // Permitir nulos aquí
-            $table->foreign('remmitance_code')->references('remmitance_code')->on('remmitance_codes')->onDelete('set null'); // Añadir comportamiento al eliminar
-            $table->string('op_document_id', 19);
-            $table->foreign('op_document_id')->references('id')->on('operative_docs');
+            $table->foreign('remmitance_code')
+                ->references('remmitance_code')->on('remmitance_codes')
+                ->onDelete('set null'); // Añadir comportamiento al eliminar
 
+            // relación con operative_docs (CASCADE al borrar el doc)
+            $table->string('op_document_id', 19);
+            $table->foreign('op_document_id')
+                ->references('id')->on('operative_docs')
+                ->cascadeOnDelete();
             
             $table->foreignId('transaction_type_id')->constrained('transaction_types');
             $table->foreignId('transaction_status_id')->constrained('transaction_statuses');
