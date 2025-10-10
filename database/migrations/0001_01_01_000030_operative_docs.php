@@ -29,7 +29,7 @@ return new class extends Migration
                   ->references('business_code')
                   ->on('businesses')
                   ->onDelete('cascade');
-
+            $table->float('af_mf');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -41,7 +41,9 @@
                 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20' => ($r['status'] ?? '') === 'received',
                 'bg-blue-500/10 text-blue-400 ring-blue-500/20'         => ($r['status'] ?? '') === 'sent',
                 'bg-orange-500/10 text-orange-400 ring-orange-500/20'   => ($r['status'] ?? '') === 'pending',
-                'bg-zinc-500/10 text-zinc-300 ring-zinc-500/20'         => !in_array(($r['status'] ?? ''), ['received','sent','pending']),
+                // 🟡 CAMBIO: estilo para 'preview'
+                'bg-purple-500/10 text-purple-300 ring-purple-500/20'   => ($r['status'] ?? '') === 'preview',
+                'bg-zinc-500/10 text-zinc-300 ring-zinc-500/20'         => !in_array(($r['status'] ?? ''), ['received','sent','pending','preview']),
               ])
             ">
               {{ ucfirst($r['status'] ?? '-') }}

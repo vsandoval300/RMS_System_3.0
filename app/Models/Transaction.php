@@ -71,7 +71,10 @@ class Transaction extends Model
     }
 
 
-    protected static function booted()
+
+
+
+    /* protected static function booted()
     {
         // Asigna UUID si no existe
         static::creating(function ($model) {
@@ -104,5 +107,48 @@ class Transaction extends Model
                     $record->update(['index' => $key + 1]);
             });
         });
+    } */
+    
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            // 🛠️ Si viene sin PK → genera UUID (como ya tenías)
+            if (! $model->getKey()) {
+                $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
+            } else {
+                // 🛠️ Si VIENE con PK y YA EXISTE en BD (incluyendo soft-deleted) → genera uno nuevo
+                $exists = self::withTrashed()->whereKey($model->getKey())->exists();
+                if ($exists) {
+                    $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
+                }
+            }
+
+            // Índice auto si no viene en el payload (como ya tenías)
+            if (! $model->index) {
+                $maxIndex = self::where('op_document_id', $model->op_document_id)
+                    ->withoutTrashed()
+                    ->max('index');
+                $model->index = $maxIndex ? $maxIndex + 1 : 1;
+            }
+
+            // Defaults (como ya tenías)
+            $model->transaction_type_id  ??= 1;
+            $model->transaction_status_id ??= 1;
+            $model->remmitance_code      ??= null;
+        });
+
+        static::deleted(function ($model) {
+            self::where('op_document_id', $model->op_document_id)
+                ->withoutTrashed()
+                ->orderBy('index')
+                ->get()
+                ->values()
+                ->each(function ($record, $key) {
+                    $record->update(['index' => $key + 1]);
+                });
+        });
     }
 }
+
+   

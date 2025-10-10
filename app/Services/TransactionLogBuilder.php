@@ -8,6 +8,7 @@ use App\Models\TransactionLog;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\CostScheme;
 
 class TransactionLogBuilder
 {
@@ -158,6 +159,131 @@ class TransactionLogBuilder
 
             return $affected;
         });
+        
     }
+
+
+
+     /**
+     * Calcula filas "preview" sin tocar BD, usando el estado actual del formulario.
+     * $form:
+     *  - transactions: [ ['index'=>2,'proportion'=>0.5|50,'exch_rate'=>1.0,'due_date'=>'...'], ... ]
+     *  - schemes:      [ ids de CostScheme seleccionados ] (opcional; si no, usa los del doc)
+     *  - insureds:     estado del repeater insureds (opcional; si no, usa los del doc)
+     */
+    public function previewForOperativeDocState(string $docId, array $form): Collection
+    {
+        $doc = OperativeDoc::with([
+            'insureds:id,op_document_id,premium',
+            'schemes.costScheme.costNodexes' => fn ($q) => $q->orderBy('index'),
+            'schemes.costScheme.costNodexes.deduction',
+            // Si tus nodos tienen relaciones con partners, cárgalas aquí:
+            'schemes.costScheme.costNodexes.partnerSource',
+            'schemes.costScheme.costNodexes.partnerDestination',
+        ])->findOrFail($docId);
+
+        // --- Prima total (si vienen insureds desde el form, usarlos; si no, los del doc)
+        $grandTotal = null;
+        if (!empty($form['insureds'])) {
+            $grandTotal = collect($form['insureds'])->sum(function ($i) {
+                $raw = $i['premium'] ?? 0;
+                $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
+                if (is_string($clean)) {
+                    $parts = explode('.', $clean, 3);
+                    $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
+                }
+                return (float) $clean;
+            });
+        } else {
+            $grandTotal = (float) $doc->insureds->sum('premium');
+        }
+
+        // --- Nodos: si el form trae schemes, usarlos; si no, los del doc
+        $nodes = collect();
+        if (!empty($form['schemes'])) {
+            $nodes = CostScheme::with([
+                    'costNodexes' => fn ($q) => $q->orderBy('index'),
+                    'costNodexes.deduction',
+                    'costNodexes.partnerSource',
+                    'costNodexes.partnerDestination',
+                ])
+                ->whereIn('id', $form['schemes'])
+                ->get()
+                ->flatMap(fn ($s) => $s->costNodexes ?? collect())
+                ->sortBy('index')
+                ->values();
+        } else {
+            $nodes = $doc->schemes
+                ->flatMap(fn ($s) => $s->costScheme?->costNodexes ?? collect())
+                ->sortBy('index')
+                ->values();
+        }
+
+        // --- Normalizar transactions del form
+        $txns = collect($form['transactions'] ?? [])
+            ->map(function ($t) {
+                $prop = $t['proportion'] ?? 0;
+                // puede venir 50 o 0.50
+                $prop = is_string($prop) ? floatval(str_replace(',', '', $prop)) : (float) $prop;
+                if ($prop > 1) $prop = $prop / 100;
+
+                return [
+                    'index'      => (int)($t['index'] ?? 0),
+                    'proportion' => $prop,
+                    'exch_rate'  => isset($t['exch_rate']) ? (float) $t['exch_rate'] : 1.0,
+                    'due_date'   => $t['due_date'] ?? null,
+                ];
+            })
+            ->sortBy('index')
+            ->values();
+
+        // --- Cálculo idéntico al de rebuildForOperativeDoc, pero sin persistir
+        $discountBase = $grandTotal;
+
+        $rows = collect();
+        foreach ($txns as $txn) {
+            $gross = round($grandTotal, 2);
+            $i = 1;
+
+            foreach ($nodes as $node) {
+                $pctRaw = (float) ($node->value ?? 0);
+                $pct    = $pctRaw > 1 ? $pctRaw / 100 : $pctRaw;
+
+                $commission = round($discountBase * $pct, 2);
+
+                $bankingFee = 0.0; // en preview lo dejamos en 0
+
+                $net = round($gross - $commission - $bankingFee, 2);
+
+                $rows->push([
+                    'inst_index'  => (int) $txn['index'],
+                    'index'       => (int) ($node->index ?? $i),
+                    'deduction'   => $node->deduction?->concept ?? '-',
+                    // nombres aproximados desde el nodo (en BD vienen de relaciones del log)
+                    'from'        => $node->partnerSource->short_name
+                                        ?? $node->partnerSource->name
+                                        ?? '—',
+                    'to'          => optional($node->partnerDestination)->short_name
+                                        ?? optional($node->partnerDestination)->name
+                                        ?? '—',
+                    'exch_rate'   => (float) $txn['exch_rate'],
+                    'gross'       => $gross,
+                    'discount'    => $commission,
+                    'banking_fee' => $bankingFee,
+                    'net'         => $net,
+                ]);
+
+                $gross = $net;
+                $i++;
+            }
+        }
+
+        return $rows->sortBy([['inst_index','asc'],['index','asc']])->values();
+    }
+
+
+
+
+
 }
 

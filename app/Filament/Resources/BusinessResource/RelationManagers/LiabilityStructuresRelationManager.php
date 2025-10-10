@@ -234,9 +234,14 @@ class LiabilityStructuresRelationManager extends RelationManager
             ->filters([
                 //
             ])
+            
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->createAnother(false)            // 👈 oculta "Create & create another"
+                    ->modalSubmitActionLabel('Create')// (opcional) etiqueta del botón principal
+                    ->modalCancelActionLabel('Cancel'),// (opcional) etiqueta del botón cancelar
             ])
+
             ->actions([
                     Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),

@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class LiabilityStructure extends Model
 {
     //
+    use SoftDeletes; // 👈 necesario para que tenga deleted_at
 
     protected $fillable = [
             'index',

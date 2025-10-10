@@ -258,44 +258,44 @@ class CostSchemeResource extends Resource
                                 Group::make()
                                     ->schema([
                                         TextInput::make('total_values')
-    ->label('Total deductions')
-    ->suffix('%')
-    ->readOnly()
-    ->dehydrated(false)
-    ->extraInputAttributes(['class' => 'text-right tabular-nums'])
-    ->afterStateHydrated(function ($set, $get) {
-        $rows   = $get('costNodexes') ?? [];
-        $values = collect($rows)
-            ->pluck('value')
-            ->filter(fn ($v) => $v !== null && $v !== '');
+                                    ->label('Total deductions')
+                                    ->suffix('%')
+                                    ->readOnly()
+                                    ->dehydrated(false)
+                                    ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+                                    ->afterStateHydrated(function ($set, $get) {
+                                        $rows   = $get('costNodexes') ?? [];
+                                        $values = collect($rows)
+                                            ->pluck('value')
+                                            ->filter(fn ($v) => $v !== null && $v !== '');
 
-        if ($values->isEmpty()) {
-            $set('total_values', null);
-            return;
-        }
+                                        if ($values->isEmpty()) {
+                                            $set('total_values', null);
+                                            return;
+                                        }
 
-        // 🔢 decimales máximos observados en los nodos
-        $maxDp = $values->map(function ($v) {
-            $s = str_replace(',', '', (string) $v);
-            $p = strpos($s, '.');
-            return $p === false ? 0 : strlen(substr($s, $p + 1));
-        })->max();
+                                        // 🔢 decimales máximos observados en los nodos
+                                        $maxDp = $values->map(function ($v) {
+                                            $s = str_replace(',', '', (string) $v);
+                                            $p = strpos($s, '.');
+                                            return $p === false ? 0 : strlen(substr($s, $p + 1));
+                                        })->max();
 
-        // ➕ suma con precisión y formatea con $maxDp
-        if (function_exists('bcadd')) {
-            $sum = '0';
-            foreach ($values as $v) {
-                $sum = bcadd($sum, (string) str_replace(',', '.', (string) $v), 20);
-            }
-            $display = bcadd($sum, '0', $maxDp);
-        } else {
-            $sum     = $values->reduce(fn ($c, $v) => $c + (float) str_replace(',', '.', (string) $v), 0.0);
-            $display = number_format($sum, $maxDp, '.', '');
-        }
+                                        // ➕ suma con precisión y formatea con $maxDp
+                                        if (function_exists('bcadd')) {
+                                            $sum = '0';
+                                            foreach ($values as $v) {
+                                                $sum = bcadd($sum, (string) str_replace(',', '.', (string) $v), 20);
+                                            }
+                                            $display = bcadd($sum, '0', $maxDp);
+                                        } else {
+                                            $sum     = $values->reduce(fn ($c, $v) => $c + (float) str_replace(',', '.', (string) $v), 0.0);
+                                            $display = number_format($sum, $maxDp, '.', '');
+                                        }
 
-        $set('total_values', $display);
-                                            }),
-                                    ])
+                                        $set('total_values', $display);
+                                                                            }),
+                                                                    ])
                                     // ocupa el ancho de la fila pero alinea el input a la derecha
                                     ->extraAttributes(['class' => 'w-full flex justify-end'])
                                     ->columnSpanFull(),

@@ -114,6 +114,7 @@ class BusinessResource extends Resource
 
                                                 // Buscar el último código existente que empiece con ese prefijo
                                                 $lastBusiness = Business::query()
+                                                    ->withTrashed() // 👈 incluye borrados (deleted_at no null)
                                                     ->where('business_code', 'like', "$prefix-%")
                                                     ->orderByDesc('business_code')
                                                     ->first();

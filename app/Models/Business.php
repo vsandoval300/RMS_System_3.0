@@ -104,7 +104,75 @@ class Business extends Model
         )->distinct();
     }
 
+/* Claro. En tu modelo Business, la función booted():
+    Se ejecuta cuando el modelo se “inicializa” y sirve para registrar eventos de Eloquent (ganchos lifecycle).
+    Intercepta el borrado y la restauración de un Business para propagar esas acciones a sus hijos LiabilityStructure.
 
+En concreto:
+    1. static::deleting(...)
+        Soft delete ($business->delete()): marca con deleted_at todos los liability_structures
+         relacionados (each->delete()), imitando una “cascada suave”.
+        Force delete ($business->forceDelete() o si el registro ya está “trashed” y vuelves a borrar): elimina
+         físicamente los liability_structures (withTrashed()->forceDelete()).
+
+    2. static::restoring(...)
+        Si restauras el Business ($business->restore()), restaura también todos los liability_structures que estaban
+         en papelera (onlyTrashed()->restore()).
+
+¿Por qué es necesario?
+    Los FK con onDelete('cascade') solo actúan en hard deletes a nivel de BD.
+    Con SoftDeletes, la BD no hace cascada; por eso registramos estos eventos para mantener la integridad lógica
+     (padre e hijos comparten el mismo estado: activo/borrado/restaurado).
+
+Requisitos/prácticas:
+    El hijo (LiabilityStructure) debe usar use SoftDeletes;.
+    Borrar/restaurar con Eloquent (no con Query Builder plano) para que sí se disparen los eventos. */
+
+    protected static function booted(): void
+    {
+        // Borrado y Restauracion para Liability Structures
+        //-------------------------------------------------
+        // Al borrar un Business:
+        static::deleting(function (Business $business) {
+            if ($business->isForceDeleting()) {
+                // Hard delete en cascada para los hijos
+                $business->liabilityStructures()
+                    ->withTrashed()
+                    ->forceDelete();
+            } else {
+                // Soft delete de los hijos
+                $business->liabilityStructures()
+                    ->get()
+                    ->each
+                    ->delete();
+            }
+        });
+
+        // Al restaurar un Business:
+        static::restoring(function (Business $business) {
+            $business->liabilityStructures()
+                ->onlyTrashed()
+                ->restore();
+        });
+
+        // Borrado y Restauracion para Operative Documents
+        //------------------------------------------------
+        static::deleting(function (Business $business) {
+            if ($business->isForceDeleting()) {
+                // Hard delete en cascada
+                $business->operativeDocs()->withTrashed()->each->forceDelete();
+            } else {
+                // Soft delete de hijos
+                $business->operativeDocs()->get()->each->delete();
+            }
+        });
+
+        static::restoring(function (Business $business) {
+            $business->operativeDocs()->onlyTrashed()->restore();
+        });
+
+
+    }
     
 }
 

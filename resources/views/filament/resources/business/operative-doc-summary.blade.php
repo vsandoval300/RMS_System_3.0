@@ -16,7 +16,9 @@
         Date: {{ \Carbon\Carbon::now()->format('d/m/Y') }}
     </div> --}}
 
-    {{-- DOCUMENT DETAILS SECTION--}}
+    {{-------------------------------------------------------------------------------}}
+    {{-- DOCUMENT DETAILS SECTION                                                  --}}
+    {{-------------------------------------------------------------------------------}}
     <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
        General Details
     </h4>
@@ -66,7 +68,9 @@
 
     <br>
 
-    {{-- PLACEMENT SCHEMES --}}
+    {{-------------------------------------------------------------------------------}}
+    {{-- PLACEMENT SCHEMES                                                         --}}
+    {{-------------------------------------------------------------------------------}}
      <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
        Placement Schemes
     </h4>
@@ -194,8 +198,9 @@
     <br>
 
 
-
-    {{-- COSTS BREAKDOWN --}}
+    {{-------------------------------------------------------------------------------}}
+    {{-- COSTS BREAKDOWN                                                           --}}
+    {{-------------------------------------------------------------------------------}}
     @php
     // Agrupamos los nodos por share
     $groupedByShare = collect($costNodes ?? [])->groupBy(fn ($node) => $node->costSchemes->share ?? 0);
@@ -334,8 +339,9 @@
     </table>
 
 
-
-    {{-- INSTALLMENTS --}}
+    {{-------------------------------------------------------------------------------}}
+    {{-- INSTALLMENTS                                                              --}}
+    {{-------------------------------------------------------------------------------}}
      <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
        Installments
     </h4>
@@ -408,5 +414,118 @@
 
         </tbody>
     </table>
+
+
+    {{-------------------------------------------------------------------------------}}
+    {{-- INSTALLMENTS LOGS                                                         --}}
+    {{-------------------------------------------------------------------------------}}
+     <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
+       Installments Log
+    </h4>
+
+
+     <table class="w-full text-sm border-collapse mt-2">
+        <thead>
+             <tr class="border-b border-gray-600">
+                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">#</th>
+                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Deduction</th>
+                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Source</th>
+                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Destination</th>
+                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Exchange Rate</th>
+                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Gross Amount</th>
+                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Discount</th>
+                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Banking Fee</th>
+                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Net Amount</th>
+                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Status</th>
+             </tr>
+        </thead>
+
+        <tbody>
+            @php
+                $nodesFlat = collect($groupedCostNodes ?? [])
+                    ->flatMap(fn ($g) => $g['nodes'] ?? [])
+                    ->sortBy('index')
+                    ->values();
+
+                $logsByTxn = collect($logsByTxn ?? []); // 👈 viene del viewData
+            @endphp
+
+            @if (empty($transactions) || $nodesFlat->isEmpty())
+                <tr>
+                    <td colspan="10" class="px-2 py-2 text-center text-gray-400">
+                        No installments or cost nodes to display
+                    </td>
+                </tr>
+            @else
+                @foreach (($transactions ?? []) as $tIdx => $txn)
+                    @foreach ($nodesFlat as $nIdx => $node)
+                        @php
+                            $num       = ($tIdx + 1) . '.' . ($nIdx + 1);
+                            $rate      = isset($txn['exch_rate']) ? (float) $txn['exch_rate'] : null;
+
+                            // match por transacción persistida + índice del log (mismo que el del nodo)
+                            $txnId     = $txn['id'] ?? null;
+                            $nodeIndex = (int)($node['index'] ?? ($nIdx + 1));
+
+                            $logRow    = $txnId ? ($logsByTxn[$txnId][$nodeIndex] ?? null) : null;
+
+                            $destination = $logRow['to_short']
+                                            ?? ($node['partner_short'] ?? $node['partner'] ?? '-');
+                        @endphp
+
+                        <tr class="bg-gray-800 text-gray-300 border-b border-gray-700">
+                            <td class="px-2 py-1">{{ $num }}</td>
+
+                            <td class="px-2 py-1 text-left">
+                                {{ $node['deduction'] ?? '-' }}
+                            </td>
+
+                            <td class="px-2 py-1 text-left">
+                                {{ $node['partner_short'] ?? $node['partner'] ?? '-' }}
+                            </td>
+
+                            {{-- DESTINATION: usa to_entity->short_name si existe, si no cae a partner_short --}}
+                            <td class="px-2 py-1 text-center">
+                                {{ $destination }}
+                            </td>
+
+                            <td class="px-2 py-1 text-right">
+                                {{ $rate !== null ? number_format($rate, 5) : '-' }}
+                            </td>
+
+                            {{-- Las demás columnas pueden usar también $logRow si quieres mostrar valores reales cuando existan --}}
+                            <td class="px-2 py-1 text-right">
+                                {{ isset($logRow['gross']) ? number_format($logRow['gross'], 2) : '—' }}
+                            </td>
+                            <td class="px-2 py-1 text-right">
+                                {{ isset($logRow['discount']) ? number_format($logRow['discount'], 2) : '—' }}
+                            </td>
+                            <td class="px-2 py-1 text-right">
+                                {{ isset($logRow['banking']) ? number_format($logRow['banking'], 2) : '—' }}
+                            </td>
+                            <td class="px-2 py-1 text-right">
+                                {{ isset($logRow['net']) ? number_format($logRow['net'], 2) : '—' }}
+                            </td>
+                            <td class="px-2 py-1 text-right">
+                                <span class="uppercase text-xs tracking-wide">
+                                    {{ $logRow['status'] ?? 'preview' }}
+                                </span>
+                            </td>
+                        </tr>
+                    @endforeach
+                @endforeach
+            @endif
+        </tbody>    
+
+
+    </table>
+
+
+
+
+
+
+
+
 
 </div>
