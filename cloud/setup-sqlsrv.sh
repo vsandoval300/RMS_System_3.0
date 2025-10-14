@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 set -e
 
-# Repos de Microsoft + ODBC
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-curl https://packages.microsoft.com/config/debian/12/prod.list > /etc/apt/sources.list.d/mssql-release.list
+# --- Repositorio Microsoft (Debian 12) ---
+sudo install -m 0755 -d /usr/share/keyrings
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+  | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
 
-apt-get update
-ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
+echo "deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/config/debian/12/prod/ stable main" \
+  | sudo tee /etc/apt/sources.list.d/mssql-release.list > /dev/null
 
-# Extensiones PHP para SQL Server
-pecl install sqlsrv
-pecl install pdo_sqlsrv
+# --- Paquetes del sistema ---
+sudo apt-get update
+sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
 
-# Habilitarlas
-docker-php-ext-enable sqlsrv pdo_sqlsrv
+# --- Extensiones PHP ---
+# El printf envía 'Enter' a pecl por si pregunta
+printf "\n" | sudo pecl install sqlsrv
+printf "\n" | sudo pecl install pdo_sqlsrv
+sudo docker-php-ext-enable sqlsrv pdo_sqlsrv
+
