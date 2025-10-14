@@ -9,6 +9,6 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
-@import '../../vendor/icetalker/filament-table-repeater/resources/css/plugin.css'; 
+/* @import '../../vendor/icetalker/filament-table-repeater/resources/css/plugin.css'; */
 @import '<path-to-vendor>/awcodes/filament-table-repeater/resources/css/plugin.css';
 @import '../../vendor/awcodes/filament-table-repeater/resources/css/plugin.css';
