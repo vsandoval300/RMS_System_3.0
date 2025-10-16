@@ -360,8 +360,8 @@ class ReinsurersResource extends Resource
                                     }),
                             ])
                             ->compact(),
-                    ]),
-
+                    ])
+                    
 
 
             ]);
@@ -625,7 +625,7 @@ public static function infolist(Infolist $infolist): Infolist
                                 ]),
                     ]),
             ])
-            ->maxWidth('7xl')
+            ->maxWidth('8xl')
             ->collapsible(),
         ]);
     }

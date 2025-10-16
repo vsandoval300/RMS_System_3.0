@@ -71,6 +71,7 @@ class BoardsRelationManager extends RelationManager
 
                 TextColumn::make('row')
                     ->label('Index')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
                     ->sortable(false) // 👈 no tiene sentido ordenar este índice
                     ->searchable(false), // 👈 tampoco buscarlo
