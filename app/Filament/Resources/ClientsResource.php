@@ -24,13 +24,14 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Support\Enums\VerticalAlignment;
 
 
 
 class ClientsResource extends Resource
 {
     protected static ?string $model = Client::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Customers';
 
     /* ───── NUEVO: burbuja con el total en el menú ───── */
@@ -331,7 +332,7 @@ public static function infolist(Infolist $infolist): Infolist
                         ]),
                 ]),
         ])
-        ->maxWidth('7xl')
+        ->maxWidth('8xl')
         ->collapsible(),
     ]);
 }
@@ -361,8 +362,11 @@ public static function infolist(Infolist $infolist): Infolist
             ->columns([
                 //
                 TextColumn::make('id')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->sortable(),
+
                 TextColumn::make('name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
@@ -370,12 +374,14 @@ public static function infolist(Infolist $infolist): Infolist
                     ]),
 
                 TextColumn::make('short_name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('description')
                     ->label('Description')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 520px; white-space: normal;', // ancho fijo de 300px
@@ -383,12 +389,14 @@ public static function infolist(Infolist $infolist): Infolist
                     ->toggleable(),
                     
                 TextColumn::make('webpage')
+                        ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                     
                 TextColumn::make('country.name')
                     ->label('Country')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->sortable()
                     ->searchable()
                     ->toggleable(),

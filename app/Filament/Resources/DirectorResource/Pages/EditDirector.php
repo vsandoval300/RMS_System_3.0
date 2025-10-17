@@ -6,6 +6,10 @@ use App\Filament\Resources\DirectorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Actions\Action;         // ✔  la clase Action
+use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action as NotificationAction;
+
 
 class EditDirector extends EditRecord
 {
@@ -25,23 +29,73 @@ class EditDirector extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Botón “Save changes”
-            $this->getSaveFormAction()
-                ->label('Save changes')
-                ->formId('form')      // ¡clave! indica a qué <form> pertenece :contentReference[oaicite:0]{index=0}
-                ->keyBindings(['mod+s']),
+        Actions\Action::make('saveAndClose')
+            ->label('Save & Close')
+            ->color('primary')
+            ->keyBindings(['mod+s'])      // ⌘S / Ctrl-S
+            ->action('saveAndClose'),     // 👈 Llama al método de la página
 
-            // Botón “Cancel”
-            $this->getCancelFormAction()
-                ->label('Cancel'),
+        Actions\Action::make('cancel')
+            ->label('Cancel')
+            ->color('gray')
+            ->url(DirectorResource::getUrl()),
         ];
     }
 
     /*--------------------------------------------------------------
-     | 3. Quitar las acciones del pie del formulario
+     | 3. Ocultar los botones que Filament coloca en el pie
      --------------------------------------------------------------*/
-    protected function getFormActions(): array
+    protected function getSaveFormAction(): Action
     {
-        return [];              // así ya no se duplican abajo :contentReference[oaicite:1]{index=1}
+        // devuelve la acción creada por Filament, pero oculta
+        return parent::getSaveFormAction()->hidden();
     }
+
+    protected function getCancelFormAction(): Action
+    {
+        return parent::getCancelFormAction()->hidden();
+    }
+
+    /*--------------------------------------------------------------
+     | 4. Acción que ejecuta nuestro botón “saveAndClose”
+     --------------------------------------------------------------*/
+    public function saveAndClose(): void
+    {
+        // Guarda SIN redirigir (el segundo argumento = false)
+        $this->save(false);
+
+        // Notificación con único botón
+        Notification::make()
+            ->title('Saved successfully')
+            ->success()
+            ->persistent()
+            ->actions([
+                NotificationAction::make('close')
+                    ->label('Close')
+                    ->button()
+                    ->url(DirectorResource::getUrl()),
+            ])
+            ->send();
+
+        // Por si el usuario cierra la notificación con la ✕
+        $this->redirect(DirectorResource::getUrl());
+    }
+
+    /* -----------------------------------------------------------------
+     | 5. Desactiva la notificación automática de Filament
+     |-----------------------------------------------------------------*/
+    protected function getSavedNotification(): ?Notification
+    {
+        return null; // usamos la nuestra en saveAndClose()
+    }
+
+
+    public function getTitle(): string
+    {
+        return 'Edit – ' . ($this->record?->name ?? 'Director') . ' ' .($this->record?->surname ?? 'Director');
+    }
+
+
+
+
 }

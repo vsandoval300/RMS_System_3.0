@@ -30,7 +30,7 @@ class BanksResource extends Resource
 {
     protected static ?string $model = Bank::class;
     // protected static ?string $cluster = Resources::class; // ✅ Vinculación correcta
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;
     protected static ?string $navigationGroup = 'Banks';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero

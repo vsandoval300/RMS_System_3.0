@@ -31,7 +31,7 @@ class BankAccountsResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
     //protected static ?string $cluster = Resources::class; // ✅ Vinculación correcta
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     //protected static ?string $cluster = \App\Filament\Clusters\Resources::class;
     protected static ?string $navigationGroup = 'Banks';
     protected static ?int    $navigationSort  = 2;   // aparecerá primero

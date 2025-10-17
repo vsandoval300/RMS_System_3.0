@@ -255,8 +255,8 @@ class BusinessResource extends Resource
                                 //->inlineLabel()
                                 ->placeholder('Select claims type.') // 👈 Aquí cambias el texto
                                 ->options([
-                                    'Claims Occurrence' => 'Claims occurrence',
-                                    'Claims Made' => 'Claims made',
+                                    'Claims occurrence' => 'Claims occurrence',
+                                    'Claims made' => 'Claims made',
                                 ])
                                 ->required()
                                 ->searchable(),
