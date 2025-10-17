@@ -563,8 +563,9 @@ class OperativeDocsRelationManager extends RelationManager
 
 
                                             // ✅ Guardado MANUAL: no borrar hijos implícitamente, actualizar existentes y crear nuevos
-                                            ->saveRelationshipsUsing(function (\Filament\Forms\Components\Repeater $component, array $state) {
+                                            ->saveRelationshipsUsing(function (\Filament\Forms\Components\Repeater $component, ?array $state) {
    
+                                                $state = $state ?? []; // 🔧
 
                                                 $relation = $component->getRelationship();   // HasMany transactions()
                                                 $parent   = $relation->getParent();          // OperativeDoc dueño
