@@ -220,7 +220,7 @@ class BusinessResource extends Resource
                                 ->placeholder('Select a business type.') // 👈 Aquí cambias el texto
                                 ->options([
                                     'Own' => 'Own',
-                                    'Third Party' => 'Third party',
+                                    'Third party' => 'Third party',
                                 ])
                                 ->required()
                                 ->searchable(),
