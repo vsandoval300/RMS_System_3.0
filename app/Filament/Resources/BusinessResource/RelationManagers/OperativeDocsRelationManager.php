@@ -288,9 +288,9 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->visibility('private')
                                                 ->acceptedFileTypes(['application/pdf'])
                                                 ->preserveFilenames()
-                                                ->downloadable(false)
-                                                ->openable(false)
-                                                ->previewable(false)
+                                                ->downloadable()
+                                                ->openable()
+                                                ->previewable(true)
                                                 ->hint(function ($record) {
                                                     return $record?->document_path
                                                         ? 'Existing file: ' . basename($record->document_path)
