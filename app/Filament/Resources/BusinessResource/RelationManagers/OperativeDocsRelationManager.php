@@ -283,14 +283,14 @@ class OperativeDocsRelationManager extends RelationManager
                                         ->schema([
                                             FileUpload::make('document_path')
                                                 ->label('File')
-                                                //->disk('s3')
+                                                ->disk('s3')
                                                 ->directory('reinsurers/OperativeDocuments')
-                                                //->visibility('private')
+                                                ->visibility('private')
                                                 ->acceptedFileTypes(['application/pdf'])
                                                 ->preserveFilenames()
-                                                ->downloadable()
-                                                ->openable()
-                                                ->previewable(true)
+                                                ->downloadable(false)
+                                                ->openable(false)
+                                                ->previewable(false)
                                                 ->hint(function ($record) {
                                                     return $record?->document_path
                                                         ? 'Existing file: ' . basename($record->document_path)
