@@ -48,6 +48,7 @@ use App\Services\TransactionLogBuilder;
 use Filament\Forms\Components\Fieldset;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 
 
@@ -285,20 +286,42 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->label('File')
                                                 ->disk('s3')
                                                 ->directory('reinsurers/OperativeDocuments')
-                                                ->visibility('public')
-                                                ->acceptedFileTypes(['application/pdf'])
+                                                ->visibility('private')
+                                                ->acceptedFileTypes(['application/pdf', 'application/octet-stream', '.pdf'])
+                                                ->maxSize(25600) // 25 MB
                                                 ->preserveFilenames()
-                                                ->downloadable()
-                                                ->openable()
-                                                ->previewable(true)
-                                                ->hint(function ($record) {
-                                                    return $record?->document_path
-                                                        ? 'Existing file: ' . basename($record->document_path)
-                                                        : 'No file uploaded yet.';
-                                                })
-                                                ->dehydrated(fn ($state) => filled($state)) // <- solo guarda si hay nuevo valor
-                                                ->helperText('Only PDF files are allowed.'),
 
+                                                // nombre seguro (slug + timestamp)
+                                                ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file): string {
+                                                    $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                                                    $ext  = $file->getClientOriginalExtension() ?: 'pdf';
+                                                    return Str::slug($name) . '-' . now()->format('YmdHis') . '.' . strtolower($ext);
+                                                })
+
+                                                // subida explícita → devuelve la key (path) a guardar
+                                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
+                                                    return Storage::disk('s3')->putFileAs(
+                                                        'reinsurers/OperativeDocuments',
+                                                        $file,
+                                                        (function () use ($file) {
+                                                            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                                                            $ext  = $file->getClientOriginalExtension() ?: 'pdf';
+                                                            return Str::slug($name) . '-' . now()->format('YmdHis') . '.' . strtolower($ext);
+                                                        })()
+                                                    );
+                                                })
+
+                                                // mientras depuras, desactiva preview/open/download
+                                                ->previewable(false)
+                                                ->openable(false)
+                                                ->downloadable(false)
+
+                                                ->dehydrated(true)
+                                                ->hint(fn ($record) => $record?->document_path
+                                                    ? 'Existing file: ' . basename($record->document_path)
+                                                    : 'No file uploaded yet.'
+                                                )
+                                                ->helperText('Only PDF files are allowed.'),
                                         ])
                                         ->compact(),
 
