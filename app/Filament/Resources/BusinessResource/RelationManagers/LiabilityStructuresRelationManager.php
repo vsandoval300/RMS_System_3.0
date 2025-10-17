@@ -31,8 +31,13 @@ class LiabilityStructuresRelationManager extends RelationManager
         return 'Edit Liability Structure';
     }
 
+   
+
     public function form(Form $form): Form
     {
+       // Normalizador: '' -> null, '1,000' -> '1000'
+       $toNumber = fn ($state) => filled($state) ? str_replace(',', '', $state) : null;
+
        return $form
         ->schema([
             Section::make('Liability Details')
@@ -79,68 +84,69 @@ class LiabilityStructuresRelationManager extends RelationManager
                 ->collapsible(), // opcional: permite colapsar la sección
 
             Section::make('Liability Scope')
-    ->schema([
-        Grid::make(12)
-            ->schema([
-                Forms\Components\TextInput::make('limit')
-                    ->label('Limit')
-                    ->required()
-                    ->mask(
-                        RawJs::make(<<<'JS'
-                            $money($input, '.', ',', 0)
-                        JS)
-                    )
-                    ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
-                    ->columnSpan(3), // mitad de lo que era antes (6 → 3)
-                    
-
-                Forms\Components\Textarea::make('limit_desc')
-                    ->label('Description')
-                    ->required()
-                    ->rows(2)
-                    ->columnSpan(9), // 1.5x lo que era antes (6 → 9)
-            ]),
-
-            Grid::make(12)
                 ->schema([
-                    Forms\Components\TextInput::make('sublimit')
-                        ->label('Sublimit')
-                        ->mask(
-                            RawJs::make(<<<'JS'
-                                $money($input, '.', ',', 0)
-                            JS)
-                        )
-                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
-                        ->columnSpan(3),
+                    Grid::make(12)
                         
+                        ->schema([
+                            Forms\Components\TextInput::make('limit')
+                                ->label('Limit')
+                                ->required()
+                                ->mask(
+                                    RawJs::make(<<<'JS'
+                                        $money($input, '.', ',', 0)
+                                    JS)
+                                )
+                                ->dehydrateStateUsing($toNumber)   // "5,000,000" -> "5000000"
+                                ->columnSpan(3),
+                                
 
-                    Forms\Components\Textarea::make('sublimit_desc')
-                        ->label('Description')
-                        ->rows(2)
-                        ->columnSpan(9),
-                ]),
+                            Forms\Components\Textarea::make('limit_desc')
+                                ->label('Description')
+                                ->required()
+                                ->rows(2)
+                                ->columnSpan(9), // 1.5x lo que era antes (6 → 9)
+                        ]),
 
-            Grid::make(12)
-                ->schema([
-                    Forms\Components\TextInput::make('deductible')
-                        ->label('Deductible')
-                        ->mask(
-                            RawJs::make(<<<'JS'
-                                $money($input, '.', ',', 0)
-                            JS)
-                        )
-                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '', $state))
-                        ->columnSpan(3),
+                        Grid::make(12)
+                            ->schema([
+                                Forms\Components\TextInput::make('sublimit')
+                                    ->label('Sublimit')
+                                    ->mask(
+                                        RawJs::make(<<<'JS'
+                                            $money($input, '.', ',', 0)
+                                        JS)
+                                    )
+                                    ->dehydrateStateUsing($toNumber)   // '' -> null (no 22P02)
+                                    ->columnSpan(3),
+                                    
 
-                    Forms\Components\Textarea::make('deductible_desc')
-                        ->label('Description')
-                        ->rows(2)
-                        ->columnSpan(9),
-                ]),
-        ])
-        ->columns(1)
-        ->compact()
-        ->collapsible(),
+                                Forms\Components\Textarea::make('sublimit_desc')
+                                    ->label('Description')
+                                    ->rows(2)
+                                    ->columnSpan(9),
+                            ]),
+
+                        Grid::make(12)
+                            ->schema([
+                                Forms\Components\TextInput::make('deductible')
+                                    ->label('Deductible')
+                                    ->mask(
+                                        RawJs::make(<<<'JS'
+                                            $money($input, '.', ',', 0)
+                                        JS)
+                                    )
+                                    ->dehydrateStateUsing($toNumber)   // '' -> null (no 22P02)
+                                    ->columnSpan(3),
+
+                                Forms\Components\Textarea::make('deductible_desc')
+                                    ->label('Description')
+                                    ->rows(2)
+                                    ->columnSpan(9),
+                            ]),
+                    ])
+                    ->columns(1)
+                    ->compact()
+                    ->collapsible(),
         ]);
     }
 
