@@ -299,12 +299,14 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->dehydrated(fn ($state) => filled($state)) // <- solo guarda si hay nuevo valor
                                                 ->helperText('Only PDF files are allowed.'), */
 
-
-                                                FileUpload::make('attachment')
-                                                ->disk('s3')
-                                                ->directory('form-attachments')
-                                                ->visibility('public')
-
+                                               FileUpload::make('attachment')
+                                                ->imagePreviewHeight('250')
+                                                ->loadingIndicatorPosition('left')
+                                                ->panelAspectRatio('2:1')
+                                                ->panelLayout('integrated')
+                                                ->removeUploadedFileButtonPosition('right')
+                                                ->uploadButtonPosition('left')
+                                                ->uploadProgressIndicatorPosition('left'),
 
                                         ])
                                         ->compact(),
