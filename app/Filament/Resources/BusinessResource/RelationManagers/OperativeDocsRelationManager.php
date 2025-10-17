@@ -285,7 +285,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->label('File')
                                                 ->disk('s3')
                                                 ->directory('reinsurers/OperativeDocuments')
-                                                ->visibility('private')
+                                                ->visibility('public')
                                                 ->acceptedFileTypes(['application/pdf'])
                                                 ->preserveFilenames()
                                                 ->downloadable()
