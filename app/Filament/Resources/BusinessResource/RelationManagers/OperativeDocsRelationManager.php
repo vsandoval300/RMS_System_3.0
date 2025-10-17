@@ -281,7 +281,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     //Tercera burbuja: solo el archivo
                                     Section::make('File Upload')
                                         ->schema([
-                                            /* FileUpload::make('document_path')
+                                            FileUpload::make('document_path')
                                                 ->label('File')
                                                 ->disk('s3')
                                                 ->directory('reinsurers/OperativeDocuments')
@@ -297,16 +297,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         : 'No file uploaded yet.';
                                                 })
                                                 ->dehydrated(fn ($state) => filled($state)) // <- solo guarda si hay nuevo valor
-                                                ->helperText('Only PDF files are allowed.'), */
-
-                                               FileUpload::make('attachment')
-                                                ->imagePreviewHeight('250')
-                                                ->loadingIndicatorPosition('left')
-                                                ->panelAspectRatio('2:1')
-                                                ->panelLayout('integrated')
-                                                ->removeUploadedFileButtonPosition('right')
-                                                ->uploadButtonPosition('left')
-                                                ->uploadProgressIndicatorPosition('left'),
+                                                ->helperText('Only PDF files are allowed.'),
 
                                         ])
                                         ->compact(),
