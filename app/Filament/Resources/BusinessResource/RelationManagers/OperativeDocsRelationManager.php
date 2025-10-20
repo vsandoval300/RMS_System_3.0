@@ -293,6 +293,8 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->visibility('public')
                                                 ->acceptedFileTypes(['application/pdf'])
                                                 ->preserveFilenames(false)
+
+                                                // 1) Subida con nombre estable (basado en id) y limpieza del anterior si cambia
                                                 ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, $record, Get $get) {
                                                     $base = (string) ($get('id') ?: $record?->id);
                                                     $name = $base . '.' . ($file->getClientOriginalExtension() ?: 'pdf');
@@ -300,11 +302,30 @@ class OperativeDocsRelationManager extends RelationManager
                                                     Storage::disk('s3')->putFileAs($dir, $file, $name, ['visibility' => 'public']);
                                                     return "{$dir}/{$name}"; // <- esto se guarda en document_path
                                                 })
+                                                
+                                                // 2) Borrado físico cuando Filament elimina el archivo subido
                                                 ->deleteUploadedFileUsing(function (?string $file) {
                                                     if ($file && Storage::disk('s3')->exists($file)) {
                                                         Storage::disk('s3')->delete($file);
                                                     }
                                                 })
+
+                                                // 3) Si el usuario hace "clear" (icono de bote), borra en S3 y fuerza que BD quede en NULL
+                                                ->afterStateUpdated(function ($state, \Filament\Forms\Set $set, \Filament\Forms\Get $get, $record) {
+                                                    // Cuando se limpia el campo, $state viene como null/''.
+                                                    if (blank($state) && $record?->document_path) {
+                                                        if (Storage::disk('s3')->exists($record->document_path)) {
+                                                            Storage::disk('s3')->delete($record->document_path);
+                                                        }
+                                                        // Asegura que el form state sea null para persistirlo
+                                                        $set('document_path', null);
+                                                    }
+                                                })
+
+                                                // 4) SIEMPRE deshidratar; y mutar '' -> null para que se escriba en BD
+                                                ->dehydrated() // (sin callback) siempre escribe el estado
+                                                ->mutateDehydratedStateUsing(fn ($state) => blank($state) ? null : $state)
+
                                                 ->downloadable()
                                                 ->openable()
                                                 ->previewable(true)
@@ -312,7 +333,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ? 'Existing file: ' . basename($record->document_path)
                                                     : 'No file uploaded yet.'
                                                 )
-                                                ->dehydrated(fn ($state) => filled($state))
+                                                //->dehydrated(fn ($state) => filled($state))
                                                 ->helperText('Only PDF files are allowed.'),
 
 
