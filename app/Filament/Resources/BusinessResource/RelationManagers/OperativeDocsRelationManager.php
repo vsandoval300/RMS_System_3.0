@@ -48,6 +48,7 @@ use App\Services\TransactionLogBuilder;
 use Filament\Forms\Components\Fieldset;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 
 
@@ -287,6 +288,36 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->directory('reinsurers/OperativeDocuments')
                                                 ->visibility('public')
                                                 ->acceptedFileTypes(['application/pdf'])
+                                                ->preserveFilenames(false)
+                                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, $record, Get $get) {
+                                                    $base = (string) ($get('id') ?: $record?->id);
+                                                    $name = $base . '.' . ($file->getClientOriginalExtension() ?: 'pdf');
+                                                    $dir  = 'reinsurers/OperativeDocuments';
+                                                    Storage::disk('s3')->putFileAs($dir, $file, $name, ['visibility' => 'public']);
+                                                    return "{$dir}/{$name}"; // <- esto se guarda en document_path
+                                                })
+                                                ->deleteUploadedFileUsing(function (?string $file) {
+                                                    if ($file && Storage::disk('s3')->exists($file)) {
+                                                        Storage::disk('s3')->delete($file);
+                                                    }
+                                                })
+                                                ->downloadable()
+                                                ->openable()
+                                                ->previewable(true)
+                                                ->hint(fn ($record) => $record?->document_path
+                                                    ? 'Existing file: ' . basename($record->document_path)
+                                                    : 'No file uploaded yet.'
+                                                )
+                                                ->dehydrated(fn ($state) => filled($state))
+                                                ->helperText('Only PDF files are allowed.'),
+
+
+                                            /* FileUpload::make('document_path')
+                                                ->label('File')
+                                                ->disk('s3')
+                                                ->directory('reinsurers/OperativeDocuments')
+                                                ->visibility('public')
+                                                ->acceptedFileTypes(['application/pdf'])
                                                 ->preserveFilenames()
                                                 ->downloadable()
                                                 ->openable()
@@ -297,7 +328,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         : 'No file uploaded yet.';
                                                 })
                                                 ->dehydrated(fn ($state) => filled($state)) // <- solo guarda si hay nuevo valor
-                                                ->helperText('Only PDF files are allowed.'),
+                                                ->helperText('Only PDF files are allowed.'), */
 
                                         ])
                                         ->compact(),
