@@ -49,6 +49,8 @@ use Filament\Forms\Components\Fieldset;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 
 
@@ -977,6 +979,58 @@ class OperativeDocsRelationManager extends RelationManager
                     ])
 
                     ->schema([
+
+FormAction::make('exportPdf')
+    ->label('Export to PDF')
+    ->icon('heroicon-o-arrow-down-tray')
+    ->color('primary')
+    ->action(function (\Filament\Forms\Get $get, $record, $livewire) {
+
+        // ===== 1) Armar dataset (igual que tu viewData) =====
+        // (este bloque es el mismo que ya pegaste antes dentro del botón;
+        //  lo omito aquí por brevedad, pero déjalo tal cual y al final tendrás $data)
+        // ...
+        $data['forPdf'] = true; // opcional para ajustar estilos en la blade
+
+        // ===== 2) Renderizar HTML de la misma blade =====
+        $html = view('filament.resources.business.operative-doc-summary', $data)->render();
+
+        // ===== 3) Configurar Dompdf nativo =====
+        $options = new Options();
+        $options->set('isRemoteEnabled', true); // para Google Fonts y assets remotos
+        $options->set('dpi', 120);
+        $options->set('defaultFont', 'DejaVu Sans'); // fallback seguro
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper('a4', 'portrait');
+        $dompdf->render();
+
+        // ===== 4) Descargar con nombre sugerido =====
+        $docId    = (string) ($get('id') ?: $record?->id ?: Str::uuid());
+        $stamp    = Carbon::now(config('app.timezone', 'UTC'))->format('Ymd_His');
+        $filename = "Summary_{$docId}_{$stamp}.pdf";
+
+        return response()->streamDownload(
+            fn () => print $dompdf->output(),
+            $filename,
+            ['Content-Type' => 'application/pdf']
+        );
+    }),
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
                         View::make('filament.resources.business.operative-doc-summary')
                             ->extraAttributes([
                                 'class' => 'bg-[#dfe0e2] text-black p-4 rounded-md'
