@@ -49,6 +49,9 @@ use Filament\Forms\Components\Fieldset;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 
 
 
@@ -978,6 +981,256 @@ class OperativeDocsRelationManager extends RelationManager
                     ])
 
                     ->schema([
+
+// 🔹 Botón de exportación (usa la MISMA blade del summary)
+        Actions::make([
+            FormAction::make('exportPdf')
+                ->label('Export to PDF')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('primary')
+                ->action(function (\Filament\Forms\Get $get, $record, $livewire) {
+
+                    // ====== Build de datos (idéntico a tu viewData) ======
+                    $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
+
+                    // Schemes
+                    $schemes = collect($get('schemes') ?? [])
+                        ->map(function ($scheme) {
+                            $model = \App\Models\CostScheme::find($scheme['cscheme_id'] ?? null);
+                            return $model ? [
+                                'id'             => $model->id,
+                                'share'          => $model->share,
+                                'agreement_type' => $model->agreement_type,
+                            ] : null;
+                        })
+                        ->filter()
+                        ->values()
+                        ->toArray();
+
+                    $totalShare = collect($schemes)->sum('share');
+
+                    // Insureds normalizados
+                    $insureds = collect($get('insureds') ?? [])->map(function ($insured) {
+                        $company  = \App\Models\Company::with('country')->find($insured['company_id'] ?? null);
+                        $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
+
+                        $raw   = $insured['premium'] ?? 0;
+                        $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
+                        if (is_string($clean)) {
+                            $parts = explode('.', $clean, 3);
+                            $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
+                        }
+                        $premium = floatval($clean);
+
+                        return [
+                            'company' => $company
+                                ? [
+                                    'name'    => $company->name,
+                                    'country' => ['name' => optional($company->country)->name],
+                                ]
+                                : ['name' => '-', 'country' => ['name' => '-']],
+                            'coverage' => $coverage ? ['name' => $coverage->name] : ['name' => '-'],
+                            'premium'  => $premium,
+                        ];
+                    })->toArray();
+
+                    // Cost nodes
+                    $costNodes = collect($get('schemes') ?? [])
+                        ->map(fn ($s) => \App\Models\CostScheme::with('costNodexes.costScheme', 'costNodexes.partnerSource', 'costNodexes.deduction')
+                            ->find($s['cscheme_id'] ?? null))
+                        ->filter()
+                        ->flatMap(fn ($scheme) => $scheme->costNodexes ?? collect())
+                        ->values();
+
+                    // Fechas / días
+                    $inception  = $get('inception_date');
+                    $expiration = $get('expiration_date');
+                    $start      = $inception ? \Carbon\Carbon::parse($inception) : null;
+                    $end        = $expiration ? \Carbon\Carbon::parse($expiration) : null;
+                    $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+                    $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
+
+                    // Totales y prorrateos
+                    $totalPremium = collect($insureds)->sum('premium');
+                    $insureds = collect($insureds)->map(function ($insured) use ($totalPremium, $coverageDays, $daysInYear, $schemes) {
+                        $allocation  = $totalPremium > 0 ? $insured['premium'] / $totalPremium : 0;
+                        $premiumFtp  = ($daysInYear > 0) ? ($insured['premium'] / $daysInYear) * $coverageDays : 0;
+
+                        $premiumFts = 0;
+                        foreach ($schemes as $s) {
+                            $premiumFts += $premiumFtp * ($s['share'] ?? 0);
+                        }
+
+                        return array_merge($insured, [
+                            'allocation_percent' => $allocation,
+                            'premium_ftp'        => $premiumFtp,
+                            'premium_fts'        => $premiumFts,
+                        ]);
+                    })->toArray();
+
+                    $totalPremiumFtp = ($daysInYear > 0) ? ($totalPremium / $daysInYear) * $coverageDays : 0;
+
+                    $totalPremiumFts = 0;
+                    foreach ($schemes as $s) {
+                        $totalPremiumFts += $totalPremiumFtp * ($s['share'] ?? 0);
+                    }
+
+                    // Converted premium (desde installments)
+                    $transactions = collect($get('transactions') ?? []);
+                    $totalConvertedPremium = 0;
+                    foreach ($transactions as $txn) {
+                        $proportion = floatval($txn['proportion'] ?? 0) / 100; // vienen en %
+                        $rate = floatval($txn['exch_rate'] ?? 0);
+                        if ($rate > 0) {
+                            $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
+                        } else {
+                            $totalConvertedPremium = 1;
+                        }
+                    }
+
+                    // Agrupación de costos por share
+                    $totalDeductionOrig = 0;
+                    $totalDeductionUsd  = 0;
+                    $groupedCostNodes = $costNodes->groupBy(fn ($n) => $n->costSchemes->share ?? 0)
+                        ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
+                            $shareFloat = floatval($share);
+
+                            $nodeList = $nodes->map(function ($node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
+                                $deduction          = $totalPremiumFts * $node->value * $shareFloat;
+                                $deductionConverted = $totalConvertedPremium * $node->value * $shareFloat;
+
+                                return [
+                                    'index'            => $node->index,
+                                    'partner'          => $node->partnerSource?->name ?? '-',
+                                    'partner_short'    => $node->partnerSource?->short_name ?? ($node->partnerSource?->name ?? '-'),
+                                    'deduction'        => $node->deduction?->concept ?? '-',
+                                    'value'            => $node->value,
+                                    'share'            => $shareFloat,
+                                    'deduction_amount' => $deduction,
+                                    'deduction_usd'    => $deductionConverted,
+                                ];
+                            })->values();
+
+                            $subtotalOrig = $nodeList->sum('deduction_amount');
+                            $subtotalUsd  = $nodeList->sum('deduction_usd');
+
+                            $totalDeductionOrig += $subtotalOrig;
+                            $totalDeductionUsd  += $subtotalUsd;
+
+                            return [
+                                'share'         => $shareFloat,
+                                'nodes'         => $nodeList,
+                                'subtotal_orig' => $subtotalOrig,
+                                'subtotal_usd'  => $subtotalUsd,
+                            ];
+                        })
+                        ->sortKeys()
+                        ->values()
+                        ->toArray();
+
+                    // Logs persistidos por transacción/índice (para Installments Log)
+                    $persistedTxIds = collect($get('transactions') ?? [])->pluck('id')->filter()->values();
+                    $logsByTxn = [];
+                    if ($persistedTxIds->isNotEmpty()) {
+                        $logs = \App\Models\TransactionLog::with('toPartner')
+                            ->whereIn('transaction_id', $persistedTxIds)
+                            ->get();
+
+                        $logsByTxn = $logs->groupBy('transaction_id')->map(function ($grp) {
+                            return $grp->mapWithKeys(function ($log) {
+                                $idx = (int)($log->index ?? 0);
+                                return [
+                                    $idx => [
+                                        'to_short'  => $log->toPartner?->short_name ?? $log->toPartner?->name ?? '-',
+                                        'to_full'   => $log->toPartner?->name ?? '-',
+                                        'exch_rate' => $log->exch_rate,
+                                        'gross'     => $log->gross_amount,
+                                        'discount'  => $log->commission_discount,
+                                        'banking'   => $log->banking_fee,
+                                        'net'       => $log->net_amount,
+                                        'status'    => $log->status,
+                                    ],
+                                ];
+                            });
+                        })->toArray();
+                    }
+
+                    $data = [
+                        'id'                   => $get('id'),
+                        'createdAt'            => $record?->created_at ?? now(),
+                        'documentType'         => ($docTypeId = $get('operative_doc_type_id'))
+                            ? \App\Models\BusinessDocType::find($docTypeId)?->name ?? '-'
+                            : '-',
+                        'inceptionDate'        => $inception,
+                        'expirationDate'       => $expiration,
+                        'premiumType'          => $record?->business?->premium_type
+                                                  ?? $business?->premium_type
+                                                  ?? '-',
+                        'originalCurrency'     => $record?->business?->currency?->acronym
+                                                  ?? $business?->currency?->acronym
+                                                  ?? '-',
+                        'insureds'             => array_values($insureds),
+                        'costSchemes'          => $schemes,
+                        'groupedCostNodes'     => $groupedCostNodes,
+                        'totalPremiumFts'      => $totalPremiumFts,
+                        'totalPremiumFtp'      => $totalPremiumFtp,
+                        'totalConvertedPremium'=> $totalConvertedPremium,
+                        'coverageDays'         => $coverageDays,
+                        'totalDeductionOrig'   => $totalDeductionOrig,
+                        'totalDeductionUsd'    => $totalDeductionUsd,
+                        'totalShare'           => $totalShare,
+                        'transactions'         => collect($get('transactions') ?? [])->values(),
+                        'logsByTxn'            => $logsByTxn,
+                    ];
+                    // ====== /Build de datos ======
+
+                    // Nombre del archivo: Summary_{Id}_{YYYYMMDD_HHMMSS}.pdf
+                    $docId    = (string) ($get('id') ?: $record?->id ?: Str::uuid());
+                    $stamp    = Carbon::now(config('app.timezone', 'UTC'))->format('Ymd_His');
+                    $filename = "Summary_{$docId}_{$stamp}.pdf";
+                    
+                    // Render del PDF usando la MISMA blade del summary
+                    $options = new Options();
+                    $options->set('isRemoteEnabled', true);
+                    $options->set('isHtml5ParserEnabled', true);
+
+                    $dompdf = new Dompdf($options);
+
+                    // Renderiza la MISMA blade del summary
+                    $html = view('filament.resources.business.operative-doc-summary', $data)->render();
+
+                    $dompdf->loadHtml($html);
+                    $dompdf->setPaper('A4', 'portrait');
+                    $dompdf->render();
+
+                    // Descargar
+                    return response()->streamDownload(
+                        fn () => print $dompdf->output(),
+                        $filename,
+                        ['Content-Type' => 'application/pdf']
+                    );
+                }),
+        ]),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         View::make('filament.resources.business.operative-doc-summary')
                             ->extraAttributes([
                                 'class' => 'bg-[#dfe0e2] text-black p-4 rounded-md'
