@@ -49,8 +49,6 @@ use Filament\Forms\Components\Fieldset;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 
 
 
@@ -284,6 +282,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     //Tercera burbuja: solo el archivo
                                     Section::make('File Upload')
                                         ->schema([
+
                                             FileUpload::make('document_path')
                                                 ->label('File')
                                                 ->disk('s3')
@@ -979,22 +978,6 @@ class OperativeDocsRelationManager extends RelationManager
                     ])
 
                     ->schema([
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        
                         View::make('filament.resources.business.operative-doc-summary')
                             ->extraAttributes([
                                 'class' => 'bg-[#dfe0e2] text-black p-4 rounded-md'
