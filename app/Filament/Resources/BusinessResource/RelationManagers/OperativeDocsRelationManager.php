@@ -1184,11 +1184,6 @@ class OperativeDocsRelationManager extends RelationManager
                     ];
                     // ====== /Build de datos ======
 
-                    // Nombre del archivo: Summary_{Id}_{YYYYMMDD_HHMMSS}.pdf
-                    $docId    = (string) ($get('id') ?: $record?->id ?: Str::uuid());
-                    $stamp    = Carbon::now(config('app.timezone', 'UTC'))->format('Ymd_His');
-                    $filename = "Summary_{$docId}_{$stamp}.pdf";
-                    
                     // Render del PDF usando la MISMA blade del summary
                     $options = new Options();
                     $options->set('isRemoteEnabled', true);
@@ -1196,12 +1191,17 @@ class OperativeDocsRelationManager extends RelationManager
 
                     $dompdf = new Dompdf($options);
 
-                    // Renderiza la MISMA blade del summary
+                    // HTML de la vista
                     $html = view('filament.resources.business.operative-doc-summary', $data)->render();
 
                     $dompdf->loadHtml($html);
                     $dompdf->setPaper('A4', 'portrait');
                     $dompdf->render();
+
+                    // Nombre del archivo
+                    $docId  = (string) ($get('id') ?: $record?->id ?: \Illuminate\Support\Str::uuid());
+                    $stamp  = \Carbon\Carbon::now(config('app.timezone', 'UTC'))->format('Ymd_His');
+                    $filename = "Summary_{$docId}_{$stamp}.pdf";
 
                     // Descargar
                     return response()->streamDownload(

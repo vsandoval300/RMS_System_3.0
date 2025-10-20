@@ -6,10 +6,15 @@
     </head>
 
      {{-- MAIN TITTLE --}}
-    <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
+    {{-- <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;"> }}
        <td class="px-2 py-1 text-right font-extrabold text-gray-300 w-1/4"></td>
         <td class="px-2 py-1 w-1/4">{{ $id ?? '-' }}</td>
-    </h4> 
+    </h4> --}}
+
+    <h4 class="font-semibold mt-6 mb-4" style="color:#db4a2b;font-size:15px;">
+        <span class="px-2 py-1 text-right font-extrabold text-gray-300 w-1/4"></span>
+        <span class="px-2 py-1 w-1/4">{{ $id ?? '-' }}</span>
+     </h4>
     
      {{--CURRENT DATE 
     <div class="text-right text-sm font-medium text-gray-600 mb-2">
