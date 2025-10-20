@@ -1000,6 +1000,14 @@ class OperativeDocsRelationManager extends RelationManager
                         'class' => 'max-h-[700px] overflow-y-auto',
                     ])
 
+                    // ⬇️ Botón para exportar/preview/imprimir
+                    ->headerActions([
+                        FormAction::make('Export to pdf')
+
+
+
+                    ])
+
 
                     ->schema([
                         View::make('filament.resources.business.operative-doc-summary')
