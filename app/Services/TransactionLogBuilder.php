@@ -136,7 +136,7 @@ class TransactionLogBuilder
                     $log->banking_fee         = $bankingScaled;         // [CHG]
 
                     // [CHG] Si net_amount ES columna generada, NO asignar esta línea:
-                    // $log->net_amount = $netScaled;                    // [CHG] <-- comenta si es columna generada
+                    $log->net_amount = $netScaled;                    // [CHG] <-- comenta si es columna generada
 
                     $log->save();
                     $affected++;
