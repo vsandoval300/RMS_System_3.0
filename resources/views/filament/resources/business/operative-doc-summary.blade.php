@@ -477,6 +477,23 @@
                             $destination = $logRow['to_short']
                                             ?? ($node['partner_short'] ?? $node['partner'] ?? '-');
                         @endphp
+                        
+                        @php
+                            // Normaliza proportion: si viene 50 => 0.5; si ya viene 0.5 => 0.5
+                            $pRaw = (float) ($txn['proportion'] ?? 0);
+                            $prop = $pRaw > 1 ? $pRaw / 100 : $pRaw;
+
+                            // Toma los valores del log (si existen) y escálalos por la proportion
+                            $grossScaled    = isset($logRow['gross'])    ? $logRow['gross']    * $prop : null;
+                            $discountScaled = isset($logRow['discount']) ? $logRow['discount'] * $prop : null;
+                            $bankingScaled  = isset($logRow['banking'])  ? $logRow['banking']  * $prop : null;
+
+                            // Si net_amount es columna generada en DB, puedes mostrar:
+                            //   a) el net del registro *prop (vista previa proporcional), o
+                            //   b) el net directo del registro (sin escalar) si prefieres ver el valor real guardado.
+                            // Aquí lo dejamos escalado para ser consistente con las otras columnas:
+                            $netScaled      = isset($logRow['net'])      ? $logRow['net']      * $prop : null;
+                        @endphp
 
                         <tr class="bg-gray-800 text-gray-300 border-b border-gray-700">
                             <td class="px-2 py-1">{{ $num }}</td>
@@ -498,19 +515,24 @@
                                 {{ $rate !== null ? number_format($rate, 5) : '-' }}
                             </td>
 
+                            
                             {{-- Las demás columnas pueden usar también $logRow si quieres mostrar valores reales cuando existan --}}
                             <td class="px-2 py-1 text-right">
-                                {{ isset($logRow['gross']) ? number_format($logRow['gross'], 2) : '—' }}
+                                {{ $grossScaled !== null ? number_format($grossScaled, 2) : '—' }}
                             </td>
                             <td class="px-2 py-1 text-right">
-                                {{ isset($logRow['discount']) ? number_format($logRow['discount'], 2) : '—' }}
+                                {{ $discountScaled !== null ? number_format($discountScaled, 2) : '—' }}
                             </td>
                             <td class="px-2 py-1 text-right">
-                                {{ isset($logRow['banking']) ? number_format($logRow['banking'], 2) : '—' }}
+                                {{ $bankingScaled !== null ? number_format($bankingScaled, 2) : '—' }}
                             </td>
+
+
                             <td class="px-2 py-1 text-right">
-                                {{ isset($logRow['net']) ? number_format($logRow['net'], 2) : '—' }}
+                                {{ $netScaled !== null ? number_format($netScaled, 2) : '—' }}
                             </td>
+
+
                             <td class="px-2 py-1 text-right">
                                 <span class="uppercase text-xs tracking-wide">
                                     {{ $logRow['status'] ?? 'preview' }}

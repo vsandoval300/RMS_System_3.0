@@ -38,10 +38,17 @@ return new class extends Migration
             $table->date('sent_date')->nullable();
             $table->date('received_date')->nullable();
             $table->float('exch_rate');
+
+
             $table->float('gross_amount');
             $table->float('commission_discount');
             $table->float('banking_fee');
-            $table->float('net_amount');
+
+            // En Postgres no hay IFNULL, usa COALESCE:
+            $table->decimal('net_amount', 18, 2)->storedAs(
+                '(COALESCE(gross_amount,0) - COALESCE(commission_discount,0) - COALESCE(banking_fee,0))');
+            //$table->float('net_amount');
+
             $table->enum('status',['Pending','Sent','Received','Completed'])
                  ->default('Pending'); 
            

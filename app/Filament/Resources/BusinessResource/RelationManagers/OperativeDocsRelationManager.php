@@ -1002,7 +1002,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                     // ⬇️ Botón para exportar/preview/imprimir
                     ->headerActions([
-                        FormAction::make('Export to pdf')
+                        FormAction::make('Export to pdf'),
 
 
 
@@ -1197,11 +1197,6 @@ class OperativeDocsRelationManager extends RelationManager
                                     }
 
 
-
-
-
-
-
                                 return [
                                     'id' => $get('id'),
                                     'createdAt' => $record?->created_at ?? now(),
@@ -1234,8 +1229,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ->columnSpanFull(),
                     //--------🟡 End Section SUMMARY -----------------------------------------------
                     
-                         
-
+                        
         ]);
     }
 
