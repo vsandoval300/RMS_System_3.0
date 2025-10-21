@@ -29,7 +29,6 @@ class TransactionLogBuilder
                     'insureds:id,op_document_id,premium',
                     'transactions' => fn ($q) => $q->orderBy('index'),
                     'schemes.costScheme.costNodexes' => fn ($q) => $q->orderBy('index'),
-                    // si tienes relación en el nodo:
                     'schemes.costScheme.costNodexes.deduction',
                 ])
                 ->findOrFail($docId);
@@ -52,40 +51,30 @@ class TransactionLogBuilder
                     ->whereHas('transaction', function ($q) use ($docId) {
                         $q->withTrashed()->where('op_document_id', $docId);
                     })
-                    ->delete(); // soft-delete en logs
+                    ->delete();
             } else {
                 TransactionLog::query()
                     ->whereHas('transaction', function ($q) use ($docId) {
                         $q->withTrashed()->where('op_document_id', $docId);
                     })
                     ->whereNotIn('transaction_id', $validTxnIds)
-                    ->delete(); // soft-delete en logs
+                    ->delete();
             }
-            // 3.b) LIMPIEZA: logs de transacciones que ya no existen
-           /*  if (empty($validTxnIds)) {
-                TransactionLog::query()
-                    ->whereHas('transaction', fn ($q) => $q->where('op_document_id', $docId))
-                    ->delete();
-            } else {
-                TransactionLog::query()
-                    ->whereHas('transaction', fn ($q) => $q->where('op_document_id', $docId))
-                    ->whereNotIn('transaction_id', $validTxnIds)
-                    ->delete();
-            } */
 
             $affected = 0;
 
             // 4) Rebuild por cada transacción
             foreach ($doc->transactions as $txn) {
-                // proportion ya NO se usa para la base del descuento (según requerimiento)
-                // pero la dejamos por si te interesa mostrarla en otro lado
-                $installmentPremium = round($grandTotal * (float) ($txn->proportion ?? 0), 2);
 
-                // ⬅️ NUEVO: la base para calcular TODOS los descuentos de este doc
+                // [ADD] Normaliza proportion: 50 => 0.5 | 0.5 => 0.5
+                $pRaw = (float) ($txn->proportion ?? 0);                // [ADD]
+                $prop = $pRaw > 1 ? $pRaw / 100 : $pRaw;                // [ADD]
+
+                // Base fija para descuentos
                 $discountBase = $grandTotal;
 
-                // ⬅️ NUEVO: el gross del primer renglón arranca en el grand total
-                $gross = round($grandTotal, 2);
+                // [CHG] El gross escalado del primer renglón arranca en grandTotal * proportion
+                $gScaled = round($grandTotal * $prop, 2);               // [CHG]
 
                 // Logs existentes por índice (para preservar campos operativos)
                 $existing = TransactionLog::query()
@@ -99,8 +88,8 @@ class TransactionLogBuilder
                     $pctRaw = (float) ($node->value ?? 0);
                     $pct    = $pctRaw > 1 ? $pctRaw / 100 : $pctRaw;
 
-                    // ⬅️ NUEVO: descuento SIEMPRE con base en el grand total
-                    $commission = round($discountBase * $pct, 2);
+                    // [CHG] Descuento escalado por proportion del installment
+                    $commissionScaled = round($discountBase * $pct * $prop, 2);   // [CHG]
 
                     // ✅ Asegurar un deduction_id NO nulo (igual que antes)
                     $deductionId =
@@ -128,25 +117,32 @@ class TransactionLogBuilder
                         $log->banking_fee   = 0;
                     }
 
-                    $bankingFee = (float) ($log->banking_fee ?? 0.0);
+                    // [CHG] Escala banking_fee existente por proportion
+                    $bankingExisting = (float) ($log->banking_fee ?? 0.0);        // [ADD]
+                    $bankingScaled   = round($bankingExisting * $prop, 2);        // [ADD]
 
-                    // ⬅️ NUEVO: neto descuenta el "commission" calculado con base fija + banking_fee
-                    $net = round($gross - $commission - $bankingFee, 2);
+                    // [CHG] Neto escalado
+                    $netScaled = round($gScaled - $commissionScaled - $bankingScaled, 2); // [CHG]
 
-                    // Campos calculados / de relación (igual que antes)
-                    $log->deduction_type      = $deductionId;
-                    $log->from_entity         = $node->partner_source_id ?? $log->from_entity;
-                    $log->to_entity           = $node->partner_destination_id ?? $log->to_entity;
-                    $log->exch_rate           = (float) ($txn->exch_rate ?? 1);
-                    $log->gross_amount        = $gross;        // muestra el gross "que va quedando"
-                    $log->commission_discount = $commission;   // SIEMPRE calculado con grand total
-                    $log->net_amount          = $net;
+                    // Campos calculados / de relación
+                    $log->deduction_type = $deductionId;
+                    $log->from_entity    = $node->partner_source_id ?? $log->from_entity;
+                    $log->to_entity      = $node->partner_destination_id ?? $log->to_entity;
+                    $log->exch_rate      = (float) ($txn->exch_rate ?? 1);
+
+                    // [CHG] Guardar importes escalados
+                    $log->gross_amount        = $gScaled;               // [CHG]
+                    $log->commission_discount = $commissionScaled;      // [CHG]
+                    $log->banking_fee         = $bankingScaled;         // [CHG]
+
+                    // [CHG] Si net_amount ES columna generada, NO asignar esta línea:
+                    // $log->net_amount = $netScaled;                    // [CHG] <-- comenta si es columna generada
 
                     $log->save();
                     $affected++;
 
-                    // El siguiente renglón parte del neto del actual
-                    $gross = $net;
+                    // [CHG] El siguiente renglón parte del neto escalado actual
+                    $gScaled = $netScaled;                               // [CHG]
                     $i++;
                 }
 
@@ -159,12 +155,9 @@ class TransactionLogBuilder
 
             return $affected;
         });
-        
     }
 
-
-
-     /**
+    /**
      * Calcula filas "preview" sin tocar BD, usando el estado actual del formulario.
      * $form:
      *  - transactions: [ ['index'=>2,'proportion'=>0.5|50,'exch_rate'=>1.0,'due_date'=>'...'], ... ]
@@ -177,12 +170,11 @@ class TransactionLogBuilder
             'insureds:id,op_document_id,premium',
             'schemes.costScheme.costNodexes' => fn ($q) => $q->orderBy('index'),
             'schemes.costScheme.costNodexes.deduction',
-            // Si tus nodos tienen relaciones con partners, cárgalas aquí:
             'schemes.costScheme.costNodexes.partnerSource',
             'schemes.costScheme.costNodexes.partnerDestination',
         ])->findOrFail($docId);
 
-        // --- Prima total (si vienen insureds desde el form, usarlos; si no, los del doc)
+        // --- Prima total
         $grandTotal = null;
         if (!empty($form['insureds'])) {
             $grandTotal = collect($form['insureds'])->sum(function ($i) {
@@ -198,7 +190,7 @@ class TransactionLogBuilder
             $grandTotal = (float) $doc->insureds->sum('premium');
         }
 
-        // --- Nodos: si el form trae schemes, usarlos; si no, los del doc
+        // --- Nodos
         $nodes = collect();
         if (!empty($form['schemes'])) {
             $nodes = CostScheme::with([
@@ -223,7 +215,6 @@ class TransactionLogBuilder
         $txns = collect($form['transactions'] ?? [])
             ->map(function ($t) {
                 $prop = $t['proportion'] ?? 0;
-                // puede venir 50 o 0.50
                 $prop = is_string($prop) ? floatval(str_replace(',', '', $prop)) : (float) $prop;
                 if ($prop > 1) $prop = $prop / 100;
 
@@ -237,29 +228,34 @@ class TransactionLogBuilder
             ->sortBy('index')
             ->values();
 
-        // --- Cálculo idéntico al de rebuildForOperativeDoc, pero sin persistir
         $discountBase = $grandTotal;
 
         $rows = collect();
         foreach ($txns as $txn) {
-            $gross = round($grandTotal, 2);
+            // [ADD] proportion normalizada del installment
+            $prop = (float) $txn['proportion'];                          // [ADD]
+
+            // [CHG] gross escalado inicial
+            $gScaled = round($grandTotal * $prop, 2);                    // [CHG]
             $i = 1;
 
             foreach ($nodes as $node) {
                 $pctRaw = (float) ($node->value ?? 0);
                 $pct    = $pctRaw > 1 ? $pctRaw / 100 : $pctRaw;
 
-                $commission = round($discountBase * $pct, 2);
+                // [CHG] descuento escalado
+                $commissionScaled = round($discountBase * $pct * $prop, 2); // [CHG]
 
-                $bankingFee = 0.0; // en preview lo dejamos en 0
+                // En preview banking fee = 0, pero mantenemos coherencia
+                $bankingScaled = 0.0;                                     // [CHG]
 
-                $net = round($gross - $commission - $bankingFee, 2);
+                // [CHG] neto escalado
+                $netScaled = round($gScaled - $commissionScaled - $bankingScaled, 2); // [CHG]
 
                 $rows->push([
                     'inst_index'  => (int) $txn['index'],
                     'index'       => (int) ($node->index ?? $i),
                     'deduction'   => $node->deduction?->concept ?? '-',
-                    // nombres aproximados desde el nodo (en BD vienen de relaciones del log)
                     'from'        => $node->partnerSource->short_name
                                         ?? $node->partnerSource->name
                                         ?? '—',
@@ -267,23 +263,18 @@ class TransactionLogBuilder
                                         ?? optional($node->partnerDestination)->name
                                         ?? '—',
                     'exch_rate'   => (float) $txn['exch_rate'],
-                    'gross'       => $gross,
-                    'discount'    => $commission,
-                    'banking_fee' => $bankingFee,
-                    'net'         => $net,
+                    'gross'       => $gScaled,            // [CHG]
+                    'discount'    => $commissionScaled,   // [CHG]
+                    'banking_fee' => $bankingScaled,      // [CHG]
+                    'net'         => $netScaled,          // [CHG]
                 ]);
 
-                $gross = $net;
+                // [CHG] Siguiente renglón parte del neto escalado
+                $gScaled = $netScaled;                                   // [CHG]
                 $i++;
             }
         }
 
         return $rows->sortBy([['inst_index','asc'],['index','asc']])->values();
     }
-
-
-
-
-
 }
-
