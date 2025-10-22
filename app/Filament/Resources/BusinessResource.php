@@ -47,7 +47,7 @@ class BusinessResource extends Resource
 {
     protected static ?string $model = Business::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 9;   // aparecerá primero
     

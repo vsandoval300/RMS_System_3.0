@@ -28,7 +28,7 @@ use Filament\Infolists\Components\TextEntry;
 class CountriesResource extends Resource
 {
     protected static ?string $model = Country::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 4;   // aparecerá primero
 

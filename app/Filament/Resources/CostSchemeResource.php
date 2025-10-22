@@ -38,7 +38,7 @@ class CostSchemeResource extends Resource
 {
     protected static ?string $model = CostScheme::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 8;   // aparecerá primero
 

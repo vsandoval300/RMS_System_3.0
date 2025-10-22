@@ -29,7 +29,7 @@ use Filament\Infolists\Components\ImageEntry;
 class ReinsurerTypeResource extends Resource
 {
     protected static ?string $model = ReinsurerType::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 8;   // aparecerá primero
 

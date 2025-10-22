@@ -29,7 +29,7 @@ use Filament\Infolists\Components\TextEntry;
 class LineOfBusinessResource extends Resource
 {
     protected static ?string $model = LineOfBusiness::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationLabel = 'Lines of Businesses';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 4;   // aparecerá primero

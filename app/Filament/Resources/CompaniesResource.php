@@ -30,7 +30,7 @@ use Filament\Infolists\Components\TextEntry;
 class CompaniesResource extends Resource
 {
     protected static ?string $model = Company::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 2;   // aparecerá primero
 

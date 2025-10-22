@@ -28,7 +28,7 @@ use Filament\Infolists\Components\TextEntry;
 class ProducersResource extends Resource
 {
     protected static ?string $model = Producer::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Underwritten';
     protected static ?int    $navigationSort  = 6;   // aparecerá primero
 

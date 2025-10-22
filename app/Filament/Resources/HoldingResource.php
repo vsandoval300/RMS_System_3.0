@@ -25,7 +25,7 @@ class HoldingResource extends Resource
 {
     protected static ?string $model = Holding::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Compliance';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero
 

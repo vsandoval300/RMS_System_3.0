@@ -29,7 +29,7 @@ use Filament\Infolists\Components\TextEntry;
 class CorporateDocumentsResource extends Resource
 {
     protected static ?string $model = DocumentType::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationLabel = 'Corporate Documents';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 9;   // aparecerá primero

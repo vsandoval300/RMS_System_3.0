@@ -30,7 +30,7 @@ use Filament\Infolists\Components\TextEntry;
 class CurrenciesResource extends Resource
 {
     protected static ?string $model = Currency::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero
 

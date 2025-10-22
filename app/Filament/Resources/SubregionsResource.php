@@ -29,7 +29,7 @@ use Filament\Infolists\Components\TextEntry;
 class SubregionsResource extends Resource
 {
     protected static ?string $model = Subregion::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 3;   // aparecerá primero
 

@@ -29,7 +29,7 @@ use Filament\Infolists\Components\TextEntry;
 class PartnerTypesResource extends Resource
 {
     protected static ?string $model = PartnerType::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 7;   // aparecerá primero
 

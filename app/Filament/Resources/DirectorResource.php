@@ -24,7 +24,7 @@ class DirectorResource extends Resource
 {
     protected static ?string $model = Director::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Reinsurers';
     protected static ?int    $navigationSort  = 2;
 

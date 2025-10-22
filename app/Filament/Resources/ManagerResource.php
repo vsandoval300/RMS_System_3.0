@@ -29,7 +29,7 @@ class ManagerResource extends Resource
 {
     protected static ?string $model = Manager::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
      protected static ?string $navigationGroup = 'Resources';
      protected static ?int    $navigationSort  = 10;   // aparecerá primero
 

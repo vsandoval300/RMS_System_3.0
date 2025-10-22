@@ -27,7 +27,7 @@ use Filament\Infolists\Components\TextEntry;
 class OperativeStatusesResource extends Resource
 {
     protected static ?string $model = OperativeStatus::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 6;   // aparecerá primero
 
