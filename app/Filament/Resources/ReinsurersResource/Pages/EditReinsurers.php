@@ -22,7 +22,7 @@ class EditReinsurers extends EditRecord
     /*--------------------------------------------------------------
      | 2. Mostrar Save & Cancel en la cabecera
      --------------------------------------------------------------*/
-    protected function getHeaderActions(): array
+   /*  protected function getHeaderActions(): array
     {
         return [
             // Botón “Save changes”
@@ -35,15 +35,15 @@ class EditReinsurers extends EditRecord
             $this->getCancelFormAction()
                 ->label('Cancel'),
         ];
-    }
+    } */
 
     /*--------------------------------------------------------------
      | 3. Quitar las acciones del pie del formulario
      --------------------------------------------------------------*/
-    protected function getFormActions(): array
+    /* protected function getFormActions(): array
     {
         return [];              // así ya no se duplican abajo :contentReference[oaicite:1]{index=1}
-    }
+    } */
 
     /*--------------------------------------------------------------
      | Gathered Relation Managers with Resource 
