@@ -62,16 +62,17 @@ class ClientsResource extends Resource
                         ->placeholder("Please provide client's name")
                         ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(255)
-                        // ───── Regla: alfanumérico + al menos una letra ─────
-                        ->rules(['regex:/^(?=.*[A-Za-z])[A-Za-z0-9]+$/'])
+                        // ✅ Permite letras (con acentos), números y espacios; exige al menos una letra
+                        ->rules(['regex:/^(?=.*\p{L})[\p{L}\d ]+$/u'])
                         ->validationMessages([
                             'regex' => 'The name must contain letters and may include numbers, '
                                     . 'but it cannot consist of numbers only.',
                         ])
                         // (opcional) formatea la capitalización
-                        ->afterStateUpdated(fn ($state, callable $set) =>
-                            $set('name', ucwords(strtolower($state)))
-                        ),
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            $clean = preg_replace('/\s+/', ' ', trim((string) $state)); // quita dobles espacios y bordes
+                            $set('name', ucwords(mb_strtolower($clean)));
+                        }),
                         //->helperText('First letter of each word will be capitalised.'),
                         
                     
