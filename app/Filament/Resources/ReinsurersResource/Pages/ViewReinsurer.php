@@ -25,5 +25,22 @@ class ViewReinsurer extends ViewRecord
         return 'View – ' . ($this->record?->name ?? 'Reinsurer');
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            /* Actions\Action::make('back')
+                ->label('Back')
+                ->icon('heroicon-o-arrow-left')
+                ->url(static::getResource()::getUrl('index')), */
+
+            Actions\Action::make('close')
+                ->label('Close')
+                ->icon('heroicon-o-x-mark')
+                ->color('gray')
+                ->outlined()
+                ->url(static::getResource()::getUrl('index')),    
+        ];
+    }
+
 
 }

@@ -282,6 +282,7 @@ class BusinessResource extends Resource
                                 ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->acronym} - {$record->name}")
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(180)
                                 ->required(),
 
                             Select::make('region_id')

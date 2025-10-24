@@ -25,6 +25,10 @@ use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Support\Enums\VerticalAlignment;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 
 
@@ -448,6 +452,8 @@ public static function infolist(Infolist $infolist): Infolist
             ->filters([
                 //
             ])
+                
+
             ->actions([
                 Tables\Actions\ActionGroup::make([
 
@@ -462,6 +468,7 @@ public static function infolist(Infolist $infolist): Infolist
                     Tables\Actions\DeleteAction::make(),
                 ])
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
