@@ -62,16 +62,59 @@ class ClientsResource extends Resource
                         ->placeholder("Please provide client's name")
                         ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(255)
-                        // ✅ Permite letras (con acentos), números y espacios; exige al menos una letra
-                        ->rules(['regex:/^(?=.*\p{L})[\p{L}\d ]+$/u'])
+                        // Permite letras unicode, dígitos, espacios y puntos. Exige al menos una letra.
+                        ->rules(['regex:/^(?=.*\p{L})[\p{L}\d .]+$/u'])
                         ->validationMessages([
-                            'regex' => 'The name must contain letters and may include numbers, '
-                                    . 'but it cannot consist of numbers only.',
+                            'regex' => 'The name must contain letters and may include numbers, spaces, and dots.',
                         ])
-                        // (opcional) formatea la capitalización
                         ->afterStateUpdated(function ($state, callable $set) {
-                            $clean = preg_replace('/\s+/', ' ', trim((string) $state)); // quita dobles espacios y bordes
-                            $set('name', ucwords(mb_strtolower($clean)));
+                            $value = (string) $state;
+
+                            // 1) Limpia espacios repetidos y bordes
+                            $value = preg_replace('/\s+/', ' ', trim($value));
+
+                            // 2) Pasa a minúsculas para normalizar y separa en palabras
+                            $lower = mb_strtolower($value, 'UTF-8');
+                            $words = preg_split('/\s/u', $lower, -1, PREG_SPLIT_NO_EMPTY);
+
+                            // 3) Partículas que van en minúsculas (salvo si son la primera palabra)
+                            $particles = ['de','del','la','las','el','los','y','e','o','u','al'];
+
+                            foreach ($words as $i => $w) {
+                                if ($i === 0 || !in_array($w, $particles, true)) {
+                                    // Title-case respetando acentos
+                                    $words[$i] = mb_convert_case($w, MB_CASE_TITLE, 'UTF-8');
+                                } else {
+                                    $words[$i] = $w; // mantener en minúsculas
+                                }
+                            }
+
+                            $result = implode(' ', $words);
+
+                            // 4) Normaliza abreviaturas y razones sociales (orden: de más larga a más corta)
+                            $patterns = [
+                                // S. de R.L. de C.V.
+                                '/\bS\.?\s*DE\s*R\.?\s*L\.?\s*DE\s*C\.?\s*V\.?\b/ui' => 'S. de R.L. de C.V.',
+                                // S. de R.L.
+                                '/\bS\.?\s*DE\s*R\.?\s*L\.?\b/ui'                   => 'S. de R.L.',
+                                // S.A.P.I
+                                '/\bS\.?\s*A\.?\s*P\.?\s*I\.?\b/ui'                 => 'S.A.P.I',
+                                // S.A.
+                                '/\bS\.?\s*A\.?\b/ui'                               => 'S.A.',
+                                // C.V.
+                                '/\bC\.?\s*V\.?\b/ui'                               => 'C.V.',
+                            ];
+                            $result = preg_replace(array_keys($patterns), array_values($patterns), $result);
+
+                            // 5) Ajuste fino: si una partícula quedó justo después de punto (p. ej., "S.A. De"),
+                            //    queremos "de" en minúsculas.
+                            $result = preg_replace_callback(
+                                '/([A-Z]\.)\s+(De|Del|La|Las|El|Los|Y|E|O|U)\b/u',
+                                fn($m) => $m[1] . ' ' . mb_strtolower($m[2], 'UTF-8'),
+                                $result
+                            );
+
+                            $set('name', $result);
                         }),
                         //->helperText('First letter of each word will be capitalised.'),
                         
