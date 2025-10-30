@@ -12,6 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\ToggleButtons;
+
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -43,19 +50,19 @@ class DirectorResource extends Resource
                 ->compact()
                 ->schema([
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->label('Name')
                             ->placeholder('Please enter first name.')
                             ->required()
                             ->maxLength(200),
 
-                        Forms\Components\TextInput::make('surname')
+                        TextInput::make('surname')
                             ->label('Surname')
                             ->placeholder('Please enter surname.')
                             ->required()
                             ->maxLength(200),
 
-                        Forms\Components\ToggleButtons::make('gender')
+                        ToggleButtons::make('gender')
                             ->label('Gender')
                             ->options([
                                 'Male' => 'Male',
@@ -64,7 +71,7 @@ class DirectorResource extends Resource
                             ->inline()
                             ->required(),
 
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->label('Email address')
                             ->placeholder('name@example.com')
                             ->email()
@@ -72,40 +79,38 @@ class DirectorResource extends Resource
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
 
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->label('Phone')
                             ->placeholder('e.g., +52 442 123 4567 ext. 123')
                             ->tel()
                             ->required()
                             ->maxLength(40),
 
-                        Forms\Components\Select::make('country_id')
-                            ->label('Country')
-                            ->relationship(
-                                name: 'country',
-                                titleAttribute: 'alpha_3',
-                                // Opción 1: por nombre
-                                // modifyQueryUsing: fn ($query) => $query->orderBy('alpha_3'),
-                                // Opción 2: por type-hint (recomendado)
-                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('alpha_3'),
-                            )
-                            // Opción 1: por nombre
-                            // ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->alpha_3} - {$record->name}")
-                            // Opción 2: por type-hint
-                            ->getOptionLabelFromRecordUsing(fn (Country $record) => "{$record->alpha_3} - {$record->name}")
+                        Select::make('country_id')
+                            ->label(__('Country'))
+                            ->options(function () {
+                                return Country::orderBy('name')
+                                    ->get()
+                                    ->mapWithKeys(fn ($country) => [
+                                        $country->id => "{$country->alpha_3} - {$country->name}"
+                                    ]);
+                            })
                             ->searchable()
                             ->preload()
+                            ->optionsLimit(300)
+                            ->placeholder('Choose the reinsurer\'s country')
                             ->required()
                             ->placeholder('Select a country'),
+                            //->helperText('Choose the reinsurer\'s country.'),
 
-                        Forms\Components\Textarea::make('address')
+                        Textarea::make('address')
                             ->label('Address')
                             ->placeholder('Please fill address.')
                             ->required()
                             ->autosize()
                             ->columnSpan(2),
 
-                        Forms\Components\TextInput::make('occupation')
+                        TextInput::make('occupation')
                             ->label('Occupation')
                             ->placeholder('e.g., Chief Risk Officer')
                             ->datalist(fn () => \App\Models\Director::query()
@@ -121,11 +126,11 @@ class DirectorResource extends Resource
                             ->maxLength(400)
                             ->columnSpan(2),
 
-                        Forms\Components\Section::make('Image')
+                        Section::make('Image')
                             ->columnSpan(2)
                             ->compact()
                             ->schema([
-                                Forms\Components\FileUpload::make('image')
+                                FileUpload::make('image')
                                     ->label('Director photo')
                                     ->disk('s3')
                                     ->directory('Directors')
