@@ -55,7 +55,7 @@ class CoveragesResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true, column: 'name')   // 👈 ignora el registro en edición
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
@@ -64,7 +64,7 @@ class CoveragesResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true, column: 'acronym') // 👈 idem
                     ->live(onBlur: false)
                     ->maxLength(20)
                     ->rule('regex:/^[A-Z]+$/')
