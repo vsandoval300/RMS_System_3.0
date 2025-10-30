@@ -13,6 +13,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
+use App\Models\Country;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -39,22 +43,39 @@ class HoldingResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\Section::make('Holding Profile')
+            Section::make('Holding Profile')
                     ->compact()
                     ->schema([
                     Forms\Components\Grid::make(2)->schema([            
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(400),
-                        Forms\Components\TextInput::make('short_name')
+                        TextInput::make('short_name')
                             ->required()
                             ->maxLength(60),
-                        Forms\Components\Select::make('country_id')
-                            ->relationship('country', 'name')
-                            ->required(),
-                        Forms\Components\Select::make('client_id')
+                        Select::make('country_id')
+                        ->label(__('Country'))
+                        ->options(function () {
+                            return Country::orderBy('name')
+                                ->get()
+                                ->mapWithKeys(fn ($country) => [
+                                    $country->id => "{$country->alpha_3} - {$country->name}"
+                                ]);
+                        })
+                        ->searchable()
+                        ->preload()
+                        ->optionsLimit(300)
+                        ->placeholder('Choose the reinsurer\'s country')
+                        ->required()
+                        ->placeholder('Select a country'),
+                        //->helperText('Choose the reinsurer\'s country.'),
+
+                        Select::make('client_id')
                             ->relationship('client', 'name')
-                            ->required(),
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(300),
                         ]),
                     ]),
         ]);
