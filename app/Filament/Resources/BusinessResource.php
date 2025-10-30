@@ -891,6 +891,16 @@ class BusinessResource extends Resource
                     )
                     ->icon('heroicon-m-eye'),  // opcional
 
+                    // 👇 NUEVA OPCIÓN
+                    Tables\Actions\Action::make('technical_result')
+                    ->label('Technical result')
+                    ->icon('heroicon-m-calculator')
+                    ->action(fn () => Notification::make()
+                        ->title('Technical result')
+                        ->body('This feature is coming soon.')
+                        ->info()
+                        ->send()),
+
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
@@ -925,6 +935,7 @@ class BusinessResource extends Resource
             'create' => Pages\CreateBusiness::route('/create'),
             'edit' => Pages\EditBusiness::route('/{record}/edit'),
             'view' => Pages\ViewBusiness::route('/{record}/view'), // 👈 Asegúrate que esto esté
+            
         ];
     }
 
