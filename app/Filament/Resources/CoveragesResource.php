@@ -55,7 +55,7 @@ class CoveragesResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique(ignoreRecord: true, column: 'name')   // 👈 ignora el registro en edición
+                    ->unique()   // 👈 ignora el registro en edición
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
@@ -64,7 +64,7 @@ class CoveragesResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->unique(ignoreRecord: true, column: 'acronym') // 👈 idem
+                    ->unique() // 👈 idem
                     ->live(onBlur: false)
                     ->maxLength(20)
                     ->rule('regex:/^[A-Z]+$/')
@@ -81,7 +81,7 @@ class CoveragesResource extends Resource
                     ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
                     //->extraAttributes(['class' => 'w-1/2']),
 
-                    Select::make('line_of_business_id')
+                    Select::make('lob_id')
                     ->label('Line of Business')
                     ->relationship('lineOfBusiness', 'name')
                     ->searchable()
