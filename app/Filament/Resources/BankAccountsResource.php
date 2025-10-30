@@ -78,6 +78,7 @@ class BankAccountsResource extends Resource
                                 )
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(180)
                                 ->required(),
                                
                             Select::make('intermediary_bank')

@@ -165,6 +165,7 @@ class ClientsResource extends Resource
                         })
                         ->searchable()
                         ->preload()
+                        ->optionsLimit(300)
                         ->placeholder('Choose the reinsurer\'s country')
                         ->required()
                         ->placeholder('Select a country'),

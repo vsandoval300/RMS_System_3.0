@@ -100,6 +100,7 @@ class PartnersResource extends Resource
                     })
                     ->searchable()
                     ->preload()
+                    ->optionsLimit(300)
                     ->required()
                     ->placeholder('Select a country')
                     ->helperText('Choose the reinsurer\'s country.')

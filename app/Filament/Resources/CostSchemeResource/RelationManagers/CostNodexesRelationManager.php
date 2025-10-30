@@ -39,6 +39,7 @@ class CostNodexesRelationManager extends RelationManager
                 ->options(Partner::all()->pluck('name', 'id'))
                 ->searchable()
                 ->preload()
+                ->optionsLimit(300)
                 ->required(),
 
             Forms\Components\TextInput::make('referral_partner')

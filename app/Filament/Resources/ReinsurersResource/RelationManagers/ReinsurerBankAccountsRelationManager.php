@@ -94,6 +94,7 @@ class ReinsurerBankAccountsRelationManager extends RelationManager
                                 )
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(300)
                                 ->required(),
                                
                             Select::make('intermediary_bank')

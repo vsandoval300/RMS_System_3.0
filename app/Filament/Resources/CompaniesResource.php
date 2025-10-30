@@ -84,6 +84,7 @@ class CompaniesResource extends Resource
                         ->relationship('country','name')
                         ->searchable()
                         ->preload()
+                        ->optionsLimit(300)
                         ->required(),
                         //->extraAttributes(['class' => 'w-1/2']),
 

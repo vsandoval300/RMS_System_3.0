@@ -309,6 +309,7 @@ class BusinessResource extends Resource
                                 ->relationship('parent', 'business_code')
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(180)
                                 ->nullable(),
 
                             Select::make('renewed_from_id')
