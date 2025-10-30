@@ -19,6 +19,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use App\Models\Country;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -80,13 +81,21 @@ class CompaniesResource extends Resource
                     //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('country_id')
-                        ->label('Country')
-                        ->relationship('country','name')
-                        ->searchable()
-                        ->preload()
-                        ->optionsLimit(300)
-                        ->required(),
-                        //->extraAttributes(['class' => 'w-1/2']),
+                            ->label(__('Country'))
+                            ->options(function () {
+                                return Country::orderBy('name')
+                                    ->get()
+                                    ->mapWithKeys(fn ($country) => [
+                                        $country->id => "{$country->alpha_3} - {$country->name}"
+                                    ]);
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(300)
+                            ->placeholder('Choose the reinsurer\'s country')
+                            ->required()
+                            ->placeholder('Select a country'),
+                            //->helperText('Choose the reinsurer\'s country.'),
 
                     Select::make('industry_id')
                         ->label('Sector')
