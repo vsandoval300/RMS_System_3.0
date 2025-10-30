@@ -165,7 +165,7 @@ class BusinessDocTypesResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
-                        'style' => 'width: 180px; white-space: normal;', // ✅ Deja que el texto se envuelva
+                        'style' => 'width: 300px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 TextColumn::make('description')
                     ->label('Description')
