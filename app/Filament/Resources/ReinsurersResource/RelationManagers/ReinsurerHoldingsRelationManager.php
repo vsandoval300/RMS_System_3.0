@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Support\RawJs;
+use Illuminate\Validation\ValidationException;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Get;
 
 class ReinsurerHoldingsRelationManager extends RelationManager
 {
@@ -23,6 +26,9 @@ class ReinsurerHoldingsRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form->schema([
+            // útil para excluirse en edición al calcular "restante"
+            //Hidden::make('id')->dehydrated(),
+
             Select::make('holding_id')
                 ->label('Holding')
                 ->relationship('holding', 'name')
@@ -38,10 +44,46 @@ class ReinsurerHoldingsRelationManager extends RelationManager
                 ->minValue(0)
                 ->maxValue(100)
                 ->step(0.01)
-                ->mask(RawJs::make('$money($input, ".", ",", 2)')) // se ve como 70.00
+                ->mask(RawJs::make('$money($input, ".", ",", 2)')) // visual 70.00
                 ->reactive()
-                ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null) // decimal → porcentaje
-                ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100) // porcentaje → decimal
+                // Mostrar % disponible en vivo
+                ->helperText(function (Get $get, RelationManager $livewire) {
+                    $owner = $livewire->getOwnerRecord();
+                    $editingId = $get('id');
+
+                    $sumOthers = $owner->reinsurerHoldings()
+                        ->when($editingId, fn ($q) => $q->whereKeyNot($editingId))
+                        ->sum('percentage'); // decimal
+
+                    $enteredPercent = (float) str_replace(',', '', (string) $get('percentage')); // "60.00"
+                    $entered = $enteredPercent ? $enteredPercent / 100 : 0;
+
+                    $remain = max(0, 1 - $sumOthers - $entered);
+                    return 'Available: ' . number_format($remain * 100, 2) . '%';
+                })
+                // ⬇️ REGLA que muestra el error debajo del campo
+                ->rule(fn (Get $get, RelationManager $livewire) =>
+                    function (string $attribute, $value, \Closure $fail) use ($get, $livewire) {
+                        $owner = $livewire->getOwnerRecord();
+                        $editingId = $get('id');
+
+                        $sumOthers = $owner->reinsurerHoldings()
+                            ->when($editingId, fn ($q) => $q->whereKeyNot($editingId))
+                            ->sum('percentage'); // decimal
+
+                        // $value llega como porcentaje ("60" o "60.00")
+                        $entered = ((float) str_replace(',', '', (string) $value)) / 100;
+
+                        if (round($sumOthers + $entered, 6) > 1) {
+                            $remaining = max(0, 1 - $sumOthers);
+                            $fail('The sum of Participation Percentage exceeds 100%. Remaining value to assign: '
+                                . number_format($remaining * 100, 2) . '%');
+                        }
+                    }
+                )
+                // conversiones: decimal <-> porcentaje
+                ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null) // decimal → %
+                ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100)  // % → decimal
                 ->columnSpan(1),
 
         ]);
@@ -91,13 +133,12 @@ class ReinsurerHoldingsRelationManager extends RelationManager
                     ->sortable(),
             ])
 
-            ->headerActions([
+            ->headerActions([ 
                 Tables\Actions\CreateAction::make()
-                    ->label('Add Holding'),
-            ])
-
-            ->actions([
-                Tables\Actions\EditAction::make(),
+                ->label('Add Holding'), 
+            ]) 
+                
+            ->actions([ Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
 
