@@ -190,7 +190,7 @@ class BusinessResource extends Resource
                     
                         
                             Select::make('reinsurance_type')
-                                ->label('Reinsurer Type')
+                                ->label('Contract Type')
                                 //->hiddenLabel()
                                 //->inlineLabel()
                                 ->placeholder('Select a reinsurer type') // 👈 Aquí cambias el texto
@@ -269,6 +269,7 @@ class BusinessResource extends Resource
                                 ->relationship('Producer', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(300)
                                 ->required(),
 
                             Select::make('currency_id')
