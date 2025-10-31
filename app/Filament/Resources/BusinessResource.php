@@ -903,6 +903,16 @@ class BusinessResource extends Resource
                         ->info()
                         ->send()),
 
+                    // 👇 NUEVA OPCIÓN: Renewal
+                    Tables\Actions\Action::make('renewal')
+                        ->label('Renewal')
+                        ->icon('heroicon-m-arrow-path')  // flechas circulares → idea de renovación
+                        ->action(fn () => Notification::make()
+                            ->title('Renewal')
+                            ->body('This feature is coming soon.')
+                            ->info()
+                            ->send()),
+
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
