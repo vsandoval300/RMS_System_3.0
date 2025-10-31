@@ -19,6 +19,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -53,7 +54,7 @@ class LineOfBusinessResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique()
+                    ->unique(ignorable: fn (?Model $record) => $record)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
@@ -68,14 +69,15 @@ class LineOfBusinessResource extends Resource
                     ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
                     //->extraAttributes(['class' => 'w-1/2']),
 
-                    TextInput::make('risk_covered')
-                    ->label('Risk covered')
+                    Select::make('risk_covered')
+                    ->label('Risk Covered')
+                    ->placeholder('Select the risk covered.') // 👈 Aquí cambias el texto
+                    ->options([
+                        'Life' => 'Life',
+                        'Non-Life' => 'Non-Life',
+                    ])
                     ->required()
-                    ->unique()
-                    ->maxLength(100)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('risk_covered', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.'),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                    ->searchable(),  
 
                 ]),
             ]);
@@ -128,7 +130,7 @@ class LineOfBusinessResource extends Resource
                                         TextEntry::make('risk_covered')->label('')->state('Risk covered:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
                                         TextEntry::make('risk_covered')->label('')
-                                            ->state(fn ($record) => $record->name ?: '—')
+                                            ->state(fn ($record) => $record->risk_covered ?: '—')
                                             ->columnSpan(9),
                                     ]),
 

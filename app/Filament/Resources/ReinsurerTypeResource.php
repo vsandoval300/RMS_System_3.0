@@ -25,6 +25,7 @@ use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
+use Illuminate\Database\Eloquent\Model;
 
 class ReinsurerTypeResource extends Resource
 {
@@ -52,7 +53,7 @@ class ReinsurerTypeResource extends Resource
                     TextInput::make('type_acronym')
                         ->label('Acronym')
                         ->required()
-                        ->unique()
+                        ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))

@@ -28,6 +28,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\ImageEntry;
+use Illuminate\Database\Eloquent\Model;
 
 
 class UserResource extends Resource
@@ -57,6 +58,7 @@ class UserResource extends Resource
                         ->placeholder('Please provide user name')
                         //->inlineLabel()
                         ->required()
+                        ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(255),
 
                     TextInput::make('email')
@@ -64,6 +66,7 @@ class UserResource extends Resource
                         ->placeholder('name@example.com')
                         ->email()
                         ->required()
+                        ->unique(ignorable: fn (?Model $record) => $record)
                         ->maxLength(255)
                         ->rule('regex:/^[\w\.-]+@[\w\.-]+\.\w+$/')
                         ->live(onBlur: true)

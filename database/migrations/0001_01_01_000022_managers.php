@@ -13,6 +13,10 @@ return new class extends Migration
             $table->bigIncrements('id');
 
             $table->string('name', 200)->index(); // 🔍 Index si se filtra o se une con frecuencia
+            $table->text('address');
+            $table->foreignId('country_id')
+                  ->constrained('countries')
+                  ->cascadeOnDelete();
 
             $table->timestamps();
             $table->softDeletes();

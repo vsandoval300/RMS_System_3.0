@@ -19,6 +19,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -52,7 +53,7 @@ class CorporateDocumentsResource extends Resource
                             ->label('Name')
                             ->required()
                             ->maxLength(255)
-                            ->unique()
+                            ->unique(ignorable: fn (?Model $record) => $record)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                             ->helperText('First letter of each word will be capitalised.')
                             ->columnSpan('full'),
@@ -63,7 +64,7 @@ class CorporateDocumentsResource extends Resource
                             ->maxLength(2)
                             ->rule('regex:/^[A-Z]+$/')
                             ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                            ->unique()
+                            ->unique(ignorable: fn (?Model $record) => $record)
                             ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).')
                             ->columnSpan('full'),
 
