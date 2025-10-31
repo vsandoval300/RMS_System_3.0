@@ -51,7 +51,7 @@ class BusinessDocTypesResource extends Resource
                     TextInput::make('name')
                         ->label('Name')
                         ->required()
-                        ->unique()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                         ->helperText('First letter of each word will be capitalised.')

@@ -265,7 +265,7 @@ class BusinessResource extends Resource
                                 ->label('Producer')
                                 //->hiddenLabel()
                                 //->inlineLabel()
-                                 ->placeholder('Select business producer.') // 👈 Aquí cambias el texto
+                                ->placeholder('Select business producer.') // 👈 Aquí cambias el texto
                                 ->relationship('Producer', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()

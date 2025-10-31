@@ -55,7 +55,7 @@ class BanksResource extends Resource
                             ->label('Name')
                             ->placeholder('Please provide name')
                             ->required()
-                            ->unique()
+                            ->unique(ignoreRecord: true)
                             ->maxLength(255)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
                             /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
@@ -76,7 +76,7 @@ class BanksResource extends Resource
                             ->label('ABA number')
                             ->placeholder('Please provide ABA number.')
                             ->rule('digits:9') 
-                            ->unique()
+                            ->unique(ignoreRecord: true)
                             ->maxLength(255)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
                             ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 

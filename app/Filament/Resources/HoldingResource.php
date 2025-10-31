@@ -49,9 +49,11 @@ class HoldingResource extends Resource
                     Forms\Components\Grid::make(2)->schema([            
                         TextInput::make('name')
                             ->required()
+                            ->unique(ignoreRecord: true)
                             ->maxLength(400),
                         TextInput::make('short_name')
                             ->required()
+                            ->unique(ignoreRecord: true)
                             ->maxLength(60),
                         Select::make('country_id')
                         ->label(__('Country'))
