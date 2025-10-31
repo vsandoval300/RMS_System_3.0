@@ -68,6 +68,15 @@ class LineOfBusinessResource extends Resource
                     ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
                     //->extraAttributes(['class' => 'w-1/2']),
 
+                    TextInput::make('risk_covered')
+                    ->label('Risk covered')
+                    ->required()
+                    ->unique()
+                    ->maxLength(100)
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('risk_covered', ucwords(strtolower($state))))
+                    ->helperText('First letter of each word will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
+
                 ]),
             ]);
     }
@@ -111,6 +120,19 @@ class LineOfBusinessResource extends Resource
                                             ->extraAttributes(['style' => 'line-height:1.35;'])
                                             ->columnSpan(9),
                                     ]),
+
+                                // Risk Covered
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('risk_covered')->label('')->state('Risk covered:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('risk_covered')->label('')
+                                            ->state(fn ($record) => $record->name ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+
                             ]),
                     ]),
             ])
@@ -174,6 +196,12 @@ class LineOfBusinessResource extends Resource
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 600px; white-space: normal;', // ancho fijo de 300px
+                    ]),
+                TextColumn::make('risk_covered')
+                    ->label('Risk covered')
+                    ->wrap()
+                    ->extraAttributes([
+                        'style' => 'width: 100px; white-space: normal;', // ancho fijo de 300px
                     ]),
             ])
             ->filters([

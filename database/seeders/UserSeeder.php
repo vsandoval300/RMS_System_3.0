@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
         $users = [
             // --- IT Team ---
             ['name' => 'Víctor Sandoval', 'email' => 'vsa@rainmakergroup.com', 'password' => 'Yahoo#03', 'role' => 'super_admin', 'department_id' => '13', 'position_id' => '14'],
-            ['name' => 'Dolores Velazquez', 'email' => 'dvm@rainmakergroup.com', 'password' => 'Mary123', 'role' => 'panel_user', 'department_id' => '13', 'position_id' => '15'],
+            ['name' => 'Dolores Velazquez', 'email' => 'dvm@rainmakergroup.com', 'password' => 'Mary123', 'role' => 'super_admin', 'department_id' => '13', 'position_id' => '15'],
             ['name' => 'Felipe de Jesús Lazaro Sánchez', 'email' => 'fls@rainmakergroup.com', 'password' => 'Fls123', 'role' => 'panel_user', 'department_id' => '13', 'position_id' => '16'],
 
             // --- Stakeholders ---

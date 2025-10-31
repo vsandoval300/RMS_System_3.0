@@ -15,6 +15,7 @@ class LineOfBusiness extends Model
     protected $fillable = [
         'name',
         'description',
+        'risk_covered',
     ];
 
     /* ─── hasMany ─── */

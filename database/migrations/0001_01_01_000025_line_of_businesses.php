@@ -17,6 +17,7 @@ return new class extends Migration
             
             $table->string('name',100)->unique();
             $table->text('description'); 
+            $table->string('risk_covered',100);
             
             $table->timestamps();
             $table->softDeletes();
