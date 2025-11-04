@@ -4,8 +4,9 @@ namespace App\Filament\Resources\CostSchemeResource\Pages;
 
 use App\Filament\Resources\CostSchemeResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Notifications\Notification;
+
 
 class EditCostScheme extends EditRecord
 {
@@ -27,12 +28,38 @@ class EditCostScheme extends EditRecord
         // o: return CostSchemeResource::getUrl('index');
     }
 
-    protected function getSavedNotification(): ?Notification
+    /**
+     * 👉 Personalizamos SOLO el botón "Save"
+     *     para que muestre un modal de confirmación.
+     */
+    protected function getSaveFormAction(): Action
     {
-        return Notification::make()
-            ->success()
-            ->title('Placement Scheme updated')
-            ->body('The Placement Scheme was saved successfully.');
+        return Action::make('save')
+            // mismo label que Filament usa por defecto
+            ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
+            ->requiresConfirmation()
+            ->modalHeading('Save Placement Scheme')
+            ->modalDescription('Are you sure you want to save these changes?')  
+            ->modalSubmitActionLabel('Save') 
+            // qué hacer al confirmar en el modal
+            ->action(fn () => $this->save())
+            ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
+    }
+
+    /**
+     * 👉 Opcional: personalizar las acciones debajo del formulario
+     *     (Save + Cancel).
+     */
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
+
+            $this->getCancelFormAction()
+                ->label('Cancel')
+                ->url(static::getResource()::getUrl('index'))
+                ->color('gray'),
+        ];
     }
 
 }
