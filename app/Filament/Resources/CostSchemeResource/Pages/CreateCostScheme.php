@@ -14,31 +14,7 @@ class CreateCostScheme extends CreateRecord
 {
     protected static string $resource = CostSchemeResource::class;
 
-    protected function getFormActions(): array
-    {
-        return [
-            /* Actions\Action::make('create')
-                ->label('Create')
-                ->action('create')      // 👈 ejecuta el método create() de la página (submit real)
-                ->color('primary'), */
-            Actions\Action::make('create')
-                ->label('Create')
-                ->requiresConfirmation()
-                ->modalHeading('Create Placement Scheme')
-                ->modalDescription('Are you sure you want to create this Placement Scheme?')
-                ->modalSubmitActionLabel('Create')
-                ->action('create')      // sigue llamando al método create()
-                ->color('primary'),
-
-
-            Actions\Action::make('cancel')
-                ->label('Cancel')
-                ->url(static::getResource()::getUrl('index'))
-                ->color('gray')
-                ->outlined(),
-        ];
-        
-    }
+    
     
     
     /**
@@ -124,7 +100,7 @@ class CreateCostScheme extends CreateRecord
     }
 
 
-/**
+    /**
      * 👉 Personalizamos SOLO el botón "Create"
      *     para que muestre un modal de confirmación.
      */
@@ -143,17 +119,31 @@ class CreateCostScheme extends CreateRecord
     }
 
    
-    
+    protected function getFormActions(): array
+    {
+        return [
+            /* Actions\Action::make('create')
+                ->label('Create')
+                ->action('create')      // 👈 ejecuta el método create() de la página (submit real)
+                ->color('primary'), */
+            Actions\Action::make('create')
+                ->label('Create')
+                ->requiresConfirmation()
+                ->modalHeading('Create Placement Scheme')
+                ->modalDescription('Are you sure you want to create this Placement Scheme?')
+                ->modalSubmitActionLabel('Create')
+                ->action('create')      // sigue llamando al método create()
+                ->color('primary'),
 
 
-
-
-
-
-
-
-
-
+            Actions\Action::make('cancel')
+                ->label('Cancel')
+                ->url(static::getResource()::getUrl('index'))
+                ->color('gray')
+                ->outlined(),
+        ];
+        
+    }
 
 
 
