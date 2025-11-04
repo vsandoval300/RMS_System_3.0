@@ -19,6 +19,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rule;
+use Filament\Tables\Actions\Action;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -41,11 +43,58 @@ class CurrenciesResource extends Resource
         return Currency::count();
     }
 
-    public static function canCreate(): bool
+    /* public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”
         return false;
+    } */
+
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Group::make() //Grupo 1
+                ->schema([
+                    Forms\Components\Section::make('Currency Details')
+                    ->schema([
+                    
+                        TextInput::make('name')
+                            ->label('Name')
+                            ->placeholder('Please provide name')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(255)
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
+                            /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
+                                ? 'First letter of each word will be capitalised.' 
+                                : null), */
+                            
+                        TextInput::make('acronym')
+                            ->label('Acronym')
+                            ->placeholder('e.g. ABC')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(3)                     // no deja escribir más de 3 caracteres
+                            ->rule('regex:/^[A-Z]{3}$/')       // obliga a que sean EXACTAMENTE 3 letras A–Z
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                            ->helperText('Only three uppercase letters allowed.')
+                            ->columnSpan(1),
+
+                            
+                        
+                               
+                    ])
+                    ->columns(2),
+                ])
+                ->columnSpanFull(),
+            ]);
     }
+
+
+
+
+
 
    
     public static function infolist(Infolist $infolist): Infolist
@@ -185,8 +234,13 @@ class CurrenciesResource extends Resource
             ->filters([
                 //
             ])
+
             ->actions([
-                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
