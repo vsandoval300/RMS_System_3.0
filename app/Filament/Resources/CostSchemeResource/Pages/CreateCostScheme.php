@@ -131,14 +131,8 @@ class CreateCostScheme extends CreateRecord
     protected function getFormActions(): array
     {
         return [
-             Actions\Action::make('create')   // 👈 aquí estás creando OTRA acción diferente
-                ->label('Create')
-                ->requiresConfirmation()
-                ->modalHeading('Create Placement Scheme')
-                ->modalDescription('Are you sure you want to create this Placement Scheme?')
-                ->modalSubmitActionLabel('Create')
-                ->action('create')
-                ->color('primary'),
+            // ⬅️ aquí USAMOS el botón definido arriba
+            $this->getCreateFormAction(),
 
             Actions\Action::make('cancel')
                 ->label('Cancel')
@@ -146,7 +140,6 @@ class CreateCostScheme extends CreateRecord
                 ->color('gray')
                 ->outlined(),
         ];
-        
     }
 
 
