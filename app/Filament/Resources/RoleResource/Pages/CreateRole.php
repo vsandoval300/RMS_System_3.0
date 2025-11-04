@@ -49,6 +49,13 @@ class CreateRole extends CreateRecord
     }
 
 
+    protected function getRedirectUrl(): string
+    {
+        // Vuelve al listado después de guardar
+        return static::getResource()::getUrl('index');
+    }
+
+
     protected function getCreatedNotification(): ?Notification
     {
         return Notification::make()
