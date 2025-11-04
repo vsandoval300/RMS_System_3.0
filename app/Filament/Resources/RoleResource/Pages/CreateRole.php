@@ -6,7 +6,10 @@ use App\Filament\Resources\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Arr;
+use Filament\Actions;
+use Filament\Actions\Action;
 use Illuminate\Support\Collection;
+use Filament\Notifications\Notification;
 
 class CreateRole extends CreateRecord
 {
@@ -43,5 +46,48 @@ class CreateRole extends CreateRecord
         });
 
         $this->record->syncPermissions($permissionModels);
+    }
+
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Role created')
+            ->body('The new Role has been created successfully.');
+    }
+
+
+    /**
+     * 👉 Personalizamos SOLO el botón "Create"
+     *     para que muestre un modal de confirmación.
+     */
+    protected function getCreateFormAction(): Action
+    {
+        return Action::make('create')
+            // label por defecto de Filament
+            ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
+            ->requiresConfirmation()
+            ->modalHeading('Create Role')
+            ->modalDescription('Are you sure you want to create this Role?')
+            ->modalSubmitActionLabel('Create')
+            // qué hacer cuando el usuario confirma en el modal
+            ->action(fn () => $this->create())
+            ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
+    }
+
+   
+    protected function getFormActions(): array
+    {
+        return [
+            // ⬅️ aquí USAMOS el botón definido arriba
+            $this->getCreateFormAction(),
+
+            Actions\Action::make('cancel')
+                ->label('Cancel')
+                ->url(static::getResource()::getUrl('index'))
+                ->color('gray')
+                ->outlined(),
+        ];
     }
 }
