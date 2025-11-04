@@ -18,7 +18,8 @@ class EditCostScheme extends EditRecord
     }
 
 // 👇 Agrega este método
-    protected function getRedirectUrl(): string
+    // 👇 Ajustar la firma a ?string
+    protected function getRedirectUrl(): ?string
     {
         // Después de guardar cambios → vuelve al listado
         return static::getResource()::getUrl('index');
