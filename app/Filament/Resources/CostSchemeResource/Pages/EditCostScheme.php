@@ -16,4 +16,13 @@ class EditCostScheme extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+// 👇 Agrega este método
+    protected function getRedirectUrl(): string
+    {
+        // Después de guardar cambios → vuelve al listado
+        return static::getResource()::getUrl('index');
+        // o: return CostSchemeResource::getUrl('index');
+    }
+
 }
