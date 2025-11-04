@@ -55,6 +55,7 @@ class CorporateDocumentsResource extends Resource
                             ->maxLength(255)
                             ->unique(ignorable: fn (?Model $record) => $record)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                            ->extraAttributes(['class' => 'w-1/2'])
                             ->helperText('First letter of each word will be capitalised.')
                             ->columnSpan('full'),
 
@@ -65,6 +66,7 @@ class CorporateDocumentsResource extends Resource
                             ->rule('regex:/^[A-Z]+$/')
                             ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
                             ->unique(ignorable: fn (?Model $record) => $record)
+                            ->extraAttributes(['class' => 'w-1/2'])
                             ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).')
                             ->columnSpan('full'),
 
@@ -73,6 +75,7 @@ class CorporateDocumentsResource extends Resource
                             ->required()
                             ->autosize()
                             ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                            ->extraAttributes(['class' => 'w-1/2'])
                             ->helperText('Please provide a brief description of the document.')
                             ->columnSpan('full'),
                     ])

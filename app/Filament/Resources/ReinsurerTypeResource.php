@@ -50,24 +50,24 @@ class ReinsurerTypeResource extends Resource
                 ->columns(1)    // ← aquí defines dos columnas
                 ->schema([
 
+
                     TextInput::make('type_acronym')
                         ->label('Acronym')
+                        ->placeholder('e.g. ABC')
                         ->required()
-                        ->unique(ignorable: fn (?Model $record) => $record)
-                        ->maxLength(2)
-                        ->rule('regex:/^[A-Z]+$/')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                        ->helperText('Only uppercase letters allowed.')
-                        ->extraAttributes(['class' => 'w-1/2'])
-                        ->live(onBlur: false),
-                        //->extraAttributes(['class' => 'uppercase w-32']),
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(2)                     // no deja escribir más de 3 caracteres
+                        ->rule('regex:/^[A-Z]{2}$/')       // obliga a que sean EXACTAMENTE 3 letras A–Z
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('type_acronym', strtoupper($state)))
+                        ->helperText('Only three uppercase letters allowed.')
+                        ->extraAttributes(['class' => 'w-1/2']),    
 
                     TextInput::make('description')
                         ->label('Description')
                         ->required()
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                        ->helperText('Please provide a brief description of the operative status.')
+                        ->helperText('Please provide a brief description of the reinsurer type.')
                         ->extraAttributes(['class' => 'w-1/2']),
                         
                 ]),

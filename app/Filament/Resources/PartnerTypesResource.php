@@ -42,7 +42,7 @@ class PartnerTypesResource extends Resource
     public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”
-        return false;
+        return true;
     }
 
     public static function form(Form $form): Form
@@ -57,21 +57,25 @@ class PartnerTypesResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                    ->extraAttributes(['class' => 'w-1/2']),
                     //->helperText('First letter of each word will be capitalised.')
-                    ->disabled()
-                    ->dehydrated(false),   // evita que el valor se envíe al servidor
+                    //->disabled()
+                    //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->maxLength(2)
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                    ->extraAttributes(['class' => 'w-1/2']),
                     //->helperText('Only uppercase letters allowed.')
-                    ->disabled()
-                    ->dehydrated(false),   // evita que el valor se envíe al servidor
+                    //->disabled()
+                    //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                     Textarea::make('description')
                     ->label('Description')
@@ -79,9 +83,11 @@ class PartnerTypesResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                    ->helperText('Please provide a brief description of the partner type.')
+                    ->extraAttributes(['class' => 'w-1/2']),
                     //->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->disabled()
-                    ->dehydrated(false),   // evita que el valor se envíe al servidor
+                    //->disabled()
+                    //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                 ]),
 
@@ -219,7 +225,11 @@ public static function infolist(Infolist $infolist): Infolist
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -239,8 +249,8 @@ public static function infolist(Infolist $infolist): Infolist
     {
         return [
             'index' => Pages\ListPartnerTypes::route('/'),
-            //'create' => Pages\CreatePartnerTypes::route('/create'),
-            //'edit' => Pages\EditPartnerTypes::route('/{record}/edit'),
+            'create' => Pages\CreatePartnerTypes::route('/create'),
+            'edit' => Pages\EditPartnerTypes::route('/{record}/edit'),
         ];
     }
 }

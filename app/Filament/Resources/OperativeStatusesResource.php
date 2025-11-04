@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Textarea;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -41,7 +42,7 @@ class OperativeStatusesResource extends Resource
     public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”
-        return false;
+        return true;
     }
 
     public static function form(Form $form): Form
@@ -56,22 +57,25 @@ class OperativeStatusesResource extends Resource
                     TextInput::make('acronym')
                         ->label('Acronym')
                         ->required()
-                        ->unique()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                        ->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Only uppercase letters allowed.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
-                    TextInput::make('description')
+                    Textarea::make('description')
                         ->label('Description')
                         ->required()
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->autosize()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                        ->helperText('Please provide a brief description of the operative status.')
+                        ->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Please provide a brief description of the operative status.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
                         
                 ]),
 
@@ -192,7 +196,11 @@ public static function infolist(Infolist $infolist): Infolist
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -212,8 +220,8 @@ public static function infolist(Infolist $infolist): Infolist
     {
         return [
             'index' => Pages\ListOperativeStatuses::route('/'),
-            //'create' => Pages\CreateOperativeStatuses::route('/create'),
-            //'edit' => Pages\EditOperativeStatuses::route('/{record}/edit'),
+            'create' => Pages\CreateOperativeStatuses::route('/create'),
+            'edit' => Pages\EditOperativeStatuses::route('/{record}/edit'),
         ];
     }
 }

@@ -39,113 +39,142 @@ class CountriesResource extends Resource
         return Country::count();
     }
 
-    public static function canCreate(): bool
+    /* public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”
         return false;
-    }
+    } */
 
-    public static function form(Form $form): Form
+    
+
+public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                
-                    Forms\Components\Section::make('Corporate Document Details') //Sección 1
+                Forms\Components\Group::make() //Grupo 1
+                ->schema([
+                    Forms\Components\Section::make('Corporate Document Details')
                     ->schema([
-
+                    
                         TextInput::make('name')
                         ->label('Name')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('First letter of each word will be capitalised.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('alpha_2')
                         ->label('Alpha 2')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('alpha_2', strtoupper($state)))
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('alpha_2', strtoupper($state))),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Only uppercase letters allowed.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('alpha_3')
                         ->label('Alpha 3')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(3)
                         ->rule('regex:/^[A-Z]+$/')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('alpha_3', strtoupper($state)))
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('alpha_3', strtoupper($state))),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Only uppercase letters allowed.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('country_code')
                         ->label('Country Code')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->numeric()
                         ->minValue(1) // opcional: evita 0 o negativos
-                        ->maxValue(999) // opcional: para limitar a 3 dígitos
+                        ->maxValue(999), // opcional: para limitar a 3 dígitos
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Only whole numbers allowed.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('iso_code')
                         ->label('Iso Code')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(30)
                         ->rule('regex:/^[A-Z0-9\-:\s]+$/')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('iso_code', strtoupper($state)))
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('iso_code', strtoupper($state))),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Only uppercase letters, numbers, dash (-), colon (:), and spaces allowed.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('am_best_code')
                         ->label('AM Best Code')
                         ->required()
                         ->maxLength(10)
                         ->rule('regex:/^[A-Z0-9\-\s]+$/')
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('am_best_code', strtoupper($state)))
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('am_best_code', strtoupper($state))),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Only uppercase letters, numbers, dash (-), and spaces allowed.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('latitude')
                         ->label('Latitude')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->type('number') // ✅ convierte el input en <input type="number">
                         ->step('any')    // ✅ permite cualquier cantidad de decimales
                         ->minValue(-90)  // límite geográfico para latitud
-                        ->maxValue(90)
+                        ->maxValue(90),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Enter a decimal value between -90 and 90.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         TextInput::make('longitude')
                         ->label('longitude')
                         ->required()
+                        ->unique(ignoreRecord: true)
                         ->type('number') // ✅ convierte el input en <input type="number">
                         ->step('any')    // ✅ permite cualquier cantidad de decimales
                         ->minValue(-90)  // límite geográfico para latitud
-                        ->maxValue(90)
+                        ->maxValue(90),
+                        //->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Enter a decimal value between -90 and 90.')
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        //->disabled()
+                        //->dehydrated(false),   // evita que el valor se envíe al servidor
 
                         Select::make('region_id')
                         ->label('Region')
                         ->relationship('region', 'name')
                         ->searchable()
                         ->preload()
-                        ->required()
-                        ->disabled()
-                        ->dehydrated(false),   // evita que el valor se envíe al servidor
-                ]),
-            
-        ]);
+                        ->required(),
+                        //->extraAttributes(['class' => 'w-1/2']),
+
+                            
+                        
+                               
+                    ])
+                    ->columns(2),
+                ])
+                ->columnSpanFull(),
+            ]);
     }
+
+
+
+
+
+
 
 
 
@@ -322,7 +351,11 @@ public static function infolist(Infolist $infolist): Infolist
                 //
             ])
             ->actions([
-                 Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -342,8 +375,8 @@ public static function infolist(Infolist $infolist): Infolist
     {
         return [
             'index' => Pages\ListCountries::route('/'),
-            //'create' => Pages\CreateCountries::route('/create'),
-            //'edit' => Pages\EditCountries::route('/{record}/edit'),
+            'create' => Pages\CreateCountries::route('/create'),
+            'edit' => Pages\EditCountries::route('/{record}/edit'),
         ];
     }
 }

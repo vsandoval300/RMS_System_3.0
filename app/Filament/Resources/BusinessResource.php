@@ -276,7 +276,7 @@ class BusinessResource extends Resource
                                 ->label('Currency')
                                 //->hiddenLabel()
                                 //->inlineLabel()
-                                ->placeholder('Business region.') // 👈 Aquí cambias el texto
+                                ->placeholder('Select currency.') // 👈 Aquí cambias el texto
                                 ->relationship(
                                     name: 'currency',         // ← relación en tu modelo
                                     titleAttribute: 'name')

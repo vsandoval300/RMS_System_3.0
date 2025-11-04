@@ -60,6 +60,7 @@ class ManagerResource extends Resource
                     ->live(onBlur: false)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                    ->extraAttributes(['class' => 'w-1/2'])
                     ->helperText('First letter of each word will be capitalised.'),
                     //->extraAttributes(['class' => 'w-1/2']),
 
@@ -68,7 +69,8 @@ class ManagerResource extends Resource
                     ->placeholder('Please provide manager address')
                     ->required()
                     ->columnSpan('full')
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state)))),
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state))))
+                    ->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('country_id')
                         ->label(__('Country'))
@@ -84,7 +86,8 @@ class ManagerResource extends Resource
                         ->optionsLimit(300)
                         ->placeholder('Choose the reinsurer\'s country')
                         ->required()
-                        ->placeholder('Select a country'),
+                        ->placeholder('Select a country')
+                        ->extraAttributes(['class' => 'w-1/2']),
                         //->helperText('Choose the reinsurer\'s country.'),
                            
                 //

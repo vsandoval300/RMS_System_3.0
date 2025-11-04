@@ -67,15 +67,16 @@ class BankAccountsResource extends Resource
                                 /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
                                 ? 'Please select the account status.' 
                                 : null), */
-                                
+
                             Select::make('currency_id')
                                 ->label('Currency')
+                                //->hiddenLabel()
                                 ->inlineLabel()
-                                ->placeholder('Select currency')
-                                ->relationship('currency', 'name') // 👈 relación base
-                                ->getOptionLabelFromRecordUsing(
-                                    fn ($record) => $record->acronym . ' - ' . $record->name
-                                )
+                                ->placeholder('Select currency.') // 👈 Aquí cambias el texto
+                                ->relationship(
+                                    name: 'currency',         // ← relación en tu modelo
+                                    titleAttribute: 'name')
+                                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->acronym} - {$record->name}")
                                 ->searchable()
                                 ->preload()
                                 ->optionsLimit(180)
@@ -127,7 +128,6 @@ class BankAccountsResource extends Resource
                                 ->label('Beneficiary SWIFT code')
                                 ->inlineLabel()
                                 ->placeholder('Please provide SWIFT code.')
-                                ->required()
                                 ->rule('regex:/^[A-Z0-9]{8}([A-Z0-9]{3})?$/') // 8 o 11 caracteres alfanuméricos
                                 ->afterStateUpdated(fn ($state, callable $set) => 
                                     $set('beneficiary_swift', strtoupper($state))
@@ -162,7 +162,7 @@ class BankAccountsResource extends Resource
                                 ->inlineLabel()
                                 ->placeholder('Please provide account number.')
                                 ->required()
-                                ->unique()
+                                ->unique(ignoreRecord: true)
                                 ->maxLength(255)
                                 ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_no', ucwords(strtolower($state)))),
                                
@@ -509,9 +509,9 @@ public static function infolist(Infolist $infolist): Infolist
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBankAccounts::route('/'),
+            'index'  => Pages\ListBankAccounts::route('/'),
             'create' => Pages\CreateBankAccounts::route('/create'),
-            'edit' => Pages\EditBankAccounts::route('/{record}/edit'),
+            'edit'   => Pages\EditBankAccounts::route('/{record}/edit'),
         ];
     }
 }

@@ -34,7 +34,7 @@ class IndustryResource extends Resource
 {
     protected static ?string $model = Industry::class;
     protected static ?string $navigationIcon = 'heroicon-o-minus';
-     protected static ?string $navigationLabel = 'Sectors';
+     protected static ?string $navigationLabel = 'Industries';
     protected static ?string $navigationGroup = 'Resources';
     protected static ?int    $navigationSort  = 5;   // aparecerá primero
 
@@ -45,13 +45,16 @@ class IndustryResource extends Resource
         return Industry::count();
     }
 
-    public static function canCreate(): bool
+    /* public static function canCreate(): bool
     {
         // Devuelve false para ocultar el botón “New country”
         return false;
-    }
+    } */
     
-    public static function form(Form $form): Form
+   
+
+
+public static function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -60,29 +63,33 @@ class IndustryResource extends Resource
                 ->columns(1)    // ← aquí defines dos columnas
                 ->schema([
 
+
                     TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    //->helperText('First letter of each word will be capitalised.')
-                    ->disabled()
-                    ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        ->label('Name')
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->extraAttributes(['class' => 'w-1/2']),    
 
                     Textarea::make('description')
-                    ->label('Description')
-                    ->required()
-                    ->columnSpan('full')
-                    ->autosize()
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    //->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                    ->disabled()
-                    ->dehydrated(false),   // evita que el valor se envíe al servidor
+                        ->label('Description')
+                        ->required()
+                        ->autosize()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                        ->helperText('Please provide a brief description of the industry.')
+                        ->extraAttributes(['class' => 'w-1/2']),
+                        
+                ]),
 
-                ]),    
 
             ]);
     }
+
+
+
+
+
 
 
 
@@ -203,7 +210,11 @@ class IndustryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),   // 👈 sustituto de Edit
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -223,8 +234,8 @@ class IndustryResource extends Resource
     {
         return [
             'index' => Pages\ListIndustries::route('/'),
-            //'create' => Pages\CreateIndustries::route('/create'),
-            //'edit' => Pages\EditIndustries::route('/{record}/edit'),
+            'create' => Pages\CreateIndustries::route('/create'),
+            'edit' => Pages\EditIndustries::route('/{record}/edit'),
         ];
     }
 }

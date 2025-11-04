@@ -11,12 +11,12 @@ class EditCurrencies extends EditRecord
 {
     protected static string $resource = CurrenciesResource::class;
 
-    protected function getHeaderActions(): array
+    /* protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make(),
         ];
-    }
+    } */
 
     // 👇 Agrega este método
     // 👇 Ajustar la firma a ?string

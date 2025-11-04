@@ -66,7 +66,6 @@ class BanksResource extends Resource
                             ->label('Address')
                             ->placeholder('Please provide bank address')
                             ->required()
-                            ->columnSpan('full')
                             ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state)))),
                             /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
                                 ? 'Please provide address.' 

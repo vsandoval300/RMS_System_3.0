@@ -16,12 +16,12 @@ class EditRole extends EditRecord
 
     public Collection $permissions;
 
-    protected function getActions(): array
+    /* protected function getActions(): array
     {
         return [
             Actions\DeleteAction::make(),
         ];
-    }
+    } */
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
