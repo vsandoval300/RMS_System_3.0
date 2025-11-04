@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CostSchemeResource\Pages;
 
 use App\Filament\Resources\CostSchemeResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
@@ -16,10 +17,20 @@ class CreateCostScheme extends CreateRecord
     protected function getFormActions(): array
     {
         return [
-            Actions\Action::make('create')
+            /* Actions\Action::make('create')
                 ->label('Create')
                 ->action('create')      // 👈 ejecuta el método create() de la página (submit real)
+                ->color('primary'), */
+            Actions\Action::make('create')
+                ->label('Create')
+                ->requiresConfirmation()
+                ->modalHeading('Create Placement Scheme')
+                ->modalDescription('Are you sure you want to create this Placement Scheme?')
+                ->modalSubmitActionLabel('Create')
+                ->action('create')      // sigue llamando al método create()
                 ->color('primary'),
+
+
             Actions\Action::make('cancel')
                 ->label('Cancel')
                 ->url(static::getResource()::getUrl('index'))
@@ -57,7 +68,7 @@ class CreateCostScheme extends CreateRecord
     } */
 
 
- public function mount(): void
+    public function mount(): void
     {
         parent::mount();
 
@@ -113,7 +124,26 @@ class CreateCostScheme extends CreateRecord
     }
 
 
+/**
+     * 👉 Personalizamos SOLO el botón "Create"
+     *     para que muestre un modal de confirmación.
+     */
+    protected function getCreateFormAction(): Action
+    {
+        return Action::make('create')
+            // label por defecto de Filament
+            ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
+            ->requiresConfirmation()
+            ->modalHeading('Create Placement Scheme')
+            ->modalDescription('Are you sure you want to create this Placement Scheme?')
+            ->modalSubmitActionLabel('Create')
+            // qué hacer cuando el usuario confirma en el modal
+            ->action(fn () => $this->create())
+            ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
+    }
 
+   
+    
 
 
 
