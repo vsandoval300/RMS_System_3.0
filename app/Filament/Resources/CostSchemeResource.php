@@ -207,7 +207,7 @@ class CostSchemeResource extends Resource
                             ->addable(true)
 
                             // ⬇️ Al agregar/quitar filas, reindexas y luego recalculas el total
-                            ->afterStateUpdated(function (array $state, callable $set, callable $get) {
+                           /*  ->afterStateUpdated(function (array $state, callable $set, callable $get) {
                                 $schemeId = $get('id');
 
                                 if (! $schemeId || ! is_string($schemeId)) {
@@ -217,6 +217,7 @@ class CostSchemeResource extends Resource
                                 // Reindexación/ID (tu lógica)
                                 $newState = [];
                                 $index = 1;
+
                                 foreach ($state as $key => $item) {
                                     if (is_array($item)) {
                                         $item['index'] = $index;
@@ -235,7 +236,55 @@ class CostSchemeResource extends Resource
                                     ->sum();
 
                                 $set('total_values', number_format($total, 5, '.', ''));
+                            }), */
+
+                            // ⬇️ Al agregar/quitar filas, reindexas y luego recalculas el total
+                            ->afterStateUpdated(function (array $state, callable $set, callable $get) {
+                                $schemeId = $get('id');
+
+                                if (! $schemeId || ! is_string($schemeId)) {
+                                    return;
+                                }
+
+                                $newState = [];
+                                $index = 1;
+
+                                foreach ($state as $key => $item) {
+                                    if (! is_array($item)) {
+                                        continue;
+                                    }
+
+                                    // Siempre reindexamos
+                                    $item['index'] = $index;
+
+                                    // ⚠️ Solo generamos ID si el nodo es nuevo
+                                    if (empty($item['id'])) {
+                                        $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+                                    }
+
+                                    $newState[$key] = $item;
+                                    $index++;
+                                }
+
+                                $set('costNodexes', $newState);
+
+                                // 🟢 Recalcular total tras add/remove
+                                $total = collect($newState)
+                                    ->pluck('value')
+                                    ->filter()
+                                    ->map(fn ($v) => (float) $v)
+                                    ->sum();
+
+                                $set('total_values', number_format($total, 5, '.', ''));
                             }),
+
+
+
+
+
+
+
+
 
                         
                                 /* Placeholder::make('total_values')
