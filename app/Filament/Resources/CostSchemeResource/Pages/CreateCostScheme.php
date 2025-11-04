@@ -9,6 +9,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\CostScheme;
+use Filament\Notifications\Notification;
 
 class CreateCostScheme extends CreateRecord
 {
@@ -99,6 +100,14 @@ class CreateCostScheme extends CreateRecord
         return [$nextIndex, $nextId];
     }
 
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Placement Scheme created')
+            ->body('The new Placement Scheme has been created successfully.');
+    }
+
 
     /**
      * 👉 Personalizamos SOLO el botón "Create"
@@ -122,19 +131,14 @@ class CreateCostScheme extends CreateRecord
     protected function getFormActions(): array
     {
         return [
-            /* Actions\Action::make('create')
-                ->label('Create')
-                ->action('create')      // 👈 ejecuta el método create() de la página (submit real)
-                ->color('primary'), */
-            Actions\Action::make('create')
+             Actions\Action::make('create')   // 👈 aquí estás creando OTRA acción diferente
                 ->label('Create')
                 ->requiresConfirmation()
                 ->modalHeading('Create Placement Scheme')
                 ->modalDescription('Are you sure you want to create this Placement Scheme?')
                 ->modalSubmitActionLabel('Create')
-                ->action('create')      // sigue llamando al método create()
+                ->action('create')
                 ->color('primary'),
-
 
             Actions\Action::make('cancel')
                 ->label('Cancel')
