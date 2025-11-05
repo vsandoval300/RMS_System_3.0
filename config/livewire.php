@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'temporary_file_upload' => [
+    /* 'temporary_file_upload' => [
         // Fuerza temporales al disco local SIEMPRE
         'disk' => env('LIVEWIRE_TMP_DISK', 'local'),
         'directory' => env('LIVEWIRE_TMP_DIR', 'livewire-tmp'),
@@ -78,9 +78,23 @@ return [
         ],
         'max_upload_time' => 10,
         'cleanup' => true,
+    ], */
+
+    'temporary_file_upload' => [
+        'disk' => env('LIVEWIRE_TMP_DISK', 'local'),
+        'directory' => env('LIVEWIRE_TMP_DIR', 'livewire-tmp'),
+
+        'rules' => ['file', 'max:20480'], // sin mimetypes aquí
+        // o simplemente: 'rules' => 'file|max:20480',
+
+        'middleware' => 'throttle:60,1',
+        'preview_mimes' => [
+            'png','gif','bmp','svg','wav','mp4','mov','avi','wmv','mp3','m4a',
+            'jpg','jpeg','mpga','webp','wma',
+        ],
+        'max_upload_time' => 10,
+        'cleanup' => true,
     ],
-
-
 
    /*  'temporary_file_upload' => [
         'disk' => null,        // Example: 'local', 's3'              | Default: 'default'
