@@ -540,6 +540,7 @@ public static function infolist(Infolist $infolist): Infolist
                                         ->label('Logo')
                                         ->disk('s3')
                                         ->visibility('public')
+                                        ->image()
                                         ->getStateUsing(fn ($record) => $record->logo)
                                         ->hidden(fn ($record) => blank($record->logo))
                                         ->extraAttributes([
@@ -578,6 +579,7 @@ public static function infolist(Infolist $infolist): Infolist
                                         ->label('Icon')
                                         ->disk('s3')
                                         ->visibility('public')
+                                        ->image()
                                         ->getStateUsing(fn ($record) => $record->icon)
                                         ->hidden(fn ($record) => blank($record->icon))
                                         ->extraAttributes([
