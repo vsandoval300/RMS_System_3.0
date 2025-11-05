@@ -106,6 +106,7 @@ class ReinsurersResource extends Resource
                                     ->label('Name')
                                     ->placeholder("Please provide reinsurer's name")
                                     ->required()
+                                    ->unique(ignoreRecord: true)
                                     ->rules([
                                         Rule::unique('reinsurers', 'name')
                                             ->whereNull('deleted_at'),
@@ -145,6 +146,7 @@ class ReinsurersResource extends Resource
                                             ->whereNull('deleted_at'),
                                     ])
                                     ->required()
+                                    ->unique(ignoreRecord: true)
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, callable $set) {
@@ -176,6 +178,7 @@ class ReinsurersResource extends Resource
                                     ->label('Acronym')
                                     ->placeholder('e.g. ABC')
                                     ->required()
+                                    ->unique(ignoreRecord: true)
                                     ->rules([
                                         Rule::unique('reinsurers', 'short_name')
                                             ->whereNull('deleted_at'),
