@@ -4,9 +4,9 @@ namespace App\Filament\Resources\BanksResource\Pages;
 
 use App\Filament\Resources\BanksResource;
 use Filament\Actions;
-use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
+use Filament\Actions\Action;
 
 class CreateBanks extends CreateRecord
 {
