@@ -107,10 +107,10 @@ class ReinsurersResource extends Resource
                                     ->placeholder("Please provide reinsurer's name")
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->rules([
+                                    /* ->rules([
                                         Rule::unique('reinsurers', 'name')
                                             ->whereNull('deleted_at'),
-                                    ])
+                                    ]) */
                                     ->maxLength(255)
                                     ->live(onBlur: true) // 👈 dispara solo cuando se pierde el foco
                                     ->afterStateUpdated(function ($state, callable $set) {
@@ -141,10 +141,10 @@ class ReinsurersResource extends Resource
                                 TextInput::make('short_name')
                                     ->label('Short Name')
                                     ->placeholder("Please provide reinsurer's short name")
-                                    ->rules([
+                                    /* ->rules([
                                         Rule::unique('reinsurers', 'short_name')
                                             ->whereNull('deleted_at'),
-                                    ])
+                                    ]) */
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255)
@@ -179,10 +179,10 @@ class ReinsurersResource extends Resource
                                     ->placeholder('e.g. ABC')
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->rules([
+                                    /* ->rules([
                                         Rule::unique('reinsurers', 'short_name')
                                             ->whereNull('deleted_at'),
-                                    ])
+                                    ]) */
                                     ->maxLength(3)
                                     ->rule('regex:/^[A-Z]{3}$/')
                                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
