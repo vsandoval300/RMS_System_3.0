@@ -12,7 +12,7 @@ class CreateHolding extends CreateRecord
 {
     protected static string $resource = HoldingResource::class;
 
-     protected function getRedirectUrl(): string
+    protected function getRedirectUrl(): string
     {
         // Vuelve al listado después de guardar
         return static::getResource()::getUrl('index');
