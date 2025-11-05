@@ -34,7 +34,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='+1 (246) 234-2001';
         $director->address ='6C Prior Park Close, St James, Barbados';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/CFH.jpeg';
         $director->country_id = '20';
         $director->save();
 
@@ -46,7 +46,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='Miguel De Mendoza 43 Deparamento 301. Colonia Merced Gomez, Alvaro Obregon, CP 01600 Mexico';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/GGT.jpeg';
         $director->country_id = '144';
         $director->save();
 
@@ -94,7 +94,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='134 Surf View Row, Atlantic Shores, Christ Church Barbados';
         $director->occupation ='Insurance Executive';
-        $director->image = '';
+        $director->image = 'Directors/AM.jpeg';
         $director->country_id = '41';
         $director->save();
 
@@ -142,7 +142,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='Hacienda del Ciervo 7A-2002, Edo Mex, 52763, Mexico';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/MKS.png';
         $director->country_id = '20';
         $director->save();
 
@@ -214,7 +214,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='#3 Colleton, St. Lucy BB27188, Barbados';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/WAG.png';
         $director->country_id = '20';
         $director->save();
 
@@ -238,7 +238,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='Staple Grove House, St. Davids, Christ Church, Barbados';
         $director->occupation ='Attorney-at-Law';
-        $director->image = '';
+        $director->image = 'Directors/TAC.png';
         $director->country_id = '20';
         $director->save();
 
@@ -250,7 +250,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='168 Cassia Row, Sunset Crest, Saint James Barbados';
         $director->occupation ='Insurance Executive';
-        $director->image = '';
+        $director->image = 'Directors/KAG.jpg';
         $director->country_id = '144';
         $director->save();
 
@@ -274,7 +274,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='+1 (246) 467-1481¬†';
         $director->address ='9 Walkers Park West, St. George, Barbados';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/GNW.jpeg';
         $director->country_id = '20';
         $director->save();
 
@@ -286,7 +286,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='Vasco de Quiroga No. 2121 Piso 4 Col. Pena Blanca Santa Fe, 01210 Ciudad de Mexico';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/AST.png';
         $director->country_id = '144';
         $director->save();
 
@@ -346,7 +346,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='96 N Shore Dr, Miami Beach FL. 33141, United States of America';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/SJX.jpeg';
         $director->country_id = '235';
         $director->save();
 
@@ -382,7 +382,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='115 Makvas Ct. Coral Gables FL, USA';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/GHO.jpeg';
         $director->country_id = '236';
         $director->save();
 
@@ -430,7 +430,7 @@ class DirectorsSeeder extends Seeder
         $director->phone ='';
         $director->address ='168 Cassia Row, Sunset Crest, Saint James Barbados';
         $director->occupation ='Business Executive';
-        $director->image = '';
+        $director->image = 'Directors/BLM.jpeg';
         $director->country_id = '144';
         $director->save();
     }

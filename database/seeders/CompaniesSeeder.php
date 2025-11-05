@@ -79,7 +79,7 @@ class CompaniesSeeder extends Seeder
         $company->save();
 
         $company = new Company();
-        $company->name = 'Agrrícola Amajac, S.A. de C.V.';
+        $company->name = 'Agrícola Amajac, S.A. de C.V.';
         $company->acronym = 'AGR_AMAJ';
         $company->activity = 'Fruit & Vegetable Store: Operates retail locations focused on the sale of fresh fruits and vegetables, providing quality produce to local customers.';
         $company->industry_id = '3';

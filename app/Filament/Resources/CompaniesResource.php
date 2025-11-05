@@ -20,6 +20,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Country;
+use Filament\Support\Enums\VerticalAlignment;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -64,9 +65,9 @@ class CompaniesResource extends Resource
                     ->label('Acronym')
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->live(onBlur: false)
-                    ->maxLength(2)
-                    ->rule('regex:/^[A-Z]+$/')
+                    //->live(onBlur: false)
+                    ->maxLength(255)
+                    ->rule('regex:/^[A-Z_]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
                     ->helperText('Only uppercase letters allowed.'),
                     //->extraAttributes(['class' => 'w-1/2']),
@@ -232,49 +233,48 @@ class CompaniesResource extends Resource
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     public static function table(Table $table): Table
     {
         return $table
+             ->recordUrl(fn (Company $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->sortable(),
                 TextColumn::make('name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 TextColumn::make('acronym')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('activity')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Activity')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 550px; white-space: normal;', // ancho fijo de 300px
                     ]),
                 TextColumn::make('sector.name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Sector')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('country.name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Country')
                     ->sortable()
                     ->searchable()
+                    ->extraAttributes([
+                        'style' => 'width: 250px; white-space: normal;', // ancho fijo de 300px
+                    ]),
 
 
             ])
@@ -307,6 +307,7 @@ class CompaniesResource extends Resource
         return [
             'index' => Pages\ListCompanies::route('/'),
             'create' => Pages\CreateCompanies::route('/create'),
+            'view'   => Pages\ViewCompanies::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditCompanies::route('/{record}/edit'),
         ];
     }
