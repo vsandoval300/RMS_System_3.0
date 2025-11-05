@@ -69,14 +69,20 @@ class IndustriesRelationManager extends RelationManager
 
         /* ───── Acciones por fila ───── */
         ->actions([
-            Tables\Actions\DetachAction::make(),
-            //Tables\Actions\EditAction::make(),     // edita la Industry (opcional)
-            // Tables\Actions\DeleteAction::make(), // solo si permites borrar Industry
+            Tables\Actions\DetachAction::make()
+                ->label('') // quita el texto "Detach"
+                ->icon('heroicon-o-trash') // icono de bote de basura
+                ->color('danger') // mismo rojo (opcional, ya suele ser danger)
+                ->iconButton(), // que sea sólo icono, no botón con borde
+            // Tables\Actions\EditAction::make(),
         ])
 
         /* ───── Acciones masivas (checkbox) ───── */
         ->bulkActions([
-            Tables\Actions\DetachBulkAction::make(),
+            Tables\Actions\DetachBulkAction::make()
+                ->label('Detach') // o el texto que quieras
+                ->icon('heroicon-o-trash')
+                ->color('danger'),
         ]);
     }
 }
