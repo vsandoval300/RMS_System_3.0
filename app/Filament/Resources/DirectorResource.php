@@ -18,6 +18,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\ToggleButtons;
+use Illuminate\Support\Str;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -75,16 +76,14 @@ class DirectorResource extends Resource
                             ->label('Email address')
                             ->placeholder('name@example.com')
                             ->email()
-                            ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
 
                         TextInput::make('phone')
                             ->label('Phone')
                             ->placeholder('e.g., +52 442 123 4567 ext. 123')
-                            ->tel()
-                            ->required()
-                            ->maxLength(40),
+                            ->rules(['nullable', 'string', 'max:40']),
+                            
 
                         Select::make('country_id')
                             ->label(__('Country'))
@@ -358,12 +357,54 @@ class DirectorResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Director $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
+
                 TextColumn::make('Index')
                     ->label('Index')
                     ->state(fn ($record, $rowLoop) => $rowLoop->iteration),
 
                 TextColumn::make('person')
+                    ->label('Director')
+                    ->html() // vamos a devolver HTML
+                    // Estado “base”: nombre completo, útil para exportar / buscar
+                    ->state(fn (Director $r) =>
+                        trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—'
+                    )
+                    ->formatStateUsing(function ($state, Director $record) {
+                        $name = e($state ?: '—');      // por seguridad, escapamos el texto
+                        $imagePath = $record->image;   // ruta tipo "Directors/CFH.jpeg"
+
+                        // Si no hay imagen, solo mostramos el nombre
+                        if (blank($imagePath)) {
+                            return "<span>{$name}</span>";
+                        }
+
+                        // Construimos la URL pública del S3
+                        $imageUrl = Str::startsWith($imagePath, ['http://', 'https://'])
+                            ? $imagePath
+                            : rtrim(config('filesystems.disks.s3.url'), '/') . '/' . ltrim($imagePath, '/');
+
+                        return "
+                            <div style='display:flex;align-items:center;gap:8px;'>
+                                <img src=\"{$imageUrl}\"
+                                    alt=\"{$name}\"
+                                    style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
+                                <span>{$name}</span>
+                            </div>
+                        ";
+                    })
+                    ->searchable(query: function (Builder $q, string $search) {
+                        $q->where(fn ($w) =>
+                            $w->where('name', 'like', "%{$search}%")
+                            ->orWhere('surname', 'like', "%{$search}%")
+                        );
+                    })
+                    ->sortable(query: function (Builder $q, string $dir) {
+                        $q->orderBy('name', $dir)->orderBy('surname', $dir);
+                    }),
+
+               /*  TextColumn::make('person')
                     ->label('Director')
                     ->state(fn (Director $r) =>
                         trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—'
@@ -376,7 +417,7 @@ class DirectorResource extends Resource
                     })
                     ->sortable(query: function (Builder $q, string $dir) {
                         $q->orderBy('name', $dir)->orderBy('surname', $dir);
-                    }),
+                    }), */
 
                 TextColumn::make('gender')->searchable(),
                 TextColumn::make('email')
@@ -419,7 +460,7 @@ class DirectorResource extends Resource
         return [
             'index'  => Pages\ListDirectors::route('/'),
             'create' => Pages\CreateDirector::route('/create'),
-            //'view'   => Pages\ViewDirector::route('/{record}'), // 👈 importante
+            'view'   => Pages\ViewDirector::route('/{record}'), // 👈 importante
             'edit'   => Pages\EditDirector::route('/{record}/edit'),
         ];
     }

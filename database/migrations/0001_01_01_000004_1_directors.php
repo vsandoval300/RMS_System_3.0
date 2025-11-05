@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('surname', 100)->index();   // ✅ Index si filtras por apellido
             $table->string('gender', 10)->index();     // ✅ Index si haces filtros
-            $table->string('email', 100);
-            $table->string('phone', 20);
-            $table->string('address', 200);
+            $table->string('email', 100)->nullable();
+            $table->string('phone', 20)->nullable();
+            $table->string('address', 200)->nullable();
             $table->string('occupation', 200)->index(); // ✅ Index si haces filtros por ocupación
             $table->string('image', 200)->nullable();
 
