@@ -429,8 +429,8 @@ class BusinessResource extends Resource
                         //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
                         
                     ]),
-                ])
-                ->maxWidth('7xl'),
+                ]),
+                //->maxWidth('8xl'),
                 //->collapsible(),
 
             
@@ -457,8 +457,8 @@ class BusinessResource extends Resource
                             // (Opcional) Dejar 2 cols vacías o añade un spacer si lo prefieres
                             // TextEntry::make('gd_desc_spacer')->label('')->state('')->columnSpan(2)->hiddenLabel(),
                         ]),
-                ])
-                ->maxWidth('7xl'),
+                    ]),
+                //->maxWidth('8xl'),
                 //->collapsible(),
 
 
@@ -580,8 +580,8 @@ class BusinessResource extends Resource
                                 ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—'),
                          ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
                     ]),
-                ])
-                ->maxWidth('7xl'),
+                ]),
+                //->maxWidth('8xl'),
                 //->collapsible(),
 
 

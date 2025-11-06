@@ -54,40 +54,40 @@ class PartnersResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('First letter of each word will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('short_name')
                     ->label('Short Name')
                     ->required()
-                    ->unique()
-                    ->live(onBlur: false)
+                    ->unique(ignoreRecord: true)
+                    //->live(onBlur: false)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Only uppercase letters allowed.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->unique()
-                    ->live(onBlur: false)
+                    ->unique(ignoreRecord: true)
+                    //->live(onBlur: false)
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Only uppercase letters allowed.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('partner_types_id')
                     ->label('Partner Type')
                     ->relationship('partnerType', 'name') // relación del modelo + campo visible
                     ->searchable()
                     ->required()
-                    ->preload()
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->preload(),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('country_id')
                     ->label('Country')
@@ -103,10 +103,12 @@ class PartnersResource extends Resource
                     ->optionsLimit(300)
                     ->required()
                     ->placeholder('Select a country')
-                    ->helperText('Choose the reinsurer\'s country.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Choose the reinsurer\'s country.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->collapsible(),
             ]);
     }
 
@@ -189,7 +191,7 @@ class PartnersResource extends Resource
                             ]),
                     ]),
             ])
-            ->maxWidth('6xl')
+            ->maxWidth('5xl')
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
@@ -217,7 +219,7 @@ class PartnersResource extends Resource
                             ]),
                     ]),
             ])
-            ->maxWidth('6xl')
+            ->maxWidth('5xl')
             ->compact(),
         ]);
     }
@@ -233,6 +235,7 @@ class PartnersResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Partner $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -288,6 +291,7 @@ class PartnersResource extends Resource
         return [
             'index' => Pages\ListPartners::route('/'),
             'create' => Pages\CreatePartners::route('/create'),
+            'view'   => Pages\ViewPartners::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditPartners::route('/{record}/edit'),
         ];
     }

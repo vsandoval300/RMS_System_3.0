@@ -54,7 +54,7 @@ class LineOfBusinessResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique(ignorable: fn (?Model $record) => $record)
+                    ->unique(ignoreRecord: true, column: 'name')   // 👈 ignora el registro en edición
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
@@ -183,6 +183,7 @@ class LineOfBusinessResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (LineOfBusiness $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -235,6 +236,7 @@ class LineOfBusinessResource extends Resource
         return [
             'index' => Pages\ListLineOfBusinesses::route('/'),
             'create' => Pages\CreateLineOfBusiness::route('/create'),
+            'view'   => Pages\ViewLineOfBusiness::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditLineOfBusiness::route('/{record}/edit'),
         ];
     }

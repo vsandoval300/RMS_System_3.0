@@ -236,7 +236,7 @@ class CompaniesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-             ->recordUrl(fn (Company $record) => static::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Company $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')

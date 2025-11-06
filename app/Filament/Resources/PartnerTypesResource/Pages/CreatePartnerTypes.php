@@ -59,4 +59,8 @@ class CreatePartnerTypes extends CreateRecord
                 ->outlined(),
         ];
     }   
+
+
+
+    
 }

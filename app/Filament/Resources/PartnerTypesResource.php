@@ -59,8 +59,7 @@ class PartnerTypesResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
                     //->helperText('First letter of each word will be capitalised.')
                     //->disabled()
                     //->dehydrated(false),   // evita que el valor se envíe al servidor
@@ -71,8 +70,7 @@ class PartnerTypesResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state))),
                     //->helperText('Only uppercase letters allowed.')
                     //->disabled()
                     //->dehydrated(false),   // evita que el valor se envíe al servidor
@@ -83,13 +81,14 @@ class PartnerTypesResource extends Resource
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                    ->helperText('Please provide a brief description of the partner type.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Please provide a brief description of the partner type.'),
                     //->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
                     //->disabled()
                     //->dehydrated(false),   // evita que el valor se envíe al servidor
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->collapsible(),
 
             ]);
     }
@@ -203,6 +202,7 @@ public static function infolist(Infolist $infolist): Infolist
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (PartnerType $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -250,6 +250,7 @@ public static function infolist(Infolist $infolist): Infolist
         return [
             'index' => Pages\ListPartnerTypes::route('/'),
             'create' => Pages\CreatePartnerTypes::route('/create'),
+            'view'   => Pages\ViewPartnerTypes::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditPartnerTypes::route('/{record}/edit'),
         ];
     }

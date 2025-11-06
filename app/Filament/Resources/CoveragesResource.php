@@ -65,7 +65,7 @@ class CoveragesResource extends Resource
                     ->label('Acronym')
                     ->required()
                     ->unique(ignoreRecord: true, column: 'acronym') // 👈 idem
-                    ->live(onBlur: false)
+                    //->live(onBlur: false)
                     ->maxLength(20)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
@@ -202,7 +202,7 @@ class CoveragesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            
+            ->recordUrl(fn (Coverage $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -269,6 +269,7 @@ class CoveragesResource extends Resource
         return [
             'index' => Pages\ListCoverages::route('/'),
             'create' => Pages\CreateCoverages::route('/create'),
+            'view'   => Pages\ViewCoverages::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditCoverages::route('/{record}/edit'),
         ];
     }

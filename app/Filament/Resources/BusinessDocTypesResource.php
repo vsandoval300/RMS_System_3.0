@@ -54,8 +54,8 @@ class BusinessDocTypesResource extends Resource
                         ->unique(ignoreRecord: true)
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                        ->helperText('First letter of each word will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('First letter of each word will be capitalised.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                     Textarea::make('description')
                         ->label('Description')
@@ -63,10 +63,12 @@ class BusinessDocTypesResource extends Resource
                         ->columnSpan('full')
                         ->autosize()
                         ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
-                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.')
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->compact(),
             ]);
     }
 
@@ -157,6 +159,7 @@ class BusinessDocTypesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (BusinessDocType $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -203,6 +206,7 @@ class BusinessDocTypesResource extends Resource
         return [
             'index' => Pages\ListBusinessDocTypes::route('/'),
             'create' => Pages\CreateBusinessDocTypes::route('/create'),
+            'view'   => Pages\ViewBusinessDocTypes::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditBusinessDocTypes::route('/{record}/edit'),
         ];
     }

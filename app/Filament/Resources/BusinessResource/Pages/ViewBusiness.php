@@ -5,10 +5,13 @@ namespace App\Filament\Resources\BusinessResource\Pages;
 use App\Filament\Resources\BusinessResource;
 use Filament\Resources\Pages\ViewRecord;
 use App\Models\Business;
+use Filament\Actions;
 
 class ViewBusiness extends ViewRecord
 {
     protected static string $resource = BusinessResource::class;
+
+    //protected ?string $maxContentWidth = '8xl';
 
     protected function resolveRecord(int|string $key): Business
     {
@@ -38,4 +41,28 @@ class ViewBusiness extends ViewRecord
         return 'Business – [ ' . ($this->record?->business_code ?? 'Business') . ' ]';
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            /* Actions\Action::make('back')
+                ->label('Back')
+                ->icon('heroicon-o-arrow-left')
+                ->url(static::getResource()::getUrl('index')), */
+
+            Actions\Action::make('close')
+                ->label('Close')
+                ->icon('heroicon-o-x-mark')
+                ->color('gray')
+                ->outlined()
+                ->url(static::getResource()::getUrl('index')),    
+        ];
+    }
+
+
+
+
+
+
 }
+
+

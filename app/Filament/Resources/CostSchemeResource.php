@@ -125,6 +125,7 @@ class CostSchemeResource extends Resource
                         ])
                         ->columns(12),
                 ])
+                ->maxWidth('7xl')
                 ->collapsible(),
                 // ╔═════════════════════════════════════════════════════════════════════════╗
                 // ║ Table Repeater para Nodos de Costo                                      ║
@@ -352,6 +353,7 @@ class CostSchemeResource extends Resource
 
 
                         ])
+                        ->maxWidth('7xl')
                         ->collapsible(),
                     
         ]);
@@ -385,6 +387,7 @@ class CostSchemeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (CostScheme $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('index')
                     ->numeric()
@@ -435,7 +438,7 @@ class CostSchemeResource extends Resource
         return [
             'index' => Pages\ListCostSchemes::route('/'),
             'create' => Pages\CreateCostScheme::route('/create'),
-            //'view' => Pages\ViewCostScheme::route('/{record}'),
+            'view' => Pages\ViewCostScheme::route('/{record}'),
             'edit' => Pages\EditCostScheme::route('/{record}/edit'),
         ];
     }

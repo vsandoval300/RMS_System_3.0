@@ -53,21 +53,23 @@ class ProducersResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('First letter of each word will be capitalised.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->live(onBlur: false)
+                    //->live(onBlur: false)
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.')
-                    ->extraAttributes(['class' => 'w-1/2']),
+                    ->helperText('Only uppercase letters allowed.'),
+                    //->extraAttributes(['class' => 'w-1/2']),
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->collapsible(),
             ]);
     }
 
@@ -161,6 +163,7 @@ class ProducersResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Producer $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -200,6 +203,7 @@ class ProducersResource extends Resource
         return [
             'index' => Pages\ListProducers::route('/'),
             'create' => Pages\CreateProducers::route('/create'),
+            'view'   => Pages\ViewProducers::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditProducers::route('/{record}/edit'),
         ];
     }
