@@ -792,7 +792,7 @@ class BusinessResource extends Resource
 
                             // cost nodes + partner
                             ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'cost_schemes.id')
-                            ->leftJoin('partners', 'partners.id', '=', 'cost_nodesx.partner_id')
+                            ->leftJoin('partners', 'partners.id', '=', 'cost_nodesx.partner_destination_id') 
 
                             // deductions (para el segundo reporte)
                             ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
@@ -919,7 +919,7 @@ class BusinessResource extends Resource
 
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -930,11 +930,7 @@ class BusinessResource extends Resource
         return [
             //
             RelationManagers\LiabilityStructuresRelationManager::class,
-            RelationManagers\OperativeDocsRelationManager::class,
-            
-
-            
-            
+            RelationManagers\OperativeDocsRelationManager::class,        
         ];
     }
 
