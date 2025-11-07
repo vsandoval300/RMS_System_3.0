@@ -3,24 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CurrenciesResource\Pages;
-use App\Filament\Resources\CurrenciesResource\RelationManagers;
 use App\Models\Currency;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\FormsComponent;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Validation\Rule;
-use Filament\Tables\Actions\Action;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -50,6 +40,9 @@ class CurrenciesResource extends Resource
     } */
 
 
+    /*--------------------------------------------------------------
+     | 1. Form New and Edit
+     --------------------------------------------------------------*/
     public static function form(Form $form): Form
     {
         return $form
@@ -93,10 +86,9 @@ class CurrenciesResource extends Resource
 
 
 
-
-
-
-   
+    /*--------------------------------------------------------------
+     | 2. Infolist
+     --------------------------------------------------------------*/
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
@@ -193,30 +185,9 @@ class CurrenciesResource extends Resource
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /*--------------------------------------------------------------
+     | 3. CRUD Table
+     --------------------------------------------------------------*/
     public static function table(Table $table): Table
     {
         return $table
@@ -234,6 +205,7 @@ class CurrenciesResource extends Resource
             ->filters([
                 //
             ])
+
 
             ->actions([
                 Tables\Actions\ActionGroup::make([

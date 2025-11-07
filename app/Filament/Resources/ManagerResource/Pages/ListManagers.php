@@ -13,7 +13,14 @@ class ListManagers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Manager')          // 👈 el texto que tú quieras
+                ->icon('heroicon-m-plus')
+                ->color('primary')
+                ->createAnother(false)
+                ->modalHeading('New Manager')   // título del modal
+                ->modalSubmitActionLabel('Create')
+                ->modalCancelActionLabel('Cancel'),
         ];
     }
 }

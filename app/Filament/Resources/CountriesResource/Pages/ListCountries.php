@@ -13,7 +13,14 @@ class ListCountries extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Country')          // 👈 el texto que tú quieras
+                ->icon('heroicon-m-plus')
+                ->color('primary')
+                ->createAnother(false)
+                ->modalHeading('New Country')   // título del modal
+                ->modalSubmitActionLabel('Create')
+                ->modalCancelActionLabel('Cancel'),
         ];
     }
 }

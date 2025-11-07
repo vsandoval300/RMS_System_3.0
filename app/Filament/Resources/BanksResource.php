@@ -42,6 +42,9 @@ class BanksResource extends Resource
         return Bank::count();
     }
 
+    /*--------------------------------------------------------------
+     | 1. Form New and Edit
+     --------------------------------------------------------------*/
     public static function form(Form $form): Form
     {
         return $form
@@ -105,8 +108,9 @@ class BanksResource extends Resource
 
 
 
-
-
+    /*--------------------------------------------------------------
+     | 2. Infolist
+    --------------------------------------------------------------*/
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
@@ -226,15 +230,9 @@ class BanksResource extends Resource
 
 
 
-
-
-
-
-
-
-
-
-
+    /*--------------------------------------------------------------
+     | 3. CRUD Table
+     --------------------------------------------------------------*/
     public static function table(Table $table): Table
     {
         return $table

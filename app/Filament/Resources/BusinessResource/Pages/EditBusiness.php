@@ -7,7 +7,8 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Actions\Action;
-use Filament\Pages\Page;
+
+
 
 class EditBusiness extends EditRecord
 {
@@ -33,10 +34,16 @@ class EditBusiness extends EditRecord
         return 'Business Details';
     }
 
-    /* public function hasCombinedRelationManagerTabsWithContent(): bool
+    public function getContentTabIcon(): ?string
+    {
+        // icono del tab principal
+        return 'heroicon-o-briefcase';
+    }
+
+    public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
-    } */
+    }
 
     
    

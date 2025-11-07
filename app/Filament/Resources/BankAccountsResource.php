@@ -43,7 +43,9 @@ class BankAccountsResource extends Resource
         return BankAccount::count();
     }
    
-
+    /*--------------------------------------------------------------
+     | 1. Form New and Edit
+     --------------------------------------------------------------*/
     public static function form(Form $form): Form
     {
         return $form
@@ -204,170 +206,172 @@ class BankAccountsResource extends Resource
 
 
 
+    /*--------------------------------------------------------------
+     | 2. Infolist
+    --------------------------------------------------------------*/
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
 
-public static function infolist(Infolist $infolist): Infolist
-{
-    return $infolist->schema([
+            InfoSection::make('Wire Instructions')->schema([
+                InfoGrid::make(1)
+                    ->extraAttributes(['style' => 'row-gap: 0;'])
+                    ->schema([
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('status_label')
+                                    ->label('')->state('Status Account:')
+                                    ->weight('bold')->alignment('right')
+                                    ->columnSpan(3),
 
-        InfoSection::make('Wire Instructions')->schema([
-            InfoGrid::make(1)
-                ->extraAttributes(['style' => 'row-gap: 0;'])
-                ->schema([
-                    InfoGrid::make(12)
-                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                        ->schema([
-                            TextEntry::make('status_label')
-                                ->label('')->state('Status Account:')
-                                ->weight('bold')->alignment('right')
-                                ->columnSpan(3),
+                                TextEntry::make('status_value')
+                                    ->label('')
+                                    // usa el valor crudo para poder colorear; el “—” lo ponemos en formatState
+                                    ->state(fn ($record) => $record->status_account)
+                                    ->formatStateUsing(fn ($state) => filled($state) ? $state : '—')
+                                    ->badge()
+                                    ->color(function ($state) {
+                                        if (blank($state)) return 'gray';
+                                        return match (strtolower($state)) {
+                                            'active'   => 'primary',
+                                            'inactive' => 'danger',
+                                            default    => 'gray',
+                                        };
+                                    })
+                                    ->columnSpan(9),
+                            ]),
 
-                            TextEntry::make('status_value')
-                                ->label('')
-                                // usa el valor crudo para poder colorear; el “—” lo ponemos en formatState
-                                ->state(fn ($record) => $record->status_account)
-                                ->formatStateUsing(fn ($state) => filled($state) ? $state : '—')
-                                ->badge()
-                                ->color(function ($state) {
-                                    if (blank($state)) return 'gray';
-                                    return match (strtolower($state)) {
-                                        'active'   => 'primary',
-                                        'inactive' => 'danger',
-                                        default    => 'gray',
-                                    };
-                                })
-                                ->columnSpan(9),
-                        ]),
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('currency_label')->label('')->state('Currency:')
+                                    ->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('currency_value')->label('')
+                                    ->state(function ($record) {
+                                        $cur = data_get($record, 'currency');
+                                        if ($cur && (data_get($cur, 'acronym') || data_get($cur, 'name'))) {
+                                            return trim(($cur->acronym ?? '') . ' - ' . ($cur->name ?? ''), ' -') ?: '-';
+                                        }
+                                        $acronym = data_get($record, 'currency_acronym');
+                                        $name    = data_get($record, 'currency_name');
+                                        return ($acronym || $name) ? trim(($acronym ?? '') . ' - ' . ($name ?? ''), ' -') : '—';
+                                    })
+                                    ->columnSpan(9),
+                            ]),
 
-                    InfoGrid::make(12)
-                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                        ->schema([
-                            TextEntry::make('currency_label')->label('')->state('Currency:')
-                                ->weight('bold')->alignment('right')->columnSpan(3),
-                            TextEntry::make('currency_value')->label('')
-                                ->state(function ($record) {
-                                    $cur = data_get($record, 'currency');
-                                    if ($cur && (data_get($cur, 'acronym') || data_get($cur, 'name'))) {
-                                        return trim(($cur->acronym ?? '') . ' - ' . ($cur->name ?? ''), ' -') ?: '-';
-                                    }
-                                    $acronym = data_get($record, 'currency_acronym');
-                                    $name    = data_get($record, 'currency_name');
-                                    return ($acronym || $name) ? trim(($acronym ?? '') . ' - ' . ($name ?? ''), ' -') : '—';
-                                })
-                                ->columnSpan(9),
-                        ]),
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('ib_label')->label('')->state('Intermediary Bank:')
+                                    ->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('ib_value')->label('')
+                                    ->state(function ($record) {
+                                        return data_get($record, 'intermediaryBank.name')
+                                            ?? data_get($record, 'intermediary_bank.name')
+                                            ?? data_get($record, 'intermediary_bank')
+                                            ?? '—';
+                                    })
+                                    ->columnSpan(9),
+                            ]),
 
-                    InfoGrid::make(12)
-                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                        ->schema([
-                            TextEntry::make('ib_label')->label('')->state('Intermediary Bank:')
-                                ->weight('bold')->alignment('right')->columnSpan(3),
-                            TextEntry::make('ib_value')->label('')
-                                ->state(function ($record) {
-                                    return data_get($record, 'intermediaryBank.name')
-                                        ?? data_get($record, 'intermediary_bank.name')
-                                        ?? data_get($record, 'intermediary_bank')
-                                        ?? '—';
-                                })
-                                ->columnSpan(9),
-                        ]),
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                            ->schema([
+                                TextEntry::make('bank_label')->label('')->state('Bank / For Credit to:')
+                                    ->weight('bold')->alignment('right')->columnSpan(3),
+                                TextEntry::make('bank_value')->label('')
+                                    ->state(function ($record) {
+                                        return data_get($record, 'bank.name')
+                                            ?? data_get($record, 'bank_id.name')
+                                            ?? data_get($record, 'bank')
+                                            ?? '—';
+                                    })
+                                    ->columnSpan(9),
+                            ]),
+                    ]),
+            ])->maxWidth('6xl')->collapsible(),
 
-                    InfoGrid::make(12)
-                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                        ->schema([
-                            TextEntry::make('bank_label')->label('')->state('Bank / For Credit to:')
-                                ->weight('bold')->alignment('right')->columnSpan(3),
-                            TextEntry::make('bank_value')->label('')
-                                ->state(function ($record) {
-                                    return data_get($record, 'bank.name')
-                                        ?? data_get($record, 'bank_id.name')
-                                        ?? data_get($record, 'bank')
-                                        ?? '—';
-                                })
-                                ->columnSpan(9),
-                        ]),
+            InfoSection::make('Beneficiary Details')->schema([
+                InfoGrid::make(1)->extraAttributes(['style' => 'row-gap: 0;'])->schema([
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('bname_label')->label('')->state('Beneficiary Name:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('bname_value')->label('')
+                            ->state(fn ($record) => $record->beneficiary_acct_name ?: '—')
+                            ->columnSpan(9),
+                    ]),
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('baddr_label')->label('')->state('Beneficiary Address:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('baddr_value')->label('')
+                            ->state(fn ($record) => $record->beneficiary_address ?: '—')
+                            ->columnSpan(9),
+                    ]),
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('bswift_label')->label('')->state('Beneficiary SWIFT:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('bswift_value')->label('')
+                            ->state(fn ($record) => $record->beneficiary_swift ? strtoupper($record->beneficiary_swift) : '—')
+                            ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:0.5px;'])
+                            ->columnSpan(9),
+                    ]),
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('bacct_label')->label('')->state('Beneficiary Account No.:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('bacct_value')->label('')
+                            ->state(fn ($record) => $record->beneficiary_acct_no ?: '—')
+                            ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
+                            ->columnSpan(9),
+                    ]),
                 ]),
-        ])->maxWidth('6xl')->collapsible(),
+            ])->maxWidth('6xl')->collapsible(),
 
-        InfoSection::make('Beneficiary Details')->schema([
-            InfoGrid::make(1)->extraAttributes(['style' => 'row-gap: 0;'])->schema([
+            InfoSection::make('For Further Account Details')->schema([
+                InfoGrid::make(1)->extraAttributes(['style' => 'row-gap: 0;'])->schema([
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('ffcn_label')->label('')->state('FFC Account Name:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('ffcn_value')->label('')
+                            ->state(fn ($record) => $record->ffc_acct_name ?: '—')
+                            ->columnSpan(9),
+                    ]),
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('ffca_label')->label('')->state('FFC Account No.:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('ffca_value')->label('')
+                            ->state(fn ($record) => $record->ffc_acct_no ?: '—')
+                            ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
+                            ->columnSpan(9),
+                    ]),
+                    InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
+                        TextEntry::make('ffad_label')->label('')->state('FFC Address:')
+                            ->weight('bold')->alignment('right')->columnSpan(3),
+                        TextEntry::make('ffad_value')->label('')
+                            ->state(fn ($record) => $record->ffc_acct_address ?: '—')
+                            ->columnSpan(9),
+                    ]),
+                ]),
+            ])->maxWidth('6xl')->collapsible(),
+
+            InfoSection::make('Audit Dates')->schema([
                 InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('bname_label')->label('')->state('Beneficiary Name:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('bname_value')->label('')
-                        ->state(fn ($record) => $record->beneficiary_acct_name ?: '—')
+                    TextEntry::make('created_label')->label('')->state('Created At:')->weight('bold')
+                        ->alignment('right')->columnSpan(3),
+                    TextEntry::make('created_value')->label('')
+                        ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
                         ->columnSpan(9),
                 ]),
                 InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('baddr_label')->label('')->state('Beneficiary Address:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('baddr_value')->label('')
-                        ->state(fn ($record) => $record->beneficiary_address ?: '—')
+                    TextEntry::make('updated_label')->label('')->state('Updated At:')->weight('bold')
+                        ->alignment('right')->columnSpan(3),
+                    TextEntry::make('updated_value')->label('')
+                        ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
                         ->columnSpan(9),
                 ]),
-                InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('bswift_label')->label('')->state('Beneficiary SWIFT:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('bswift_value')->label('')
-                        ->state(fn ($record) => $record->beneficiary_swift ? strtoupper($record->beneficiary_swift) : '—')
-                        ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:0.5px;'])
-                        ->columnSpan(9),
-                ]),
-                InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('bacct_label')->label('')->state('Beneficiary Account No.:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('bacct_value')->label('')
-                        ->state(fn ($record) => $record->beneficiary_acct_no ?: '—')
-                        ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
-                        ->columnSpan(9),
-                ]),
-            ]),
-        ])->maxWidth('6xl')->collapsible(),
-
-        InfoSection::make('For Further Account Details')->schema([
-            InfoGrid::make(1)->extraAttributes(['style' => 'row-gap: 0;'])->schema([
-                InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('ffcn_label')->label('')->state('FFC Account Name:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('ffcn_value')->label('')
-                        ->state(fn ($record) => $record->ffc_acct_name ?: '—')
-                        ->columnSpan(9),
-                ]),
-                InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('ffca_label')->label('')->state('FFC Account No.:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('ffca_value')->label('')
-                        ->state(fn ($record) => $record->ffc_acct_no ?: '—')
-                        ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
-                        ->columnSpan(9),
-                ]),
-                InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('ffad_label')->label('')->state('FFC Address:')
-                        ->weight('bold')->alignment('right')->columnSpan(3),
-                    TextEntry::make('ffad_value')->label('')
-                        ->state(fn ($record) => $record->ffc_acct_address ?: '—')
-                        ->columnSpan(9),
-                ]),
-            ]),
-        ])->maxWidth('6xl')->collapsible(),
-
-        InfoSection::make('Audit Dates')->schema([
-            InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                TextEntry::make('created_label')->label('')->state('Created At:')->weight('bold')
-                    ->alignment('right')->columnSpan(3),
-                TextEntry::make('created_value')->label('')
-                    ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                    ->columnSpan(9),
-            ]),
-            InfoGrid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                TextEntry::make('updated_label')->label('')->state('Updated At:')->weight('bold')
-                    ->alignment('right')->columnSpan(3),
-                TextEntry::make('updated_value')->label('')
-                    ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                    ->columnSpan(9),
-            ]),
-        ])->maxWidth('6xl')->compact(),
-    ]);
-}
+            ])->maxWidth('6xl')->compact(),
+        ]);
+    }
 
 
 
@@ -377,8 +381,9 @@ public static function infolist(Infolist $infolist): Infolist
 
 
 
-
-
+    /*--------------------------------------------------------------
+     | 3. CRUD Table
+     --------------------------------------------------------------*/
     public static function table(Table $table): Table
     {
         return $table

@@ -13,7 +13,14 @@ class ListCoverages extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Coverage')          // 👈 el texto que tú quieras
+                ->icon('heroicon-m-plus')
+                ->color('primary')
+                ->createAnother(false)
+                ->modalHeading('New Coverage')   // título del modal
+                ->modalSubmitActionLabel('Create')
+                ->modalCancelActionLabel('Cancel'),
         ];
     }
 }

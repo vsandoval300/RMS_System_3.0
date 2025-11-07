@@ -17,7 +17,14 @@ class ListReinsurers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Reinsurer')          // 👈 el texto que tú quieras
+                ->icon('heroicon-m-plus')
+                ->color('primary')
+                ->createAnother(false)
+                ->modalHeading('New Reinsurer')   // título del modal
+                ->modalSubmitActionLabel('Create')
+                ->modalCancelActionLabel('Cancel'),
         ];
     }
 

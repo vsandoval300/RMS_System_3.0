@@ -13,7 +13,14 @@ class ListPartnerTypes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Partner Type')          // 👈 el texto que tú quieras
+                ->icon('heroicon-m-plus')
+                ->color('primary')
+                ->createAnother(false)
+                ->modalHeading('New Partner Type')   // título del modal
+                ->modalSubmitActionLabel('Create')
+                ->modalCancelActionLabel('Cancel'),
         ];
     }
 }

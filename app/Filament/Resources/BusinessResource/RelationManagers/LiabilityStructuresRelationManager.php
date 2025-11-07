@@ -16,10 +16,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
+use Illuminate\Database\Eloquent\Model;
 
 class LiabilityStructuresRelationManager extends RelationManager
 {
     protected static string $relationship = 'LiabilityStructures';
+    protected static ?string $icon = 'heroicon-o-shield-check';
 
     public static function getCreateFormHeading(): string
     {
@@ -30,6 +32,8 @@ class LiabilityStructuresRelationManager extends RelationManager
     {
         return 'Edit Liability Structure';
     }
+
+   
 
    
 
@@ -244,6 +248,7 @@ class LiabilityStructuresRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->createAnother(false)            // 👈 oculta "Create & create another"
+                    ->modalHeading('➕ New Liability Structure')   // 👈 título del modal
                     ->modalSubmitActionLabel('Create')// (opcional) etiqueta del botón principal
                     ->modalCancelActionLabel('Cancel'),// (opcional) etiqueta del botón cancelar
             ])
@@ -251,7 +256,8 @@ class LiabilityStructuresRelationManager extends RelationManager
             ->actions([
                     Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\EditAction::make()
+                        ->modalHeading('📝 Edit Liability Structure'), // 👈 título del modal
                     Tables\Actions\DeleteAction::make(),
                     ]),
                

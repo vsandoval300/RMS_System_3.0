@@ -50,6 +50,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
+use Illuminate\Database\Eloquent\Model;
 
 
 
@@ -62,8 +63,18 @@ class OperativeDocsRelationManager extends RelationManager
 {
     protected static string $relationship = 'OperativeDocs';
     protected static ?string $title = 'Operative Documents';
+    protected static ?string $icon = 'heroicon-o-document-text';
     protected static ?string $recordTitleAttribute = 'description';
 
+     public static function getCreateFormHeading(): string
+    {
+        return 'New Operative Document';
+    }
+
+    public static function getEditFormHeading(): string
+    {
+        return 'Edit Operative Document';
+    }
 
     public static function getEloquentQuery(): Builder
     {
