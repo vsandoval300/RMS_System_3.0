@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Traits\HasAuditLogs; 
 
 class OperativeDoc extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     /* --------------------------------------------------
      |  Tabla y asignación masiva
@@ -92,6 +93,26 @@ class OperativeDoc extends Model
         );
     }
 
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->business ?? $this;
+    }
+
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        $base = $this->business_code
+            ?: $this->business?->business_code;
+
+        if ($base && $this->index) {
+            $suffix = str_pad($this->index, 2, '0', STR_PAD_LEFT);
+
+            return "{$base}-{$suffix}";
+        }
+
+        $key = $this->getKey();
+
+        return $key !== null ? (string) $key : null;
+    }
 
     protected static function booted(): void
     {

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use App\Enums\ApprovalStatus;           // 👈 tu Enum PHP 8.1+
 use App\Enums\BusinessLifecycleStatus;  // 👈 tu Enum PHP 8.1+
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs;
 
 class Business extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     /* ---------------------------------------------------
      |  Tabla y PK
@@ -102,6 +103,12 @@ class Business extends Model
         return $this->belongsToMany(Coverage::class, 'liability_structures',
             'business_code', 'coverage_id', 'business_code', 'id'
         )->distinct();
+    }
+
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        // Para Business, el identificador que quieres es business_code
+        return $this->business_code ?: null;
     }
 
 /* Claro. En tu modelo Business, la función booted():

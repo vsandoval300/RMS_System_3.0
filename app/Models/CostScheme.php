@@ -41,6 +41,16 @@ class CostScheme extends Model
         return $this->hasMany(CostNodex::class, 'cscheme_id', 'id');
     }
 
+
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->operativeDoc?->business
+            ?? $this->operativeDoc
+            ?? $this;
+    }
+
+    
+
     /* ──────────────────────────────────────────────────────────────
      |  Cascada SoftDelete / Restore / ForceDelete a los hijos
      ──────────────────────────────────────────────────────────────*/

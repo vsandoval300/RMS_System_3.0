@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Traits\HasAuditLogs;
 
 class BusinessOpDocsInsured extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $table = 'businessdoc_insureds';
     protected $primaryKey = 'id';
@@ -33,6 +34,39 @@ class BusinessOpDocsInsured extends Model
     {
         return $this->belongsTo(OperativeDoc::class, 'op_document_id');
     }
+
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->operativeDoc?->business
+            ?? $this->operativeDoc
+            ?? $this;
+    }
+
+    Protected function getAuditLabelIdentifier(): ?string
+    {
+        $docId    = $this->operativeDoc?->id;
+        $company  = $this->company?->name;
+        $coverage = $this->coverage?->name;
+
+        if (! $docId) {
+            // fallback al comportamiento genérico del trait
+            return parent::getAuditLabelIdentifier();
+        }
+
+        // Armamos partes legibles
+        $parts = [$docId, 'INS'];
+
+        if ($company) {
+            $parts[] = Str::limit($company, 15, '');   // acortar un poco
+        }
+
+        if ($coverage) {
+            $parts[] = Str::limit($coverage, 10, '');
+        }
+
+        return implode('-', $parts);
+    }
+
 
     public function company()
     {

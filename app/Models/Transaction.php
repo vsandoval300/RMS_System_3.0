@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Models\Traits\HasAuditLogs;
 
 class Transaction extends Model
 {
     //
-    use SoftDeletes;
+    use SoftDeletes, HasAuditLogs;
 
     /* ---------------------------------------------------
      |  Tabla y PK
@@ -71,7 +72,30 @@ class Transaction extends Model
     }
 
 
+    /**
+     * Queremos que los logs aparezcan en el Business (como los demás).
+     */
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->operativeDoc?->business
+            ?? $this->operativeDoc
+            ?? $this;
+    }
 
+    /**
+     * Cómo se va a ver el identificador en el event:
+     * p.ej. "Updated Transaction 2025-1MO054-001-01"
+     */
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        $docId = $this->operativeDoc?->id;
+
+        if ($docId && $this->index) {
+            return "{$docId}-TX" . str_pad($this->index, 2, '0', STR_PAD_LEFT);
+        }
+
+        return parent::getAuditLabelIdentifier();
+    }
 
 
     /* protected static function booted()

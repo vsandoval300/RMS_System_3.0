@@ -31,15 +31,18 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page; 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Forms\Components\View as ViewField;
 
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Section as InfoSection;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Group;
+
 
 
 
@@ -78,7 +81,16 @@ class BusinessResource extends Resource
         return $form
             ->schema([
 
+
+// 🟡 BURBUJA PRINCIPAL
+            Section::make()  // puedes ponerle un título general si quieres
+                ->schema([
+
+
+
+
                 Section::make('General Details')
+                    ->compact() 
                     ->columns(3)    // ← aquí defines dos columnas
                     
                     ->schema([
@@ -360,20 +372,21 @@ class BusinessResource extends Resource
 
                         ]),
                   
-                 Section::make('Audit Info')
-                    ->schema([
-                        Placeholder::make('created_at')
-                            ->label('Created at')
-                            ->content(fn ($record) => $record?->created_at?->format('d/m/Y H:i:s')),
-
-                        Placeholder::make('updated_at')
-                            ->label('Last updated')
-                            ->content(fn ($record) => $record?->updated_at?->format('d/m/Y H:i:s')),
-                    ])
+                 /* Section::make('Audit Info')
+                    ->compact()
                     ->columns(2)
+                    ->collapsible()           // 👈 permite colapsar
+                    ->collapsed()
                     ->hidden(fn (string $context): bool => $context === 'create') 
+                    ->schema([
+
+                        ViewField::make('audit_logs_view')
+                            ->view('filament.resources.audit.audit-logs') 
+                            ->columnSpanFull(),
+                    ]) */
+                    
                  
-                 
+                 ]),
                  
 
             ]);
@@ -395,197 +408,208 @@ class BusinessResource extends Resource
     {
         return $infolist->schema([
 
-            /* ─────────────────────────  GENERAL DETAILS  ───────────────────────── */
-            InfoSection::make('Entity & Code')
-                ->compact()
-                ->schema([
-                    InfoGrid::make(12)->schema([
+            InfoSection::make() // o InfoSection::make('Business Details')
+            ->schema([
 
-                        // Fila 1: Reinsurer (izq)  |  Business Code (der)
-                        Split::make([
-                            TextEntry::make('gd_reinsurer_label')->label('Underwritten by')
-                                ->weight('bold')->alignment('left'),   
-                            TextEntry::make('gd_reinsurer_value')->label('')
-                                ->state(fn ($record) => $record->reinsurer?->name ?? '—'),
-                        ])->columnSpan(4),
-                        //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                /* ─────────────────────────  GENERAL DETAILS  ───────────────────────── */
+                InfoSection::make('Entity & Code')
+                    ->compact()
+                    ->schema([
+                        InfoGrid::make(12)->schema([
 
-
-                        Split::make([
-                            TextEntry::make('gd_code_label')->label('')->state('')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('')->label('')
-                                ->state(fn ($record) => ''),
-                        ])->columnSpan(4),
-                        //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            // Fila 1: Reinsurer (izq)  |  Business Code (der)
+                            Split::make([
+                                TextEntry::make('gd_reinsurer_label')->label('Underwritten by')
+                                    ->weight('bold')->alignment('left'),   
+                                TextEntry::make('gd_reinsurer_value')->label('')
+                                    ->state(fn ($record) => $record->reinsurer?->name ?? '—'),
+                            ])->columnSpan(4),
+                            //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
 
-                        Split::make([
-                            TextEntry::make('gd_code_label')->label('')->state('  Business code')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('gd_code_value')->label('')
-                                ->state(fn ($record) => $record->business_code ?: '—'),
-                        ])->columnSpan(4),
-                        //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
-                        
-                    ]),
-                ]),
-                //->maxWidth('8xl'),
-                //->collapsible(),
+                            Split::make([
+                                TextEntry::make('gd_code_label')->label('')->state('')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('')->label('')
+                                    ->state(fn ($record) => ''),
+                            ])->columnSpan(4),
+                            //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-            
-            /* ─────────────────────────  DESCRIPTION  ───────────────────────── */    
-            InfoSection::make('Context')
-                ->compact()
-                ->schema([
-                    // Fila: Description (2 | 8)
-                    InfoGrid::make(12)
-                        ->extraAttributes(['style' => 'gap:1px;padding:1px 0;'])
-                        ->schema([
-                            TextEntry::make('gd_desc_label')
-                                ->label('')
-                                ->state('  General description')
-                                ->weight('bold')
-                                ->alignment('left')
-                                ->columnSpan(2),
 
-                            TextEntry::make('gd_desc_value')
-                                ->label('')
-                                ->state(fn ($record) => $record->description ?: '—')
-                                ->extraAttributes(['style' => 'line-height:1;'])
-                                ->columnSpan(8),
-                            // (Opcional) Dejar 2 cols vacías o añade un spacer si lo prefieres
-                            // TextEntry::make('gd_desc_spacer')->label('')->state('')->columnSpan(2)->hiddenLabel(),
+                            Split::make([
+                                TextEntry::make('gd_code_label')->label('')->state('  Business code')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('gd_code_value')->label('')
+                                    ->state(fn ($record) => $record->business_code ?: '—'),
+                            ])->columnSpan(4),
+                            //->extraAttributes(['style' => 'gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            
                         ]),
                     ]),
-                //->maxWidth('8xl'),
-                //->collapsible(),
+                    //->maxWidth('8xl'),
+                    //->collapsible(),
+
+                
+                /* ─────────────────────────  DESCRIPTION  ───────────────────────── */    
+                InfoSection::make('Context')
+                    ->compact()
+                    ->schema([
+                        // Fila: Description (2 | 8)
+                        InfoGrid::make(12)
+                            ->extraAttributes(['style' => 'gap:1px;padding:1px 0;'])
+                            ->schema([
+                                TextEntry::make('gd_desc_label')
+                                    ->label('')
+                                    ->state('  General description')
+                                    ->weight('bold')
+                                    ->alignment('left')
+                                    ->columnSpan(2),
+
+                                TextEntry::make('gd_desc_value')
+                                    ->label('')
+                                    ->state(fn ($record) => $record->description ?: '—')
+                                    ->extraAttributes(['style' => 'line-height:1;'])
+                                    ->columnSpan(8),
+                                // (Opcional) Dejar 2 cols vacías o añade un spacer si lo prefieres
+                                // TextEntry::make('gd_desc_spacer')->label('')->state('')->columnSpan(2)->hiddenLabel(),
+                            ]),
+                        ]),
+                    //->maxWidth('8xl'),
+                    //->collapsible(),
 
 
-            /* ─────────────────────────  CONTRACT DETAILS  ───────────────────────── */
-            InfoSection::make('Contract Details')
-                ->schema([
-                    // 3 pares por fila → 12 cols / 4 = 3 columnas
-                    InfoGrid::make(12)->schema([
+                /* ─────────────────────────  CONTRACT DETAILS  ───────────────────────── */
+                InfoSection::make('Contract Details')
+                    ->schema([
+                        // 3 pares por fila → 12 cols / 4 = 3 columnas
+                        InfoGrid::make(12)->schema([
 
-                        /* Fila 1 */
-                        Split::make([
-                            TextEntry::make('rt_label')->label('')->state('Reinsurer type')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('rt_value')->label('')
-                                ->state(fn ($record) => $record->reinsurance_type ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            /* Fila 1 */
+                            Split::make([
+                                TextEntry::make('rt_label')->label('')->state('Reinsurer type')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('rt_value')->label('')
+                                    ->state(fn ($record) => $record->reinsurance_type ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('ct_label')->label('')->state('Claims type')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('ct_value')->label('')
-                                ->state(fn ($record) => $record->claims_type ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('ct_label')->label('')->state('Claims type')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('ct_value')->label('')
+                                    ->state(fn ($record) => $record->claims_type ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('parent_label')->label('')->state('Parent business')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('parent_value')->label('')
-                                ->state(fn ($record) => $record->parent?->business_code ?: '—'),
-                    ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('parent_label')->label('')->state('Parent business')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('parent_value')->label('')
+                                    ->state(fn ($record) => $record->parent?->business_code ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        /* Fila 2 */
-                        Split::make([
-                            TextEntry::make('rc_label')->label('')->state('Risk covered')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('rc_value')->label('')
-                                ->state(fn ($record) => $record->risk_covered ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            /* Fila 2 */
+                            Split::make([
+                                TextEntry::make('rc_label')->label('')->state('Risk covered')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('rc_value')->label('')
+                                    ->state(fn ($record) => $record->risk_covered ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('prod_label')->label('')->state('Producer')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('prod_value')->label('')
-                                ->state(fn ($record) => $record->producer?->name ?? '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('prod_label')->label('')->state('Producer')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('prod_value')->label('')
+                                    ->state(fn ($record) => $record->producer?->name ?? '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('renew_label')->label('')->state('Renewed from')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('renew_value')->label('')
-                                ->state(fn ($record) => $record->renewedFrom?->business_code ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('renew_label')->label('')->state('Renewed from')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('renew_value')->label('')
+                                    ->state(fn ($record) => $record->renewedFrom?->business_code ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        /* Fila 3 */
-                        Split::make([
-                            TextEntry::make('bt_label')->label('')->state('Business type')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('bt_value')->label('')
-                                ->state(fn ($record) => $record->business_type ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            /* Fila 3 */
+                            Split::make([
+                                TextEntry::make('bt_label')->label('')->state('Business type')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('bt_value')->label('')
+                                    ->state(fn ($record) => $record->business_type ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('curr_label')->label('')->state('Currency')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('curr_value')->label('')
-                                ->state(fn ($record) => $record->currency
-                                    ? ($record->currency->acronym . ' - ' . $record->currency->name)
-                                    : '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('curr_label')->label('')->state('Currency')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('curr_value')->label('')
+                                    ->state(fn ($record) => $record->currency
+                                        ? ($record->currency->acronym . ' - ' . $record->currency->name)
+                                        : '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('appr_label')->label('')->state('Approval status')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('appr_value')->label('')
-                                ->state(fn ($record) => $record->approval_status ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('appr_label')->label('')->state('Approval status')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('appr_value')->label('')
+                                    ->state(fn ($record) => $record->approval_status ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        /* Fila 4 */
-                        Split::make([
-                            TextEntry::make('pt_label')->label('')->state('Premium type')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('pt_value')->label('')
-                                ->state(fn ($record) => $record->premium_type ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            /* Fila 4 */
+                            Split::make([
+                                TextEntry::make('pt_label')->label('')->state('Premium type')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('pt_value')->label('')
+                                    ->state(fn ($record) => $record->premium_type ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('reg_label')->label('')->state('Region')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('reg_value')->label('')
-                                ->state(fn ($record) => $record->region?->name ?? '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('reg_label')->label('')->state('Region')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('reg_value')->label('')
+                                    ->state(fn ($record) => $record->region?->name ?? '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('appr_date_label')->label('')->state('Approval date')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('appr_date_value')->label('')
-                                ->state(fn ($record) => $record->approval_status_updated_at?->format('Y-m-d') ?: '—'),
-                        ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('appr_date_label')->label('')->state('Approval date')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('appr_date_value')->label('')
+                                    ->state(fn ($record) => $record->approval_status_updated_at?->format('Y-m-d') ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        /* Fila 5 */
-                        Split::make([
-                            TextEntry::make('purp_label')->label('')->state('Purpose')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('purp_value')->label('')
-                                ->state(fn ($record) => $record->purpose ?: '—'),
-                         ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            /* Fila 5 */
+                            Split::make([
+                                TextEntry::make('purp_label')->label('')->state('Purpose')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('purp_value')->label('')
+                                    ->state(fn ($record) => $record->purpose ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('life_label')->label('')->state('Lifecycle status')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('life_value')->label('')
-                                ->state(fn ($record) => $record->business_lifecycle_status ?: '—'),
-                         ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('life_label')->label('')->state('Lifecycle status')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('life_value')->label('')
+                                    ->state(fn ($record) => $record->business_lifecycle_status ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
-                        Split::make([
-                            TextEntry::make('created_label')->label('')->state('Created at')
-                                ->weight('bold')->alignment('left'),
-                            TextEntry::make('created_value')->label('')
-                                ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—'),
-                         ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                            Split::make([
+                                TextEntry::make('created_label')->label('')->state('Created at')
+                                    ->weight('bold')->alignment('left'),
+                                TextEntry::make('created_value')->label('')
+                                    ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—'),
+                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+                        ]),
                     ]),
-                ]),
-                //->maxWidth('8xl'),
-                //->collapsible(),
-
-
-            
+                    //->maxWidth('8xl'),
+                    //->collapsible(),
+                InfoSection::make('Audit Info')
+                    ->compact()
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        ViewEntry::make('audit_logs_view')
+                            ->view('filament.resources.audit.audit-logs')
+                            ->columnSpanFull(),
+                    ]),
+            ]),     
         ]);
     }
 

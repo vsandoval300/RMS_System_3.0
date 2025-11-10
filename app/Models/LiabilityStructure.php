@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs; 
 
 
 class LiabilityStructure extends Model
 {
     //
-    use SoftDeletes; // 👈 necesario para que tenga deleted_at
+    use SoftDeletes, HasAuditLogs;  // 👈 necesario para que tenga deleted_at
 
     protected $fillable = [
             'index',
@@ -36,6 +37,10 @@ class LiabilityStructure extends Model
         return $this->belongsTo(Coverage::class, 'coverage_id');
     }
 
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->business ?? $this;
+    }
 
     protected static function booted(): void
     {
@@ -56,6 +61,24 @@ class LiabilityStructure extends Model
                 });
         });
     }
+
+    /* protected function getAuditLabelIdentifier(): ?string
+    {
+        $base = $this->business_code
+            ?: $this->business?->business_code;
+
+        if ($base && $this->index) {
+            // 01, 02, 03...
+            $suffix = str_pad($this->index, 2, '0', STR_PAD_LEFT);
+
+            return "{$base}-{$suffix}";
+        }
+
+        // Fallback: usa la PK (id)
+        $key = $this->getKey();
+
+        return $key !== null ? (string) $key : null;
+    } */
 
 
 }

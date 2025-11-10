@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Traits\HasAuditLogs;
 
 class BusinessOpDocsScheme extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $table = 'businessdoc_schemes';
     protected $primaryKey = 'id';
@@ -34,6 +35,25 @@ class BusinessOpDocsScheme extends Model
         return $this->belongsTo(CostScheme::class, 'cscheme_id');
     }
 
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->operativeDoc?->business
+            ?? $this->operativeDoc
+            ?? $this;
+    }
+
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        $docId = $this->operativeDoc?->id;
+
+        if ($docId && $this->index !== null) {
+            $idx = str_pad($this->index, 2, '0', STR_PAD_LEFT);
+
+            return "{$docId}-SCHEME-{$idx}";
+        }
+
+        return parent::getAuditLabelIdentifier();
+    }
     
     protected static function booted()
     {
