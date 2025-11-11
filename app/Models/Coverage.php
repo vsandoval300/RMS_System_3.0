@@ -38,14 +38,16 @@ class Coverage extends Model
         return $this->hasMany(LiabilityStructure::class, 'coverage_id');
     }
 
-
+    /* ─── Metodos para salvar Logs ─── */
+    /* ─── Este guarda la etiqueta del campo a manera de identificador ─── */
     protected function getAuditLabelIdentifier(): ?string
     {
         return $this->name
             ?? $this->name . ':'
             ?? parent::getAuditLabelIdentifier();
     }
-    
+    /* ─── Este metodo ayuda a guardar los valores texto de los selectores de menu ─── */
+    /* ─── en lugar de guardar los id de los menu                                  ─── */
     protected function transformAuditValue(string $field, $value)
     {
         if ($value === null || $value === '') {
