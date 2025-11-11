@@ -165,7 +165,7 @@ class SubregionsResource extends Resource
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')
+            /* InfoSection::make('Audit Dates')
                 ->schema([
                     InfoGrid::make(2)
                         ->extraAttributes(['style' => 'gap: 12px;'])
@@ -200,7 +200,7 @@ class SubregionsResource extends Resource
                         ]),
                 ])
                 ->maxWidth('4xl')
-                ->compact(),
+                ->compact(), */
         ]);
     }
 

@@ -275,7 +275,7 @@ public static function infolist(Infolist $infolist): Infolist
         ->collapsible(),
 
         /* ─────────────────────────  AUDIT  ───────────────────────── */
-        InfoSection::make('Audit Dates')
+        /* InfoSection::make('Audit Dates')
             ->schema([
                 InfoGrid::make(2)
                     ->extraAttributes(['style' => 'gap: 12px;'])
@@ -295,7 +295,7 @@ public static function infolist(Infolist $infolist): Infolist
                     ]),
             ])
             ->maxWidth('5xl')
-            ->compact(),
+            ->compact(), */
     ]);
 }
 
@@ -306,6 +306,7 @@ public static function infolist(Infolist $infolist): Infolist
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Country $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -376,6 +377,7 @@ public static function infolist(Infolist $infolist): Infolist
         return [
             'index' => Pages\ListCountries::route('/'),
             'create' => Pages\CreateCountries::route('/create'),
+            'view'   => Pages\ViewCountries::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditCountries::route('/{record}/edit'),
         ];
     }

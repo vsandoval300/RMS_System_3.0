@@ -141,7 +141,7 @@ public static function infolist(Infolist $infolist): Infolist
         ->collapsible(),
 
         /* ─────────────────────────  AUDIT  ───────────────────────── */
-        InfoSection::make('Audit Dates')
+       /*  InfoSection::make('Audit Dates')
             ->schema([
                 InfoGrid::make(2)
                     ->extraAttributes(['style' => 'gap: 12px;'])
@@ -176,7 +176,7 @@ public static function infolist(Infolist $infolist): Infolist
                     ]),
             ])
             ->maxWidth('4xl')
-            ->compact(),
+            ->compact(), */
     ]);
 }
 
