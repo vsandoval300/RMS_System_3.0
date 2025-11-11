@@ -36,9 +36,14 @@ trait HasAuditLogs
         return $key !== null ? (string) $key : null;
     }
 
+    protected function transformAuditValue(string $field, $value)
+    {
+        return $value;
+    }
+
     public function storeAudit(string $event): void
     {
-        $userId = Auth::id();
+        $userId  = Auth::id();
         $changes = [];
 
         if ($event === 'updated') {
@@ -47,9 +52,11 @@ trait HasAuditLogs
                     continue;
                 }
 
+                $old = $this->getOriginal($field);
+
                 $changes[$field] = [
-                    'old' => $this->getOriginal($field),
-                    'new' => $new,
+                    'old' => $this->transformAuditValue($field, $old),
+                    'new' => $this->transformAuditValue($field, $new),
                 ];
             }
 

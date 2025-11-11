@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs;
 
 class Company extends Model
 {
     //
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $table = 'companies';
 
@@ -39,6 +40,26 @@ class Company extends Model
     public function insuredDocs()
     {
         return $this->hasMany(BusinessOpDocsInsured::class, 'company_id');
+    }
+
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        return $this->name
+            ?? $this->name . ':'
+            ?? parent::getAuditLabelIdentifier();
+    }
+
+    protected function transformAuditValue(string $field, $value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return match ($field) {
+            'industry_id' => Industry::find($value)?->name ?? $value,
+            'country_id'  => Country::find($value)?->name ?? $value,
+            default       => $value,
+        };
     }
 
 }

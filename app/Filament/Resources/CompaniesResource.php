@@ -99,7 +99,7 @@ class CompaniesResource extends Resource
                             //->helperText('Choose the reinsurer\'s country.'),
 
                     Select::make('industry_id')
-                        ->label('Sector')
+                        ->label('Industry')
                         ->relationship('sector','name')
                         ->searchable()
                         ->preload()
@@ -197,7 +197,7 @@ class CompaniesResource extends Resource
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')
+            /* InfoSection::make('Audit Dates')
                 ->schema([
                     InfoGrid::make(2)
                         ->extraAttributes(['style' => 'gap: 12px;'])
@@ -225,7 +225,7 @@ class CompaniesResource extends Resource
                         ]),
                 ])
                 ->maxWidth('5xl')
-                ->compact(),
+                ->compact(), */
         ]);
     }
 
