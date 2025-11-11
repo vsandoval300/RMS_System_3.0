@@ -18,7 +18,7 @@
     @else
         <div
             class="mt-2 space-y-2 text-xs pr-2 overflow-y-auto"
-            style="max-height: 200px;"
+            style="max-height: 600px;"
         >
             @foreach ($logs as $log)
                 <div class="rounded-md border border-gray-700 px-3 py-2 space-y-1">

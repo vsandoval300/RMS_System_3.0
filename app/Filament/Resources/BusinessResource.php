@@ -42,6 +42,9 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\Tabs;
+use Filament\Infolists\Components\Tabs\Tab;
+
 
 
 
@@ -599,7 +602,7 @@ class BusinessResource extends Resource
                     ]),
                     //->maxWidth('8xl'),
                     //->collapsible(),
-                InfoSection::make('Audit Info')
+                /* InfoSection::make('Audit Info')
                     ->compact()
                     ->columns(2)
                     ->collapsible()
@@ -608,7 +611,7 @@ class BusinessResource extends Resource
                         ViewEntry::make('audit_logs_view')
                             ->view('filament.resources.audit.audit-logs')
                             ->columnSpanFull(),
-                    ]),
+                    ]), */
             ]),     
         ]);
     }

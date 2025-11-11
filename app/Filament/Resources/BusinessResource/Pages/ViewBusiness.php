@@ -6,12 +6,14 @@ use App\Filament\Resources\BusinessResource;
 use Filament\Resources\Pages\ViewRecord;
 use App\Models\Business;
 use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Forms;
 
 class ViewBusiness extends ViewRecord
 {
     protected static string $resource = BusinessResource::class;
-
-    //protected ?string $maxContentWidth = '8xl';
+    
+   
 
     protected function resolveRecord(int|string $key): Business
     {
@@ -49,12 +51,28 @@ class ViewBusiness extends ViewRecord
                 ->icon('heroicon-o-arrow-left')
                 ->url(static::getResource()::getUrl('index')), */
 
-            Actions\Action::make('close')
+            Action::make('auditInfo')
+                ->label('Audit info')
+                ->icon('heroicon-o-clipboard-document-list')
+                ->modalHeading('Audit info')
+                ->modalWidth('7xl')        // 👈 aquí controlas el ancho del modal
+                ->modalSubmitAction(false) // no necesitamos botón de "Save"
+                ->closeModalByClickingAway() // opcional
+                ->form([
+                    Forms\Components\View::make('filament.resources.audit.audit-logs')
+                        ->viewData([
+                            // Pasamos el registro actual a la vista Blade
+                            'record' => $this->getRecord(),
+                        ])
+                        ->columnSpanFull(),
+                ]),   
+                
+            Action::make('close')
                 ->label('Close')
                 ->icon('heroicon-o-x-mark')
                 ->color('gray')
                 ->outlined()
-                ->url(static::getResource()::getUrl('index')),    
+                ->url(static::getResource()::getUrl('index')),      
         ];
     }
 

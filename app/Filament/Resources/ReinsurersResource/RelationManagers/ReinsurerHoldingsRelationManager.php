@@ -64,6 +64,7 @@ class ReinsurerHoldingsRelationManager extends RelationManager
                 // ⬇️ REGLA que muestra el error debajo del campo
                 ->rule(fn (Get $get, RelationManager $livewire) =>
                     function (string $attribute, $value, \Closure $fail) use ($get, $livewire) {
+
                         $owner = $livewire->getOwnerRecord();
                         $editingId = $get('id');
 
@@ -71,13 +72,30 @@ class ReinsurerHoldingsRelationManager extends RelationManager
                             ->when($editingId, fn ($q) => $q->whereKeyNot($editingId))
                             ->sum('percentage'); // decimal
 
-                        // $value llega como porcentaje ("60" o "60.00")
-                        $entered = ((float) str_replace(',', '', (string) $value)) / 100;
+                        // normalizamos el valor con máscara ("-5.00", "60,00", etc.)
+                        $numericPercent = (float) str_replace(',', '', (string) $value);
+
+                        // 1) No permitir negativos
+                        if ($numericPercent < 0) {
+                            $fail('Participation Percentage must be greater than or equal to 0%.');
+                            return;
+                        }
+
+                        // 2) No permitir > 100
+                        if ($numericPercent > 100) {
+                            $fail('Participation Percentage cannot exceed 100%.');
+                            return;
+                        }
+
+                        // 3) Validar suma total ≤ 100%
+                        $entered = $numericPercent / 100;
 
                         if (round($sumOthers + $entered, 6) > 1) {
                             $remaining = max(0, 1 - $sumOthers);
-                            $fail('The sum of Participation Percentage exceeds 100%. Remaining value to assign: '
-                                . number_format($remaining * 100, 2) . '%');
+                            $fail(
+                                'The sum of Participation Percentage exceeds 100%. Remaining value to assign: ' .
+                                number_format($remaining * 100, 2) . '%'
+                            );
                         }
                     }
                 )
