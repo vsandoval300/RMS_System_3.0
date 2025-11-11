@@ -20,6 +20,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Support\Enums\VerticalAlignment;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -187,20 +188,24 @@ class LineOfBusinessResource extends Resource
             ->columns([
                 //
                 TextColumn::make('id')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->sortable(),
                 TextColumn::make('name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
                         'style' => 'width: 180px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 TextColumn::make('description')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 600px; white-space: normal;', // ancho fijo de 300px
                     ]),
                 TextColumn::make('risk_covered')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Risk covered')
                     ->wrap()
                     ->extraAttributes([

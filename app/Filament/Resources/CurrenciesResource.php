@@ -144,11 +144,11 @@ class CurrenciesResource extends Resource
                         
                     ]),
             ])
-            ->maxWidth('4xl')
+            ->maxWidth('5xl')
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')
+            /* InfoSection::make('Audit Dates')
                 ->schema([
                     InfoGrid::make(2)
                         ->extraAttributes(['style' => 'gap: 12px;'])
@@ -179,7 +179,7 @@ class CurrenciesResource extends Resource
                         ]),
                 ])
                 ->maxWidth('4xl')
-                ->compact(),
+                ->compact(), */
         ]);
     }
 
@@ -191,6 +191,7 @@ class CurrenciesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Currency $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -233,6 +234,7 @@ class CurrenciesResource extends Resource
         return [
             'index' => Pages\ListCurrencies::route('/'),
             'create' => Pages\CreateCurrencies::route('/create'),
+            'view'   => Pages\ViewCurrencies::route('/{record}'), 
             'edit' => Pages\EditCurrencies::route('/{record}/edit'),
         ];
     }

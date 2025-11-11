@@ -20,6 +20,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Support\Enums\VerticalAlignment;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -206,23 +207,28 @@ class CoveragesResource extends Resource
             ->columns([
                 //
                 TextColumn::make('id')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->sortable(),
                 TextColumn::make('name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
                         'style' => 'width: 320px; white-space: normal;', // ✅ Deja que el texto se envuelva
                     ]),
                 TextColumn::make('acronym')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('description')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Description')
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 400px; white-space: normal;', // ancho fijo de 300px
                     ]),
                 TextColumn::make('lineOfBusiness.name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Line of Business')
                     ->sortable()
                     ->searchable()
