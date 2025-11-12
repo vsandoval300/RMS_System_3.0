@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Filament\Resources\CountriesResource\Pages;
+namespace App\Filament\Resources\IndustryResource\Pages;
 
-use App\Filament\Resources\CountriesResource;
+use App\Filament\Resources\IndustryResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Forms;
 
-class ViewCountries extends ViewRecord
+class ViewIndustries extends ViewRecord
 {
-    protected static string $resource = CountriesResource::class;
+    protected static string $resource = IndustryResource::class;
 
     protected ?string $maxContentWidth = '5xl';
 
     public function getTitle(): string
     {
-        return 'View – ' . ($this->record?->name ?? 'Country');
+        return 'View – ' . ($this->record?->name ?? 'Industry');
     }
 
     protected function getHeaderActions(): array

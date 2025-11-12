@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs;
 
 class Industry extends Model
 {
     //
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $table = 'industries'; // ✅ aquí redirigimos la tabla
 
@@ -38,6 +39,15 @@ class Industry extends Model
             'industry_id',
             'client_id'
         );
+    }
+
+    /* ─── Metodos para salvar Logs ─── */
+    /* ─── Este guarda la etiqueta del campo a manera de identificador ─── */
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        return $this->name
+            ?? $this->name . ':'
+            ?? parent::getAuditLabelIdentifier();
     }
 
 }

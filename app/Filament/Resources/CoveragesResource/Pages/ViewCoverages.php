@@ -25,7 +25,7 @@ class ViewCoverages extends ViewRecord
             Action::make('auditInfo')
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modalHeading('Audit info')
+                ->modalHeading(' ')
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()

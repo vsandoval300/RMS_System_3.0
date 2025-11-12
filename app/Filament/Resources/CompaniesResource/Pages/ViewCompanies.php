@@ -26,9 +26,10 @@ class ViewCompanies extends ViewRecord
     {
         return [
             Action::make('auditInfo')
-                ->label('Audit info')
+                ->label('Audit Info')
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modalHeading('Audit info')
+                ->modalHeading(' ')
+                ->modalDescription('Review the full change history for this record, including who modified it and when.')
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()

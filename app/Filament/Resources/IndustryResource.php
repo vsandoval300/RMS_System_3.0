@@ -139,7 +139,7 @@ public static function form(Form $form): Form
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')
+            /* InfoSection::make('Audit Dates')
                 ->schema([
                     InfoGrid::make(12)
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
@@ -171,7 +171,7 @@ public static function form(Form $form): Form
                         ]),
                 ])
                 ->maxWidth('5xl')
-                ->compact(),
+                ->compact(), */
         ]);
     }
 
@@ -183,6 +183,7 @@ public static function form(Form $form): Form
     public static function table(Table $table): Table
     {
         return $table
+        ->recordUrl(fn (Industry $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -235,6 +236,7 @@ public static function form(Form $form): Form
         return [
             'index' => Pages\ListIndustries::route('/'),
             'create' => Pages\CreateIndustries::route('/create'),
+            'view'   => Pages\ViewIndustries::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditIndustries::route('/{record}/edit'),
         ];
     }
