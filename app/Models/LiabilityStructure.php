@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Coverage; 
 use App\Models\Traits\HasAuditLogs; 
+
 
 
 class LiabilityStructure extends Model
@@ -37,10 +39,7 @@ class LiabilityStructure extends Model
         return $this->belongsTo(Coverage::class, 'coverage_id');
     }
 
-    protected function getAuditOwnerModel(): Model
-    {
-        return $this->business ?? $this;
-    }
+    
 
     protected static function booted(): void
     {
@@ -62,23 +61,30 @@ class LiabilityStructure extends Model
         });
     }
 
+    // 🔑 Donde se guardan los logs del hijo: en el padre
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->business ?? $this;
+    }
+
+    // (Opcional) etiqueta legible en el historial
     /* protected function getAuditLabelIdentifier(): ?string
     {
-        $base = $this->business_code
-            ?: $this->business?->business_code;
+        $concept = $this->coverage?->name;
+        return $concept ? "{$this->id} · {$concept}" : $this->id;
+    } */
 
-        if ($base && $this->index) {
-            // 01, 02, 03...
-            $suffix = str_pad($this->index, 2, '0', STR_PAD_LEFT);
-
-            return "{$base}-{$suffix}";
+    protected function transformAuditValue(string $field, $value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
         }
 
-        // Fallback: usa la PK (id)
-        $key = $this->getKey();
-
-        return $key !== null ? (string) $key : null;
-    } */
+        return match ($field) {
+            'coverage_id' => Coverage::find($value)?->name ?? $value,
+            default       => $value,
+        };
+    }
 
 
 }

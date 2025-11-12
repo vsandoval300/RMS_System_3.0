@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs;
+use App\Models\Industry; 
 
 class ClientIndustry extends Model
 {
     //
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $table = 'client_industries';
 
@@ -29,4 +31,22 @@ class ClientIndustry extends Model
     {
         return $this->belongsTo(Industry::class);
     }
+
+    
+
+    
+
+    
+
+
+
+    /* ──────────────  Metods for audit registers  ──────────────── */
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this->client ?? $this;
+    }
+
+    
+
+    /* ────────────────────────────────────────────────────────────── */
 }

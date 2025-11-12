@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Filament\Resources\ClientsResource\Pages;
+namespace App\Filament\Resources\ManagerResource\Pages;
 
-use App\Filament\Resources\ClientsResource;
+use App\Filament\Resources\ManagerResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
 use Filament\Forms;
 
-class ViewClients extends ViewRecord
+class ViewManager extends ViewRecord
 {
-    protected static string $resource = ClientsResource::class;
+    protected static string $resource = ManagerResource::class;
 
     protected ?string $maxContentWidth = '5xl';
 
     public function getTitle(): string
     {
-        return 'View – ' . ($this->record?->name ?? 'Client');
+        return 'View – ' . ($this->record?->name ?? 'Manager');
     }
 
     protected function getHeaderActions(): array
@@ -51,5 +51,3 @@ class ViewClients extends ViewRecord
         ];
     }
 }
-
-

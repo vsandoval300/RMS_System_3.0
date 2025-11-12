@@ -149,7 +149,7 @@ public static function infolist(Infolist $infolist): Infolist
         ->collapsible(),
 
         /* ─────────────────────────  AUDIT  ───────────────────────── */
-        InfoSection::make('Audit Dates')->schema([
+        /* InfoSection::make('Audit Dates')->schema([
             InfoGrid::make(12)
                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                 ->schema([
@@ -174,7 +174,7 @@ public static function infolist(Infolist $infolist): Infolist
                 ]),
         ])
         ->maxWidth('5xl')
-        ->compact(),
+        ->compact(), */
     ]);
 }
 
@@ -187,6 +187,7 @@ public static function infolist(Infolist $infolist): Infolist
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (DocumentType $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -241,6 +242,7 @@ public static function infolist(Infolist $infolist): Infolist
         return [
             'index' => Pages\ListCorporateDocuments::route('/'),
             'create' => Pages\CreateCorporateDocuments::route('/create'),
+            'view'   => Pages\ViewCorporateDocuments::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditCorporateDocuments::route('/{record}/edit'),
         ];
     }

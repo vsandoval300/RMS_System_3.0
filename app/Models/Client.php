@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Country; 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs;
 
 class Client extends Model
 {
     //
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $fillable = [
         'name',
@@ -43,5 +45,28 @@ class Client extends Model
         ->withTimestamps()            // si tu pivote tiene created_at / updated_at
         // ->withPivot(['extra_col'])    // si guardas columnas adicionales
         ;
+    }
+
+
+
+    /* ─── Metodos para salvar Logs ─── */
+    /* ─── Este guarda la etiqueta del campo a manera de identificador ─── */
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        return $this->name
+            ?? $this->name . ':'
+            ?? parent::getAuditLabelIdentifier();
+    }
+
+    protected function transformAuditValue(string $field, $value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return match ($field) {
+            'country_id' => Country::find($value)?->name ?? $value,
+            default       => $value,
+        };
     }
 }

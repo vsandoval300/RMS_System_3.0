@@ -387,10 +387,10 @@ class BankAccountsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            
-            ->recordUrl(null)        // ❌ sin enlace
+            ->recordUrl(fn (BankAccount $record) => static::getUrl('view', ['record' => $record]))
+            /* ->recordUrl(null)        // ❌ sin enlace
             ->recordAction(null)     // ❌ sin acción -> desactiva “edit” :contentReference[oaicite:0]{index=0}
-            ->selectable(true)           // ✅ el clic pasa a ser un toggle de selección
+            ->selectable(true)   */         // ✅ el clic pasa a ser un toggle de selección
             ->columns([           // usa el clic para seleccionar la fila
                 //
                 TextColumn::make('id')->sortable(),
@@ -516,6 +516,7 @@ class BankAccountsResource extends Resource
         return [
             'index'  => Pages\ListBankAccounts::route('/'),
             'create' => Pages\CreateBankAccounts::route('/create'),
+            'view'   => Pages\ViewBankAccounts::route('/{record}'),   // 👈 NUEVA
             'edit'   => Pages\EditBankAccounts::route('/{record}/edit'),
         ];
     }

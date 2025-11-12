@@ -199,7 +199,7 @@ class BanksResource extends Resource
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')->schema([
+            /* InfoSection::make('Audit Dates')->schema([
                 InfoGrid::make(12)
                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                     ->schema([
@@ -224,7 +224,7 @@ class BanksResource extends Resource
                     ]),
             ])
             ->maxWidth('6xl')
-            ->compact(),
+            ->compact(), */
         ]);
     }
 
@@ -236,6 +236,7 @@ class BanksResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Bank $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')
@@ -291,6 +292,7 @@ class BanksResource extends Resource
         return [
             'index' => Pages\ListBanks::route('/'),
             'create' => Pages\CreateBanks::route('/create'),
+            'view'   => Pages\ViewBanks::route('/{record}'),   // 👈 NUEVA
             'edit' => Pages\EditBanks::route('/{record}/edit'),
         ];
     }

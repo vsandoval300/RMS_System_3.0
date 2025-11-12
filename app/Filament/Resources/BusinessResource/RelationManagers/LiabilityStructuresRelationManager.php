@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Card;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Model;

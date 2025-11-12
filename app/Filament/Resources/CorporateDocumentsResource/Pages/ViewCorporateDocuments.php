@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Filament\Resources\ClientsResource\Pages;
+namespace App\Filament\Resources\CorporateDocumentsResource\Pages;
 
-use App\Filament\Resources\ClientsResource;
+use App\Filament\Resources\CorporateDocumentsResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
 use Filament\Forms;
 
-class ViewClients extends ViewRecord
+class ViewCorporateDocuments extends ViewRecord
 {
-    protected static string $resource = ClientsResource::class;
+    protected static string $resource = CorporateDocumentsResource::class;
 
     protected ?string $maxContentWidth = '5xl';
 
     public function getTitle(): string
     {
-        return 'View – ' . ($this->record?->name ?? 'Client');
+        return 'View – ' . ($this->record?->name ?? 'DocumentCorpType');
     }
 
     protected function getHeaderActions(): array
@@ -50,6 +50,10 @@ class ViewClients extends ViewRecord
                 ->url(static::getResource()::getUrl('index')),
         ];
     }
+
+
+
+
+
+
 }
-
-
