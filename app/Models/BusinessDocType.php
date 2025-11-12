@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\HasAuditLogs;
 
 class BusinessDocType extends Model
 {
     //
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $fillable = [
         'name',
@@ -21,5 +22,12 @@ class BusinessDocType extends Model
     public function operativeDocs()
     {
         return $this->hasMany(OperativeDoc::class, 'operative_doc_type_id');
+    }
+
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        return $this->name
+            ?? $this->name . ':'
+            ?? parent::getAuditLabelIdentifier();
     }
 }

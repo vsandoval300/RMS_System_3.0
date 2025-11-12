@@ -118,7 +118,7 @@ class BusinessDocTypesResource extends Resource
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')->schema([
+            /* InfoSection::make('Audit Dates')->schema([
                 InfoGrid::make(2)
                     ->extraAttributes(['style' => 'gap: 12px;'])
                     ->schema([
@@ -145,7 +145,7 @@ class BusinessDocTypesResource extends Resource
                     ]),
             ])
             ->maxWidth('5xl')
-            ->compact(),
+            ->compact(), */
         ]);
     }
 

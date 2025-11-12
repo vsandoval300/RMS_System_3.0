@@ -5,6 +5,8 @@ namespace App\Filament\Resources\CostSchemeResource\Pages;
 use App\Filament\Resources\CostSchemeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\Action;
+use Filament\Forms;
 
 class ViewCostScheme extends ViewRecord
 {
@@ -17,20 +19,36 @@ class ViewCostScheme extends ViewRecord
         return 'View – ' . ($this->record?->name ?? 'CostScheme');
     }
 
-     protected function getHeaderActions(): array
+    protected function getHeaderActions(): array
     {
         return [
-            /* Actions\Action::make('back')
-                ->label('Back')
-                ->icon('heroicon-o-arrow-left')
-                ->url(static::getResource()::getUrl('index')), */
+            Action::make('auditInfo')
+                ->label('Audit info')
+                ->icon('heroicon-o-clipboard-document-list')
+                ->modalHeading(' ')
+                ->modalWidth('4xl')
+                ->modalSubmitAction(false)
+                ->closeModalByClickingAway()
+                ->form(function () {
+                    $record = $this->getRecord();
 
-            Actions\Action::make('close')
+                    return [
+
+                        // ── Change history (vista Blade que ya tienes) ──
+                        Forms\Components\View::make('filament.resources.audit.audit-logs')
+                            ->viewData([
+                                'record' => $record,
+                            ])
+                            ->columnSpanFull(),
+                    ];
+                }),
+
+            Action::make('close')
                 ->label('Close')
                 ->icon('heroicon-o-x-mark')
                 ->color('gray')
                 ->outlined()
-                ->url(static::getResource()::getUrl('index')),    
+                ->url(static::getResource()::getUrl('index')),
         ];
     }
 }

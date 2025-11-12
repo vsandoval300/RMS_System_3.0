@@ -30,7 +30,7 @@ class ViewCompanies extends ViewRecord
                 ->icon('heroicon-o-clipboard-document-list')
                 ->modalHeading(' ')
                 ->modalDescription('Review the full change history for this record, including who modified it and when.')
-                ->modalWidth('7xl')
+                ->modalWidth('4xl')
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()
                 ->form(function () {
