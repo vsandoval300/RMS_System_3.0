@@ -388,23 +388,6 @@ public static function infolist(Infolist $infolist): Infolist
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public static function table(Table $table): Table
     {
         return $table

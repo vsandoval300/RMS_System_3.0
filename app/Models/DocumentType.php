@@ -23,6 +23,8 @@ class DocumentType extends Model
             ?? parent::getAuditLabelIdentifier();
     }
 
+    
+
 
 
 }

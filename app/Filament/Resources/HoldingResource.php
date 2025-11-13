@@ -157,7 +157,7 @@ class HoldingResource extends Resource
             ->collapsible(),
 
             /* ─────────────────────────  AUDIT  ───────────────────────── */
-            InfoSection::make('Audit Dates')
+            /* InfoSection::make('Audit Dates')
                 ->schema([
                     InfoGrid::make(2)
                         ->extraAttributes(['style' => 'gap: 12px;'])
@@ -190,7 +190,7 @@ class HoldingResource extends Resource
                         ]),
                 ])
                 ->maxWidth('5xl')
-                ->compact(),
+                ->compact(), */
         ]);
     }
 
@@ -213,6 +213,7 @@ class HoldingResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Holding $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('Index')
                     ->label('Index')
@@ -272,6 +273,7 @@ class HoldingResource extends Resource
         return [
             'index' => Pages\ListHoldings::route('/'),
             'create' => Pages\CreateHolding::route('/create'),
+            'view'   => Pages\ViewHolding::route('/{record}'),  // 👈 nuevo
             'edit' => Pages\EditHolding::route('/{record}/edit'),
         ];
     }

@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Filament\Resources\DirectorResource\Pages;
+namespace App\Filament\Resources\HoldingResource\Pages;
 
-use App\Filament\Resources\DirectorResource;
+use App\Filament\Resources\HoldingResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
 use Filament\Forms;
 
-class ViewDirector extends ViewRecord
+class ViewHolding extends ViewRecord
 {
-    protected static string $resource = DirectorResource::class;
+    protected static string $resource = HoldingResource::class;
 
     protected ?string $maxContentWidth = '5xl';
 
     public function getTitle(): string
     {
-        return 'View – ' . ($this->record?->name ?? 'Director');
+        return 'View – ' . ($this->record?->name ?? 'Holding');
     }
 
     protected function getHeaderActions(): array

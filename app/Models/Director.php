@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Occupation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Traits\HasAuditLogs;
+use App\Models\Country; 
 
 class Director extends Model
 {
     //
-    use SoftDeletes;
+    use SoftDeletes,HasAuditLogs;
 
     protected $fillable = [
         'name','surname','gender','email','phone','address',
@@ -34,5 +36,25 @@ class Director extends Model
         return $this->belongsTo(Country::class, 'country_id');
     }
     
+    /* ─── Metodos para salvar Logs ─── */
+    /* ─── Este guarda la etiqueta del campo a manera de identificador ─── */
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        return $this->name
+            ?? $this->name . ':'
+            ?? parent::getAuditLabelIdentifier();
+    }
+
+    protected function transformAuditValue(string $field, $value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return match ($field) {
+            'country_id' => Country::find($value)?->name ?? $value,
+            default       => $value,
+        };
+    }
                            
 }
