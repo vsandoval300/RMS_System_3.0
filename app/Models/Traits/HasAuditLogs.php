@@ -36,6 +36,19 @@ trait HasAuditLogs
         return $key !== null ? (string) $key : null;
     }
 
+    
+    /**
+     * Permite que cada modelo cambie el prefijo del evento.
+     * Por defecto: "Created", "Updated", "Deleted".
+     */
+    protected function getAuditEventLabelPrefix(string $event): string
+    {
+        return ucfirst($event);
+    }
+
+
+
+
     protected function transformAuditValue(string $field, $value)
     {
         return $value;

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Country; 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\HasAuditLogs;
+use App\Models\ClientIndustry;
 
 class Client extends Model
 {
@@ -42,6 +43,7 @@ class Client extends Model
             'client_id',         // FK de este modelo en la pivote
             'industry_id'        // FK del modelo relacionado en la pivote
         )
+        ->using(ClientIndustry::class) // 👈 clave para que se use el modelo pivote
         ->withTimestamps()            // si tu pivote tiene created_at / updated_at
         // ->withPivot(['extra_col'])    // si guardas columnas adicionales
         ;

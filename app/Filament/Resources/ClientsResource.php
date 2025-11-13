@@ -434,7 +434,7 @@ public static function infolist(Infolist $infolist): Infolist
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->wrap()
                     ->extraAttributes([
-                        'style' => 'width: 520px; white-space: normal;', // ancho fijo de 300px
+                        'style' => 'width: 750px; white-space: normal;', // ancho fijo de 300px
                     ])
                     ->toggleable(),
                     
