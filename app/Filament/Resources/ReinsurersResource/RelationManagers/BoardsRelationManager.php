@@ -14,12 +14,14 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
 use App\Models\Director;
 use App\Models\Board;
+use App\Models\ReinsurerBoard;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 
 class BoardsRelationManager extends RelationManager
 {
     protected static string $relationship = 'boards';
+    protected static ?string $icon = 'heroicon-o-user-group';
 
     public function form(Form $form): Form
     {
@@ -134,7 +136,24 @@ class BoardsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->using(function (Board $record, RelationManager $livewire) {
+                        // Reinsurer al que pertenece este RelationManager
+                        $reinsurer = $livewire->getOwnerRecord();
+
+                        // Buscar el pivot específico
+                        $pivot = ReinsurerBoard::where('reinsurer_id', $reinsurer->id)
+                            ->where('board_id', $record->id)
+                            ->first();
+
+                        if ($pivot) {
+                            // 👇 SOLO esto: dispara SoftDeletes + evento "deleted" + HasAuditLogs
+                            $pivot->delete();
+                        }
+
+                        // Filament espera que regreses el modelo "borrado"
+                        return $record;
+                    }),
             ]);
     }
 }

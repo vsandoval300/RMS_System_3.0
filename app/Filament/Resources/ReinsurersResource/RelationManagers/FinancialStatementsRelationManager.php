@@ -20,6 +20,7 @@ class FinancialStatementsRelationManager extends RelationManager
     protected static string $relationship = 'financialStatements';
     protected static ?string $title  = 'Financial Statements';
     protected static ?string $recordTitleAttribute = 'start_date';
+    protected static ?string $icon = 'heroicon-o-presentation-chart-line';
 
     /* ==========  TABLA  ========== */
     public function table(Table $table): Table
@@ -102,7 +103,8 @@ class FinancialStatementsRelationManager extends RelationManager
                     ->directory('reinsurers/financials_statements')
                     ->visibility('private')
                     ->acceptedFileTypes(['application/pdf'])
-                    ->required()
+                    // 🔹 Requerido solo si NO existe archivo aún
+                    ->required(fn ($record) => $record === null || blank($record->document_path))
                     ->getUploadedFileNameForStorageUsing(function ($file, $record, $set, $get) {
                         // ✅ Obtener reinsurer desde el relation manager
                         $reinsurer = $this->getOwnerRecord(); // ← aquí viene el modelo padre
@@ -120,7 +122,38 @@ class FinancialStatementsRelationManager extends RelationManager
 
                         return "{$reinsurerName}--{$startDate} to {$endDate}.{$extension}";
                     })
+                    ->downloadable()
+                    ->openable()
+                    ->previewable(true)
+                    // 🔹 CLAVE: conservar el archivo anterior si no se sube uno nuevo
+                    ->dehydrateStateUsing(function ($state, $record) {
+                        // En edición, si no se sube nada nuevo, $state será null,
+                        // pero el registro puede tener ya document_path guardado
+                        if (blank($state) && $record?->document_path) {
+                            return $record->document_path;   // conserva la ruta anterior
+                        }
+
+                        return $state; // en creación o cuando sí subes algo nuevo
+                    })
+                    ->hint(fn ($record) => $record?->document_path
+                        ? 'Existing file: ' . basename($record->document_path)
+                        : 'No file uploaded yet.'
+                    )
+                    // ❌ IMPORTANTE: quita esta línea que tenías antes:
+                    // ->dehydrated(fn ($state) => filled($state))
+                    ->helperText('Only PDF files are allowed.')
                     ->columnSpanFull(),
+
+
+
+                    
+
+
+
+
+
+
+
             ]);
     }
 }

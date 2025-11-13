@@ -22,7 +22,8 @@ class ReinsurerHoldingsRelationManager extends RelationManager
 {
     protected static string $relationship = 'reinsurerHoldings';
     protected static ?string $title = 'Holdings';
-
+    protected static ?string $icon = 'heroicon-o-building-office';
+    
     public function form(Form $form): Form
     {
         return $form->schema([

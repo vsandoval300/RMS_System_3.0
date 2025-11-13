@@ -292,7 +292,7 @@ class DirectorResource extends Resource
 
                     // Col 3: foto
                    
-                            /* InfoGrid::make(1)
+                            InfoGrid::make(1)
                                 ->columnSpan(1)
                                 ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:6px;height:100%;'])
                                 ->schema([
@@ -336,11 +336,11 @@ class DirectorResource extends Resource
                                         ')
                                         ->visible(fn ($record) => blank(data_get($record, 'image')))
                                         ->extraAttributes(['style' => 'margin:0; padding:0;']),
-                                ]), */
+                                ]),
 
                     ]),
             ])
-            ->maxWidth('4xl')
+            ->maxWidth('5xl')
             ->collapsible(),
         ]);
     }

@@ -10,11 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Traits\HasAuditLogs;
 
 class Reinsurer extends Model
 {
     //
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $fillable = [
         'cns_reinsurer',
@@ -75,27 +76,17 @@ class Reinsurer extends Model
         return $this->hasMany(ReinsurerDoc::class, 'reinsurer_id');
     }
 
-
-
     // 👉 Reaseguradores y Cuentas Bancarias
     public function reinsurerBankAccounts(): HasMany
     {
         return $this->hasMany(ReinsurerBankAccount::class, 'reinsurer_id');
     }
-
-
-
-
-    
+  
     // 👉 Reaseguradores y Financial Statements
     public function financialStatements()
     {
         return $this->hasMany(ReinsurerFinancialStatement::class, 'reinsurer_id');
     }
-
-
-
-
 
     // 👉 Reaseguradores y Holdings
     public function reinsurerHoldings(): HasMany
@@ -145,5 +136,31 @@ class Reinsurer extends Model
                 Storage::disk('s3')->delete($reinsurer->icon);
             }
         });
+    }
+
+
+    /* ─── Metodos para salvar Logs ─── */
+    /* ─── Este guarda la etiqueta del campo a manera de identificador ─── */
+    protected function getAuditLabelIdentifier(): ?string
+    {
+        return $this->name
+            ?? $this->name . ':'
+            ?? parent::getAuditLabelIdentifier();
+    }
+
+    protected function transformAuditValue(string $field, $value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return match ($field) {
+            'country_id' => Country::find($value)?->name ?? $value,
+            'parent_id' => Reinsurer::find($value)?->name ?? $value,
+            'manager_id' => Manager::find($value)?->name ?? $value,
+            'reinsurer_type_id' => ReinsurerType::find($value)?->description ?? $value,
+            'operative_status_id' => OperativeStatus::find($value)?->description ?? $value,
+            default       => $value,
+        };
     }
 }

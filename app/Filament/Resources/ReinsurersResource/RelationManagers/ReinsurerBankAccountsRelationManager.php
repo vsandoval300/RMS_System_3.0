@@ -16,8 +16,8 @@ use Filament\Tables\Columns\TextColumn;
 class ReinsurerBankAccountsRelationManager extends RelationManager
 {
     protected static string $relationship = 'reinsurerBankAccounts';
-
     protected static ?string $title       = 'Bank Accounts';
+    protected static ?string $icon = 'heroicon-o-banknotes';
 
     public static function getEloquentQuery(): Builder
     {

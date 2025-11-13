@@ -46,6 +46,7 @@ class ReinsurersResource extends Resource
     protected static ?string $model = Reinsurer::class;
     protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Reinsurers';
+    protected static ?string $icon = 'heroicon-o-building-office';
     protected static ?int    $navigationSort  = 1;  
 
     /* ───── NUEVO: burbuja con el total en el menú ───── */
@@ -326,6 +327,17 @@ class ReinsurersResource extends Resource
                                             : 'No logo uploaded yet.';
                                     })
                                     ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
+
+                                    // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
+                                    ->dehydrateStateUsing(function ($state, $record) {
+                                        // En edición, si no se sube nada nuevo, $state será null
+                                        if (blank($state) && $record?->logo) {
+                                            return $record->logo;   // conserva la ruta anterior
+                                        }
+
+                                        return $state; // en creación o cuando sí subes algo nuevo
+                                    })
+
                                     ->deleteUploadedFileUsing(function ($file) {
                                         if ($file && Storage::disk('s3')->exists($file)) {
                                             Storage::disk('s3')->delete($file);
@@ -354,6 +366,15 @@ class ReinsurersResource extends Resource
                                             : 'No icon uploaded yet.';
                                     })
                                     ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
+
+                                    ->dehydrateStateUsing(function ($state, $record) {
+                                        if (blank($state) && $record?->icon) {
+                                            return $record->icon;
+                                        }
+
+                                        return $state;
+                                    })
+
                                     ->deleteUploadedFileUsing(function ($file) {
                                         if ($file && Storage::disk('s3')->exists($file)) {
                                             Storage::disk('s3')->delete($file);
@@ -626,7 +647,7 @@ public static function infolist(Infolist $infolist): Infolist
                                 ]),
                     ]),
             ])
-            ->maxWidth('8xl')
+            ->maxWidth('9xl')
             ->collapsible(),
         ]);
     }
@@ -649,6 +670,7 @@ public static function infolist(Infolist $infolist): Infolist
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Reinsurer $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 //
                 TextColumn::make('id')->sortable()

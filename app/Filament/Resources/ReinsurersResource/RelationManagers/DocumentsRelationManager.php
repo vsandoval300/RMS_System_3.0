@@ -22,6 +22,7 @@ class DocumentsRelationManager extends RelationManager
     protected static ?string $title = 'Corporate Documents';
     /** ← NUEVO: etiqueta del botón */
     protected static ?string $createButtonLabel = 'New corporate doc';
+    protected static ?string $icon = 'heroicon-o-document-text';
 
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
