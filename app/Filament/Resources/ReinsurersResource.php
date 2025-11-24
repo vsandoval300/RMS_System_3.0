@@ -330,12 +330,17 @@ class ReinsurersResource extends Resource
 
                                     // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
                                     ->dehydrateStateUsing(function ($state, $record) {
-                                        // En edición, si no se sube nada nuevo, $state será null
-                                        if (blank($state) && $record?->logo) {
-                                            return $record->logo;   // conserva la ruta anterior
+                                        // 👇 si viene como array, toma el primer elemento
+                                        if (is_array($state)) {
+                                            $state = $state[0] ?? null;
                                         }
 
-                                        return $state; // en creación o cuando sí subes algo nuevo
+                                        // en edición, si no se sube nada, conserva lo que ya tenía
+                                        if (blank($state) && $record?->logo) {
+                                            return $record->logo;
+                                        }
+
+                                        return $state; // string o null
                                     })
 
                                     ->deleteUploadedFileUsing(function ($file) {
@@ -368,6 +373,10 @@ class ReinsurersResource extends Resource
                                     ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
 
                                     ->dehydrateStateUsing(function ($state, $record) {
+                                        if (is_array($state)) {
+                                            $state = $state[0] ?? null;
+                                        }
+
                                         if (blank($state) && $record?->icon) {
                                             return $record->icon;
                                         }

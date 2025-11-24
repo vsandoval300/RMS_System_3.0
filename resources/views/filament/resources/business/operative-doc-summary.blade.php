@@ -12,7 +12,7 @@
     </h4> --}}
 
     <h4 class="font-semibold mt-6 mb-4" style="color:#db4a2b;font-size:15px;">
-        <span class="px-2 py-1 text-right font-extrabold text-gray-300 w-1/4"></span>
+        <span class="px-2 py-1 text-left font-extrabold text-gray-300 w-1/4"></span>
         <span class="px-2 py-1 w-1/4">{{ $id ?? '-' }}</span>
      </h4>
     
@@ -28,26 +28,46 @@
        General Details
     </h4>
 
-    <table class="w-full text-sm border-separate border-spacing-y-1">
+    <table class="table-fixed w-full text-sm border-separate border-spacing-y-1">
+        <colgroup>
+            {{-- 4 columnas con datos → auto --}}
+            <col>
+            <col>
+            <col>
+            <col>
+
+            {{-- 2 columnas dummy con ancho fijo --}}
+            <col style="width: 150px;">
+            <col style="width: 150px;">
+            {{-- o Tailwind:
+            <col class="w-[80px]">
+            <col class="w-[80px]">
+            --}}
+        </colgroup>
+
         <tbody>
             <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
                     Document type:
                 </td>
                 <td class="px-2 py-1 font-thin">{{ $documentType ?? '-' }}</td>
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
                     Creation date:
                 </td>
-                <td class="px-2 py-1 w-1/4">
+                <td class="px-2 py-1">
                     {{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d/m/Y') : '-' }}
                 </td>
+                {{-- columnas “dummy” --}}
+                <td></td>
+                <td></td>
             </tr>
+
             <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
                     Premium type:
                 </td>
                 <td class="px-2 py-1 font-thin">{{ $premiumType ?? '-' }}</td>
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
                     Period:
                 </td>
                 <td class="px-2 py-1 font-thin">
@@ -55,18 +75,25 @@
                     to
                     {{ $expirationDate ? \Carbon\Carbon::parse($expirationDate)->format('d/m/Y') : '-' }}
                 </td>
+                <td></td>
+                <td></td>
             </tr>
+
             <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
                     Original currency:
                 </td>
                 <td class="px-2 py-1 font-thin">{{ $originalCurrency ?? '-' }}</td>
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
                     Coverage days:
                 </td>
                 <td class="px-2 py-1 font-thin">
-                    {{ isset($inceptionDate, $expirationDate) ? \Carbon\Carbon::parse($inceptionDate)->diffInDays(\Carbon\Carbon::parse($expirationDate)) : '-' }}
-                </td>                
+                    {{ isset($inceptionDate, $expirationDate)
+                        ? \Carbon\Carbon::parse($inceptionDate)->diffInDays(\Carbon\Carbon::parse($expirationDate))
+                        : '-' }}
+                </td>
+                <td></td>
+                <td></td>
             </tr>
         </tbody>
     </table>
