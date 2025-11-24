@@ -31,6 +31,8 @@ class Reinsurer extends Model
         'country_id',
         'reinsurer_type_id',
         'operative_status_id',
+        'logo',          // 👈 MUY IMPORTANTE
+        'icon',          // 👈 MUY IMPORTANTE
     ];
 
     protected $table = 'reinsurers';
