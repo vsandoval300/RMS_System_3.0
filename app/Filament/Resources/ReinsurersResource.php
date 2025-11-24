@@ -329,13 +329,20 @@ class ReinsurersResource extends Resource
                                     ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
 
                                     // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
-                                    ->dehydrateStateUsing(function ($state, $record) {
-                                        // En edición, si no se sube nada nuevo, $state será null
-                                        if (blank($state) && $record?->logo) {
-                                            return $record->logo;   // conserva la ruta anterior
+                                    ->dehydrateStateUsing(function ($state, ?Reinsurer $record) {
+                                        // 1) Si no se eligió nada, conserva el valor que ya tenía el registro
+                                        if (blank($state)) {
+                                            return $record?->logo;
                                         }
 
-                                        return $state; // en creación o cuando sí subes algo nuevo
+                                        // 2) Si viene como ["uuid" => "ruta"], nos quedamos SOLO con la ruta
+                                        if (is_array($state)) {
+                                            // ejemplo: ["tbd...uuid..." => "reinsurers/logos/55-Logoprueba.png"]
+                                            $state = array_values($state)[0] ?? null;
+                                        }
+
+                                        // 3) Aquí ya es string (o null)
+                                        return $state;
                                     })
 
                                     ->deleteUploadedFileUsing(function ($file) {
@@ -367,9 +374,13 @@ class ReinsurersResource extends Resource
                                     })
                                     ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
 
-                                    ->dehydrateStateUsing(function ($state, $record) {
-                                        if (blank($state) && $record?->icon) {
-                                            return $record->icon;
+                                    ->dehydrateStateUsing(function ($state, ?Reinsurer $record) {
+                                        if (blank($state)) {
+                                            return $record?->icon;
+                                        }
+
+                                        if (is_array($state)) {
+                                            $state = array_values($state)[0] ?? null;
                                         }
 
                                         return $state;
