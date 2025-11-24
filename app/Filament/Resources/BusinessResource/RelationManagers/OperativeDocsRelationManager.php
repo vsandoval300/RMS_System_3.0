@@ -1157,44 +1157,45 @@ class OperativeDocsRelationManager extends RelationManager
 
                                 
                                 // Cambio
-                                $groupedCostNodes = $costNodes->groupBy(fn ($node) => $node->costScheme->share ?? 0)
+                               $groupedCostNodes = $costNodes
+                                    ->groupBy(fn ($node) => $node->costScheme->share ?? 0)  // 👈 aquí
                                     ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
                                         $shareFloat = floatval($share);
 
                                         $nodeList = $nodes->map(function ($node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
-                                            $deduction = $totalPremiumFts * $node->value * $shareFloat;
+                                            $deduction          = $totalPremiumFts       * $node->value * $shareFloat;
                                             $deductionConverted = $totalConvertedPremium * $node->value * $shareFloat;
 
                                             return [
-                                                'index' => $node->index,
-                                                'partner' => $node->partnerSource?->name ?? '-',
-                                                'partner_short' => $node->partnerSource?->short_name
-                                                                   ?? ($node->partnerSource?->name
-                                                                   ?? '-'),
-                                                'deduction' => $node->deduction?->concept ?? '-',
-                                                'value' => $node->value,
-                                                'share' => $shareFloat,
+                                                'index'            => $node->index,
+                                                'partner'          => $node->partnerSource?->name ?? '-',
+                                                'partner_short'    => $node->partnerSource?->short_name
+                                                                    ?? ($node->partnerSource?->name ?? '-'),
+                                                'deduction'        => $node->deduction?->concept ?? '-',
+                                                'value'            => $node->value,
+                                                'share'            => $shareFloat,
                                                 'deduction_amount' => $deduction,
-                                                'deduction_usd' => $deductionConverted,
+                                                'deduction_usd'    => $deductionConverted,
                                             ];
                                         })->values();
 
                                         $subtotalOrig = $nodeList->sum('deduction_amount');
-                                        $subtotalUsd = $nodeList->sum('deduction_usd');
+                                        $subtotalUsd  = $nodeList->sum('deduction_usd');
 
                                         $totalDeductionOrig += $subtotalOrig;
-                                        $totalDeductionUsd += $subtotalUsd;
+                                        $totalDeductionUsd  += $subtotalUsd;
 
                                         return [
-                                            'share' => $shareFloat,
-                                            'nodes' => $nodeList,
+                                            'share'         => $shareFloat,
+                                            'nodes'         => $nodeList,
                                             'subtotal_orig' => $subtotalOrig,
-                                            'subtotal_usd' => $subtotalUsd,
+                                            'subtotal_usd'  => $subtotalUsd,
                                         ];
                                     })
                                     ->sortKeys()
                                     ->values()
                                     ->toArray();
+
 
 
                                     // 👇 NUEVO: logs persistidos por transacción e índice

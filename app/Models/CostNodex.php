@@ -50,10 +50,10 @@ class CostNodex extends Model
         return $this->belongsTo(Partner::class);
     }
     /** Relación con esquema de costos */
-    public function costSchemes()
+    /* public function costSchemes()
     {
         return $this->belongsTo(CostScheme::class, 'cscheme_id');
-    }
+    } */
     /** Relación con los tipos de deducciones */
     public function deduction()
     {
