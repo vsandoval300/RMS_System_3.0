@@ -328,27 +328,14 @@ class ReinsurersResource extends Resource
                                     })
                                     ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
 
+                                    // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
                                     ->dehydrateStateUsing(function ($state, $record) {
-                                        // 1) Si no se sube nada nuevo en edición, conserva el valor anterior
+                                        // En edición, si no se sube nada nuevo, $state será null
                                         if (blank($state) && $record?->logo) {
-                                            return $record->logo;
+                                            return $record->logo;   // conserva la ruta anterior
                                         }
 
-                                        // 2) Si viene como array ["tempId","ruta"]
-                                        if (is_array($state)) {
-                                            // si viene índice numérico
-                                            if (isset($state[1])) {
-                                                return $state[1];   // 👈 nos quedamos solo con la ruta
-                                            }
-
-                                            // por si viniera como ['path' => '...']
-                                            if (isset($state['path'])) {
-                                                return $state['path'];
-                                            }
-                                        }
-
-                                        // 3) Si ya es string, lo dejamos tal cual
-                                        return $state;
+                                        return $state; // en creación o cuando sí subes algo nuevo
                                     })
 
                                     ->deleteUploadedFileUsing(function ($file) {
@@ -383,15 +370,6 @@ class ReinsurersResource extends Resource
                                     ->dehydrateStateUsing(function ($state, $record) {
                                         if (blank($state) && $record?->icon) {
                                             return $record->icon;
-                                        }
-
-                                        if (is_array($state)) {
-                                            if (isset($state[1])) {
-                                                return $state[1];
-                                            }
-                                            if (isset($state['path'])) {
-                                                return $state['path'];
-                                            }
                                         }
 
                                         return $state;
