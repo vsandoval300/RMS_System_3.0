@@ -39,6 +39,8 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Actions;
 use App\Models\Traits\HasOperativeDocOverview;
 use Filament\Forms\Components\ToggleButtons;
+use App\Models\CostScheme;
+use App\Models\CostNodex;
 
 
 
@@ -1092,12 +1094,43 @@ class OperativeDocsRelationManager extends RelationManager
                                     ];
                                 })->toArray();
 
-                                $costNodes = collect($get('schemes') ?? [])
+                                
+                                
+                                
+                                /* $costNodes = collect($get('schemes') ?? [])
                                     ->map(fn ($scheme) => \App\Models\CostScheme::with('costNodexes.costScheme', 'costNodexes.partnerSource', 'costNodexes.deduction') // <-------
                                         ->find($scheme['cscheme_id'] ?? null))
                                     ->filter()
                                     ->flatMap(fn ($scheme) => $scheme->costNodexes ?? collect())
+                                    ->values(); */
+
+                                // 1) Traemos los esquemas seleccionados en el formulario
+                                $costNodes = collect($get('schemes') ?? [])
+                                    ->pluck('cscheme_id')
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->map(fn ($schemeId) =>
+                                        CostScheme::with([
+                                            'costNodexes.partnerSource',
+                                            'costNodexes.deduction',
+                                        ])->find($schemeId)
+                                    )
+                                    ->filter()
+                                    ->flatMap(function (CostScheme $scheme) {
+                                        // Le inyectamos el share del esquema a cada nodo (solo en memoria)
+                                        return $scheme->costNodexes->map(function (CostNodex $node) use ($scheme) {
+                                            $node->scheme_share = (float) $scheme->share;     // 👈 0.90 por ejemplo
+                                            return $node;
+                                        });
+                                    })
                                     ->values();
+
+
+
+
+
+
 
                                 // 📊 Cálculos generales
                                 $inception = $get('inception_date');
@@ -1157,7 +1190,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                 
                                 // Cambio
-                               $groupedCostNodes = $costNodes
+                               /* $groupedCostNodes = $costNodes
                                     ->groupBy(fn ($node) => $node->costScheme->share ?? 0)  // 👈 aquí
                                     ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
                                         $shareFloat = floatval($share);
@@ -1194,7 +1227,55 @@ class OperativeDocsRelationManager extends RelationManager
                                     })
                                     ->sortKeys()
                                     ->values()
-                                    ->toArray();
+                                    ->toArray(); */
+
+                                    // 2) Agrupamos por esquema (cscheme_id) y calculamos deducciones
+                                    $groupedCostNodes = $costNodes
+                                        ->groupBy('cscheme_id')
+                                        ->map(function ($nodes, $schemeId) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
+                                            /** @var \App\Models\CostNodex $first */
+                                            $first      = $nodes->first();
+                                            $shareFloat = (float) ($first->scheme_share ?? 0);   // 👈 share confiable
+
+                                            $nodeList = $nodes->map(function (CostNodex $node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
+                                                $deduction          = $totalPremiumFts      * (float) $node->value * $shareFloat;
+                                                $deductionConverted = $totalConvertedPremium * (float) $node->value * $shareFloat;
+
+                                                return [
+                                                    'index'           => $node->index,
+                                                    'partner'         => $node->partnerSource?->name ?? '-',
+                                                    'partner_short'   => $node->partnerSource?->short_name
+                                                                        ?? $node->partnerSource?->name
+                                                                        ?? '-',
+                                                    'deduction'       => $node->deduction?->concept ?? '-',
+                                                    'value'           => (float) $node->value,
+                                                    'share'           => $shareFloat,
+                                                    'deduction_amount'=> $deduction,
+                                                    'deduction_usd'   => $deductionConverted,
+                                                ];
+                                            })->values();
+
+                                            $subtotalOrig = $nodeList->sum('deduction_amount');
+                                            $subtotalUsd  = $nodeList->sum('deduction_usd');
+
+                                            $totalDeductionOrig += $subtotalOrig;
+                                            $totalDeductionUsd  += $subtotalUsd;
+
+                                            return [
+                                                'scheme_id'     => $schemeId,
+                                                'share'         => $shareFloat,
+                                                'nodes'         => $nodeList,
+                                                'subtotal_orig' => $subtotalOrig,
+                                                'subtotal_usd'  => $subtotalUsd,
+                                            ];
+                                        })
+                                        ->values()
+                                        ->toArray();
+
+
+
+
+
 
 
 
