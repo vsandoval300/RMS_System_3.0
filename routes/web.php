@@ -8,3 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 // ✅ redirige raíz a Filament (autenticará y mandará a /admin/login si hace falta)
 Route::redirect('/', '/admin');
+
+/* Route::get('/ping', function () {
+    return 'pong';
+}); */

@@ -33,10 +33,10 @@ class ViewBusiness extends ViewRecord
         return 'Business Details';
     }
 
-  /*   public function hasCombinedRelationManagerTabsWithContent(): bool
+    public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
-    } */
+    }
 
     public function getTitle(): string
     {
@@ -75,11 +75,6 @@ class ViewBusiness extends ViewRecord
                 ->url(static::getResource()::getUrl('index')),      
         ];
     }
-
-
-
-
-
 
 }
 

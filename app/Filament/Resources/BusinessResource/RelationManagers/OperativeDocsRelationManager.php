@@ -36,6 +36,10 @@ use App\Services\TransactionLogBuilder;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Filament\Forms\Components\Actions;
+use App\Models\Traits\HasOperativeDocOverview;
+use Filament\Forms\Components\ToggleButtons;
+
 
 
 
@@ -46,6 +50,7 @@ use Nette\Utils\Html as UtilsHtml;
 
 class OperativeDocsRelationManager extends RelationManager
 {
+    use HasOperativeDocOverview;
     protected static string $relationship = 'OperativeDocs';
     protected static ?string $title = 'Operative Documents';
     protected static ?string $icon = 'heroicon-o-document-text';
@@ -80,7 +85,7 @@ class OperativeDocsRelationManager extends RelationManager
         return $form->schema([
 
 
-            Hidden::make('active_panel')
+         Hidden::make('active_panel')
                 ->default('tabs')   // 👈 por defecto Tabs abierto, Summary cerrado
                 ->reactive()
                 ->dehydrated(false) 
@@ -88,10 +93,13 @@ class OperativeDocsRelationManager extends RelationManager
                         if (blank($state)) $set('active_panel', 'tabs');
                     }),
 
+                 
+
                 // ────────  A) SECTION: TABS (colapsable)  ─────────────────────────
                 Section::make('Document Details')
                     ->collapsible()
                     ->collapsed(fn (Get $get) => $get('active_panel') !== 'tabs')
+                    
                     ->extraAttributes([
                         'x-on:click.self' => '$wire.set("data.active_panel","tabs"); $wire.set("active_panel","tabs");',
                     ])
@@ -147,7 +155,14 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->schema([
                                                         Select::make('operative_doc_type_id')
                                                                 ->label('Document Type')
-                                                                ->relationship('docType', 'name')
+                                                                ->relationship(
+                                                                    name: 'docType',
+                                                                    titleAttribute: 'name',
+                                                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('id') // 👈 orden por id
+                                                                )
+                                                                ->getOptionLabelFromRecordUsing(
+                                                                    fn ($record) => "{$record->id} - {$record->name}"
+                                                                )
                                                                 ->required()
                                                                 ->live()
                                                                 ->preload()
@@ -976,6 +991,29 @@ class OperativeDocsRelationManager extends RelationManager
             
 
                 
+                // ───────── BOTÓN SOBRE OVERVIEW ─────────────────────────
+               /*  Actions::make([
+                    FormAction::make('viewOverview')
+                        ->label('View')
+                        ->icon('heroicon-o-eye')
+                        ->color('primary')
+                        ->modalHeading('Overview')
+                        ->modalWidth('7xl')
+                        // Solo botón Cancel
+                        ->modalSubmitAction(false)
+                        // El form del modal solo contiene la misma vista reutilizable
+                        ->form([
+                            static::makeOperativeDocOverviewView(), // 👈 misma vista del trait
+                        ])
+                        ->action(fn () => null),
+                ])
+                    ->columnSpanFull()
+                    ->extraAttributes([
+                        'class' => 'flex justify-end mb-2',
+                    ]), */
+                // ───────── FIN BOTÓN SOBRE OVERVIEW ─────────────────────
+                
+                //Con esto, al dar clic en **View** se abre un modal con tu **Overview completo** (misma vista y cálculos), y el usuario solo tiene el botón **Cancel** para cerrarlo.
 
 
 
@@ -988,20 +1026,15 @@ class OperativeDocsRelationManager extends RelationManager
                 Section::make('Overview')
                     ->collapsible()
                     ->collapsed(fn (Get $get) => $get('active_panel') !== 'summary')
-                    //->extraAttributes([
-                    //    'class' => 'max-h-[550px] overflow-y-auto'
-                    //]),
                     ->extraAttributes([
                         'x-on:click.self' => '$wire.set("data.active_panel","summary"); $wire.set("active_panel","summary");',
                         'class' => 'max-h-[700px] overflow-y-auto',
                     ])
+                   
 
                     // ⬇️ Botón para exportar/preview/imprimir
                     ->headerActions([
                         FormAction::make('Export to pdf'),
-
-
-
                     ])
 
 
@@ -1122,7 +1155,9 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalDeductionOrig = 0;
                                 $totalDeductionUsd = 0;
 
-                                $groupedCostNodes = $costNodes->groupBy(fn ($node) => $node->costSchemes->share ?? 0)
+                                
+                                // Cambio
+                                $groupedCostNodes = $costNodes->groupBy(fn ($node) => $node->costScheme->share ?? 0)
                                     ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
                                         $shareFloat = floatval($share);
 
@@ -1344,13 +1379,15 @@ class OperativeDocsRelationManager extends RelationManager
         ])
         ->headerActions([
             Tables\Actions\CreateAction::make()
-                ->label('Create Operative Doc')
+                ->label('➕ New Operative Doc')
                 ->modalHeading('➕ Create Operative Doc')
                 ->modalWidth('7xl')
 
                 ->createAnother(false)                 // 👈 oculta "Create & create another"
                 ->modalSubmitActionLabel('Create')     // 👈 botón principal
                 ->modalCancelActionLabel('Cancel')     // 👈 botón cancelar
+
+             
 
 
                 ->beforeFormFilled(function ($livewire, $action) {
@@ -1418,7 +1455,15 @@ class OperativeDocsRelationManager extends RelationManager
                 }),
 
 
+            /* Tables\Actions\Action::make('close')
+                    ->label('Close')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('gray')
+                    ->outlined()
+                    ->url(route('filament.admin.resources.businesses.index')), */
         ])
+
+
         ->actions([
             Tables\Actions\ActionGroup::make([
                 Tables\Actions\ViewAction::make('view')

@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Alignment;
 
 
 
@@ -14,6 +15,7 @@ class EditBusiness extends EditRecord
 {
     protected static string $resource = BusinessResource::class;
 
+    
    /*  protected function getHeaderActions(): array
     {
         return [
@@ -45,15 +47,6 @@ class EditBusiness extends EditRecord
         return true;
     }
 
-    
-   
-   
-
-
-
-
-
-     
     /* protected function getHeaderActions(): array
     {
         return [
@@ -110,11 +103,24 @@ class EditBusiness extends EditRecord
         ];
     }
 
+    
+    /* protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('back')
+                ->label('Back')
+                ->icon('heroicon-o-arrow-left')
+                ->url(static::getResource()::getUrl('index')), 
 
-
-
-
-
-
+                
+            Action::make('close')
+                ->label('Close')
+                ->icon('heroicon-o-x-mark')
+                ->color('gray')
+                ->outlined()
+                ->url(static::getResource()::getUrl('index')),      
+        ];
+    }*/
+    
 
 }

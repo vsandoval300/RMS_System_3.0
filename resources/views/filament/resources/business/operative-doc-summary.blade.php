@@ -208,7 +208,7 @@
     {{-------------------------------------------------------------------------------}}
     @php
     // Agrupamos los nodos por share
-    $groupedByShare = collect($costNodes ?? [])->groupBy(fn ($node) => $node->costSchemes->share ?? 0);
+    $groupedByShare = collect($costNodes ?? [])->groupBy(fn ($node) => $node->costScheme->share ?? 0); //Cambio
     $groupIndex = 1;
     @endphp
 

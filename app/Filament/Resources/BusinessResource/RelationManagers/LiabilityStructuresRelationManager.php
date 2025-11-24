@@ -246,17 +246,26 @@ class LiabilityStructuresRelationManager extends RelationManager
             
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->label('➕ New Liability Structure')
                     ->createAnother(false)            // 👈 oculta "Create & create another"
                     ->modalHeading('➕ New Liability Structure')   // 👈 título del modal
                     ->modalSubmitActionLabel('Create')// (opcional) etiqueta del botón principal
                     ->modalCancelActionLabel('Cancel'),// (opcional) etiqueta del botón cancelar
+
+
+                    /* Tables\Actions\Action::make('close')
+                    ->label('Close')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('gray')
+                    ->outlined()
+                    ->url(route('filament.admin.resources.businesses.index')),  */
             ])
 
             ->actions([
                     Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make()
-                        ->modalHeading('📝 Edit Liability Structure'), // 👈 título del modal
+                        ->modalHeading('📝 Modifying Liability Structure'), // 👈 título del modal
                     Tables\Actions\DeleteAction::make(),
                     ]),
                
