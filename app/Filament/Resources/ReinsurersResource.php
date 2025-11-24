@@ -321,33 +321,56 @@ class ReinsurersResource extends Resource
                                     ->previewable(false)
                                     ->downloadable()
                                     ->openable()
-                                    ->hint(function ($record) {
-                                        return $record?->logo
-                                            ? 'Existing logo: ' . basename($record->logo)
-                                            : 'No logo uploaded yet.';
-                                    })
-                                    ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
+                                    ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG).')
 
-                                    // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
-                                    ->dehydrateStateUsing(function ($state, $record) {
-                                        // 👇 si viene como array, toma el primer elemento
+                                    // 👉 guardamos nosotros a S3 y devolvemos SIEMPRE un string
+                                    ->saveUploadedFileUsing(function (
+                                        TemporaryUploadedFile $file,
+                                        ?Reinsurer $record
+                                    ) {
+                                        $baseName = $file->getClientOriginalName();
+
+                                        // usa el id si ya existe, para nombres más estables
+                                        $prefix = $record?->id
+                                            ? $record->id . '-logo-'
+                                            : 'tmp-logo-';
+
+                                        $filename = $prefix . $baseName;
+
+                                        // esto devuelve p.ej. "reinsurers/logos/60-logo-miarchivo.png"
+                                        return $file->storePubliclyAs(
+                                            'reinsurers/logos',
+                                            $filename,
+                                            's3'
+                                        );
+                                    })
+
+                                    // el estado que llega aquí ya es string o null
+                                    ->dehydrateStateUsing(function ($state, ?Reinsurer $record) {
+                                        // si el usuario borró el archivo desde la UI
+                                        if (blank($state)) {
+                                            return null;
+                                        }
+
+                                        // si viene un array por alguna razón rara, nos quedamos con el primero
                                         if (is_array($state)) {
-                                            $state = $state[0] ?? null;
+                                            return $state[0] ?? null;
                                         }
 
-                                        // en edición, si no se sube nada, conserva lo que ya tenía
-                                        if (blank($state) && $record?->logo) {
-                                            return $record->logo;
-                                        }
-
-                                        return $state; // string o null
+                                        return $state; // string con la ruta en S3
                                     })
 
-                                    ->deleteUploadedFileUsing(function ($file) {
+                                    // limpieza física opcional cuando se borra el archivo desde el campo
+                                    ->deleteUploadedFileUsing(function (?string $file) {
                                         if ($file && Storage::disk('s3')->exists($file)) {
                                             Storage::disk('s3')->delete($file);
                                         }
-                                    }),
+                                    })
+                                    ->hint(fn ($record) =>
+                                        $record?->logo
+                                            ? 'Existing logo: ' . basename($record->logo)
+                                            : 'No logo uploaded yet.'
+                                    ),
                             ])
                             ->compact(),
 
@@ -365,30 +388,47 @@ class ReinsurersResource extends Resource
                                     ->previewable(false)
                                     ->downloadable()
                                     ->openable()
-                                    ->hint(function ($record) {
-                                        return $record?->icon
-                                            ? 'Existing icon: ' . basename($record->icon)
-                                            : 'No icon uploaded yet.';
+                                    ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG).')
+
+                                    ->saveUploadedFileUsing(function (
+                                        TemporaryUploadedFile $file,
+                                        ?Reinsurer $record
+                                    ) {
+                                        $baseName = $file->getClientOriginalName();
+                                        $prefix   = $record?->id
+                                            ? $record->id . '-icon-'
+                                            : 'tmp-icon-';
+
+                                        $filename = $prefix . $baseName;
+
+                                        return $file->storePubliclyAs(
+                                            'reinsurers/icons',
+                                            $filename,
+                                            's3'
+                                        );
                                     })
-                                    ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
 
-                                    ->dehydrateStateUsing(function ($state, $record) {
+                                    ->dehydrateStateUsing(function ($state, ?Reinsurer $record) {
+                                        if (blank($state)) {
+                                            return null;
+                                        }
                                         if (is_array($state)) {
-                                            $state = $state[0] ?? null;
+                                            return $state[0] ?? null;
                                         }
-
-                                        if (blank($state) && $record?->icon) {
-                                            return $record->icon;
-                                        }
-
                                         return $state;
                                     })
 
-                                    ->deleteUploadedFileUsing(function ($file) {
+                                    ->deleteUploadedFileUsing(function (?string $file) {
                                         if ($file && Storage::disk('s3')->exists($file)) {
                                             Storage::disk('s3')->delete($file);
                                         }
-                                    }),
+                                    })
+
+                                    ->hint(fn ($record) =>
+                                        $record?->icon
+                                            ? 'Existing icon: ' . basename($record->icon)
+                                            : 'No icon uploaded yet.'
+                                    ),
                             ])
                             ->compact(),
                     ])
