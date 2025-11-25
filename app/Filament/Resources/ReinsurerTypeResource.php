@@ -26,6 +26,7 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Unique;
 
 class ReinsurerTypeResource extends Resource
 {
@@ -55,7 +56,10 @@ class ReinsurerTypeResource extends Resource
                         ->label('Acronym')
                         ->placeholder('e.g. ABC')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(2)                     // no deja escribir más de 3 caracteres
                         ->rule('regex:/^[A-Z]{2}$/')       // obliga a que sean EXACTAMENTE 3 letras A–Z
                         ->afterStateUpdated(fn ($state, callable $set) => $set('type_acronym', strtoupper($state)))

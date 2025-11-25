@@ -15,11 +15,18 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->string('name', 200)->unique(); // ← Protege contra duplicados
+            // 👇 alineado con el form
+            $table->string('name', 255);
             $table->text('description');
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(
+                ['name', 'deleted_at'],
+                'business_doc_types_name_deleted_at_unique'
+            );
         });
     }
 

@@ -18,6 +18,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Unique;
 
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Grid as InfoGrid;
@@ -64,7 +65,10 @@ class ClientsResource extends Resource
                         ->label(__('Name'))
                         ->required()
                         ->placeholder("Please provide client's name")
-                        ->unique(ignorable: fn (?Model $record) => $record)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(255)
                         // Permite letras unicode, dígitos, espacios y puntos. Exige al menos una letra.
                         ->rules(['regex:/^(?=.*\p{L})[\p{L}\d .]+$/u'])
@@ -127,7 +131,10 @@ class ClientsResource extends Resource
                         ->label(__('Short Name'))
                         ->required()
                         ->placeholder("Please provide client's short name")
-                        ->unique(ignorable: fn (?Model $record) => $record)   // 👈 ignora el registro actual
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->live(onBlur: false)
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) =>

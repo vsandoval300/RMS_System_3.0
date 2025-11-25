@@ -23,6 +23,10 @@ return new class extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 👇 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(['name', 'deleted_at'], 'subregions_name_deleted_at_unique');
+            $table->unique(['subregion_code', 'deleted_at'], 'subregions_subregion_code_deleted_at_unique');
         });
     }
 

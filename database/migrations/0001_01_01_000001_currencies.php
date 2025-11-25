@@ -19,6 +19,11 @@ return new class extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 👇 Unicidad solo entre registros "vivos" (deleted_at NULL),
+            //    con nombres explícitos de índice
+            $table->unique(['name', 'deleted_at'], 'currencies_name_deleted_at_unique');
+            $table->unique(['acronym', 'deleted_at'], 'currencies_acronym_deleted_at_unique');
         });
     }
 

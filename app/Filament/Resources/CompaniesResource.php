@@ -21,6 +21,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Country;
 use Filament\Support\Enums\VerticalAlignment;
+use Illuminate\Validation\Rules\Unique;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -55,7 +56,10 @@ class CompaniesResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique(ignoreRecord: true)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
@@ -64,7 +68,10 @@ class CompaniesResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->unique(ignoreRecord: true)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     //->live(onBlur: false)
                     ->maxLength(255)
                     ->rule('regex:/^[A-Z_]+$/')

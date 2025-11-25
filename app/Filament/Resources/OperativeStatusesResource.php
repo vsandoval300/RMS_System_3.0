@@ -18,6 +18,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -57,7 +58,10 @@ class OperativeStatusesResource extends Resource
                     TextInput::make('acronym')
                         ->label('Acronym')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))

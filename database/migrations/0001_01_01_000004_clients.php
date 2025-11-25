@@ -16,19 +16,28 @@ return new class extends Migration
 
             $table->bigIncrements('id');
 
-            $table->string('name', 150)->nullable();
-            $table->string('short_name', 150)->index(); // ✅ indexed para búsquedas
+            // 👇 alineados con el form (required + maxLength 255)
+            $table->string('name', 255);
+            $table->string('short_name', 255);
+
             $table->text('description');
-            $table->string('webpage')->nullable();      // ✅ mejor como string si no es muy largo
-            $table->string('logo_path')->nullable();     // ✅ mejor como string si almacenas solo ruta
-            
+
+            // required en el form + maxLength(255)
+            $table->string('webpage', 255);
+
+            // opcional: ruta del logo
+            $table->string('logo_path', 255)->nullable();
+
             $table->foreignId('country_id')
-                  ->constrained('countries')
-                  ->cascadeOnDelete();
-                 
+                ->constrained('countries')
+                ->cascadeOnDelete();
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(['name', 'deleted_at'], 'clients_name_deleted_at_unique');
+            $table->unique(['short_name', 'deleted_at'], 'clients_short_name_deleted_at_unique');
         });
     }
 

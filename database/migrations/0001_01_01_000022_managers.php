@@ -12,14 +12,18 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
 
-            $table->string('name', 200)->index(); // 🔍 Index si se filtra o se une con frecuencia
+            $table->string('name', 255); // 🔍 Index si se filtra o se une con frecuencia
             $table->text('address');
+
             $table->foreignId('country_id')
                   ->constrained('countries')
                   ->cascadeOnDelete();
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(['name', 'deleted_at'], 'managers_name_deleted_at_unique');
         });
     }
 

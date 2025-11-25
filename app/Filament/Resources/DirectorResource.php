@@ -19,6 +19,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\ToggleButtons;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Unique;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -77,7 +78,10 @@ class DirectorResource extends Resource
                             ->placeholder('name@example.com')
                             ->email()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true),
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            ),
 
                         TextInput::make('phone')
                             ->label('Phone')

@@ -16,11 +16,14 @@ return new class extends Migration
 
             $table->bigIncrements('id');
 
-            $table->string('name', 100)->unique(); // ✅ ya tiene índice implícito
+            $table->string('name', 100); // ✅ ya tiene índice implícito
             $table->text('description');           // ✅ bien como texto largo
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 👇 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(['name', 'deleted_at'], 'industries_name_deleted_at_unique');
         });
     }
 

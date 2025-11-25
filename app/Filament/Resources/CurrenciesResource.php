@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -56,7 +57,10 @@ class CurrenciesResource extends Resource
                             ->label('Name')
                             ->placeholder('Please provide name')
                             ->required()
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(255)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
                             /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
@@ -67,7 +71,10 @@ class CurrenciesResource extends Resource
                             ->label('Acronym')
                             ->placeholder('e.g. ABC')
                             ->required()
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(3)                     // no deja escribir más de 3 caracteres
                             ->rule('regex:/^[A-Z]{3}$/')       // obliga a que sean EXACTAMENTE 3 letras A–Z
                             ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))

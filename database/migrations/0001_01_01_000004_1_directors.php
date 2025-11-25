@@ -15,22 +15,37 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
 
-            $table->string('name', 100);
-            $table->string('surname', 100)->index();   // ✅ Index si filtras por apellido
-            $table->string('gender', 10)->index();     // ✅ Index si haces filtros
-            $table->string('email', 100)->nullable();
-            $table->string('phone', 20)->nullable();
-            $table->string('address', 200)->nullable();
-            $table->string('occupation', 200)->index(); // ✅ Index si haces filtros por ocupación
-            $table->string('image', 200)->nullable();
+            // 👇 alineados con el form
+            $table->string('name', 200);
+            $table->string('surname', 200)->index();    // sigues pudiendo filtrar por apellido
+            $table->string('gender', 10)->index();
+
+            // email opcional, pero único entre registros vivos
+            $table->string('email', 255)->nullable();
+
+            $table->string('phone', 40)->nullable();
+
+            // address es required en el form → mejor no nullable y como text por si se alarga
+            $table->text('address');
+
+            // occupation required + maxLength(400)
+            $table->string('occupation', 400)->index();
+
+            // ruta de la imagen (S3)
+            $table->string('image', 255)->nullable();
 
             $table->foreignId('country_id')
                 ->constrained('countries')
                 ->cascadeOnDelete();
-                
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 email único solo entre registros vivos (deleted_at NULL)
+            $table->unique(
+                ['email', 'deleted_at'],
+                'directors_email_deleted_at_unique'
+            );
         });
     }
 

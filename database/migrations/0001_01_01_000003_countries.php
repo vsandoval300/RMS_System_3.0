@@ -33,6 +33,17 @@ return new class extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(['name', 'deleted_at'], 'countries_name_deleted_at_unique');
+            $table->unique(['alpha_2', 'deleted_at'], 'countries_alpha2_deleted_at_unique');
+            $table->unique(['alpha_3', 'deleted_at'], 'countries_alpha3_deleted_at_unique');
+            $table->unique(['country_code', 'deleted_at'], 'countries_country_code_deleted_at_unique');
+            $table->unique(['iso_code', 'deleted_at'], 'countries_iso_code_deleted_at_unique');
+
+            // Si de verdad quieres latitude/longitude únicos:
+            $table->unique(['latitude', 'deleted_at'], 'countries_latitude_deleted_at_unique');
+            $table->unique(['longitude', 'deleted_at'], 'countries_longitude_deleted_at_unique');
         });
     }
 

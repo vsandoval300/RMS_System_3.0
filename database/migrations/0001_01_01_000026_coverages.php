@@ -15,13 +15,29 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->string('name', 200)->unique(); // Sugerido
-            $table->string('acronym', 30)->unique(); // Sugerido
+            // 👇 alineados con el form
+            $table->string('name', 255);
+            $table->string('acronym', 20);
+
             $table->text('description');
-            $table->foreignId('lob_id')->constrained('line_of_businesses')->cascadeOnDelete();
+
+            $table->foreignId('lob_id')
+                ->constrained('line_of_businesses')
+                ->cascadeOnDelete();
             
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(
+                ['name', 'deleted_at'],
+                'coverages_name_deleted_at_unique'
+            );
+
+            $table->unique(
+                ['acronym', 'deleted_at'],
+                'coverages_acronym_deleted_at_unique'
+            );
         });
     }
 

@@ -31,6 +31,7 @@ use App\Exports\ReinsurersExport;
 use Carbon\Carbon;
 use Filament\Tables\Actions\Action;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -91,7 +92,10 @@ class ReinsurersResource extends Resource
                                 TextInput::make('cns_reinsurer')
                                     ->label('LSK (Legacy Substitute Key)')
                                     ->placeholder("Please provide LSK number if exist.")
-                                    ->unique(ignoreRecord: true)
+                                    ->unique(
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                                    )
                                     ->nullable()
                                     ->columnSpan(2),
                             ])
@@ -107,7 +111,10 @@ class ReinsurersResource extends Resource
                                     ->label('Name')
                                     ->placeholder("Please provide reinsurer's name")
                                     ->required()
-                                    ->unique(ignoreRecord: true)
+                                    ->unique(
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                                    )
                                     /* ->rules([
                                         Rule::unique('reinsurers', 'name')
                                             ->whereNull('deleted_at'),
@@ -147,7 +154,10 @@ class ReinsurersResource extends Resource
                                             ->whereNull('deleted_at'),
                                     ]) */
                                     ->required()
-                                    ->unique(ignoreRecord: true)
+                                    ->unique(
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                                    )
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, callable $set) {
@@ -179,7 +189,10 @@ class ReinsurersResource extends Resource
                                     ->label('Acronym')
                                     ->placeholder('e.g. ABC')
                                     ->required()
-                                    ->unique(ignoreRecord: true)
+                                   ->unique(
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                                    )
                                     /* ->rules([
                                         Rule::unique('reinsurers', 'short_name')
                                             ->whereNull('deleted_at'),

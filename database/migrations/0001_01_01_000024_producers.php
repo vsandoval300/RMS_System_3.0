@@ -15,11 +15,23 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
             
-            $table->string('name',150)->unique();
-            $table->string('acronym',10)->unique()->index();
-            
+            // 👇 alineado con el form
+            $table->string('name', 255);
+            $table->string('acronym', 3);
+
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(
+                ['name', 'deleted_at'],
+                'producers_name_deleted_at_unique'
+            );
+
+            $table->unique(
+                ['acronym', 'deleted_at'],
+                'producers_acronym_deleted_at_unique'
+            );
         });
     }
 

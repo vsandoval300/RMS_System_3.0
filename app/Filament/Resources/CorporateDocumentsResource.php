@@ -20,6 +20,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -53,7 +54,10 @@ class CorporateDocumentsResource extends Resource
                             ->label('Name')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignorable: fn (?Model $record) => $record)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                             ->extraAttributes(['class' => 'w-1/2'])
                             ->helperText('First letter of each word will be capitalised.')
@@ -65,7 +69,10 @@ class CorporateDocumentsResource extends Resource
                             ->maxLength(2)
                             ->rule('regex:/^[A-Z]+$/')
                             ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                            ->unique(ignorable: fn (?Model $record) => $record)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->extraAttributes(['class' => 'w-1/2'])
                             ->helperText('Provide two characters — only uppercase letters allowed (e.g. “US”).')
                             ->columnSpan('full'),

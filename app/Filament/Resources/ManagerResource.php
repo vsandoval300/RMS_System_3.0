@@ -21,6 +21,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
 use Filament\Support\Enums\VerticalAlignment;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -56,7 +57,10 @@ class ManagerResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique(ignorable: fn (?Model $record) => $record)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     ->live(onBlur: false)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))

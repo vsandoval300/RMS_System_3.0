@@ -19,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -54,7 +55,10 @@ class PartnersResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->unique(ignoreRecord: true)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
@@ -63,7 +67,10 @@ class PartnersResource extends Resource
                     TextInput::make('short_name')
                     ->label('Short Name')
                     ->required()
-                    ->unique(ignoreRecord: true)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     //->live(onBlur: false)
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', strtoupper($state)))
@@ -73,7 +80,10 @@ class PartnersResource extends Resource
                     TextInput::make('acronym')
                     ->label('Acronym')
                     ->required()
-                    ->unique(ignoreRecord: true)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     //->live(onBlur: false)
                     ->maxLength(3)
                     ->rule('regex:/^[A-Z]+$/')

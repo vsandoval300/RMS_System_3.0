@@ -19,6 +19,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -51,7 +52,10 @@ class BusinessDocTypesResource extends Resource
                     TextInput::make('name')
                         ->label('Name')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                         ->helperText('First letter of each word will be capitalised.'),

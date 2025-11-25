@@ -18,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -58,6 +59,10 @@ class RegionsResource extends Resource
                     TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     ->maxLength(255)
                     ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.')
@@ -67,6 +72,10 @@ class RegionsResource extends Resource
                     TextInput::make('region_code')
                     ->label('Region Code')
                     ->required()
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                    )
                     ->numeric()
                     ->minValue(1) // opcional: evita 0 o negativos
                     ->maxValue(999) // opcional: para limitar a 3 dígitos

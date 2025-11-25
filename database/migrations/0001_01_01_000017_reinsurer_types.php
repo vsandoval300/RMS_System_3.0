@@ -12,14 +12,17 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
 
-            $table->string('type_acronym', 5)->unique();  // ✔ clave única corta
+            $table->string('type_acronym', 2);  // ✔ clave única corta
             $table->text('description');                  // ✔ descripción extendida
 
             $table->timestamps();
             $table->softDeletes();
 
-            // Opcional: índice fulltext si haces búsquedas de texto completo en descripción
-            // $table->fullText('description');
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(
+                ['type_acronym', 'deleted_at'],
+                'reinsurer_types_type_acronym_deleted_at_unique'
+            );
         });
     }
 

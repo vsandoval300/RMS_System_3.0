@@ -12,11 +12,14 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
 
-            $table->string('acronym', 100)->unique(); // ✔ Índice único para búsquedas rápidas
+            $table->string('acronym', 2); // ✔ Índice único para búsquedas rápidas
             $table->text('description');              // ✔ Descripción operativa
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 👇 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(['acronym', 'deleted_at'], 'operative_statuses_acronym_deleted_at_unique');
         });
     }
 

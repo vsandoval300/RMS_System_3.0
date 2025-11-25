@@ -19,6 +19,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -58,7 +59,10 @@ class BanksResource extends Resource
                             ->label('Name')
                             ->placeholder('Please provide name')
                             ->required()
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(255)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
                             /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
@@ -78,7 +82,10 @@ class BanksResource extends Resource
                             ->label('ABA number')
                             ->placeholder('Please provide ABA number.')
                             ->rule('digits:9') 
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(255)
                             ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
                             ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
@@ -90,7 +97,10 @@ class BanksResource extends Resource
                             ->placeholder('Please provide SWIFT code.')
                             ->required()
                             ->rule('regex:/^[A-Z0-9]{8}([A-Z0-9]{3})?$/') // 8 o 11 caracteres alfanuméricos
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(11) // 👈 opcional: restringir a máximo 11 chars
                             ->afterStateUpdated(fn ($state, callable $set) => $set('swift_code', strtoupper($state)))
                             ->extraAttributes(['style' => 'text-transform:uppercase'])

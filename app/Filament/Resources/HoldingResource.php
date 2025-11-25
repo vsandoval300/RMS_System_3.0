@@ -17,6 +17,7 @@ use Filament\Forms\Components\Select;
 use App\Models\Country;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -49,11 +50,17 @@ class HoldingResource extends Resource
                     Forms\Components\Grid::make(2)->schema([            
                         TextInput::make('name')
                             ->required()
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(400),
                         TextInput::make('short_name')
                             ->required()
-                            ->unique(ignoreRecord: true)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                            )
                             ->maxLength(60),
                         Select::make('country_id')
                         ->label(__('Country'))

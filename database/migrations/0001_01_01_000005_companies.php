@@ -15,14 +15,15 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
 
-            $table->string('name', 200);
-            $table->string('acronym', 30);
+            // 👇 alineados con el form
+            $table->string('name', 255);
+            $table->string('acronym', 255);
+
             $table->text('activity');
 
             $table->foreignId('industry_id')
                 ->constrained('industries')
                 ->cascadeOnDelete();
-                
 
             $table->foreignId('country_id')
                 ->constrained('countries')
@@ -30,6 +31,16 @@ return new class extends Migration
                 
             $table->timestamps();
             $table->softDeletes();
+
+            // 🔒 Unicidad solo entre registros vivos (deleted_at NULL)
+            $table->unique(
+                ['name', 'deleted_at'],
+                'companies_name_deleted_at_unique'
+            );
+            $table->unique(
+                ['acronym', 'deleted_at'],
+                'companies_acronym_deleted_at_unique'
+            );
 
             // (Opcional) Índice combinado si haces muchas búsquedas por país + industria
             // $table->index(['country_id', 'industry_id']);

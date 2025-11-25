@@ -18,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
 
 // 👇 IMPORTS para INFOLIST
 use Filament\Infolists\Infolist;
@@ -59,7 +60,10 @@ public static function form(Form $form): Form
                         TextInput::make('name')
                         ->label('Name')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(255)
                         ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
                         //->extraAttributes(['class' => 'w-1/2']),
@@ -70,7 +74,10 @@ public static function form(Form $form): Form
                         TextInput::make('alpha_2')
                         ->label('Alpha 2')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(2)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('alpha_2', strtoupper($state))),
@@ -82,7 +89,10 @@ public static function form(Form $form): Form
                         TextInput::make('alpha_3')
                         ->label('Alpha 3')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(3)
                         ->rule('regex:/^[A-Z]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('alpha_3', strtoupper($state))),
@@ -94,7 +104,10 @@ public static function form(Form $form): Form
                         TextInput::make('country_code')
                         ->label('Country Code')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->numeric()
                         ->minValue(1) // opcional: evita 0 o negativos
                         ->maxValue(999), // opcional: para limitar a 3 dígitos
@@ -106,7 +119,10 @@ public static function form(Form $form): Form
                         TextInput::make('iso_code')
                         ->label('Iso Code')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->maxLength(30)
                         ->rule('regex:/^[A-Z0-9\-:\s]+$/')
                         ->afterStateUpdated(fn ($state, callable $set) => $set('iso_code', strtoupper($state))),
@@ -129,7 +145,10 @@ public static function form(Form $form): Form
                         TextInput::make('latitude')
                         ->label('Latitude')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->type('number') // ✅ convierte el input en <input type="number">
                         ->step('any')    // ✅ permite cualquier cantidad de decimales
                         ->minValue(-90)  // límite geográfico para latitud
@@ -142,7 +161,10 @@ public static function form(Form $form): Form
                         TextInput::make('longitude')
                         ->label('longitude')
                         ->required()
-                        ->unique(ignoreRecord: true)
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
                         ->type('number') // ✅ convierte el input en <input type="number">
                         ->step('any')    // ✅ permite cualquier cantidad de decimales
                         ->minValue(-90)  // límite geográfico para latitud

@@ -14,11 +14,16 @@ return new class extends Migration
         Schema::create('regions', function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            $table->string('name', 30)->index();           // ✅ index si lo usas en buscador/filtro
-            $table->integer('region_code')->index();       // ✅ index si lo filtras o haces JOIN
+            // 👇 sin index simple; vamos a usar unique compuesto
+            $table->string('name', 30);
+            $table->integer('region_code');
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 👇 Unicidad solo entre registros "vivos" (deleted_at NULL)
+            $table->unique(['name', 'deleted_at'], 'regions_name_deleted_at_unique');
+            $table->unique(['region_code', 'deleted_at'], 'regions_region_code_deleted_at_unique');
         });
     }
 
