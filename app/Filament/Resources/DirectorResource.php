@@ -366,58 +366,32 @@ class DirectorResource extends Resource
 
                 TextColumn::make('person')
                     ->label('Director')
-                    ->html() // vamos a devolver HTML
-                    // Estado “base”: nombre completo, útil para exportar / buscar
-                    ->state(fn (Director $r) =>
-                        trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—'
-                    )
+                    ->html()
+                    ->state(fn (Director $r) => trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—')
                     ->formatStateUsing(function ($state, Director $record) {
-                        $name = e($state ?: '—');      // por seguridad, escapamos el texto
-                        $imagePath = $record->image;   // ruta tipo "Directors/CFH.jpeg"
+                        $name      = e($state ?: '—');
+                        $imagePath = $record->image;
 
-                        // Si no hay imagen, solo mostramos el nombre
                         if (blank($imagePath)) {
                             return "<span>{$name}</span>";
                         }
 
-                        // Construimos la URL pública del S3
-                        $imageUrl = Str::startsWith($imagePath, ['http://', 'https://'])
+                        $imageUrl = \Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://'])
                             ? $imagePath
                             : rtrim(config('filesystems.disks.s3.url'), '/') . '/' . ltrim($imagePath, '/');
 
                         return "
                             <div style='display:flex;align-items:center;gap:8px;'>
                                 <img src=\"{$imageUrl}\"
-                                    alt=\"{$name}\"
                                     style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
                                 <span>{$name}</span>
                             </div>
                         ";
                     })
-                    ->searchable(query: function (Builder $q, string $search) {
-                        $q->where(fn ($w) =>
-                            $w->where('name', 'like', "%{$search}%")
-                            ->orWhere('surname', 'like', "%{$search}%")
-                        );
-                    })
-                    ->sortable(query: function (Builder $q, string $dir) {
-                        $q->orderBy('name', $dir)->orderBy('surname', $dir);
-                    }),
+                    ->searchable(['name', 'surname'])   // 👈 ESTA ES LA FORMA CORRECTA
+                    ->sortable(['name', 'surname']),   // 👈 También ordena por ambas columnas
 
-               /*  TextColumn::make('person')
-                    ->label('Director')
-                    ->state(fn (Director $r) =>
-                        trim(($r->name ?? '') . ' ' . ($r->surname ?? '')) ?: '—'
-                    )
-                    ->searchable(query: function (Builder $q, string $search) {
-                        $q->where(fn ($w) =>
-                            $w->where('name', 'like', "%{$search}%")
-                              ->orWhere('surname', 'like', "%{$search}%")
-                        );
-                    })
-                    ->sortable(query: function (Builder $q, string $dir) {
-                        $q->orderBy('name', $dir)->orderBy('surname', $dir);
-                    }), */
+               
 
                 TextColumn::make('gender')->searchable(),
                 TextColumn::make('email')
