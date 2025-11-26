@@ -15,11 +15,11 @@ return new class extends Migration
             $table->engine('InnoDB');
             $table->bigIncrements('id');
 
-            $table->string('name',150)->unique();
-            $table->string('alpha_2',2)->unique();
-            $table->string('alpha_3',3)->unique();
-            $table->string('country_code',3)->unique();
-            $table->string('iso_code',30)->unique();
+            $table->string('name',150);
+            $table->string('alpha_2',2);
+            $table->string('alpha_3',3);
+            $table->string('country_code',3);
+            $table->string('iso_code',30);
 
             $table->string('am_best_code',10)->index();   // ✅ Index si haces filtros/búsquedas
             $table->float('latitude')->index();           // Opcional: si filtras o haces geobúsquedas

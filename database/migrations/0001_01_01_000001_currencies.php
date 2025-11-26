@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
 
             $table->string('name', 70)->index();        // ✅ agrega índice si se busca o ordena
-            $table->string('acronym', 3)->unique();     // ✅ ya está indexado por ser unique
+            $table->string('acronym', 3);     // ✅ ya está indexado por ser unique
 
             $table->timestamps();
             $table->softDeletes();

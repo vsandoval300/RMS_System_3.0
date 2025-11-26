@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->bigIncrements('id');
 
-            $table->string('name', 60)->unique();   // ✅ índice implícito por unique
+            $table->string('name', 60);   // ✅ índice implícito por unique
             $table->text('description');
 
             $table->foreignId('client_id')
@@ -25,6 +25,9 @@ return new class extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+
+            // 👇 Unicidad solo entre registros vivos
+            $table->unique(['name', 'deleted_at'], 'business_units_name_deleted_at_unique');
         });
     }
 
