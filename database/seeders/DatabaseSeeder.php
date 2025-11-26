@@ -113,17 +113,17 @@ class DatabaseSeeder extends Seeder
             //FILES FOR CELL-MAYAB
             //=============================================
            /*  BusinessesCellMayabSeeder::class, //1
-            LiabilityStructureCellMayabSeeder::class, //2
+               LiabilityStructureCellMayabSeeder::class, //2
             //Files for Placement Schemes==================
-            CschemeCellMayabSeeder::class, //6
-            CostNodesxCellMayabSeeder::class, //4
+               CschemeCellMayabSeeder::class, //6
+               CostNodesxCellMayabSeeder::class, //4
             //CschemeCnodesCellMayabSeeder::class, //7
             //Files for Business Documents=================
-            BusinessesDocsCellMayabSeeder::class, //Details
-            BusinessDocInsuredsCellMayabSeeder::class, //Insureds
-            BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
-            TransactionsCellMayabSeeder::class, //Transactions
-            TransactionsLogCellMayabSeeder::class, //TransactionLogs
+               BusinessesDocsCellMayabSeeder::class, //Details
+               BusinessDocInsuredsCellMayabSeeder::class, //Insureds
+               BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
+               TransactionsCellMayabSeeder::class, //Transactions
+               TransactionsLogCellMayabSeeder::class, //TransactionLogs
             
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
