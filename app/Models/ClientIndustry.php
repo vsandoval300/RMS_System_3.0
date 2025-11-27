@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 class ClientIndustry extends Pivot
 {
     //
-    use HasFactory, SoftDeletes, HasAuditLogs;
+    use HasFactory, HasAuditLogs;
 
     protected $table = 'client_industries';
 

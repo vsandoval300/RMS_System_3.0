@@ -11,6 +11,7 @@ use App\Models\Country;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\HasAuditLogs;
 use App\Models\ClientIndustry;
+use App\Models\Industry;
 
 class Client extends Model
 {
@@ -43,10 +44,9 @@ class Client extends Model
             'client_id',         // FK de este modelo en la pivote
             'industry_id'        // FK del modelo relacionado en la pivote
         )
-        ->using(ClientIndustry::class) // 👈 clave para que se use el modelo pivote
-        ->withTimestamps()            // si tu pivote tiene created_at / updated_at
-        // ->withPivot(['extra_col'])    // si guardas columnas adicionales
-        ;
+        ->using(ClientIndustry::class)
+        ->withPivot('id')       // 👈 solo el id del pivote (o lo que necesites)
+        ->withTimestamps();     // sin wherePivotNull
     }
 
 
@@ -70,5 +70,13 @@ class Client extends Model
             'country_id' => Country::find($value)?->name ?? $value,
             default       => $value,
         };
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Client $client) {
+            // borrar físicamente los pivotes cuando se borra el cliente
+            ClientIndustry::where('client_id', $client->id)->delete();
+        });
     }
 }

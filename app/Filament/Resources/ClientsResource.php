@@ -19,6 +19,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Unique;
+use Illuminate\Support\Facades\Storage;
 
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Grid as InfoGrid;
@@ -191,19 +192,47 @@ class ClientsResource extends Resource
                 ]),
 
                 Section::make('Images')->schema([
-
+                                                
                     FileUpload::make('logo_path')
-                        ->label(__('Logo'))
+                        ->label('Client Logo')
                         ->disk('s3')
-                        ->directory('reinsurers/logos')
-                        ->image()
+                        ->directory('Clients/logos')
                         ->visibility('public')
-                        ->default(fn ($record) => $record?->logo)
-                        ->imagePreviewHeight('100')
-                        ->previewable()
-                        ->extraAttributes(['class' => 'w-1/2']),
+                        ->image()
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
+                        ->preserveFilenames(false)
+                        ->previewable(false)
+                        ->downloadable()
+                        ->openable()
+                        ->hint(function ($record) {
+                            return $record?->logo
+                                ? 'Existing logo: ' . basename($record->logo)
+                                : 'No logo uploaded yet.';
+                        })
+                        ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
 
-                    
+                        // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
+                        ->dehydrateStateUsing(function ($state, ?Client $record) {
+                            // 1) Si no se eligió nada, conserva el valor que ya tenía el registro
+                            if (blank($state)) {
+                                return $record?->logo;
+                            }
+
+                            // 2) Si viene como ["uuid" => "ruta"], nos quedamos SOLO con la ruta
+                            if (is_array($state)) {
+                                // ejemplo: ["tbd...uuid..." => "reinsurers/logos/55-Logoprueba.png"]
+                                $state = array_values($state)[0] ?? null;
+                            }
+
+                            // 3) Aquí ya es string (o null)
+                            return $state;
+                        })
+
+                        ->deleteUploadedFileUsing(function ($file) {
+                            if ($file && Storage::disk('s3')->exists($file)) {
+                                Storage::disk('s3')->delete($file);
+                            }
+                        }),
 
                 ]),    
 

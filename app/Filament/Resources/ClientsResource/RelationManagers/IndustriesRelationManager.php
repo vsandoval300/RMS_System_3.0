@@ -45,49 +45,48 @@ class IndustriesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-        ->columns([
-            Tables\Columns\TextColumn::make('name')
-                ->label('Industry')
-                ->sortable()
-                ->searchable(),
-            Tables\Columns\TextColumn::make('description')
-                ->wrap()                                 // ✔ permite salto de línea
-                ->extraAttributes([
-                    'style' => 'max-width: 950px; white-space: normal;', // ancho deseado
-                ]),
-        ])
+            ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Industry')
+                    ->sortable()
+                    ->searchable(),
 
-        /* ───── Acciones del encabezado (arriba a la derecha) ───── */
-        ->headerActions([
-            Tables\Actions\AttachAction::make()
-                ->label('Add industry')      // ← texto del botón
-                ->modalHeading('Attach Industry')
-                ->preloadRecordSelect()      // muestra 1ª página al abrir
-                ->recordSelectSearchColumns(['name', 'description']), // opcional
-                // ->multiple()               // marca esto si quieres adjuntar varios de golpe
-        ])
+                Tables\Columns\TextColumn::make('description')
+                    ->wrap()
+                    ->extraAttributes([
+                        'style' => 'max-width: 950px; white-space: normal;',
+                    ]),
+            ])
 
-        /* ───── Acciones por fila ───── */
-        ->actions([
-            Tables\Actions\DetachAction::make()
-                ->label('Delete') // quita el texto "Detach"
-                ->icon('heroicon-o-trash') // icono de bote de basura
-                ->color('danger') // mismo rojo (opcional, ya suele ser danger)
-                ->link(), // que sea sólo icono, no botón con borde
-            // Tables\Actions\EditAction::make(),
-        ])
+            // ───── Header actions ─────
+            ->headerActions([
+                Tables\Actions\AttachAction::make()
+                    ->label('Add industry')
+                    ->modalHeading('Attach Industry')
+                    ->preloadRecordSelect()
+                    ->recordSelectSearchColumns(['name', 'description']),
+            ])
 
-        /* ───── Acciones masivas (checkbox) ───── */
-        ->bulkActions([
-            Tables\Actions\DetachBulkAction::make()
-                ->label('Delete') // o el texto que quieras
-                ->icon('heroicon-o-trash')
-                ->color('danger'),
-        ]);
+            // ───── Row actions ─────
+            ->actions([
+                Tables\Actions\DetachAction::make()
+                    ->label('Delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete industry')
+                    ->modalDescription('Are you sure you want to delete this industry from the client?'),
+            ])
 
-            
-
-
-
+            // ───── Bulk actions ─────
+            ->bulkActions([
+                Tables\Actions\DetachBulkAction::make()
+                    ->label('Delete selected')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete selected industries')
+                    ->modalDescription('Are you sure you want to delete the selected industries from the client?'),
+            ]);
     }
 }
