@@ -103,11 +103,9 @@ class FinancialStatementsRelationManager extends RelationManager
                     ->directory('reinsurers/financials_statements')
                     ->visibility('private')
                     ->acceptedFileTypes(['application/pdf'])
-                    // 🔹 Requerido solo si NO existe archivo aún
                     ->required(fn ($record) => $record === null || blank($record->document_path))
                     ->getUploadedFileNameForStorageUsing(function ($file, $record, $set, $get) {
-                        // ✅ Obtener reinsurer desde el relation manager
-                        $reinsurer = $this->getOwnerRecord(); // ← aquí viene el modelo padre
+                        $reinsurer = $this->getOwnerRecord();
                         $reinsurerName = $reinsurer?->short_name ?? 'unknown';
 
                         $startDate = $get('start_date')
@@ -125,22 +123,25 @@ class FinancialStatementsRelationManager extends RelationManager
                     ->downloadable()
                     ->openable()
                     ->previewable(true)
-                    // 🔹 CLAVE: conservar el archivo anterior si no se sube uno nuevo
-                    ->dehydrateStateUsing(function ($state, $record) {
-                        // En edición, si no se sube nada nuevo, $state será null,
-                        // pero el registro puede tener ya document_path guardado
+                    ->dehydrateStateUsing(function ($state, ?\App\Models\ReinsurerFinancialStatement $record) {
+                        // 1) Si no se sube nada nuevo y ya hay archivo guardado → conserva el existente
                         if (blank($state) && $record?->document_path) {
-                            return $record->document_path;   // conserva la ruta anterior
+                            return $record->document_path;
                         }
 
-                        return $state; // en creación o cuando sí subes algo nuevo
+                        // 2) Si viene como array ["uuid" => "ruta/del/archivo.pdf"]
+                        if (is_array($state)) {
+                            // Nos quedamos con el primer valor del array
+                            $state = array_values($state)[0] ?? null;
+                        }
+
+                        // 3) Ahora $state ya es string (o null)
+                        return $state;
                     })
                     ->hint(fn ($record) => $record?->document_path
                         ? 'Existing file: ' . basename($record->document_path)
                         : 'No file uploaded yet.'
                     )
-                    // ❌ IMPORTANTE: quita esta línea que tenías antes:
-                    // ->dehydrated(fn ($state) => filled($state))
                     ->helperText('Only PDF files are allowed.')
                     ->columnSpanFull(),
 

@@ -10,7 +10,7 @@ use App\Models\Traits\HasAuditLogs;
 class ReinsurerFinancialStatement extends Model
 {
     //
-use SoftDeletes, HasAuditLogs;
+    use HasAuditLogs;
 
     protected $table = 'reinsurer_financials';
 

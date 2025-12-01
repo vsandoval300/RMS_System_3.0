@@ -128,7 +128,11 @@ class Reinsurer extends Model
     protected static function booted()
     {
         static::deleting(function ($reinsurer) {
-            // Si tiene logo, eliminarlo
+            
+            
+            /** --------------------------
+             *  1) Borrar archivos S3
+             * -------------------------- */
             if ($reinsurer->logo && Storage::disk('s3')->exists($reinsurer->logo)) {
                 Storage::disk('s3')->delete($reinsurer->logo);
             }
@@ -137,6 +141,43 @@ class Reinsurer extends Model
             if ($reinsurer->icon && Storage::disk('s3')->exists($reinsurer->icon)) {
                 Storage::disk('s3')->delete($reinsurer->icon);
             }
+
+            /** ----------------------------------------
+             *  2) Borrar registros relacionados (HARD)
+             * ---------------------------------------- */
+
+            // a) Docs (reinsurer_docs)
+            $reinsurer->documents()->each(function (ReinsurerDoc $doc) {
+                // si quieres borrar también el PDF:
+                if ($doc->document_path && Storage::disk('s3')->exists($doc->document_path)) {
+                    Storage::disk('s3')->delete($doc->document_path);
+                }
+
+                $doc->delete();   // ← hard delete (no tiene SoftDeletes)
+            });
+
+            // b) Cuentas bancarias (reinsurer_bankaccounts)
+            $reinsurer->reinsurerBankAccounts()->delete();
+
+            // c) Financial statements (reinsurer_financials)
+            $reinsurer->financialStatements()->each(function (ReinsurerFinancialStatement $fs) {
+                if ($fs->document_path && Storage::disk('s3')->exists($fs->document_path)) {
+                    Storage::disk('s3')->delete($fs->document_path);
+                }
+
+                $fs->delete();
+            });
+
+            // d) Holdings (holding_reinsurers) usando tu modelo ReinsurerHolding
+            $reinsurer->reinsurerHoldings()->delete();
+
+            // e) Boards pivot (reinsurer_boards) usando modelo ReinsurerBoard
+            $reinsurer->reinsurerBoards()->delete();
+
+            // f) Si también quieres asegurarte de "soltar" la relación belongsToMany:
+            $reinsurer->boards()->detach();
+
+
         });
     }
 

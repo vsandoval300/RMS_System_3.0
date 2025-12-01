@@ -8,7 +8,7 @@ use App\Models\Traits\HasAuditLogs;
 
 class ReinsurerHolding extends Model
 {
-    use SoftDeletes, HasAuditLogs;
+    use HasAuditLogs;
     
     protected $table = 'holding_reinsurers';
 

@@ -11,7 +11,7 @@ use App\Models\Traits\HasAuditLogs;
 class ReinsurerBankAccount extends Model
 {
     //
-    use HasFactory, SoftDeletes, HasAuditLogs;
+    use HasFactory, HasAuditLogs;
 
     protected $table = 'reinsurer_bankaccounts';
 

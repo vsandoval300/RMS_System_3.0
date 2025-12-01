@@ -9,7 +9,7 @@ use App\Models\Traits\HasAuditLogs;
 
 class ReinsurerDoc extends Model
 {
-    use SoftDeletes, HasAuditLogs;
+    use HasAuditLogs;
 
     protected $table = 'reinsurer_docs';
 

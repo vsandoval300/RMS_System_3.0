@@ -10,7 +10,7 @@ use App\Models\Traits\HasAuditLogs;
 
 class ReinsurerBoard extends Pivot
 {
-    use SoftDeletes,HasAuditLogs;
+    use HasAuditLogs;
     
     protected $table = 'reinsurer_boards';
     public $incrementing = true;
