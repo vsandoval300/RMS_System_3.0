@@ -14,6 +14,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Schema;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\HtmlString;
+
 
 class FinancialStatementsRelationManager extends RelationManager
 {
@@ -46,29 +49,59 @@ class FinancialStatementsRelationManager extends RelationManager
                 /*  Columna PDF + nombre de archivo  */
                 TextColumn::make('document_path')
                     ->label('Document')
-                    // ——— ÍCONO PDF
-                    ->icon('heroicon-o-document')   // «document-text» si usas Heroicons Mini
-                    ->iconColor('danger')           // rojo, igual que en Corporate Docs
-                    ->color('danger')
-                    // ——— SOLO EL NOMBRE DEL ARCHIVO
-                    ->formatStateUsing(fn ($state) => \Illuminate\Support\Str::afterLast($state, '/'))
-                    // ——— LINK
-                   ->url(function ($record) {
-                        // ───────── URL absoluta vs. path en S3 ─────────
-                        if (\Illuminate\Support\Str::startsWith(
-                            $record->document_path,
-                            ['http://', 'https://']
-                        )) {
-                            return $record->document_path;       // ya es URL completa
-                        }
+                    // Ícono dinámico
+                    ->icon(fn ($state, $record) =>
+                        $record->document_path ? 'heroicon-o-document-text' : 'heroicon-o-x-circle'
+                    )
+                    ->color(fn ($state, $record) =>
+                        $record->document_path ? 'primary' : 'danger'
+                    )
+                    ->tooltip(fn ($state, $record) =>
+                        $record->document_path ? 'View PDF' : 'No document available'
+                    )
+                    // Solo el nombre del archivo
+                    ->formatStateUsing(fn ($state) =>
+                        $state ? Str::afterLast($state, '/') : '—'
+                    )
+                    ->extraAttributes(['class' => 'cursor-pointer'])
+                    ->searchable()
+                    ->sortable()
+                    ->action(
+                        Action::make('viewPdf')
+                            ->label('View PDF')
+                            ->hidden(fn ($record) => blank($record->document_path))
+                            ->modalHeading(fn ($record) => "PDF – {$record->id}")
+                            ->modalWidth('7xl')
+                            ->modalSubmitAction(false)
+                            ->modalContent(function ($record) {
+                                $path = $record->document_path;
 
-                        /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 */  // ✅ anotación
-                        $s3 = \Illuminate\Support\Facades\Storage::disk('s3');
+                                if (blank($path)) {
+                                    return new HtmlString('<p>No document available.</p>');
+                                }
 
-                        return $s3->url($record->document_path); // genera la URL firmada
-                    })
-                    ->openUrlInNewTab()
-                    ->tooltip('View PDF'),
+                                /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                                $disk = Storage::disk('s3');
+
+                                // 1) Si aún quedara algún registro viejo con URL completa, la usamos tal cual
+                                if (filter_var($path, FILTER_VALIDATE_URL)) {
+                                    $url = $path;
+                                } else {
+                                    // 2) Si es key corta ("reinsurers/financials_statements/..."), confiamos en ella
+                                    //    y dejamos que S3 nos diga si existe o no.
+                                    $url = $disk->url($path);
+                                }
+
+                                return view('filament.components.pdf-viewer', [
+                                    'url' => $url,
+                                ]);
+                            })
+                    )
+
+
+
+
+
             ])
             ->defaultSort('start_date', 'asc')
             ->headerActions([

@@ -14,6 +14,8 @@ use Filament\Forms\Components\Grid;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
 use Illuminate\Support\Str;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\HtmlString;
 
 
 class DocumentsRelationManager extends RelationManager
@@ -53,13 +55,89 @@ class DocumentsRelationManager extends RelationManager
                     ->label('Type')
                     ->searchable(),
 
+                // 👉 Nombre del archivo (solo texto)
+                TextColumn::make('document_path')
+                    ->label('File')
+                    // Muestra solo el nombre del archivo
+                    ->formatStateUsing(fn ($state) => $state ? basename($state) : '—')
+                    ->icon(fn ($state, $record) =>
+                        $record->document_path ? 'heroicon-o-document-text' : 'heroicon-o-x-circle'
+                    )
+                    ->color(fn ($state, $record) =>
+                        $record->document_path ? 'primary' : 'danger'
+                    )
+                    ->tooltip(fn ($state, $record) =>
+                        $record->document_path ? 'View PDF' : 'No document available'
+                    )
+                    ->extraAttributes([
+                        'class' => 'cursor-pointer', // que parezca clickeable
+                    ])
+                    ->searchable()
+                    ->sortable()
+                    ->action(
+                        Action::make('viewPdf')
+                            ->label('View PDF')
+                            ->hidden(fn ($record) => blank($record->document_path))
+                            ->modalHeading(fn ($record) => "PDF – {$record->id}")
+                            ->modalWidth('7xl')
+                            ->modalSubmitAction(false)
+                            ->modalContent(function ($record) {
+                                $path = $record->document_path;
+
+                                if (blank($path)) {
+                                    return new HtmlString('<p>No document available.</p>');
+                                }
+
+                                /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                                $disk = Storage::disk('s3');
+
+                                // Si aún hay URLs completas, las usamos tal cual
+                                if (filter_var($path, FILTER_VALIDATE_URL)) {
+                                    $url = $path;
+                                } else {
+                                    // Si solo es la key, validamos que exista
+                                    if (! $disk->exists($path)) {
+                                        return new HtmlString(
+                                            '<p>The PDF file does not exist in S3.</p>'
+                                            .'<p><code>' . e($path) . '</code></p>'
+                                        );
+                                    }
+
+                                    $url = $disk->url($path);
+                                }
+
+                                return view('filament.components.pdf-viewer', [
+                                    'url' => $url,
+                                ]);
+                            })
+                    ),
+            ])
+            ->defaultSort('stamp_date', 'asc')
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->modalHeading('Add document')
+                    ->label('New Corporate Document'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]);
+
+
+
+
+
+
                 // Nos quedamos aqui en que no se renderiza la columna
-               TextColumn::make('document_path')
+              /*  TextColumn::make('document_path')
                     ->label('File')
                     ->icon('heroicon-o-document') // ícono PDF
                     ->color('danger')
                     ->url(function ($record) {
-                        /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 */
+                        /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 
                         $s3 = Storage::disk('s3');
 
                         return Str::startsWith(
@@ -88,7 +166,7 @@ class DocumentsRelationManager extends RelationManager
                 ])
                     ->bulkActions([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]);
+                ]); */
     }
 
     /* ---------- Formulario ---------- */
