@@ -10,7 +10,7 @@ use App\Models\Traits\HasAuditLogs;
 
 class CostNodex extends Model
 {
-    use HasFactory, SoftDeletes, HasAuditLogs;
+    use HasFactory, HasAuditLogs;
 
     protected $table = 'cost_nodesx';
     protected $primaryKey = 'id';

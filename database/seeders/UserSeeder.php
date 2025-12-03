@@ -91,15 +91,6 @@ class UserSeeder extends Seeder
             ['name' => 'Mendez, Ana', 'email' => 'ame@rainmakergroup.com', 'password' => 'Anm123', 'role' => 'panel_user', 'department_id' => '7', 'position_id' => '6'],
             ['name' => 'Letona, Diego Armando', 'email' => 'all@rainmakergroup.com', 'password' => 'Lda123', 'role' => 'panel_user', 'department_id' => '7', 'position_id' => '3'],
             ['name' => 'Giron, Jorge Alejandro', 'email' => 'jgb@rainmakergroup.com', 'password' => 'Gja123', 'role' => 'panel_user', 'department_id' => '7', 'position_id' => '22'],
-
-
-
-
-
-
-
-
-
             
         ];
 

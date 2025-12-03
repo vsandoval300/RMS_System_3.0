@@ -62,10 +62,38 @@ class AdminPanelProvider extends PanelProvider
                 )
             ->id('admin')
             ->path('admin')
+
+            ->authGuard('web')   // o 'filament' si decidiste usar ese guard
+           
             ->login()
-            ->plugins([
+            /* ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
-            ])
+            ]) */
+            ->plugins([
+                    FilamentShieldPlugin::make()
+                        ->gridColumns([
+                            'default' => 1,
+                            'sm' => 2,
+                            'lg' => 3,
+                        ])
+                        ->sectionColumnSpan(1)
+                        ->checkboxListColumns([
+                            'default' => 1,
+                            'sm' => 2,
+                            'lg' => 4,
+                        ])
+                        ->resourceCheckboxListColumns([
+                            'default' => 1,
+                            'sm' => 2,
+                        ]),
+                    ])
+
+
+
+
+
+
+
             /*->colors([
                 'primary' => Color::Blue,
             ]) */
@@ -93,30 +121,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
+            ]);
 
            
             
             //Configuraión para Shield en el recurso permisos
             // otras configuraciones del panel...
-                ->plugins([
-                    FilamentShieldPlugin::make()
-                        ->gridColumns([
-                            'default' => 1,
-                            'sm' => 2,
-                            'lg' => 3,
-                        ])
-                        ->sectionColumnSpan(1)
-                        ->checkboxListColumns([
-                            'default' => 1,
-                            'sm' => 2,
-                            'lg' => 4,
-                        ])
-                        ->resourceCheckboxListColumns([
-                            'default' => 1,
-                            'sm' => 2,
-                        ]),
-                ]);
+                
            
 
 

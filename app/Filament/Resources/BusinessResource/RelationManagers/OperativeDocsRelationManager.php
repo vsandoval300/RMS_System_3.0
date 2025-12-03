@@ -41,6 +41,11 @@ use App\Models\Traits\HasOperativeDocOverview;
 use Filament\Forms\Components\ToggleButtons;
 use App\Models\CostScheme;
 use App\Models\CostNodex;
+use Filament\Tables\Actions\Action;
+
+
+
+
 
 
 
@@ -1419,8 +1424,42 @@ class OperativeDocsRelationManager extends RelationManager
                     'Expired'  => 'danger',
                 }),
 
-
             Tables\Columns\IconColumn::make('document_path')
+                ->label('File')
+                ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->getStateUsing(fn ($record) => true)
+                ->icon(fn ($record) =>
+                    $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
+                )
+                ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
+                ->tooltip(fn ($record) =>
+                    $record->document_path ? 'View PDF' : 'No document available'
+                )
+                ->action(
+                    Action::make('viewPdf')
+                        ->label('View PDF')
+                        ->icon('heroicon-o-document-text')
+                        ->hidden(fn ($record) => blank($record->document_path))
+                        ->modalHeading(fn ($record) => "PDF – {$record->id}")
+                        ->modalWidth('7xl')
+                        ->modalSubmitAction(false)
+                        ->modalContent(function ($record) {
+                            if (blank($record->document_path)) {
+                                return new HtmlString('<p>No document available.</p>');
+                            }
+
+                            // Usa la ruta interna
+                            $url = route('pdf.viewer', [
+                                'operativeDoc' => $record->getKey(),
+                            ]);
+
+                            return view('filament.components.pdf-viewer', [
+                                'url' => $url,
+                            ]);
+                        })
+                ),
+            /* Tables\Columns\IconColumn::make('document_path')
                 ->label('File')                         // sin encabezado
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
@@ -1437,7 +1476,7 @@ class OperativeDocsRelationManager extends RelationManager
                         return null; // 👈 evita error si es null
                     }
 
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 */
+                    /** @var \Illuminate\Filesystem\FilesystemAdapter $s3
                     $s3 = Storage::disk('s3');
 
                     return Str::startsWith(
@@ -1451,7 +1490,7 @@ class OperativeDocsRelationManager extends RelationManager
                 ->openUrlInNewTab()
                 ->tooltip(fn ($record) =>
                     $record->document_path ? 'View PDF' : 'No document available'
-                ),
+                ), */
 
         ])
 
