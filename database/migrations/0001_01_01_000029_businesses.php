@@ -30,6 +30,12 @@ return new class extends Migration
             // Claves foráneas a otras tablas
             $table->foreignId('reinsurer_id')->constrained('reinsurers');
             $table->string('parent_id', 19)->nullable();
+
+            $table->foreign('parent_id')
+                  ->references('treaty_code')
+                  ->on('treaties')
+                  ->nullOnDelete();
+                  
             $table->string('renewed_from_id', 19)->nullable();
             $table->foreignId('producer_id')->constrained('partners');
             $table->foreignId('currency_id')->constrained('currencies');

@@ -65,10 +65,10 @@ class Business extends Model
     /* ---------------------------------------------------
     |  ➜  Relaciones self-referenciales
     ---------------------------------------------------*/
-    public function parent()
+    /* public function parent()
     {
         return $this->belongsTo(self::class,'parent_id');  
-    }
+    } */
 
     public function renewedFrom()
     {
@@ -78,10 +78,10 @@ class Business extends Model
     /* ---------------------------------------------------
      |  ➜  Relaciones hasMany / hasOne
      ---------------------------------------------------*/
-    public function children()   // inverso de parent()
+   /*  public function children()   // inverso de parent()
     {
         return $this->hasMany(self::class,'parent_id','business_code');
-    }
+    } */
 
     public function renewals()   // inverso de renewedFrom()
     {
@@ -109,6 +109,11 @@ class Business extends Model
     {
         // Para Business, el identificador que quieres es business_code
         return $this->business_code ?: null;
+    }
+
+    public function treaty()
+    {
+        return $this->belongsTo(Treaty::class, 'parent_id', 'treaty_code');
     }
 
 /* Claro. En tu modelo Business, la función booted():

@@ -176,6 +176,7 @@ class ProducersResource extends Resource
                 TextColumn::make('id')
                     ->sortable(),
                 TextColumn::make('name')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('acronym')
                     ->searchable()
