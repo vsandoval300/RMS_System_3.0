@@ -112,7 +112,7 @@ class DatabaseSeeder extends Seeder
             //=============================================
             //FILES FOR CELL-MAYAB
             //=============================================
-           /*  BusinessesCellMayabSeeder::class, //1
+               BusinessesCellMayabSeeder::class, //1
                LiabilityStructureCellMayabSeeder::class, //2
             //Files for Placement Schemes==================
                CschemeCellMayabSeeder::class, //6
@@ -129,7 +129,7 @@ class DatabaseSeeder extends Seeder
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
 
-            
+            /*
             //=============================================
             //FILES FOR YELMO
             //=============================================

@@ -319,9 +319,8 @@ class BusinessResource extends Resource
                         ->schema([ 
                  
                             Select::make('parent_id')
-                                ->label('Parent Business')
-                                //->inlineLabel()
-                                ->relationship('parent', 'business_code')
+                                ->label('Treaty') // o "Master Contract", lo que prefieras
+                                ->relationship('treaty', 'treaty_code') // 👈 usa la nueva relación
                                 ->searchable()
                                 ->preload()
                                 ->optionsLimit(180)
