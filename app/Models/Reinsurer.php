@@ -107,6 +107,11 @@ class Reinsurer extends Model
         return $this->hasMany(Business::class);
     }
 
+    public function treaties(): HasMany
+    {
+        return $this->hasMany(Treaty::class, 'reinsurer_id');
+    }
+
     /* ---------------------------------------------------
      |  ➜  Relaciones BelongsToMany
      ---------------------------------------------------*/

@@ -8,6 +8,7 @@ use App\Enums\ApprovalStatus;           // 👈 tu Enum PHP 8.1+
 use App\Enums\BusinessLifecycleStatus;  // 👈 tu Enum PHP 8.1+
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\HasAuditLogs;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Business extends Model
 {
@@ -112,6 +113,11 @@ class Business extends Model
     }
 
     public function treaty()
+    {
+        return $this->belongsTo(Treaty::class, 'parent_id', 'treaty_code');
+    }
+
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(Treaty::class, 'parent_id', 'treaty_code');
     }

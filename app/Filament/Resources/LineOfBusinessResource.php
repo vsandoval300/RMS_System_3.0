@@ -68,6 +68,8 @@ class LineOfBusinessResource extends Resource
                     Textarea::make('description')
                     ->label('Description')
                     ->required()
+                    ->sortable()
+                    ->searchable()
                     ->columnSpan('full')
                     ->autosize()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
@@ -77,6 +79,8 @@ class LineOfBusinessResource extends Resource
                     Select::make('risk_covered')
                     ->label('Risk Covered')
                     ->placeholder('Select the risk covered.') // 👈 Aquí cambias el texto
+                    ->sortable()
+                    ->searchable()
                     ->options([
                         'Life' => 'Life',
                         'Non-Life' => 'Non-Life',

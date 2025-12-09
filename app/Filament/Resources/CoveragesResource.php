@@ -230,6 +230,8 @@ class CoveragesResource extends Resource
                 TextColumn::make('description')
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Description')
+                    ->sortable()
+                    ->searchable()
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 400px; white-space: normal;', // ancho fijo de 300px

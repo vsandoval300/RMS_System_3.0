@@ -450,6 +450,8 @@ public static function infolist(Infolist $infolist): Infolist
 
                 TextColumn::make('description')
                     ->label('Description')
+                    ->sortable()
+                    ->searchable()
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->wrap()
                     ->extraAttributes([

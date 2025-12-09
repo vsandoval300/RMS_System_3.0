@@ -54,7 +54,7 @@ class BusinessResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 9;   // aparecerá primero
+    protected static ?int    $navigationSort  = 10;   // aparecerá primero
     
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
@@ -84,7 +84,7 @@ class BusinessResource extends Resource
             ->schema([
 
 
-// 🟡 BURBUJA PRINCIPAL
+            // 🟡 BURBUJA PRINCIPAL
             Section::make()  // puedes ponerle un título general si quieres
                 ->schema([
 
@@ -500,12 +500,28 @@ class BusinessResource extends Resource
                                     ->state(fn ($record) => $record->claims_type ?: '—'),
                             ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
 
+
+
+
+
+
                             Split::make([
-                                TextEntry::make('parent_label')->label('')->state('Parent business')
-                                    ->weight('bold')->alignment('left'),
-                                TextEntry::make('parent_value')->label('')
-                                    ->state(fn ($record) => $record->parent?->business_code ?: '—'),
-                            ])->columnSpan(4)->extraAttributes(['style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);']),
+    TextEntry::make('parent_label')->label('')->state('Parent treaty')
+        ->weight('bold')->alignment('left'),
+
+    TextEntry::make('parent_value')->label('')
+        ->state(fn ($record) => $record->parent?->treaty_code ?: '—'),
+])
+->columnSpan(4)
+->extraAttributes([
+    'style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);',
+]),
+
+
+
+
+
+
 
                             /* Fila 2 */
                             Split::make([

@@ -242,7 +242,8 @@ class SubregionsResource extends Resource
                     ->sortable(),
                 TextColumn::make('region.name')
                     ->label('Region')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
 
             ])

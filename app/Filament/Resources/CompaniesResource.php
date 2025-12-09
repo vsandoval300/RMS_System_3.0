@@ -203,36 +203,7 @@ class CompaniesResource extends Resource
             ->maxWidth('5xl')
             ->collapsible(),
 
-            /* ─────────────────────────  AUDIT  ───────────────────────── */
-            /* InfoSection::make('Audit Dates')
-                ->schema([
-                    InfoGrid::make(2)
-                        ->extraAttributes(['style' => 'gap: 12px;'])
-                        ->schema([
-                            // Created at
-                            InfoGrid::make(12)
-                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                                ->schema([
-                                    TextEntry::make('created_label')->label('')->state('Created At:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('created_value')->label('')
-                                        ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                                        ->columnSpan(9),
-                                ]),
-                            // Updated at
-                            InfoGrid::make(12)
-                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                                ->schema([
-                                    TextEntry::make('updated_label')->label('')->state('Updated At:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('updated_value')->label('')
-                                        ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                                        ->columnSpan(9),
-                                ]),
-                        ]),
-                ])
-                ->maxWidth('5xl')
-                ->compact(), */
+           
         ]);
     }
 
@@ -263,6 +234,8 @@ class CompaniesResource extends Resource
                 TextColumn::make('activity')
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Activity')
+                    ->sortable()
+                    ->searchable()
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 550px; white-space: normal;', // ancho fijo de 300px

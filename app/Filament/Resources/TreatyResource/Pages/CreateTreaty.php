@@ -1,35 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\BusinessResource\Pages;
+namespace App\Filament\Resources\TreatyResource\Pages;
 
-use App\Filament\Resources\BusinessResource;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\TreatyResource;
 use Filament\Actions;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
 
-
-class CreateBusiness extends CreateRecord
+class CreateTreaty extends CreateRecord
 {
-    protected static string $resource = BusinessResource::class;
-
-    /* protected function getFormActions(): array
-    {
-        return [
-            Actions\Action::make('create')
-                ->label('Create')
-                ->action('create')      // 👈 ejecuta el método create() de la página (submit real)
-                ->color('primary'),
-            Actions\Action::make('cancel')
-                ->label('Cancel')
-                ->url(static::getResource()::getUrl('index'))
-                ->color('gray')
-                ->outlined(),
-        ];
-        
-    } */
-
-    
+    protected static string $resource = TreatyResource::class;
 
 
 
@@ -43,8 +24,8 @@ class CreateBusiness extends CreateRecord
     {
         return Notification::make()
             ->success()
-            ->title('Business created')
-            ->body('The new Business has been created successfully.');
+            ->title('Treaty created')
+            ->body('The new Treaty has been created successfully.');
     }
 
 
@@ -58,8 +39,8 @@ class CreateBusiness extends CreateRecord
             // label por defecto de Filament
             ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
             ->requiresConfirmation()
-            ->modalHeading('Create Business')
-            ->modalDescription('Are you sure you want to create this Business?')
+            ->modalHeading('Create Treaty')
+            ->modalDescription('Are you sure you want to create this Treaty?')
             ->modalSubmitActionLabel('Create')
             // qué hacer cuando el usuario confirma en el modal
             ->action(fn () => $this->create())
@@ -80,14 +61,4 @@ class CreateBusiness extends CreateRecord
                 ->outlined(),
         ];
     }
-
-
-
-
-
-
-
-
-
-
 }

@@ -202,7 +202,7 @@ class CostSchemeResource extends Resource
 
                             ])
                             ->columns(11)
-                            ->addActionLabel('Agregar nodo de costo')
+                            ->addActionLabel('Add cost node')
                             ->reorderable(false)
                             ->deletable(true)
                             ->addable(true)
@@ -398,7 +398,9 @@ class CostSchemeResource extends Resource
                 Tables\Columns\TextColumn::make('share')
                     ->label('Share')
                     ->formatStateUsing(fn ($state) => number_format($state * 100, 2) . '%'),
-                Tables\Columns\TextColumn::make('agreement_type'),
+                Tables\Columns\TextColumn::make('agreement_type')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->since(),
                 Tables\Columns\TextColumn::make('updated_at')->since(),
             ])

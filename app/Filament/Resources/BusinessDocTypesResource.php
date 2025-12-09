@@ -176,6 +176,8 @@ class BusinessDocTypesResource extends Resource
                     ]),
                 TextColumn::make('description')
                     ->label('Description')
+                    ->sortable()
+                    ->searchable()
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 600px; white-space: normal;', // ancho fijo de 300px

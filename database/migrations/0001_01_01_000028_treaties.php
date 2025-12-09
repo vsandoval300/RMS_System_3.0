@@ -13,6 +13,12 @@ return new class extends Migration
             // 🔥 Primary Key tipo string como en businesses
             $table->string('treaty_code', 19)->primary();
 
+            $table->integer('index');
+            // 👇 Nuevo: relación con reinsurers
+            $table->foreignId('reinsurer_id')
+                  ->constrained('reinsurers')
+                  ->nullOnDelete();   
+
             $table->string('name');
             $table->string('contract_type')->nullable(); 
             $table->text('description')->nullable();
