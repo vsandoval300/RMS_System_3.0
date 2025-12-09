@@ -127,7 +127,7 @@ class TreatyResource extends Resource
                     Section::make()
                         ->columns(2) // subdivide la columna 3 en 2
                         ->schema([
-                        /* TextInput::make('index')
+                        TextInput::make('index')
                             ->label('Index')
                             //->inlineLabel()
                             //->hiddenLabel()
@@ -135,7 +135,7 @@ class TreatyResource extends Resource
                             ->numeric()
                             ->default(fn () => \App\Models\Treaty::max('index') + 1 ?? 1)
                             ->disabledOn(['create', 'edit'])
-                            ->dehydrated(), */                                
+                            ->dehydrated(),                                 
 
                         TextInput::make('treaty_code')
                             ->label('Treaty Code')
@@ -283,7 +283,7 @@ class TreatyResource extends Resource
                             ->extraAttributes(['style' => 'row-gap: 0;'])
                             ->schema([
 
-                                // Name
+                                // Underwritten by
                                 InfoGrid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
@@ -294,7 +294,7 @@ class TreatyResource extends Resource
                                             ->columnSpan(9),
                                     ]),
 
-                                // Acronym
+                                // Treaty Code
                                 InfoGrid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
@@ -305,7 +305,18 @@ class TreatyResource extends Resource
                                             ->columnSpan(9),
                                     ]),
 
-                                // Acronym
+                                // Index
+                                InfoGrid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
+                                        TextEntry::make('gd_code_label')->label('')->state('  Index')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('gd_code_value')->label('')
+                                            ->state(fn ($record) => $record->index ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                // Name
                                 InfoGrid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
@@ -316,7 +327,7 @@ class TreatyResource extends Resource
                                             ->columnSpan(9),
                                     ]),
 
-                                // Acronym
+                                // Contract type
                                 InfoGrid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
@@ -327,7 +338,7 @@ class TreatyResource extends Resource
                                             ->columnSpan(9),
                                     ]),    
 
-                                // Activity (multilínea)
+                                // Description (multilínea)
                                 InfoGrid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
@@ -364,6 +375,9 @@ class TreatyResource extends Resource
                 //
                 TextColumn::make('treaty_code')
                     ->sortable(),
+
+                TextColumn::make('index')
+                    ->sortable(),    
 
                 TextColumn::make('reinsurer.short_name')
                     ->label('Reinsurer')
