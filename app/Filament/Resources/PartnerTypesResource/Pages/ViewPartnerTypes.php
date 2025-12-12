@@ -26,6 +26,7 @@ class ViewPartnerTypes extends ViewRecord
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
                 ->modalHeading(' ')
+                ->modalDescription('Review the full change history for this record, including who modified it and when.')
                 ->modalWidth('4xl')
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()

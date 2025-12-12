@@ -127,7 +127,7 @@ class TreatyResource extends Resource
                     Section::make()
                         ->columns(2) // subdivide la columna 3 en 2
                         ->schema([
-                        TextInput::make('index')
+                        /* TextInput::make('index')
                             ->label('Index')
                             //->inlineLabel()
                             //->hiddenLabel()
@@ -135,7 +135,7 @@ class TreatyResource extends Resource
                             ->numeric()
                             ->default(fn () => \App\Models\Treaty::max('index') + 1 ?? 1)
                             ->disabledOn(['create', 'edit'])
-                            ->dehydrated(),                                 
+                            ->dehydrated(),  */                                
 
                         TextInput::make('treaty_code')
                             ->label('Treaty Code')
@@ -149,8 +149,10 @@ class TreatyResource extends Resource
                     ])
                     ->columnSpan(1), 
 
-
-                    Select::make('contract_type')
+                    Section::make()
+                        ->columns(3) // subdivide la columna 3 en 2
+                        ->schema([
+                            Select::make('contract_type')
                                 ->label('Contract Type')
                                 ->options([
                                     'Treaty'   => 'Treaty',
@@ -163,23 +165,27 @@ class TreatyResource extends Resource
                                 ->searchable()    // opcional
                                 ->preload()       // opcional: carga todas las opciones
                                 //->disabledOn(['create']) // mismo comportamiento que tenías
-                                ->dehydrated(),
-                    
+                                ->dehydrated()
+                                ->columnSpan(1),
+
+                            TextInput::make('name')
+                                ->label('Tittle')
+                                //->hiddenLabel()
+                                //->inlineLabel()
+                                //->disabledOn(['create'])
+                                ->maxLength(510)
+                                ->placeholder('Fill in the treaty name')
+                                ->required()
+                                ->columnSpan(2),
+                                //->default('DFT'),
+                    ]),
                     
                         
                 Section::make()
                     ->columns(3) // subdivide la columna 3 en 2
                     ->schema([
 
-                        TextInput::make('name')
-                                ->label('Name')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                //->disabledOn(['create'])
-                                ->maxLength(510)
-                                ->placeholder('Fill in the treaty name')
-                                ->required(),
-                                //->default('DFT'),
+                        
 
                         Textarea::make('description')
                             ->label('Description')
@@ -192,7 +198,7 @@ class TreatyResource extends Resource
 
 
                 //Tercera burbuja: solo el archivo
-                                    Section::make('File Upload')
+                                    /* Section::make('File Upload')
                                         ->schema([
 
                                             FileUpload::make('document_path')
@@ -250,7 +256,7 @@ class TreatyResource extends Resource
 
 
                                         ])
-                                        ->compact(),
+                                        ->compact(), */
 
                         ])
                        
@@ -306,7 +312,7 @@ class TreatyResource extends Resource
                                     ]),
 
                                 // Index
-                                InfoGrid::make(12)
+                                /* InfoGrid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
                                         TextEntry::make('gd_code_label')->label('')->state('  Index')
@@ -314,7 +320,7 @@ class TreatyResource extends Resource
                                         TextEntry::make('gd_code_value')->label('')
                                             ->state(fn ($record) => $record->index ?: '—')
                                             ->columnSpan(9),
-                                    ]),
+                                    ]), */
 
                                 // Name
                                 InfoGrid::make(12)
@@ -374,26 +380,45 @@ class TreatyResource extends Resource
             ->columns([
                 //
                 TextColumn::make('treaty_code')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->sortable(),
 
-                TextColumn::make('index')
-                    ->sortable(),    
+                /* TextColumn::make('index')
+                    ->verticalAlignment(VerticalAlignment::Start)
+                    ->sortable(),     */
 
                 TextColumn::make('reinsurer.short_name')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Reinsurer')
                     ->searchable(),    
 
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->verticalAlignment(VerticalAlignment::Start)
+                    ->label('Tittle')
+                    ->sortable()
+                    ->searchable()
+                    ->wrap() // ✅ Permite que se haga multilínea
+                    ->extraAttributes([
+                        'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
+                    ]),
 
                 TextColumn::make('contract_type')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->searchable(),
 
                 TextColumn::make('description')
-                    ->searchable(),
+                    ->verticalAlignment(VerticalAlignment::Start)
+                    ->label('Description')
+                    ->sortable()
+                    ->searchable()
+                    ->wrap() // ✅ Permite que se haga multilínea
+                    ->extraAttributes([
+                        'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
+                    ]),
 
                 // 👉 Nombre del archivo (solo texto)
-                TextColumn::make('document_path')
+                /* TextColumn::make('document_path')
+                    ->verticalAlignment(VerticalAlignment::Start)
                     ->label('File')
                     // Muestra solo el nombre del archivo
                     ->formatStateUsing(fn ($state) => $state ? basename($state) : '—')
@@ -425,7 +450,7 @@ class TreatyResource extends Resource
                                     return new HtmlString('<p>No document available.</p>');
                                 }
 
-                                /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                                // @var \Illuminate\Filesystem\FilesystemAdapter $disk
                                 $disk = Storage::disk('s3');
 
                                 // Si viene una URL completa, intentamos recuperar solo la "key" del objeto
@@ -458,7 +483,7 @@ class TreatyResource extends Resource
                                     'url' => $url,
                                 ]);
                             })
-                    ),
+                    ), */
             ])
             ->filters([
                 //
@@ -489,6 +514,7 @@ class TreatyResource extends Resource
     {
         return [
             //
+            RelationManagers\DocsRelationManager::class,
         ];
     }
 

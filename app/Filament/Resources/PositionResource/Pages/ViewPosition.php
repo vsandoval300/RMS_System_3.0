@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Filament\Resources\CountriesResource\Pages;
+namespace App\Filament\Resources\PositionResource\Pages;
 
-use App\Filament\Resources\CountriesResource;
+use App\Filament\Resources\PositionResource;
+use Filament\Resources\Pages\view;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Forms;
 
-class ViewCountries extends ViewRecord
+class ViewPosition extends ViewRecord
 {
-    protected static string $resource = CountriesResource::class;
-
+    protected static string $resource = PositionResource::class;
+    
     protected ?string $maxContentWidth = '5xl';
 
     public function getTitle(): string
     {
-        return 'View – ' . ($this->record?->name ?? 'Country');
+        return 'View – ' . ($this->record?->position ?? 'Position');
     }
 
     protected function getHeaderActions(): array

@@ -6,6 +6,23 @@
         : collect();
 @endphp
 
+{{-- @php
+    /** @var \Illuminate\Database\Eloquent\Model|null $record */
+
+    // 1) Preferimos el record que viene por viewData()
+    $resolvedRecord = $record ?? null;
+
+    // 2) Fallback: si no vino, intentamos obtenerlo desde el contexto del componente (si existe)
+    if (! $resolvedRecord && isset($this) && method_exists($this, 'getRecord')) {
+        $resolvedRecord = $this->getRecord();
+    }
+
+    $logs = $resolvedRecord
+        ? $resolvedRecord->auditLogs()->with('user')->latest()->get()
+        : collect();
+@endphp --}}
+
+
 <div class="flex flex-col gap-4">
     {{-- Título general del modal --}}
     <div class="mt-2">

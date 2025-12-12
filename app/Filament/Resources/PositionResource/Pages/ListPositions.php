@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Filament\Resources\TreatyResource\Pages;
+namespace App\Filament\Resources\PositionResource\Pages;
 
-use App\Filament\Resources\TreatyResource;
+use App\Filament\Resources\PositionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListTreaties extends ListRecords
+class ListPositions extends ListRecords
 {
-    protected static string $resource = TreatyResource::class;
+    protected static string $resource = PositionResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make()
-                ->label('New Treaty')          // 👈 el texto que tú quieras
+                ->label('New Position')          // 👈 el texto que tú quieras
                 ->icon('heroicon-m-plus')
                 ->color('primary')
                 ->createAnother(false)
-                ->modalHeading('New Treaty')   // título del modal
+                ->modalHeading('New Position')   // título del modal
                 ->modalSubmitActionLabel('Create')
                 ->modalCancelActionLabel('Cancel'),
         ];

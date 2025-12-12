@@ -8,6 +8,8 @@ use Filament\Actions;
 use Filament\Resources\Pages\view;
 use Filament\Actions\Action;
 use Filament\Forms;
+use App\Models\AuditLog;
+use App\Models\TreatyDoc;
 
 
 class ViewTreaty extends viewRecord

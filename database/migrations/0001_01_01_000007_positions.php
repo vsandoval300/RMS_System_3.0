@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('position'); // Nombre del cargo
             $table->text('description')->nullable(); // Descripción del cargo
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
