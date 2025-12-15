@@ -14,9 +14,6 @@ use Filament\Notifications\Notification;
 class CreateCostScheme extends CreateRecord
 {
     protected static string $resource = CostSchemeResource::class;
-
-    
-    
     
     /**
      * A dónde redirige el botón “Create”
@@ -43,7 +40,6 @@ class CreateCostScheme extends CreateRecord
             'id' => $nextId,
         ]);
     } */
-
 
     public function mount(): void
     {
@@ -141,8 +137,5 @@ class CreateCostScheme extends CreateRecord
                 ->outlined(),
         ];
     }
-
-
-
 
 }

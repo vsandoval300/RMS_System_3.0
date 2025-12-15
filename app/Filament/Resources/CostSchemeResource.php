@@ -25,6 +25,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\TextInput\Mask;
 use Filament\Support\RawJs;
+use Filament\Tables\Columns\TextColumn;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -104,7 +105,7 @@ class CostSchemeResource extends Resource
                                     Forms\Components\Grid::make(2)
                                         ->schema([
                                             TextInput::make('index')
-                                                ->label('Index')
+                                                ->label('Daily Index')
                                                 ->numeric()
                                                 ->required()
                                                 ->disabled()
@@ -389,22 +390,42 @@ class CostSchemeResource extends Resource
         return $table
             ->recordUrl(fn (CostScheme $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
-                Tables\Columns\TextColumn::make('index')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('id')
+
+                TextColumn::make('row_number')
+                    ->label('#')
+                    ->alignCenter()
+                    ->state(function (CostScheme $record) {
+                        return CostScheme::query()
+                            ->where(function ($q) use ($record) {
+                                $q->where('created_at', '<', $record->created_at)
+                                ->orWhere(function ($q) use ($record) {
+                                    $q->where('created_at', '=', $record->created_at)
+                                        ->where('id', '<', $record->id); // 👈 desempate (ASC)
+                                });
+                            })
+                            ->count() + 1;
+                    })
+                    ->alignCenter(),
+                
+                TextColumn::make('id')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('share')
+                TextColumn::make('index')
+                    ->label('Daily index')
+                    ->numeric()
+                    ->sortable()
+                    ->alignCenter(),
+                TextColumn::make('share')
                     ->label('Share')
                     ->formatStateUsing(fn ($state) => number_format($state * 100, 2) . '%'),
-                Tables\Columns\TextColumn::make('agreement_type')
+                TextColumn::make('agreement_type')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')->since(),
-                Tables\Columns\TextColumn::make('updated_at')->since(),
+                TextColumn::make('created_at')->since(),
+                TextColumn::make('updated_at')->since(),
             ])
-            ->defaultSort('index', 'asc')
+            //->defaultSort('created_at', 'asc')
+            ->defaultSort('id', 'asc')
             ->filters([])
             
              ->actions([
