@@ -83,14 +83,31 @@ class FinancialStatementsRelationManager extends RelationManager
                                 /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
                                 $disk = Storage::disk('s3');
 
-                                // 1) Si aún quedara algún registro viejo con URL completa, la usamos tal cual
+                                // Si viene una URL completa, intentamos recuperar solo la "key" del objeto
                                 if (filter_var($path, FILTER_VALIDATE_URL)) {
-                                    $url = $path;
+                                    // Ejemplo simple: quitar dominio de S3 y quedarnos con la key
+                                    $parsed = parse_url($path);
+                                    $key = ltrim($parsed['path'] ?? '', '/');
                                 } else {
-                                    // 2) Si es key corta ("reinsurers/financials_statements/..."), confiamos en ella
-                                    //    y dejamos que S3 nos diga si existe o no.
-                                    $url = $disk->url($path);
+                                    $key = $path;
                                 }
+
+                                if (! $disk->exists($key)) {
+                                    return new HtmlString(
+                                        '<p>The PDF file does not exist in S3.</p>'
+                                        .'<p><code>' . e($key) . '</code></p>'
+                                    );
+                                }
+
+                                // 🔥 Siempre generamos una URL temporal con headers "inline"
+                                $url = $disk->temporaryUrl(
+                                    $key,
+                                    now()->addMinutes(10),
+                                    [
+                                        'ResponseContentType'        => 'application/pdf',
+                                        'ResponseContentDisposition' => 'inline; filename="'.basename($key).'"',
+                                    ]
+                                );
 
                                 return view('filament.components.pdf-viewer', [
                                     'url' => $url,

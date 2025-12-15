@@ -204,6 +204,8 @@ class LineOfBusinessResource extends Resource
                 TextColumn::make('description')
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Description')
+                    ->searchable()
+                    ->sortable()
                     ->wrap()
                     ->extraAttributes([
                         'style' => 'width: 600px; white-space: normal;', // ancho fijo de 300px
@@ -212,6 +214,8 @@ class LineOfBusinessResource extends Resource
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Risk covered')
                     ->wrap()
+                    ->searchable()
+                    ->sortable()
                     ->extraAttributes([
                         'style' => 'width: 100px; white-space: normal;', // ancho fijo de 300px
                     ]),
