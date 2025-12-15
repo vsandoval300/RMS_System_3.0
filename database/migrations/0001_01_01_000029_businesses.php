@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('risk_covered', ['Life', 'Non-Life']);
             $table->enum('business_type', ['Own', 'Third party']);
             $table->enum('premium_type', ['Fixed', 'Estimated']);
-            $table->enum('purpose', ['Strategic', 'Normal']);
+            $table->enum('purpose', ['Strategic', 'Traditional']);
             $table->enum('claims_type', ['Claims occurrence', 'Claims made']);
 
             // Claves foráneas a otras tablas

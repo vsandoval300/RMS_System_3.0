@@ -257,7 +257,7 @@ class BusinessResource extends Resource
                                 //->inlineLabel()
                                 ->placeholder('Select business purpose.') // 👈 Aquí cambias el texto
                                 ->options([
-                                    'Normal' => 'Normal',
+                                    'Traditional' => 'Traditional',
                                     'Strategic' => 'Strategic',
                                 ])
                                 ->required()
