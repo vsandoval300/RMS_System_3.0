@@ -379,8 +379,24 @@ class TreatyResource extends Resource
         return $table
             ->columns([
                 //
+                TextColumn::make('row_number')
+                    ->label('#')
+                    ->alignCenter()
+                    ->state(function (Treaty $record) {
+                        return Treaty::query()
+                            ->where(function ($q) use ($record) {
+                                $q->where('created_at', '<', $record->created_at)
+                                ->orWhere(function ($q) use ($record) {
+                                    $q->where('created_at', '=', $record->created_at)
+                                        ->where('treaty_code', '<', $record->treaty_code); // 👈 desempate (ASC)
+                                });
+                            })
+                            ->count() + 1;
+                    })
+                    ->alignCenter(),
+
                 TextColumn::make('treaty_code')
-                    ->verticalAlignment(VerticalAlignment::Start)
+                    //->verticalAlignment(VerticalAlignment::Start)
                     ->sortable(),
 
                 /* TextColumn::make('index')
@@ -388,12 +404,12 @@ class TreatyResource extends Resource
                     ->sortable(),     */
 
                 TextColumn::make('reinsurer.short_name')
-                    ->verticalAlignment(VerticalAlignment::Start)
+                    //->verticalAlignment(VerticalAlignment::Start)
                     ->label('Reinsurer')
                     ->searchable(),    
 
                 TextColumn::make('name')
-                    ->verticalAlignment(VerticalAlignment::Start)
+                    //->verticalAlignment(VerticalAlignment::Start)
                     ->label('Tittle')
                     ->sortable()
                     ->searchable()
@@ -403,11 +419,11 @@ class TreatyResource extends Resource
                     ]),
 
                 TextColumn::make('contract_type')
-                    ->verticalAlignment(VerticalAlignment::Start)
+                    //->verticalAlignment(VerticalAlignment::Start)
                     ->searchable(),
 
                 TextColumn::make('description')
-                    ->verticalAlignment(VerticalAlignment::Start)
+                    //->verticalAlignment(VerticalAlignment::Start)
                     ->label('Description')
                     ->sortable()
                     ->searchable()

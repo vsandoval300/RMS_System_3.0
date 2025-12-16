@@ -660,7 +660,7 @@ class BusinessResource extends Resource
                                 $q->where('created_at', '<', $record->created_at)
                                 ->orWhere(function ($q) use ($record) {
                                     $q->where('created_at', '=', $record->created_at)
-                                        ->where('id', '<', $record->id); // 👈 desempate (ASC)
+                                        ->where('business_code', '<', $record->business_code); // 👈 desempate (ASC)
                                 });
                             })
                             ->count() + 1;
