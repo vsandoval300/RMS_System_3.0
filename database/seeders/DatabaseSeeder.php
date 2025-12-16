@@ -32,16 +32,16 @@ class DatabaseSeeder extends Seeder
             
             //Operative Tables 
             
-            /*=============================================*/
+            //=============================================
             RegionsSeeder::class,
             SubRegionsSeeder::class, 
             CountriesSeeder::class,
             //Cátalogo de monedas
-            /*=============================================*/
+            //=============================================
             CurrenciesSeeder::class,
             ClientsSeeder::class,
            
-            /*=============================================*/
+            //=============================================
             BusinessUnitsSeeder::class,
             DepartmentsSeeder::class,
             PositionsSeeder::class,
@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             //Cátalogos de posición geografica
             
             //Cátalogo de Usuarios
-            /*=============================================*/
+            //=============================================
             IndustriesSeeder::class,
             ClientIndustriesSeeder::class,
             PartnerTypesSeeder::class,
@@ -177,6 +177,29 @@ class DatabaseSeeder extends Seeder
             //InvoicesYelmoSeeder::class, //11
             //InvoiceTransactionsYelmoSeeder::class, //12
             
+
+            //=============================================
+            //FILES FOR RISIKO
+            //=============================================
+               TreatiesRisikoSeeder::class,
+               TreatiesDocRisikoSeeder::class,
+               BusinessesRisikoSeeder::class, //1
+               LiabilityStructureRisikoSeeder::class, //2
+            //Files for Placement Schemes==================
+               //CschemeRisikoSeeder::class, //6
+               //CostNodesxRisikoSeeder::class, //4
+            //CschemeCnodesRisikoSeeder::class, //7
+            //Files for Business Documents=================
+               //BusinessesDocsRisikoSeeder::class, //Details
+               //BusinessDocInsuredsRisikoSeeder::class, //Insureds
+               //BusinessDocsSchemesRisikoSeeder::class, //Placement Schemes
+               //TransactionsRisikoSeeder::class, //Transactions
+               //TransactionsLogRisikoSeeder::class, //TransactionLogs
+
+
+
+
+
             //File of Activity
             /*=============================================*/
             //ActivityLogSeeder::class, /*1*/

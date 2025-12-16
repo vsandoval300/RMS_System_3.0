@@ -650,12 +650,29 @@ class BusinessResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('index')
-                    ->numeric()
-                    ->sortable(),
+
+                TextColumn::make('row_number')
+                    ->label('#')
+                    ->alignCenter()
+                    ->state(function (Business $record) {
+                        return Business::query()
+                            ->where(function ($q) use ($record) {
+                                $q->where('created_at', '<', $record->created_at)
+                                ->orWhere(function ($q) use ($record) {
+                                    $q->where('created_at', '=', $record->created_at)
+                                        ->where('id', '<', $record->id); // 👈 desempate (ASC)
+                                });
+                            })
+                            ->count() + 1;
+                    })
+                    ->alignCenter(),
 
                 TextColumn::make('business_code')
                     ->searchable(),
+
+                TextColumn::make('index')
+                    ->numeric()
+                    ->sortable(),
 
                 TextColumn::make('reinsurance_type')
                     ->searchable(),
