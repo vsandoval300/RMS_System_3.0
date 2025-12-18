@@ -10,7 +10,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;           // 👈 importa la facade
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 use Filament\Forms\Components\FileUpload;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Support\RawJs;
@@ -36,24 +35,12 @@ use App\Services\TransactionLogBuilder;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Filament\Forms\Components\Actions;
 use App\Models\Traits\HasOperativeDocOverview;
 use Filament\Forms\Components\ToggleButtons;
 use App\Models\CostScheme;
 use App\Models\CostNodex;
 use Filament\Tables\Actions\Action;
 
-
-
-
-
-
-
-
-
-
-
-use Nette\Utils\Html as UtilsHtml;
 
 class OperativeDocsRelationManager extends RelationManager
 {
@@ -447,7 +434,35 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->preload()
                                                             ->required()
                                                             ->searchable()
-                                                            ->columnSpan(5),
+                                                            ->columnSpan(4),
+
+                                                        /* Select::make('cscheme_id')
+                                                            ->label('Placement scheme')
+                                                            ->relationship('costScheme', 'id')
+                                                            ->preload()
+                                                            ->required()
+                                                            ->searchable()
+                                                            ->columnSpan(3), */
+
+                                                        Select::make('cscheme_id')
+                                                            ->label('Placement scheme')
+                                                            ->options(function (Get $get) {
+                                                                $ids = collect($get('../../schemes') ?? []) // sube niveles según tu estructura real
+                                                                    ->pluck('cscheme_id')
+                                                                    ->filter()
+                                                                    ->unique()
+                                                                    ->values();
+
+                                                                return \App\Models\CostScheme::whereIn('id', $ids)
+                                                                    ->get()
+                                                                    ->mapWithKeys(fn ($s) => [
+                                                                        $s->id => "{$s->id} · Index: {$s->index} · Share: ".number_format($s->share * 100, 2)."%",
+                                                                    ]);
+                                                            })
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->required()
+                                                            ->columnSpan(3),
 
                                                         Select::make('coverage_id')
                                                             ->label('Coverage')
@@ -455,7 +470,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->preload()
                                                             ->required()
                                                             ->searchable()
-                                                            ->columnSpan(4),
+                                                            ->columnSpan(3),
 
                                                         TextInput::make('premium')
                                                             ->label('Premium')
@@ -472,19 +487,8 @@ class OperativeDocsRelationManager extends RelationManager
                                                             )
                                                             ->step(0.01)
                                                             ->required()
-                                                            ->columnSpan(3),
+                                                            ->columnSpan(2),
 
-                                                        /* TextInput::make('premium')
-                                                            ->prefix('$')
-                                                            ->required()
-                                                            ->live()
-                                                            ->mask(RawJs::make('$money($input)'))
-                                                            ->stripCharacters(',') 
-                                                            ->dehydrateStateUsing(fn ($state) => $state !== null ? floatval(str_replace(',', '', $state)) : null)                                            
-                                                            ->numeric()
-                                                            //->dehydrateStateUsing(fn ($state) => floatval(preg_replace('/[^0-9.]/', '', $state)))
-                                                            ->step(0.01)
-                                                        ->columnSpan(3), */
                                                     ])
                                                     ->reorderableWithButtons()
                                                     ->defaultItems(1)
@@ -1056,7 +1060,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
 
                                 // 🔸 Schemes con datos relevantes ya cargados
-                                $schemes = collect($get('schemes') ?? [])
+                                /* $schemes = collect($get('schemes') ?? [])
                                     ->map(function ($scheme) {
                                         $model = \App\Models\CostScheme::find($scheme['cscheme_id'] ?? null);
                                         return $model ? [
@@ -1067,14 +1071,44 @@ class OperativeDocsRelationManager extends RelationManager
                                     })
                                     ->filter()
                                     ->values()
+                                    ->toArray(); */
+
+                                /*================================================================
+                                 |  SCHEMES (Cost Schemes seleccionados en el formulario)
+                                 =================================================================*/
+                                $schemes = collect($get('schemes') ?? [])
+                                    ->map(function ($scheme) {
+                                        $id = $scheme['cscheme_id'] ?? null;
+
+                                        $model = \App\Models\CostScheme::find($id);
+
+                                        return $model ? [
+                                            'cscheme_id'     => $id,               // 👈 IMPORTANTE
+                                            'id'             => $model->id,        // SCHE-....
+                                            'share'          => $model->share,
+                                            'agreement_type' => $model->agreement_type,
+                                        ] : null;
+                                    })
+                                    ->filter()
+                                    ->values()
                                     ->toArray();
                                 
                                 $totalShare = collect($schemes)->sum('share'); // 🔹 total calculado
+                                
+                                // ✅ NEW: mapa cscheme_id => share (para usarlo por insured)
+                                $schemeShareById = collect($schemes) // ✅ NEW
+                                    ->mapWithKeys(fn ($s) => [       // ✅ NEW
+                                        ($s['cscheme_id'] ?? null) => (float) ($s['share'] ?? 0), // ✅ NEW
+                                    ])                               // ✅ NEW
+                                    ->filter();                      // ✅ NEW
 
+                                
 
-                                // 🔹 Insureds con limpieza de premium
+                                /*================================================================
+                                 |  INSUREDS (con cscheme_id incluido)
+                                 =================================================================*/
                                 $insureds = collect($get('insureds') ?? [])->map(function ($insured) {
-                                    $company = \App\Models\Company::with('country')->find($insured['company_id'] ?? null);
+                                    $company  = \App\Models\Company::with('country')->find($insured['company_id'] ?? null);
                                     $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
 
                                     $raw = $insured['premium'] ?? 0;
@@ -1086,30 +1120,27 @@ class OperativeDocsRelationManager extends RelationManager
                                     $premium = floatval($clean);
 
                                     return [
+                                        'cscheme_id' => $insured['cscheme_id'] ?? null, // 👈 IMPORTANTE (ajusta si tu key es otro)
+                                        // 'cscheme_id' => $insured['cost_scheme_id'] ?? null,
+
                                         'company' => $company
                                             ? [
                                                 'name' => $company->name,
                                                 'country' => ['name' => optional($company->country)->name],
                                             ]
                                             : ['name' => '-', 'country' => ['name' => '-']],
-                                        'coverage' => $coverage
-                                            ? ['name' => $coverage->name]
-                                            : ['name' => '-'],
-                                        'premium' => $premium,
+
+                                        'coverage' => $coverage ? ['name' => $coverage->name] : ['name' => '-'],
+                                        'premium'  => $premium,
                                     ];
                                 })->toArray();
+                               
 
-                                
-                                
-                                
-                                /* $costNodes = collect($get('schemes') ?? [])
-                                    ->map(fn ($scheme) => \App\Models\CostScheme::with('costNodexes.costScheme', 'costNodexes.partnerSource', 'costNodexes.deduction') // <-------
-                                        ->find($scheme['cscheme_id'] ?? null))
-                                    ->filter()
-                                    ->flatMap(fn ($scheme) => $scheme->costNodexes ?? collect())
-                                    ->values(); */
 
-                                // 1) Traemos los esquemas seleccionados en el formulario
+
+                                /*================================================================
+                                 |  COST NODES (igual que lo tenías)
+                                 =================================================================*/
                                 $costNodes = collect($get('schemes') ?? [])
                                     ->pluck('cscheme_id')
                                     ->filter()
@@ -1132,50 +1163,52 @@ class OperativeDocsRelationManager extends RelationManager
                                     ->values();
 
 
-
-
-
-
-
-                                // 📊 Cálculos generales
-                                $inception = $get('inception_date');
-                                $expiration = $get('expiration_date');
-                                $start = $inception ? \Carbon\Carbon::parse($inception) : null;
-                                $end = $expiration ? \Carbon\Carbon::parse($expiration) : null;
+                                /*================================================================
+                                |  CÁLCULOS GENERALES (FTP / FTS)
+                                =================================================================*/
+                                $inception   = $get('inception_date');
+                                $expiration  = $get('expiration_date');
+                                $start       = $inception ? \Carbon\Carbon::parse($inception) : null;
+                                $end         = $expiration ? \Carbon\Carbon::parse($expiration) : null;
                                 $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
-                                $daysInYear = $start && $start->isLeapYear() ? 366 : 365;
+                                $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
 
                                 $totalPremium = collect($insureds)->sum('premium');
-                                $insureds = collect($insureds)->map(function ($insured) use ($totalPremium, $coverageDays, $daysInYear, $schemes) {
-                                    $allocation = $totalPremium > 0 ? $insured['premium'] / $totalPremium : 0;
-                                    $premiumFtp = ($daysInYear > 0) ? ($insured['premium'] / $daysInYear) * $coverageDays : 0;
 
-                                    // Aplica todos los shares al insured individual para calcular su FTS
-                                    $premiumFts = 0;
-                                    foreach ($schemes as $s) {
-                                        $premiumFts += $premiumFtp * ($s['share'] ?? 0);
-                                    }
+                                // 🔁 CHANGED: ahora premium_fts = premium_ftp * share del scheme del insured (NO suma de todos los shares)
+                                $insureds = collect($insureds)->map(function ($insured) use ($totalPremium, $coverageDays, $daysInYear, $schemeShareById) {
+
+                                    $allocation = $totalPremium > 0 ? $insured['premium'] / $totalPremium : 0;
+
+                                    $premiumFtp = ($daysInYear > 0)
+                                        ? ($insured['premium'] / $daysInYear) * $coverageDays
+                                        : 0;
+
+                                    // ✅ NEW: tomar share SOLO del scheme del insured
+                                    $insuredSchemeId = $insured['cscheme_id'] ?? null; // ✅ NEW
+                                    $share = (float) ($schemeShareById[$insuredSchemeId] ?? 0); // ✅ NEW
+
+                                    // ✅ NEW: regla que pediste
+                                    $premiumFts = $premiumFtp * $share; // ✅ NEW
 
                                     return array_merge($insured, [
                                         'allocation_percent' => $allocation,
-                                        'premium_ftp' => $premiumFtp,
-                                        'premium_fts' => $premiumFts,
+                                        'premium_ftp'        => $premiumFtp,
+                                        'premium_fts'        => $premiumFts,
+                                        'scheme_share'       => $share, // ✅ NEW (opcional, útil si luego lo quieres imprimir por insured)
                                     ]);
                                 })->toArray();
-                                
-                                
+
                                 $totalPremiumFtp = ($daysInYear > 0) ? ($totalPremium / $daysInYear) * $coverageDays : 0;
 
-                                
-                                
-                                $totalPremiumFts = 0;
-                                foreach ($schemes as $s) {
-                                    $totalPremiumFts += $totalPremiumFtp * ($s['share'] ?? 0);
-                                }
+                                // 🔁 CHANGED: totalPremiumFts ahora debe ser consistente con los insureds
+                                $totalPremiumFts = collect($insureds)->sum('premium_fts'); // ✅ NEW
 
 
 
-                                //Converted Premium Formula
+                                /*================================================================
+                                 |  Converted Premium (igual, pero ahora usa el totalPremiumFts)
+                                 =================================================================*/
                                 // -Transform Annual Premium Fts according their installments parameters//
                                 $transactions = collect($get('transactions') ?? []);
                                 $totalConvertedPremium = 0;
@@ -1190,49 +1223,12 @@ class OperativeDocsRelationManager extends RelationManager
                                     }
                                 }
 
+
+                                /*================================================================
+                                 |  COSTS BREAKDOWN (igual que lo tenías)
+                                 =================================================================*/
                                 $totalDeductionOrig = 0;
                                 $totalDeductionUsd = 0;
-
-                                
-                                // Cambio
-                               /* $groupedCostNodes = $costNodes
-                                    ->groupBy(fn ($node) => $node->costScheme->share ?? 0)  // 👈 aquí
-                                    ->map(function ($nodes, $share) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
-                                        $shareFloat = floatval($share);
-
-                                        $nodeList = $nodes->map(function ($node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
-                                            $deduction          = $totalPremiumFts       * $node->value * $shareFloat;
-                                            $deductionConverted = $totalConvertedPremium * $node->value * $shareFloat;
-
-                                            return [
-                                                'index'            => $node->index,
-                                                'partner'          => $node->partnerSource?->name ?? '-',
-                                                'partner_short'    => $node->partnerSource?->short_name
-                                                                    ?? ($node->partnerSource?->name ?? '-'),
-                                                'deduction'        => $node->deduction?->concept ?? '-',
-                                                'value'            => $node->value,
-                                                'share'            => $shareFloat,
-                                                'deduction_amount' => $deduction,
-                                                'deduction_usd'    => $deductionConverted,
-                                            ];
-                                        })->values();
-
-                                        $subtotalOrig = $nodeList->sum('deduction_amount');
-                                        $subtotalUsd  = $nodeList->sum('deduction_usd');
-
-                                        $totalDeductionOrig += $subtotalOrig;
-                                        $totalDeductionUsd  += $subtotalUsd;
-
-                                        return [
-                                            'share'         => $shareFloat,
-                                            'nodes'         => $nodeList,
-                                            'subtotal_orig' => $subtotalOrig,
-                                            'subtotal_usd'  => $subtotalUsd,
-                                        ];
-                                    })
-                                    ->sortKeys()
-                                    ->values()
-                                    ->toArray(); */
 
                                     // 2) Agrupamos por esquema (cscheme_id) y calculamos deducciones
                                     $groupedCostNodes = $costNodes
@@ -1279,10 +1275,9 @@ class OperativeDocsRelationManager extends RelationManager
 
 
 
-
-
-
-
+                                    /*================================================================
+                                     |  LOGS (igual que lo tenías)
+                                     =================================================================*/
 
                                     // 👇 NUEVO: logs persistidos por transacción e índice
                                     $persistedTxIds = collect($get('transactions') ?? [])->pluck('id')->filter()->values();
@@ -1314,7 +1309,9 @@ class OperativeDocsRelationManager extends RelationManager
                                         })->toArray();
                                     }
 
-
+                                /*================================================================
+                                |  RETURN A LA VISTA
+                                =================================================================*/
                                 return [
                                     'id' => $get('id'),
                                     'createdAt' => $record?->created_at ?? now(),
@@ -1332,13 +1329,16 @@ class OperativeDocsRelationManager extends RelationManager
                                     'insureds' => array_values($insureds),
                                     'costSchemes' => $schemes,
                                     'groupedCostNodes' => $groupedCostNodes,
+
                                     'totalPremiumFts' => $totalPremiumFts,
                                     'totalPremiumFtp' => $totalPremiumFtp,
                                     'totalConvertedPremium' => $totalConvertedPremium,
+
                                     'coverageDays' => $coverageDays,
                                     'totalDeductionOrig' => $totalDeductionOrig,
                                     'totalDeductionUsd' => $totalDeductionUsd,
                                     'totalShare' => $totalShare,
+
                                     'transactions' => collect($get('transactions') ?? [])->values(),
                                     'logsByTxn'            => $logsByTxn,  // 👈 NUEVO
                                 ];

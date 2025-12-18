@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use App\Models\Coverage; 
 use App\Models\Company; 
+use App\Models\OperativeDoc; 
 use App\Models\Traits\HasAuditLogs;
 
 class BusinessOpDocsInsured extends Model
@@ -22,6 +24,7 @@ class BusinessOpDocsInsured extends Model
     protected $fillable = [
         'id',
         'op_document_id',   // FK → operative_docs.id
+        'cscheme_id',
         'company_id',       // FK → companies.id
         'coverage_id',      // FK → coverages.id
         'premium',
@@ -29,13 +32,11 @@ class BusinessOpDocsInsured extends Model
 
     protected $casts = [
         'premium' => 'decimal:2',
+        'op_document_id' => 'string',
+        'cscheme_id' => 'string',
     ];
 
-    /* ─── belongsTo ─── */
-    public function operativeDoc()
-    {
-        return $this->belongsTo(OperativeDoc::class, 'op_document_id');
-    }
+   
 
     /* ──────────────  Metods for audit registers  ──────────────── */
     protected function getAuditOwnerModel(): Model
@@ -87,6 +88,17 @@ class BusinessOpDocsInsured extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function operativeDoc(): BelongsTo
+    {
+        return $this->belongsTo(OperativeDoc::class, 'op_document_id', 'id');
+    }
+
+     /** 🔗 Cost Scheme */
+    public function costScheme(): BelongsTo
+    {
+        return $this->belongsTo(CostScheme::class, 'cscheme_id', 'id');
     }
 
     public function coverage()

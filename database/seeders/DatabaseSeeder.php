@@ -112,7 +112,7 @@ class DatabaseSeeder extends Seeder
             //=============================================
             //FILES FOR CELL-MAYAB
             //=============================================
-               BusinessesCellMayabSeeder::class, //1
+              /*  BusinessesCellMayabSeeder::class, //1
                LiabilityStructureCellMayabSeeder::class, //2
             //Files for Placement Schemes==================
                CschemeCellMayabSeeder::class, //6
@@ -123,7 +123,7 @@ class DatabaseSeeder extends Seeder
                BusinessDocInsuredsCellMayabSeeder::class, //Insureds
                BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
                TransactionsCellMayabSeeder::class, //Transactions
-               TransactionsLogCellMayabSeeder::class, //TransactionLogs
+               TransactionsLogCellMayabSeeder::class, //TransactionLogs */
             
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
@@ -186,14 +186,14 @@ class DatabaseSeeder extends Seeder
                BusinessesRisikoSeeder::class, //1
                LiabilityStructureRisikoSeeder::class, //2
             //Files for Placement Schemes==================
-               //CschemeRisikoSeeder::class, //6
-               //CostNodesxRisikoSeeder::class, //4
+               CschemeRisikoSeeder::class, //6
+               CostNodesxRisikoSeeder::class, //4
             //CschemeCnodesRisikoSeeder::class, //7
             //Files for Business Documents=================
-               //BusinessesDocsRisikoSeeder::class, //Details
-               //BusinessDocInsuredsRisikoSeeder::class, //Insureds
-               //BusinessDocsSchemesRisikoSeeder::class, //Placement Schemes
-               //TransactionsRisikoSeeder::class, //Transactions
+               BusinessesDocsRisikoSeeder::class, //Details
+               BusinessDocInsuredsRisikoSeeder::class, //Insureds
+               BusinessDocsSchemesRisikoSeeder::class, //Placement Schemes
+               TransactionsRisikoSeeder::class, //Transactions
                //TransactionsLogRisikoSeeder::class, //TransactionLogs
 
 

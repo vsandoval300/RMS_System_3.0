@@ -134,7 +134,7 @@
                 </tr>
             @endforelse
 
-            {{-- 🔹 TOTAL ROW --}}
+            {{-- 🔹 TOTAL ROW 
             @if (isset($totalShare))
                  <tr class="border-t border-gray-700 bg-gray-800 text-gray-300 font-semibold">
                     <td colspan="2" class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Total Share:</td>
@@ -143,88 +143,163 @@
                     </td>
                     <td></td>
                 </tr>
-            @endif
+            @endif--}}
 
         </tbody>
     </table>
 
 
+    <br>
+
 
 
 
     {{-------------------------------------------------------------------------------}}
-    {{-- INSUREDS -------------------------------------------------------------------}}
+    {{-- INSUREDS (grouped by Placement Scheme)                                      --}}
     {{-------------------------------------------------------------------------------}}
-     <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
-       Insureds
+
+    <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
+        Insureds
     </h4>
 
-    <table class="w-full text-sm border-separate border-spacing-y-1 mt-2">
-        <thead>
-            <tr class="border-b border-gray-600">
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Insured</th>
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Coverage</th>
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Country</th>
-                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Allocation</th> <!-- NUEVA -->
-                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium</th>
-                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Ftp</th>
-                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Fts</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($insureds ?? [] as $index => $insured)
-                <tr class="bg-gray-800 rounded text-gray-300 border-b border-gray-600">
-                    <td class="px-2 py-1">{{ $index + 1 }}</td>
-                    <td class="px-2 py-1">{{ $insured['company']['name'] ?? '-' }}</td>
-                    <td class="px-2 py-1">{{ $insured['coverage']['name'] ?? '-' }}</td>
-                    <td class="px-2 py-1">{{ $insured['company']['country']['name'] ?? '-' }}</td>
-                    <td class="px-2 py-1 text-right">{{ number_format($insured['allocation_percent'] * 100, 2) . '%' }}</td> <!-- NUEVO -->
-                    <td class="px-2 py-1 text-right">${{ number_format($insured['premium'], 2) }}</td>
-                    <td class="px-2 py-1 text-right">${{ number_format($insured['premium_ftp'] ?? 0, 2) }}</td>
-                    <td class="px-2 py-1 text-right">${{ number_format($insured['premium_fts'] ?? 0, 2) }}</td>
+    @php
+        $schemeMetaById = collect($costSchemes ?? [])
+            ->mapWithKeys(function ($s) {
+                $key = $s['cscheme_id'] ?? $s['id'] ?? null;
+                return $key ? [
+                    $key => [
+                        'label' => $s['id'] ?? '—',
+                        'share' => (float) ($s['share'] ?? 0),
+                    ],
+                ] : [];
+            });
 
-                </tr>
+        $schemeKey = fn ($i) => $i['cscheme_id'] ?? $i['cost_scheme_id'] ?? '—';
 
+        $insuredsGrouped = collect($insureds ?? [])->groupBy($schemeKey);
+    @endphp
+
+    {{-- ✅ NEW: un solo wrapper para TODAS las tablas --}}
+    <div class="overflow-x-auto"> {{-- ✅ NEW --}}
+        <div class="min-w-[1200px]"> {{-- ✅ NEW: ancho base común para todo --}}
+            @forelse ($insuredsGrouped as $schemeId => $rows)
+                @php
+                    $meta        = $schemeMetaById[$schemeId] ?? null;
+                    $schemeLabel = $meta['label'] ?? $schemeId;
+                    $schemeShare = (float) ($meta['share'] ?? 0);
+
+                    $countInsureds = $rows->unique(fn($i) => $i['company']['name'] ?? null)->count();
+
+                    $totalAllocation = $rows->sum('allocation_percent');
+                    $totalPremium    = $rows->sum('premium');
+                    $totalFtp        = $rows->sum(fn($i) => $i['premium_ftp'] ?? 0);
+                    $totalFts        = $rows->sum(fn($i) => $i['premium_fts'] ?? 0);
+                @endphp
+
+                <div class="px-2 py-1 text-left font-semibold mt-4 text-sm" style="color: #100f0d;">
+                    Placement Scheme: <span class="font-bold">{{ $schemeLabel }}</span>
+                </div>
+
+                <table
+                    class="w-full text-sm border-separate border-spacing-y-1 mt-2 table-fixed"  {{-- ✅ NEW: table-fixed --}}
+                    style="table-layout: fixed; width: 100%;" {{-- ✅ NEW: forzado --}}
+                >
+                    <colgroup>
+                        <col style="width:4%;">   {{-- # --}}
+                        <col style="width:22%;">  {{-- Insured --}}
+                        <col style="width:22%;">  {{-- Coverage --}}
+                        <col style="width:8%;">   {{-- Share --}}
+                        <col style="width:8%;">   {{-- Country --}}
+                        <col style="width:9%;">   {{-- Allocation --}}
+                        <col style="width:9%;">   {{-- Annual Premium --}}
+                        <col style="width:9%;">   {{-- Annual Premium Ftp --}}
+                        <col style="width:9%;">   {{-- Annual Premium Fts --}}
+                    </colgroup>
+
+                    <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Insured</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Coverage</th>
+                            <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Share</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Country</th>
+                            <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Allocation</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Ftp</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Fts</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($rows->values() as $index => $insured)
+                            <tr class="bg-gray-800 rounded text-gray-300 border-b border-gray-600">
+                                <td class="px-2 py-1">{{ $index + 1 }}</td>
+
+                                <td class="px-2 py-1 truncate" title="{{ $insured['company']['name'] ?? '-' }}">
+                                    {{ $insured['company']['name'] ?? '-' }}
+                                </td>
+
+                                <td class="px-2 py-1 truncate" title="{{ $insured['coverage']['name'] ?? '-' }}">
+                                    {{ $insured['coverage']['name'] ?? '-' }}
+                                </td>
+
+                                <td class="px-2 py-1 text-right">
+                                    {{ number_format($schemeShare * 100, 2) . '%' }}
+                                </td>
+
+                                <td class="px-2 py-1 truncate" title="{{ $insured['company']['country']['name'] ?? '-' }}">
+                                    {{ $insured['company']['country']['name'] ?? '-' }}
+                                </td>
+
+                                <td class="px-2 py-1 text-right">
+                                    {{ isset($insured['allocation_percent']) ? number_format($insured['allocation_percent'] * 100, 2) . '%' : '-' }}
+                                </td>
+
+                                <td class="px-2 py-1 text-right whitespace-nowrap">
+                                    ${{ number_format($insured['premium'] ?? 0, 2) }}
+                                </td>
+
+                                <td class="px-2 py-1 text-right whitespace-nowrap">
+                                    ${{ number_format($insured['premium_ftp'] ?? 0, 2) }}
+                                </td>
+
+                                <td class="px-2 py-1 text-right whitespace-nowrap">
+                                    ${{ number_format($insured['premium_fts'] ?? 0, 2) }}
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
+                            <td class="px-2 py-1 font-semibold" style="color:#100f0d;">{{ $countInsureds }}</td>
+                            <td class="px-2 py-1 font-semibold" style="color:#100f0d;">
+                                {{ $countInsureds === 1 ? 'insured' : 'insureds' }}
+                            </td>
+                            <td class="px-2 py-1"></td>
+                            <td class="px-2 py-1"></td>
+
+                            <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d;">Totals:</td>
+                            <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d;">
+                                {{ number_format($totalAllocation * 100, 2) . '%' }}
+                            </td>
+                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d;">
+                                ${{ number_format($totalPremium, 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d;">
+                                ${{ number_format($totalFtp, 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d;">
+                                ${{ number_format($totalFts, 2) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                 <br>
             @empty
-                <tr>
-                    <td colspan="8" class="px-2 py-2 text-center text-gray-400">No insureds available</td>
-                </tr>
-            @else
-                {{-- 🔹 TOTAL ROW --}}
-                <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
-                    <td class="px-2 py-1 font-semibold" style="color: #100f0d;">
-                        {{ collect($insureds ?? [])->unique(fn($i) => $i['company']['name'])->count() }}
-                    </td> {{-- Columna vacía para # --}}
-                    <td class="px-2 py-1 font-semibold" style="color: #100f0d;">
-                        
-                        {{ collect($insureds ?? [])->unique(fn($i) => $i['company']['name'])->count() === 1 ? 'insured' : 'insureds' }}
-
-
-                    </td> {{-- 👈 Aquí ahora está el conteo, justo bajo "Insured" --}}
-                    <td class="px-2 py-1 font-medium" style="color: #100f0d;"></td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Totals:</td>
-
-                    {{-- 🔹 Allocation total: debe sumar 100% --}}
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
-                        {{ number_format(collect($insureds)->sum('allocation_percent') * 100, 2) . '%' }}
-                    </td>
-
-
-
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
-                        ${{ number_format(collect($insureds)->sum('premium'), 2) }}
-                    </td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
-                        ${{ number_format($totalPremiumFtp ?? 0, 2) }}
-                    </td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">
-                        ${{ number_format($totalPremiumFts ?? 0, 2) }}
-                    </td>
-                </tr>
+                <div class="px-2 py-2 text-center text-gray-400">No insureds available</div>
             @endforelse
-        </tbody>
-    </table>
+        </div>
+    </div>
+
 
 
     <br>
