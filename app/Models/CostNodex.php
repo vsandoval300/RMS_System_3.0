@@ -20,12 +20,13 @@ class CostNodex extends Model
 
     protected $fillable = [
         'id',
+        'index',
         'concept',
         'value',
         'partner_source_id',
         'partner_destination_id', // nuevo campo
-        'referral_partner',
         'cscheme_id',
+        
     ];
 
     // ----------------------------------

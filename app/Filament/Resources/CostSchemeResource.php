@@ -26,6 +26,8 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\TextInput\Mask;
 use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Get;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -34,6 +36,7 @@ use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
+
 
 class CostSchemeResource extends Resource
 {
@@ -60,6 +63,9 @@ class CostSchemeResource extends Resource
 
     public static function form(Form $form): Form
     {
+
+        $exemptId = 8; // o el id real
+
         return $form->schema([
             Section::make('Structure Details')
                 ->schema([
@@ -123,6 +129,30 @@ class CostSchemeResource extends Resource
                                 ])
                                 ->columnSpan(6) // Mitad derecha
                                 ->compact(),
+
+
+                            // 🔹 Columna derecha: Index & Scheme Id
+                            Section::make()
+                                ->schema([
+                                    Forms\Components\Grid::make(1)
+                                        ->schema([
+                                            
+                                            Textarea::make('description')
+                                                ->label('Description')
+                                                ->required()
+                                                ->autosize()
+                                                ->afterStateHydrated(function ($state, callable $set) {
+                                                    if (blank($state)) {
+                                                        $set('description', 'Each and every loss, subject to the applicable annual aggregate.');
+                                                    }
+                                                })
+                                                ->helperText('Please provide a brief description of the document.')
+                                                ->columnSpan('full'),
+
+                                        ]),
+                                ])
+                                ->columnSpan(12) // Mitad derecha
+                                ->compact(),
                         ])
                         ->columns(12),
                 ])
@@ -131,6 +161,9 @@ class CostSchemeResource extends Resource
                 // ╔═════════════════════════════════════════════════════════════════════════╗
                 // ║ Table Repeater para Nodos de Costo                                      ║
                 // ╚═════════════════════════════════════════════════════════════════════════╝
+
+                
+                
                 Section::make('Cost Nodes')
                     ->description('Define the cost nodes of this scheme')
                         ->schema([
@@ -152,7 +185,7 @@ class CostSchemeResource extends Resource
                                         ->content(fn ($get) => $get('index'))
                                         ->columnSpan(1),
 
-                                    Select::make('concept')
+                                    /* Select::make('concept')
                                         ->label('Deduction Type')
                                         ->relationship('deduction', 'concept')
                                         ->placeholder('Select deduction')
@@ -164,6 +197,21 @@ class CostSchemeResource extends Resource
                                             if ($state != 3) {   // 👈 si NO es referral
                                                 $set('referral_partner', null); // 👈 limpia el valor
                                             }
+                                        })
+                                        ->columnSpan(2), */
+
+                                    Select::make('concept')
+                                        ->label('Deduction Type')
+                                        ->relationship('deduction', 'concept')
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set) use ($exemptId) {
+                                            if ((int) $state === $exemptId) {
+                                                $set('value', 0);
+                                            }
+                                            // ❌ no lo limpies a null
                                         })
                                         ->columnSpan(2),
 
@@ -188,6 +236,24 @@ class CostSchemeResource extends Resource
                                     TextInput::make('value')
                                         ->label('Value')
                                         ->suffix('%')
+                                        ->inputMode('decimal')
+                                        ->live(onBlur: true)
+                                        ->default(0) 
+                                        ->required()
+                                        ->minValue(0)
+                                        ->maxValue(100)
+                                        ->dehydrated() // ✅ IMPORTANTÍSIMO
+                                        ->disabled(fn (Get $get) => (int) $get('concept') === $exemptId) // 👈 bloquea si es exempt
+                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 5, '.', '') : '0.00000')
+                                        ->dehydrateStateUsing(fn ($state) => ($state !== null && $state !== '') ? $state / 100 : 0)
+                                        ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+                                        ->columnSpan(2),
+
+                                        
+
+                                    /* TextInput::make('value')
+                                        ->label('Value')
+                                        ->suffix('%')
                                         ->type('text')
                                         ->inputMode('decimal') 
                                         ->live(onBlur: true)
@@ -199,46 +265,23 @@ class CostSchemeResource extends Resource
                                         ->extraInputAttributes([
                                             'class' => 'text-right tabular-nums', // ← alinea a la derecha y usa dígitos monoespaciados
                                         ])
-                                        ->columnSpan(2),
+                                        ->columnSpan(2), */
 
                             ])
+                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data) {
+                                $data['value'] ??= 0; // 👈 garantiza que SIEMPRE exista
+                                return $data;
+                            })
+                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data) {
+                                $data['value'] ??= 0; // 👈 también en updates
+                                return $data;
+                            })                           
                             ->columns(11)
                             ->addActionLabel('Add cost node')
                             ->reorderable(false)
                             ->deletable(true)
                             ->addable(true)
 
-                            // ⬇️ Al agregar/quitar filas, reindexas y luego recalculas el total
-                           /*  ->afterStateUpdated(function (array $state, callable $set, callable $get) {
-                                $schemeId = $get('id');
-
-                                if (! $schemeId || ! is_string($schemeId)) {
-                                    return;
-                                }
-
-                                // Reindexación/ID (tu lógica)
-                                $newState = [];
-                                $index = 1;
-
-                                foreach ($state as $key => $item) {
-                                    if (is_array($item)) {
-                                        $item['index'] = $index;
-                                        $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
-                                        $newState[$key] = $item;
-                                        $index++;
-                                    }
-                                }
-                                $set('costNodexes', $newState);
-
-                                // 🟢 Recalcular total tras add/remove
-                                $total = collect($newState)
-                                    ->pluck('value')
-                                    ->filter()
-                                    ->map(fn ($v) => (float) $v)
-                                    ->sum();
-
-                                $set('total_values', number_format($total, 5, '.', ''));
-                            }), */
 
                             // ⬇️ Al agregar/quitar filas, reindexas y luego recalculas el total
                             ->afterStateUpdated(function (array $state, callable $set, callable $get) {
@@ -279,29 +322,6 @@ class CostSchemeResource extends Resource
 
                                 $set('total_values', number_format($total, 5, '.', ''));
                             }),
-
-
-
-
-
-
-
-
-
-                        
-                                /* Placeholder::make('total_values')
-                                    ->label('')
-                                    ->content(function ($get) {
-                                        $values = collect($get('costNodexes') ?? [])
-                                            ->pluck('value')
-                                            ->filter()
-                                            ->map(fn ($v) => floatval($v)); // 👈 multiplicamos porque en BD está dividido entre 100
-                                        $total = $values->sum();
-                                        return 'Total deductions: ' . $total . '%';
-                                    })
-                                    ->columnSpanFull()
-                                    ->extraAttributes(['class' => 'text-right font-bold']), */
-
                                 
 
                                 

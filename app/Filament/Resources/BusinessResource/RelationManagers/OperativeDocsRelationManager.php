@@ -1041,13 +1041,11 @@ class OperativeDocsRelationManager extends RelationManager
                         'x-on:click.self' => '$wire.set("data.active_panel","summary"); $wire.set("active_panel","summary");',
                         'class' => 'max-h-[700px] overflow-y-auto',
                     ])
-                   
 
                     // ⬇️ Botón para exportar/preview/imprimir
                     ->headerActions([
                         FormAction::make('Export to pdf'),
                     ])
-
 
                     ->schema([
                         View::make('filament.resources.business.operative-doc-summary')
@@ -1059,23 +1057,9 @@ class OperativeDocsRelationManager extends RelationManager
                             ->viewData(function ($get, $record, $livewire) {
                                 $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
 
-                                // 🔸 Schemes con datos relevantes ya cargados
-                                /* $schemes = collect($get('schemes') ?? [])
-                                    ->map(function ($scheme) {
-                                        $model = \App\Models\CostScheme::find($scheme['cscheme_id'] ?? null);
-                                        return $model ? [
-                                            'id' => $model->id,
-                                            'share' => $model->share,
-                                            'agreement_type' => $model->agreement_type,
-                                        ] : null;
-                                    })
-                                    ->filter()
-                                    ->values()
-                                    ->toArray(); */
-
                                 /*================================================================
-                                 |  SCHEMES (Cost Schemes seleccionados en el formulario)
-                                 =================================================================*/
+                                |  SCHEMES (Cost Schemes seleccionados en el formulario)
+                                =================================================================*/
                                 $schemes = collect($get('schemes') ?? [])
                                     ->map(function ($scheme) {
                                         $id = $scheme['cscheme_id'] ?? null;
@@ -1085,6 +1069,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         return $model ? [
                                             'cscheme_id'     => $id,               // 👈 IMPORTANTE
                                             'id'             => $model->id,        // SCHE-....
+                                            'description'    => $model->description,  // ✅ MOD [PS-DESC-1] NEW
                                             'share'          => $model->share,
                                             'agreement_type' => $model->agreement_type,
                                         ] : null;
@@ -1092,21 +1077,19 @@ class OperativeDocsRelationManager extends RelationManager
                                     ->filter()
                                     ->values()
                                     ->toArray();
-                                
-                                $totalShare = collect($schemes)->sum('share'); // 🔹 total calculado
-                                
-                                // ✅ NEW: mapa cscheme_id => share (para usarlo por insured)
-                                $schemeShareById = collect($schemes) // ✅ NEW
-                                    ->mapWithKeys(fn ($s) => [       // ✅ NEW
-                                        ($s['cscheme_id'] ?? null) => (float) ($s['share'] ?? 0), // ✅ NEW
-                                    ])                               // ✅ NEW
-                                    ->filter();                      // ✅ NEW
 
-                                
+                                $totalShare = collect($schemes)->sum('share'); // 🔹 total calculado
+
+                                // ✅ NEW: mapa cscheme_id => share (para usarlo por insured)
+                                $schemeShareById = collect($schemes)
+                                    ->mapWithKeys(fn ($s) => [
+                                        ($s['cscheme_id'] ?? null) => (float) ($s['share'] ?? 0),
+                                    ])
+                                    ->filter();
 
                                 /*================================================================
-                                 |  INSUREDS (con cscheme_id incluido)
-                                 =================================================================*/
+                                |  INSUREDS (con cscheme_id incluido)
+                                =================================================================*/
                                 $insureds = collect($get('insureds') ?? [])->map(function ($insured) {
                                     $company  = \App\Models\Company::with('country')->find($insured['company_id'] ?? null);
                                     $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
@@ -1120,8 +1103,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     $premium = floatval($clean);
 
                                     return [
-                                        'cscheme_id' => $insured['cscheme_id'] ?? null, // 👈 IMPORTANTE (ajusta si tu key es otro)
-                                        // 'cscheme_id' => $insured['cost_scheme_id'] ?? null,
+                                        'cscheme_id' => $insured['cscheme_id'] ?? null, // 👈 IMPORTANTE
 
                                         'company' => $company
                                             ? [
@@ -1134,13 +1116,10 @@ class OperativeDocsRelationManager extends RelationManager
                                         'premium'  => $premium,
                                     ];
                                 })->toArray();
-                               
-
-
 
                                 /*================================================================
-                                 |  COST NODES (igual que lo tenías)
-                                 =================================================================*/
+                                |  COST NODES (igual que lo tenías)
+                                =================================================================*/
                                 $costNodes = collect($get('schemes') ?? [])
                                     ->pluck('cscheme_id')
                                     ->filter()
@@ -1154,68 +1133,66 @@ class OperativeDocsRelationManager extends RelationManager
                                     )
                                     ->filter()
                                     ->flatMap(function (CostScheme $scheme) {
-                                        // Le inyectamos el share del esquema a cada nodo (solo en memoria)
                                         return $scheme->costNodexes->map(function (CostNodex $node) use ($scheme) {
-                                            $node->scheme_share = (float) $scheme->share;     // 👈 0.90 por ejemplo
+                                            $node->scheme_share = (float) $scheme->share; // 👈 solo display
                                             return $node;
                                         });
                                     })
                                     ->values();
-
 
                                 /*================================================================
                                 |  CÁLCULOS GENERALES (FTP / FTS)
                                 =================================================================*/
                                 $inception   = $get('inception_date');
                                 $expiration  = $get('expiration_date');
+
                                 $start       = $inception ? \Carbon\Carbon::parse($inception) : null;
                                 $end         = $expiration ? \Carbon\Carbon::parse($expiration) : null;
-                                $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+
+                                // ✅ MOD [LEAP-1]: define días del año (según el año del start)
                                 $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
+                                // ✅ MOD [LEAP-2]: calcula coverageDays normal
+                                $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+                                // ✅ MOD [LEAP-3]: regla anti-distorsión (tu caso 31/12/2011 -> 31/12/2012)
+                                if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
+                                    $coverageDays = $daysInYear;
+                                }
 
                                 $totalPremium = collect($insureds)->sum('premium');
 
-                                // 🔁 CHANGED: ahora premium_fts = premium_ftp * share del scheme del insured (NO suma de todos los shares)
                                 $insureds = collect($insureds)->map(function ($insured) use ($totalPremium, $coverageDays, $daysInYear, $schemeShareById) {
-
                                     $allocation = $totalPremium > 0 ? $insured['premium'] / $totalPremium : 0;
 
                                     $premiumFtp = ($daysInYear > 0)
                                         ? ($insured['premium'] / $daysInYear) * $coverageDays
                                         : 0;
 
-                                    // ✅ NEW: tomar share SOLO del scheme del insured
-                                    $insuredSchemeId = $insured['cscheme_id'] ?? null; // ✅ NEW
-                                    $share = (float) ($schemeShareById[$insuredSchemeId] ?? 0); // ✅ NEW
+                                    $insuredSchemeId = $insured['cscheme_id'] ?? null;
+                                    $share = (float) ($schemeShareById[$insuredSchemeId] ?? 0);
 
-                                    // ✅ NEW: regla que pediste
-                                    $premiumFts = $premiumFtp * $share; // ✅ NEW
+                                    $premiumFts = $premiumFtp * $share;
 
                                     return array_merge($insured, [
                                         'allocation_percent' => $allocation,
                                         'premium_ftp'        => $premiumFtp,
                                         'premium_fts'        => $premiumFts,
-                                        'scheme_share'       => $share, // ✅ NEW (opcional, útil si luego lo quieres imprimir por insured)
+                                        'scheme_share'       => $share,
                                     ]);
                                 })->toArray();
 
                                 $totalPremiumFtp = ($daysInYear > 0) ? ($totalPremium / $daysInYear) * $coverageDays : 0;
-
-                                // 🔁 CHANGED: totalPremiumFts ahora debe ser consistente con los insureds
-                                $totalPremiumFts = collect($insureds)->sum('premium_fts'); // ✅ NEW
-
-
+                                $totalPremiumFts = collect($insureds)->sum('premium_fts');
 
                                 /*================================================================
-                                 |  Converted Premium (igual, pero ahora usa el totalPremiumFts)
-                                 =================================================================*/
-                                // -Transform Annual Premium Fts according their installments parameters//
+                                |  Converted Premium (igual, pero ahora usa el totalPremiumFts)
+                                =================================================================*/
                                 $transactions = collect($get('transactions') ?? []);
                                 $totalConvertedPremium = 0;
 
                                 foreach ($transactions as $txn) {
-                                    $proportion = floatval($txn['proportion'] ?? 0) / 100; // 👈 CORRECTO
+                                    $proportion = floatval($txn['proportion'] ?? 0) / 100;
                                     $rate = floatval($txn['exch_rate'] ?? 0);
+
                                     if ($rate > 0) {
                                         $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
                                     } else {
@@ -1223,91 +1200,128 @@ class OperativeDocsRelationManager extends RelationManager
                                     }
                                 }
 
-
                                 /*================================================================
-                                 |  COSTS BREAKDOWN (igual que lo tenías)
-                                 =================================================================*/
+                                |  ✅✅✅ COSTS BREAKDOWN (FIX: NO duplicar share)
+                                |  - Base por scheme = SUM(premium_fts) de insureds de ese scheme
+                                |  - Deduction = base_scheme * node.value
+                                |  - USD base por scheme usando installments
+                                =================================================================*/
+
+                                // ✅ MOD [CB-1]: base Orig. Curr por scheme (sum premium_fts del scheme)
+                                $premiumFtsByScheme = collect($insureds) // ✅ MOD [CB-1]
+                                    ->groupBy('cscheme_id')             // ✅ MOD [CB-1]
+                                    ->map(fn ($rows) => $rows->sum('premium_fts')); // ✅ MOD [CB-1]
+
+                                // ✅ MOD [CB-2]: base USD por scheme (aplicando installments)
+                                $convertedFtsByScheme = $premiumFtsByScheme->map(function ($schemeFts) use ($transactions) { // ✅ MOD [CB-2]
+                                    $converted = 0.0;                                                                   // ✅ MOD [CB-2]
+
+                                    foreach ($transactions as $txn) {                                                    // ✅ MOD [CB-2]
+                                        $proportion = floatval($txn['proportion'] ?? 0) / 100;                           // ✅ MOD [CB-2]
+                                        $rate       = floatval($txn['exch_rate'] ?? 0);                                  // ✅ MOD [CB-2]
+
+                                        if ($rate > 0) {                                                                 // ✅ MOD [CB-2]
+                                            $converted += ($schemeFts * $proportion) / $rate;                            // ✅ MOD [CB-2]
+                                        }                                                                                // ✅ MOD [CB-2]
+                                    }                                                                                    // ✅ MOD [CB-2]
+
+                                    return $converted;                                                                    // ✅ MOD [CB-2]
+                                });                                                                                       // ✅ MOD [CB-2]
+
+                                // ✅ MOD [CB-3]: recalcular groupedCostNodes con fórmula correcta
                                 $totalDeductionOrig = 0;
-                                $totalDeductionUsd = 0;
+                                $totalDeductionUsd  = 0;
 
-                                    // 2) Agrupamos por esquema (cscheme_id) y calculamos deducciones
-                                    $groupedCostNodes = $costNodes
-                                        ->groupBy('cscheme_id')
-                                        ->map(function ($nodes, $schemeId) use (&$totalDeductionOrig, &$totalDeductionUsd, $totalPremiumFts, $totalConvertedPremium) {
-                                            /** @var \App\Models\CostNodex $first */
-                                            $first      = $nodes->first();
-                                            $shareFloat = (float) ($first->scheme_share ?? 0);   // 👈 share confiable
+                                $groupedCostNodes = $costNodes
+                                    ->groupBy('cscheme_id')
+                                    ->map(function ($nodes, $schemeId) use (
+                                        &$totalDeductionOrig,
+                                        &$totalDeductionUsd,
+                                        $premiumFtsByScheme,
+                                        $convertedFtsByScheme
+                                    ) {
+                                        /** @var \App\Models\CostNodex $first */
+                                        $first      = $nodes->first();
+                                        $shareFloat = (float) ($first->scheme_share ?? 0); // ✅ MOD [CB-3] solo display
 
-                                            $nodeList = $nodes->map(function (CostNodex $node) use ($shareFloat, $totalPremiumFts, $totalConvertedPremium) {
-                                                $deduction          = $totalPremiumFts      * (float) $node->value * $shareFloat;
-                                                $deductionConverted = $totalConvertedPremium * (float) $node->value * $shareFloat;
+                                        // ✅ MOD [CB-3]: base por scheme (orig y usd)
+                                        $schemeBaseOrig = (float) ($premiumFtsByScheme[$schemeId] ?? 0);   // ✅ MOD [CB-3]
+                                        $schemeBaseUsd  = (float) ($convertedFtsByScheme[$schemeId] ?? 0); // ✅ MOD [CB-3]
 
-                                                return [
-                                                    'index'           => $node->index,
-                                                    'partner'         => $node->partnerSource?->name ?? '-',
-                                                    'partner_short'   => $node->partnerSource?->short_name
-                                                                        ?? $node->partnerSource?->name
-                                                                        ?? '-',
-                                                    'deduction'       => $node->deduction?->concept ?? '-',
-                                                    'value'           => (float) $node->value,
-                                                    'share'           => $shareFloat,
-                                                    'deduction_amount'=> $deduction,
-                                                    'deduction_usd'   => $deductionConverted,
-                                                ];
-                                            })->values();
+                                        $nodeList = $nodes->map(function (CostNodex $node) use ($schemeBaseOrig, $schemeBaseUsd, $shareFloat) {
+                                            $rate = (float) ($node->value ?? 0); // ej 0.02
 
-                                            $subtotalOrig = $nodeList->sum('deduction_amount');
-                                            $subtotalUsd  = $nodeList->sum('deduction_usd');
-
-                                            $totalDeductionOrig += $subtotalOrig;
-                                            $totalDeductionUsd  += $subtotalUsd;
+                                            // ✅ MOD [CB-3]: NO multiplica share otra vez
+                                            $deductionOrig = $schemeBaseOrig * $rate; // ✅ MOD [CB-3]
+                                            $deductionUsd  = $schemeBaseUsd  * $rate; // ✅ MOD [CB-3]
 
                                             return [
-                                                'scheme_id'     => $schemeId,
-                                                'share'         => $shareFloat,
-                                                'nodes'         => $nodeList,
-                                                'subtotal_orig' => $subtotalOrig,
-                                                'subtotal_usd'  => $subtotalUsd,
+                                                'index'            => $node->index,
+                                                'partner'          => $node->partnerSource?->name ?? '-',
+                                                'partner_short'    => $node->partnerSource?->short_name
+                                                                    ?? $node->partnerSource?->name
+                                                                    ?? '-',
+                                                'deduction'        => $node->deduction?->concept ?? '-',
+                                                'value'            => $rate,
+                                                'share'            => $shareFloat,       // solo display
+                                                'scheme_base_orig' => $schemeBaseOrig,   // ✅ MOD [CB-3] (para fórmula)
+                                                'scheme_base_usd'  => $schemeBaseUsd,    // ✅ MOD [CB-3] (para fórmula)
+                                                'deduction_amount' => $deductionOrig,
+                                                'deduction_usd'    => $deductionUsd,
                                             ];
-                                        })
-                                        ->values()
-                                        ->toArray();
+                                        })->values();
 
+                                        $subtotalOrig = $nodeList->sum('deduction_amount');
+                                        $subtotalUsd  = $nodeList->sum('deduction_usd');
 
+                                        $totalDeductionOrig += $subtotalOrig;
+                                        $totalDeductionUsd  += $subtotalUsd;
 
-                                    /*================================================================
-                                     |  LOGS (igual que lo tenías)
-                                     =================================================================*/
+                                        return [
+                                            'scheme_id'        => $schemeId,
+                                            'share'            => $shareFloat,
+                                            'scheme_base_orig' => $schemeBaseOrig, // ✅ MOD [CB-3]
+                                            'scheme_base_usd'  => $schemeBaseUsd,  // ✅ MOD [CB-3]
+                                            'nodes'            => $nodeList,
+                                            'subtotal_orig'    => $subtotalOrig,
+                                            'subtotal_usd'     => $subtotalUsd,
+                                        ];
+                                    })
+                                    ->values()
+                                    ->toArray();
 
-                                    // 👇 NUEVO: logs persistidos por transacción e índice
-                                    $persistedTxIds = collect($get('transactions') ?? [])->pluck('id')->filter()->values();
-                                    $logsByTxn = [];
+                                /*================================================================
+                                |  LOGS (igual que lo tenías)
+                                =================================================================*/
 
-                                    if ($persistedTxIds->isNotEmpty()) {
-                                        $logs = \App\Models\TransactionLog::with('toPartner')
-                                            ->whereIn('transaction_id', $persistedTxIds)
-                                            ->get();
+                                $persistedTxIds = collect($get('transactions') ?? [])->pluck('id')->filter()->values();
+                                $logsByTxn = [];
 
-                                        $logsByTxn = $logs->groupBy('transaction_id')->map(function ($grp) {
-                                            return $grp->mapWithKeys(function ($log) {
-                                                $idx = (int)($log->index ?? 0);
-                                                return [
-                                                    $idx => [
-                                                        'to_short'   => $log->toPartner?->short_name
-                                                                        ?? $log->toPartner?->name
-                                                                        ?? '-',
-                                                        'to_full'    => $log->toPartner?->name ?? '-',
-                                                        'exch_rate'  => $log->exch_rate,
-                                                        'gross'      => $log->gross_amount,
-                                                        'discount'   => $log->commission_discount,
-                                                        'banking'    => $log->banking_fee,
-                                                        'net'        => $log->net_amount,
-                                                        'status'     => $log->status,
-                                                    ],
-                                                ];
-                                            });
-                                        })->toArray();
-                                    }
+                                if ($persistedTxIds->isNotEmpty()) {
+                                    $logs = \App\Models\TransactionLog::with('toPartner')
+                                        ->whereIn('transaction_id', $persistedTxIds)
+                                        ->get();
+
+                                    $logsByTxn = $logs->groupBy('transaction_id')->map(function ($grp) {
+                                        return $grp->mapWithKeys(function ($log) {
+                                            $idx = (int)($log->index ?? 0);
+                                            return [
+                                                $idx => [
+                                                    'to_short'   => $log->toPartner?->short_name
+                                                                    ?? $log->toPartner?->name
+                                                                    ?? '-',
+                                                    'to_full'    => $log->toPartner?->name ?? '-',
+                                                    'exch_rate'  => $log->exch_rate,
+                                                    'gross'      => $log->gross_amount,
+                                                    'discount'   => $log->commission_discount,
+                                                    'banking'    => $log->banking_fee,
+                                                    'net'        => $log->net_amount,
+                                                    'status'     => $log->status,
+                                                ],
+                                            ];
+                                        });
+                                    })->toArray();
+                                }
 
                                 /*================================================================
                                 |  RETURN A LA VISTA
@@ -1326,25 +1340,31 @@ class OperativeDocsRelationManager extends RelationManager
                                     'originalCurrency' => $record?->business?->currency?->acronym
                                         ?? $business?->currency?->acronym
                                         ?? '-',
+
                                     'insureds' => array_values($insureds),
                                     'costSchemes' => $schemes,
                                     'groupedCostNodes' => $groupedCostNodes,
 
                                     'totalPremiumFts' => $totalPremiumFts,
                                     'totalPremiumFtp' => $totalPremiumFtp,
-                                    'totalConvertedPremium' => $totalConvertedPremium,
+                                    'totalConvertedPremium' => $totalConvertedPremium, // (global)
+
+                                    // ✅ MOD [CB-RET]: opcional si quieres usarlo en la vista (fórmulas)
+                                    'premiumFtsByScheme'     => $premiumFtsByScheme,     // ✅ MOD [CB-RET]
+                                    'convertedFtsByScheme'   => $convertedFtsByScheme,   // ✅ MOD [CB-RET]
 
                                     'coverageDays' => $coverageDays,
-                                    'totalDeductionOrig' => $totalDeductionOrig,
-                                    'totalDeductionUsd' => $totalDeductionUsd,
+                                    'totalDeductionOrig' => $totalDeductionOrig, // ✅ ya corresponde al breakdown nuevo
+                                    'totalDeductionUsd' => $totalDeductionUsd,   // ✅ ya corresponde al breakdown nuevo
                                     'totalShare' => $totalShare,
 
                                     'transactions' => collect($get('transactions') ?? [])->values(),
-                                    'logsByTxn'            => $logsByTxn,  // 👈 NUEVO
+                                    'logsByTxn' => $logsByTxn,
                                 ];
                             }),
                     ])
                     ->columnSpanFull(),
+
                     //--------🟡 End Section SUMMARY -----------------------------------------------
                     
                         

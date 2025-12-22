@@ -19,6 +19,7 @@ return new class extends Migration
 
             $table->float('share');
             $table->string('agreement_type',15);
+            $table->text('description')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

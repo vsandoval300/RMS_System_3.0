@@ -22,6 +22,8 @@ class CostScheme extends Model
         'index',
         'share',
         'agreement_type',
+        'description',
+
     ];
 
     /* ─── hasMany & belongsToMany ─── */

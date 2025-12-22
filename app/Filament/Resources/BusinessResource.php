@@ -718,11 +718,17 @@ class BusinessResource extends Resource
                     }),
 
                 TextColumn::make('renewed_from_id')
+                    ->label('Renewed from')
                     ->searchable(),
 
                 TextColumn::make('currency.acronym')
                     ->label('Currency')
                     ->searchable(),
+
+                TextColumn::make('parent_id')
+                    ->label('Treaty')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->dateTime()

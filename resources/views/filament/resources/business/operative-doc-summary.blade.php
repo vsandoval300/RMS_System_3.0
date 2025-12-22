@@ -112,6 +112,7 @@
              <tr class="border-b text-gray-300 border-gray-600">
                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Id</th>
+                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Description</th>
                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Share (%)</th>
                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Agreement Type</th>
             </tr>
@@ -123,6 +124,11 @@
 
                     <td class="px-2 py-1">{{ $index + 1 }}</td>
                     <td class="px-2 py-1">{{ $scheme['id'] ?? '-' }}</td>
+
+                    <td class="px-2 py-1"> {{-- ✅ MOD [PS-DESC-3] NEW --}}
+                        {{ $scheme['description'] ?? '-' }}
+                    </td>
+
                     <td class="px-2 py-1 text-center">
                         {{ isset($scheme['share']) ? number_format($scheme['share'] * 100, 2) . '%' : '-' }}
                     </td>
@@ -130,7 +136,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="px-2 py-2 text-center text-gray-400">No cost schemes available</td>
+                    <td colspan="5" class="px-2 py-2 text-center text-gray-400">No cost schemes available</td>
                 </tr>
             @endforelse
 
