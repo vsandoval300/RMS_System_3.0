@@ -15,7 +15,7 @@ return new class extends Migration
             $table->engine('InnoDB');
             //$table->bigInteger('id')->unsigned();
             // Definir 'business_code' como la clave primaria
-            $table->string('remmitance_code', 14)->primary();
+            $table->string('remmitance_code', 36)->primary();
             $table->bigInteger('id');
             
             $table->timestamps();

@@ -55,7 +55,7 @@ class ViewBusiness extends ViewRecord
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
                 ->modalHeading('Audit info')
-                ->modalWidth('8xl')        // 👈 aquí controlas el ancho del modal
+                ->modalWidth('7xl')        // 👈 aquí controlas el ancho del modal
                 ->modalSubmitAction(false) // no necesitamos botón de "Save"
                 ->closeModalByClickingAway() // opcional
                 ->form([

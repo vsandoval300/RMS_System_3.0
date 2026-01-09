@@ -7,16 +7,20 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use App\Models\Transaction;
+use App\Models\OperativeDoc;
+use Illuminate\Support\Str;
+use Filament\Forms\Set;
+use Filament\Forms\Get;
 
 class CreateTransaction extends CreateRecord
 {
     protected static string $resource = TransactionResource::class;
 
-    protected function getRedirectUrl(): string
+    /* protected function getRedirectUrl(): string
     {
-        // Vuelve al listado después de guardar
         return static::getResource()::getUrl('index');
-    }
+    } */
 
     protected function getCreatedNotification(): ?Notification
     {
@@ -27,36 +31,90 @@ class CreateTransaction extends CreateRecord
     }
 
 
-    /**
-     * 👉 Personalizamos SOLO el botón "Create"
-     *     para que muestre un modal de confirmación.
-     */
+    protected function getCreateAnotherFormAction(): Action
+    {
+        return Action::make('createAnother')
+            ->label('Save & Create Another')
+            ->color('gray')
+            ->requiresConfirmation()
+            ->modalHeading('Create Transaction')
+            ->modalDescription('Create this Transaction and start a new one?')
+            ->modalSubmitActionLabel('Create & New')
+            ->action(function () {
+
+                // 1) conservar el documento actual
+                $opDocumentId = $this->data['op_document_id'] ?? request()->query('op_document_id');
+
+                // 2) ✅ usar createAnother() (NO redirecciona a View)
+                $this->createAnother();
+
+                // 3) si no hay documento, listo
+                if (blank($opDocumentId)) {
+                    return;
+                }
+
+                // 4) recalcular defaults para la siguiente transacción
+                $nextIndex = Transaction::where('op_document_id', $opDocumentId)->count() + 1;
+                $newId     = (string) Str::uuid();
+
+                $currencyId = OperativeDoc::query()
+                    ->whereKey($opDocumentId)
+                    ->with('business:business_code,currency_id')
+                    ->first()
+                    ?->business
+                    ?->currency_id;
+
+                $exchRate = ((int) $currencyId === 157) ? 1 : null;
+
+                // 5) rellenar form conservando Document y nuevos index/id
+                $this->form->fill([
+                    'op_document_id' => $opDocumentId,
+                    'index'          => $nextIndex,
+                    'id'             => $newId,
+                    'exch_rate'      => $exchRate,
+                    'transaction_status_id'  => 1, 
+                    'preview_logs'   => [],
+                ]);
+            });
+    }
+
+
     protected function getCreateFormAction(): Action
     {
         return Action::make('create')
-            // label por defecto de Filament
-            ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
-            ->requiresConfirmation()
-            ->modalHeading('Create Transaction')
-            ->modalDescription('Are you sure you want to create this Transaction?')
-            ->modalSubmitActionLabel('Create')
-            // qué hacer cuando el usuario confirma en el modal
-            ->action(fn () => $this->create())
-            ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
+        ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
+        ->requiresConfirmation()
+        ->modalHeading('Create Transaction')
+        ->modalDescription('Are you sure you want to create this Transaction?')
+        ->modalSubmitActionLabel('Create')
+        ->action(function () {
+            $this->create();
+
+            // ✅ SOLO aquí te vas al index
+            $this->redirect(static::getResource()::getUrl('index'));
+        })
+        ->keyBindings(['mod+s']);
     }
 
-   
     protected function getFormActions(): array
     {
         return [
-            // ⬅️ aquí USAMOS el botón definido arriba
             $this->getCreateFormAction(),
+            $this->getCreateAnotherFormAction(),
 
             Actions\Action::make('cancel')
                 ->label('Cancel')
                 ->url(static::getResource()::getUrl('index'))
                 ->color('gray')
                 ->outlined(),
+        ];
+    }
+
+    protected function getFormDefaults(): array
+    {
+        return [
+            ...parent::getFormDefaults(),
+            'op_document_id' => request()->query('op_document_id'), // 👈 aquí llega el id del operative_doc
         ];
     }
 }

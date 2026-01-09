@@ -6,60 +6,77 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('transaction_logs', function (Blueprint $table) {
-            $table->engine('InnoDB');
-            //PK
-            $table->char('id', 36)->primary(); // UUID como string
 
+            $table->char('id', 36)->primary();
 
             $table->char('transaction_id', 36);
             $table->foreign('transaction_id')
                 ->references('id')->on('transactions')
                 ->onDelete('cascade');
 
-            $table->integer('index'); 
+            $table->integer('index');
 
-            $table->bigInteger('deduction_type')->unsigned();
+            $table->unsignedBigInteger('deduction_type');
             $table->foreign('deduction_type')->references('id')->on('deductions');
 
-            $table->bigInteger('from_entity')->unsigned();
+            $table->unsignedBigInteger('from_entity');
             $table->foreign('from_entity')->references('id')->on('partners');
 
-            $table->bigInteger('to_entity')->unsigned();
+            $table->unsignedBigInteger('to_entity');
             $table->foreign('to_entity')->references('id')->on('partners');
-            
-                
 
             $table->date('sent_date')->nullable();
             $table->date('received_date')->nullable();
-            $table->float('exch_rate');
 
+            $table->decimal('exch_rate', 18, 10);
+            $table->decimal('proportion', 18, 6);              // ej: 0.25
+            $table->decimal('commission_percentage', 18, 6);   // ej: 0.10
+            $table->decimal('gross_amount', 18, 2);
 
-            $table->float('gross_amount');
-            $table->float('commission_discount');
-            $table->float('banking_fee');
+            /**
+             * base_calc = (gross_amount * proportion) / exch_rate
+             */
+            $grossCalcExpr = '((COALESCE(gross_amount,0) * COALESCE(proportion,0)) / NULLIF(COALESCE(exch_rate,0),0))';
 
-            // En Postgres no hay IFNULL, usa COALESCE:
+            /**
+             * commission_discount = base_calc * commission_percentage
+             */
+            $commissionExpr = "($grossCalcExpr * COALESCE(commission_percentage,0))";
+
+            $table->decimal('gross_amount_calc', 18, 2)->storedAs($grossCalcExpr);
+            $table->decimal('commission_discount', 18, 2)->storedAs($commissionExpr);
+
+            $table->decimal('banking_fee', 18, 2)->default(0);
+
+            /**
+             * net_amount = base_calc - commission_discount - banking_fee
+             * ⚠️ NO puede referenciar gross_amount_calc ni commission_discount en Postgres,
+             * así que repetimos expresiones.
+             */
             $table->decimal('net_amount', 18, 2)->storedAs(
-                '(COALESCE(gross_amount,0) - COALESCE(commission_discount,0) - COALESCE(banking_fee,0))');
-            //$table->float('net_amount');
+                "(COALESCE($grossCalcExpr,0) - COALESCE($commissionExpr,0) - COALESCE(banking_fee,0))"
+            );
 
-            $table->enum('status',['Pending','Sent','Received','Completed'])
-                 ->default('Pending'); 
-           
+            /**
+             * STATUS como campo normal (ver nota abajo)
+             */
+            $table->string('status', 30)->storedAs(
+                "CASE
+                    WHEN received_date IS NOT NULL THEN 'Completed'
+                    WHEN sent_date IS NOT NULL THEN 'In process'
+                    ELSE 'Pending'
+                END"
+            );
+
+            $table->string('evidence_path', 255)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('transaction_logs');

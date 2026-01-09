@@ -8,12 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use App\Models\Traits\HasAuditLogs;
+use Illuminate\Support\Facades\DB;
+use App\Models\OperativeDoc;
+use App\Models\TransactionLog;
+use App\Models\CostNodex; // ajusta al nombre real
+use App\Services\TransactionLogsPreviewService;
 
 class Transaction extends Model
 {
     //
+    
     use SoftDeletes, HasAuditLogs;
 
+    public static bool $autoBuildLogs = true;
     /* ---------------------------------------------------
      |  Tabla y PK
      ---------------------------------------------------*/
@@ -62,6 +69,12 @@ class Transaction extends Model
         return $this->belongsTo(OperativeDoc::class, 'op_document_id');
     }
 
+    public function remmitanceCode(): BelongsTo
+    {
+        return $this->belongsTo(RemmitanceCode::class, 'remmitance_code', 'remmitance_code');
+    }
+
+
     /* --------------------------------------------------
      |  hasMany
      --------------------------------------------------*/
@@ -97,82 +110,97 @@ class Transaction extends Model
         return parent::getAuditLabelIdentifier();
     }
 
-
-    /* protected static function booted()
-    {
-        // Asigna UUID si no existe
-        static::creating(function ($model) {
-            if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
-            }
-
-            // Asigna automáticamente el índice
-            if (! $model->index) {
-                $maxIndex = self::where('op_document_id', $model->op_document_id)
-                    ->withoutTrashed()
-                    ->max('index');
-                $model->index = $maxIndex ? $maxIndex + 1 : 1;
-            }
-
-            // Asignaciones forzadas por defecto
-            $model->transaction_type_id ??= 1;
-            $model->transaction_status_id ??= 1;
-            $model->remmitance_code ??= null;
-        });
-
-        // Reordenamiento al eliminar
-        static::deleted(function ($model) {
-            self::where('op_document_id', $model->op_document_id)
-                ->withoutTrashed()
-                ->orderBy('index')
-                ->get()
-                ->values()
-                ->each(function ($record, $key) {
-                    $record->update(['index' => $key + 1]);
-            });
-        });
-    } */
     
 
-    protected static function booted()
-    {
-        static::creating(function ($model) {
-            // 🛠️ Si viene sin PK → genera UUID (como ya tenías)
-            if (! $model->getKey()) {
-                $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
-            } else {
-                // 🛠️ Si VIENE con PK y YA EXISTE en BD (incluyendo soft-deleted) → genera uno nuevo
-                $exists = self::withTrashed()->whereKey($model->getKey())->exists();
-                if ($exists) {
-                    $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
+        protected static function booted()
+        {
+            static::creating(function ($model) {
+                // UUID
+                if (! $model->getKey()) {
+                    $model->{$model->getKeyName()} = (string) Str::uuid();
+                } else {
+                    $exists = self::withTrashed()->whereKey($model->getKey())->exists();
+                    if ($exists) {
+                        $model->{$model->getKeyName()} = (string) Str::uuid();
+                    }
                 }
-            }
 
-            // Índice auto si no viene en el payload (como ya tenías)
-            if (! $model->index) {
-                $maxIndex = self::where('op_document_id', $model->op_document_id)
-                    ->withoutTrashed()
-                    ->max('index');
-                $model->index = $maxIndex ? $maxIndex + 1 : 1;
-            }
+                // Index consecutivo por documento
+                if (! $model->index) {
+                    $maxIndex = self::where('op_document_id', $model->op_document_id)->max('index');
+                    $model->index = ($maxIndex ?? 0) + 1;
+                }
 
-            // Defaults (como ya tenías)
-            $model->transaction_type_id  ??= 1;
-            $model->transaction_status_id ??= 1;
-            $model->remmitance_code      ??= null;
-        });
+                // Defaults
+                $model->transaction_type_id   ??= 1;
+                $model->transaction_status_id ??= 1;
+                $model->remmitance_code       ??= null;
+            });
 
-        static::deleted(function ($model) {
-            self::where('op_document_id', $model->op_document_id)
-                ->withoutTrashed()
-                ->orderBy('index')
-                ->get()
-                ->values()
-                ->each(function ($record, $key) {
-                    $record->update(['index' => $key + 1]);
+            /**
+             * ✅ DUEÑO de la lógica: al crear Transaction → generar TransactionLogs
+             */
+            static::created(function (self $tx) {
+
+                if (! static::$autoBuildLogs) {
+                    return;
+                }
+
+                DB::transaction(function () use ($tx) {
+                    TransactionLog::where('transaction_id', $tx->id)->forceDelete();
+
+                    $rows = app(TransactionLogsPreviewService::class)->build(
+                        opDocumentId: (string) $tx->op_document_id,
+                        typeId: (int) $tx->transaction_type_id,
+                        proportion: (float) $tx->proportion,
+                        exchRate: (float) $tx->exch_rate,
+                        remittanceCode: $tx->remmitance_code,
+                        dueDate: $tx->due_date,
+                    );
+
+                    if (empty($rows)) {
+                        return;
+                    }
+
+                    $now = now();
+
+                    $payload = collect($rows)->map(function (array $row) use ($tx, $now) {
+                        return [
+                            'id'             => (string) Str::uuid(),
+                            'transaction_id' => $tx->id,
+                            'index'          => (int) ($row['index'] ?? 1),
+                            'deduction_type' => (int) ($row['deduction_id'] ?? $row['deduction_type'] ?? 1),
+                            'from_entity'    => (int) ($row['from_entity'] ?? 0),
+                            'to_entity'      => (int) ($row['to_entity'] ?? 0),
+                            'sent_date'      => null,
+                            'received_date'  => null,
+                            'exch_rate'      => (float) $tx->exch_rate,
+                            'proportion'     => (float) $tx->proportion,
+                            'commission_percentage' => (string) ($row['commission_percentage'] ?? 0),
+                            'gross_amount'   => (float) ($row['gross_amount'] ?? 0),
+                            'banking_fee'    => 0,
+                            'created_at'     => $now,
+                            'updated_at'     => $now,
+                        ];
+                    })->all();
+
+                    TransactionLog::insert($payload);
                 });
-        });
-    }
+            });
+
+            static::deleted(function ($model) {
+                self::where('op_document_id', $model->op_document_id)
+                    ->orderBy('index')
+                    ->get()
+                    ->values()
+                    ->each(function ($record, $key) {
+                        $record->index = $key + 1;
+                        $record->saveQuietly();
+                    });
+            });
+        }
+
+    
 }
 
    

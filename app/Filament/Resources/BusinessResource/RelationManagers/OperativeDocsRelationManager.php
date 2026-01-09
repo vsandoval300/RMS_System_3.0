@@ -524,7 +524,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 //----------------------------------------------------        
                                 //⚪️ 4.-Tab for Installments 
                                 //----------------------------------------------------                                                                                                                               
-                                Tab::make('Installments')
+                                /* Tab::make('Installments')
                                     ->icon('heroicon-o-banknotes')
                                     ->reactive()
                                     ->live()
@@ -807,180 +807,14 @@ class OperativeDocsRelationManager extends RelationManager
                                                     $set('transactions', $tx);
                                                     $set('logs_nonce', ($get('logs_nonce') ?? 0) + 1);
                                                 })
-                                            ),
+                                            ), 
 
                                         // ⬆️ ─── END Repeater
+                                       
 
+                                    ]), //─── End Tab ─────────────────────────────────────────── */
 
-
-
-
-
-                                        // ⬇️ ─── Section: Installments Log (PREVIEW en vivo con el estado del form)
-                                        /* Section::make('Installments Log')
-                                            ->schema([
-                                                View::make('partials.transaction-logs-grid')
-                                                    ->reactive()
-                                                    // 🟡 Reconcilia el DOM únicamente cuando cambia el nonce
-                                                    ->key(fn (Get $get) => ['wire:key' => 'logs-grid-'.$get('logs_nonce')])
-                                                    ->viewData(function (Get $get, $record) {
-                                                        // toques para reactividad
-                                                        $touchTx  = $get('transactions');
-                                                        $touchNce = $get('logs_nonce');
-
-                                                        $docId = $record?->id ?? $get('id');
-                                                        if (! $docId) return ['rows' => collect()];
-
-                                                        // 🟡 Tomar el estado actual del repeater
-                                                        $stateTx   = collect($get('transactions') ?? []);
-
-                                                        // 🟡 Solo transacciones PERSISTIDAS que siguen presentes en el formulario
-                                                        $persisted = $stateTx->filter(fn ($it) => !empty($it['id']))->values();
-
-                                                        // 🟡 Mapa de índice preferente desde el estado (respeta reordenamiento antes de guardar)
-                                                        $indexByTxnIdFromState = $persisted->mapWithKeys(
-                                                            fn ($it) => [$it['id'] => (int)($it['index'] ?? 0)]
-                                                        );
-
-                                                        // ===== A) LOGS REALES DESDE BD PERO SOLO DE LOS IDs QUE SIGUEN EN EL FORM =====
-                                                        $rowsPersisted = collect();
-                                                        if ($persisted->isNotEmpty()) {
-                                                            $keptIds = $persisted->pluck('id');
-
-                                                            $rowsPersisted = \App\Models\TransactionLog::with(['deduction', 'fromPartner', 'toPartner'])
-                                                                ->whereIn('transaction_id', $keptIds)   // 🟡 clave: ya NO usamos “todas las del doc”
-                                                                ->get()
-                                                                ->map(function ($log) use ($indexByTxnIdFromState) {
-                                                                    return [
-                                                                        'inst_index'  => (int) ($indexByTxnIdFromState[$log->transaction_id] ?? 0),
-                                                                        'index'       => (int) ($log->index ?? 0),
-                                                                        'deduction'   => $log->deduction?->concept ?? '-',
-                                                                        'from'        => $log->fromPartner?->short_name ?? '-',
-                                                                        'to'          => $log->toPartner?->short_name ?? '-',
-                                                                        'exch_rate'   => $log->exch_rate,
-                                                                        'gross'       => $log->gross_amount,
-                                                                        'discount'    => $log->commission_discount,
-                                                                        'banking_fee' => $log->banking_fee,
-                                                                        'net'         => $log->net_amount,
-                                                                        'status'      => $log->status,
-                                                                    ];
-                                                                });
-                                                        }
-
-                                                        // 2) PREVIEW solo para filas NUEVAS y COMPLETAS del estado del form
-                                                        $stateTx = collect($get('transactions') ?? []);
-
-                                                        $txForPreview = $stateTx
-                                                            ->filter(fn ($r) => empty($r['id'])) // solo las nuevas
-                                                            ->map(function ($t) {
-                                                                $prop = $t['proportion'] ?? null;
-                                                                $prop = is_string($prop) ? floatval(str_replace(',', '', $prop)) : $prop;
-                                                                if ($prop !== null && $prop > 1) $prop = $prop / 100;
-                                                                return [
-                                                                    'index'      => (int)($t['index'] ?? 0),
-                                                                    'proportion' => $prop,
-                                                                    'exch_rate'  => isset($t['exch_rate']) ? (float) $t['exch_rate'] : null,
-                                                                    'due_date'   => $t['due_date'] ?? null,
-                                                                ];
-                                                            })
-                                                            // 🟡 Consideramos “completa” solo con fecha real Y-m-d y rate > 0
-                                                            ->filter(function ($r) {
-                                                                $dueOk = is_string($r['due_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $r['due_date']);
-                                                                return $r['proportion'] !== null && ($r['exch_rate'] ?? 0) > 0 && $dueOk;
-                                                            })
-                                                            ->sortBy('index')
-                                                            ->values()
-                                                            ->all();
-
-                                                        $rowsPreview = collect();
-                                                        if (!empty($txForPreview)) {
-                                                            $schemeIds = collect($get('schemes') ?? [])->pluck('cscheme_id')->filter()->values()->all();
-                                                            $insureds   = $get('insureds') ?? [];
-
-                                                            $rowsPreview = app(\App\Services\TransactionLogBuilder::class)
-                                                                ->previewForOperativeDocState($docId, [
-                                                                    'transactions' => $txForPreview,
-                                                                    'schemes'      => $schemeIds,
-                                                                    'insureds'     => $insureds,
-                                                                ])
-                                                                ->map(fn ($r) => array_merge($r, ['status' => 'preview']));
-                                                        }
-
-                                                        // 3) Combinamos BD + PREVIEW completo, ordenado
-                                                        $rows = $rowsPersisted
-                                                            ->concat($rowsPreview ?? collect())
-                                                            ->sortBy([['inst_index','asc'], ['index','asc']])
-                                                            ->values();
-
-                                                        return ['rows' => $rows];
-                                                    }),
-                                            ])
-                                            ->compact()
-                                            ->extraAttributes([
-                                                'class' => 'rounded-xl ring-1 ring-gray-950/10 dark:ring-white/10 bg-transparent p-4',
-                                            ]),  // ⬆️ ─── END Section*/
-
-                                    ]), //─── End Tab ─────────────────────────────────────────── 
-
-
-
-
-
-
- // 👉 BOTÓN para abrir el recurso de logs filtrado por este documento
-                                        /* Actions::make([
-                                            FormAction::make('rebuildLogs')
-                                                ->label('Build / Update logs')
-                                                ->icon('heroicon-m-arrow-path')
-                                                ->color('primary')
-                                                ->requiresConfirmation()
-                                                ->modalHeading('Rebuild transaction logs')
-                                                ->modalDescription('This will (re)build the transaction logs from the current Placement Schemes and Installments. Operational fields (sent/received/banking fee/status) will be preserved when possible.')
-                                                ->modalSubmitActionLabel('Run')
-                                                ->action(function (Get $get) {
-                                                    $docId = $get('id');
-
-                                                    if (! $docId) {
-                                                        Notification::make()
-                                                            ->title('No document ID found')
-                                                            ->danger()
-                                                            ->send();
-                                                        return;
-                                                    }
-
-                                                    try {
-                                                        $affected = app(TransactionLogBuilder::class)->rebuildForOperativeDoc($docId);
-
-                                                        Notification::make()
-                                                            ->title("Transaction logs built/updated ({$affected})")
-                                                            ->success()
-                                                            ->send();
-                                                    } catch (\Throwable $e) {
-                                                        report($e);
-
-                                                        Notification::make()
-                                                            ->title('Could not rebuild logs')
-                                                            ->body($e->getMessage())
-                                                            ->danger()
-                                                            ->send();
-                                                    }
-                                                }),
-                                        ]), */
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                      
-                            
+                           
                         ])
                         ->columnSpanFull(), //─────── END tabs ──────────────────────────────────
                                                      
@@ -1002,30 +836,7 @@ class OperativeDocsRelationManager extends RelationManager
             
 
                 
-                // ───────── BOTÓN SOBRE OVERVIEW ─────────────────────────
-               /*  Actions::make([
-                    FormAction::make('viewOverview')
-                        ->label('View')
-                        ->icon('heroicon-o-eye')
-                        ->color('primary')
-                        ->modalHeading('Overview')
-                        ->modalWidth('7xl')
-                        // Solo botón Cancel
-                        ->modalSubmitAction(false)
-                        // El form del modal solo contiene la misma vista reutilizable
-                        ->form([
-                            static::makeOperativeDocOverviewView(), // 👈 misma vista del trait
-                        ])
-                        ->action(fn () => null),
-                ])
-                    ->columnSpanFull()
-                    ->extraAttributes([
-                        'class' => 'flex justify-end mb-2',
-                    ]), */
-                // ───────── FIN BOTÓN SOBRE OVERVIEW ─────────────────────
-                
-                //Con esto, al dar clic en **View** se abre un modal con tu **Overview completo** (misma vista y cálculos), y el usuario solo tiene el botón **Cancel** para cerrarlo.
-
+               
 
 
 
@@ -1621,6 +1432,13 @@ class OperativeDocsRelationManager extends RelationManager
             ]),
         ]) */
         
+            Action::make('addTransaction')
+                ->label('Add transaction')
+                ->icon('heroicon-o-plus-circle')
+                ->url(fn ($record) => \App\Filament\Resources\TransactionResource::getUrl('create', [
+                    'op_document_id' => $record->id, // 👈 el operative_doc id (tu "document code")
+                ]))
+                ->openUrlInNewTab(false),
 
             Tables\Actions\EditAction::make('edit')
                 ->label('Edit')

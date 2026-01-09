@@ -5,46 +5,67 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class TransactionLog extends Model
 {
-    //
     use SoftDeletes;
 
     protected $table = 'transaction_logs';
 
-    /** 🟢 Declaración correcta para IDs tipo string */
     protected $primaryKey = 'id';
-    public $incrementing = false;     // 👈 ID no es autoincremental
-    protected $keyType = 'string';    // 👈 ID es string (varchar)
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'transaction_id',   // 👈 clave que enlaza con transactions.remmitance_code
+        'id',
+        'transaction_id',
         'index',
         'deduction_type',
         'from_entity',
         'to_entity',
         'sent_date',
         'received_date',
+
         'exch_rate',
+        'proportion',
+        'commission_percentage',
         'gross_amount',
-        'commission_discount',
+
+        // ❌ NO incluir (son GENERATED):
+        // 'gross_amount_calc',
+        // 'commission_discount',
+        // 'net_amount',
+
         'banking_fee',
-        'net_amount',
-        'status',
+        'evidence_path',
     ];
 
     protected $casts = [
-        'sent_date'      => 'date',
-        'received_date'  => 'date',
-        'exch_rate'      => 'decimal:6',
-        'gross_amount'   => 'decimal:2',
+        'sent_date'     => 'date',
+        'received_date' => 'date',
+
+        'exch_rate'              => 'decimal:6',
+        'proportion'             => 'decimal:6',
+        'commission_percentage'  => 'decimal:6',
+
+        'gross_amount'      => 'decimal:2',
+        'gross_amount_calc' => 'decimal:2',
         'commission_discount' => 'decimal:2',
-        'banking_fee'    => 'decimal:2',
-        'net_amount'     => 'decimal:2',
+        'banking_fee'       => 'decimal:2',
+        'net_amount'        => 'decimal:2',
+        'status' => 'string',
     ];
 
-    // ✅ inversa, también por código
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            if (blank($model->id)) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
+
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(Transaction::class, 'transaction_id');
@@ -64,6 +85,4 @@ class TransactionLog extends Model
     {
         return $this->belongsTo(Partner::class, 'to_entity', 'id');
     }
-
-
 }

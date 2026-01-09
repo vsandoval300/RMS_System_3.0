@@ -10,43 +10,125 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Support\RawJs;
 
 class LogsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'logs';  // 👈 nombre de la relación en el modelo Transaction
+    protected static string $relationship = 'logs';
+    protected static ?string $title = 'Transaction Lifecycle';
 
-    protected static ?string $title = 'Transaction Logs'; // 👈 título visible en el tab
+    // ✅ Bloquea crear logs manualmente
+    public function canCreate(): bool
+    {
+        return false;
+    }
+
+    // ✅ Bloquea borrar (si quieres)
+    public function canDelete($record): bool
+    {
+        return false;
+    }
 
     public function form(Form $form): Form
     {
         return $form->schema([
-            TextInput::make('transaction_id')
-                ->label('Transaction Id')
-                ->required()
-                ->maxLength(50), 
+            Section::make()
+                ->columns(6)
+                ->schema([
+                    TextInput::make('index')
+                        ->numeric()
+                        ->disabled()            // ✅ siempre
+                        ->dehydrated(false)
+                        ->columnSpan(1),
 
-            TextInput::make('index')
-                ->numeric(),
+                    TextInput::make('transaction_id')
+                        ->label('Transaction Id')
+                        ->disabled()            // ✅ siempre
+                        ->dehydrated(false)
+                        ->columnSpan(3),
 
-            TextInput::make('deduction_type')
-                ->maxLength(50),
+                    Select::make('deduction_type')
+                        ->label('Deduction type')
+                        ->relationship('deduction', 'concept')
+                        ->searchable()
+                        ->preload()
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->columnSpan(2),
 
-            TextInput::make('from_entity')
-                ->maxLength(100),
+                    Select::make('from_entity')
+                        ->label('From entity')
+                        ->relationship('fromPartner', 'short_name')
+                        ->searchable()
+                        ->preload()
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->columnSpan(3),
 
-            TextInput::make('to_entity')
-                ->maxLength(100),
+                    Select::make('to_entity')
+                        ->label('To entity')
+                        ->relationship('toPartner', 'short_name')
+                        ->searchable()
+                        ->preload()
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->columnSpan(3),
+                ]),
 
-            DatePicker::make('sent_date'),
-            DatePicker::make('received_date'),
+            Section::make()
+                ->columns(2)
+                ->schema([
+                    DatePicker::make('sent_date'),
+                    DatePicker::make('received_date'),
+                ]),
 
-            TextInput::make('exch_rate')->numeric(),
-            TextInput::make('gross_amount')->numeric(),
-            TextInput::make('commission_discount')->numeric(),
-            TextInput::make('banking_fee')->numeric(),
-            TextInput::make('net_amount')->numeric(),
-            
-            TextInput::make('status')->maxLength(20),
+            Section::make()
+                ->columns(2)
+                ->schema([
+                    TextInput::make('exch_rate')->numeric(),
+                    TextInput::make('status')
+                        ->maxLength(30)
+                        ->disabled()
+                        ->dehydrated(false),
+                ]),
+
+            Section::make()
+                ->columns(4)
+                ->schema([
+                    TextInput::make('gross_amount')
+                        ->label('Gross amount')
+                        ->required()
+                        ->mask(RawJs::make('$money($input, ".", ",", 2)'))
+                        ->dehydrateStateUsing(fn ($state) =>
+                            $state === null || $state === '' ? null : (float) str_replace(',', '', (string) $state)
+                        ),
+
+                    TextInput::make('gross_amount_calc')
+                        ->label('Gross amount calc')
+                        ->disabled()
+                        ->dehydrated(false),
+
+                    TextInput::make('commission_discount')
+                        ->label('Commission discount')
+                        ->disabled()
+                        ->dehydrated(false),
+
+                    TextInput::make('banking_fee')
+                        ->label('Banking fee')
+                        ->required()
+                        ->mask(RawJs::make('$money($input, ".", ",", 2)'))
+                        ->dehydrateStateUsing(fn ($state) =>
+                            $state === null || $state === '' ? null : (float) str_replace(',', '', (string) $state)
+                        ),
+
+                    // ✅ net_amount es storedAs(...) → no editable
+                    TextInput::make('net_amount')
+                        ->label('Net amount')
+                        ->disabled()
+                        ->dehydrated(false),
+                ]),
         ]);
     }
 
@@ -56,19 +138,16 @@ class LogsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('index')->sortable(),
 
-                // 1) Mostrar el concepto de la deducción
                 TextColumn::make('deduction.concept')
                     ->label('Deduction')
                     ->sortable()
                     ->searchable(),
 
-                // 2) Mostrar el short_name del partner origen
                 TextColumn::make('fromPartner.short_name')
                     ->label('From Partner')
                     ->sortable()
                     ->searchable(),
 
-                // 3) Mostrar el short_name del partner destino
                 TextColumn::make('toPartner.short_name')
                     ->label('To Partner')
                     ->sortable()
@@ -78,21 +157,21 @@ class LogsRelationManager extends RelationManager
                 TextColumn::make('received_date')->date(),
                 TextColumn::make('exch_rate')->numeric(decimalPlaces: 5),
                 TextColumn::make('gross_amount')->numeric(2),
+                TextColumn::make('gross_amount_calc')->numeric(2),
+                TextColumn::make('commission_discount')->label('Discount')->numeric(2),
+                TextColumn::make('banking_fee')->numeric(2),
                 TextColumn::make('net_amount')->numeric(2),
                 TextColumn::make('status')->badge(),
             ])
             ->defaultSort('index', 'asc')
-            ->filters([])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                // ✅ NO CreateAction
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                //Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                // ✅ NO DeleteBulkAction
             ]);
     }
-
 }

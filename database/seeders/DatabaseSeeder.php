@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\region;
 use App\Models\sub_region;
 use App\Models\country;
+use App\Models\Transaction;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -22,12 +23,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+         Transaction::$autoBuildLogs = false;
         // User::factory(10)->create();
 
         /*User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]); */
+        try {
         $this->call([
             
             //Operative Tables 
@@ -112,7 +115,7 @@ class DatabaseSeeder extends Seeder
             //=============================================
             //FILES FOR CELL-MAYAB
             //=============================================
-              /*  BusinessesCellMayabSeeder::class, //1
+               BusinessesCellMayabSeeder::class, //1
                LiabilityStructureCellMayabSeeder::class, //2
             //Files for Placement Schemes==================
                CschemeCellMayabSeeder::class, //6
@@ -123,7 +126,7 @@ class DatabaseSeeder extends Seeder
                BusinessDocInsuredsCellMayabSeeder::class, //Insureds
                BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
                TransactionsCellMayabSeeder::class, //Transactions
-               TransactionsLogCellMayabSeeder::class, //TransactionLogs */
+               TransactionsLogCellMayabSeeder::class, //TransactionLogs 
             
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
@@ -225,5 +228,8 @@ class DatabaseSeeder extends Seeder
         \Illuminate\Support\Facades\Artisan::call('permission:cache-reset');
         $this->command?->info('Permissions cache reset.');
 
-    }
+      } finally {
+         Transaction::$autoBuildLogs = true;
+      }
+   }
 }
