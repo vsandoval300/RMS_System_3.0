@@ -29,14 +29,20 @@ use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Support\Enums\VerticalAlignment;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\View;
 use Filament\Forms\Components\Hidden;
+
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Grid;
+
+
+use Filament\Infolists\Components\RepeatableEntry;
+use Illuminate\Support\Facades\Storage;
+
+
+
 
 
 class TransactionResource extends Resource
@@ -113,36 +119,36 @@ public static function form(Form $form): Form
                         ->schema([
                             // ───── Columna 1: Document ─────
                             Select::make('op_document_id')
-    ->label('Document')
-    ->placeholder('Select document.')
-    ->relationship('operativeDoc', 'id')
-    ->searchable()
-    ->preload()
-    ->optionsLimit(10000)
-    ->required()
-    ->live()
-    ->columnSpan(2)
-    ->default(fn () => request()->query('op_document_id'))
+                                ->label('Document')
+                                ->placeholder('Select document.')
+                                ->relationship('operativeDoc', 'id')
+                                ->searchable()
+                                ->preload()
+                                ->optionsLimit(10000)
+                                ->required()
+                                ->live()
+                                ->columnSpan(2)
+                                ->default(fn () => request()->query('op_document_id'))
 
-    // ✅ Cuando viene precargado, simula que el usuario lo seleccionó
-    ->afterStateHydrated(function (Select $component, $state, ?Transaction $record) {
-        if ($record?->exists) {
-            return;
-        }
+                                // ✅ Cuando viene precargado, simula que el usuario lo seleccionó
+                                ->afterStateHydrated(function (Select $component, $state, ?Transaction $record) {
+                                    if ($record?->exists) {
+                                        return;
+                                    }
 
-        if (blank($state)) {
-            return;
-        }
+                                    if (blank($state)) {
+                                        return;
+                                    }
 
-        // 🔥 Esto dispara tu afterStateUpdated y por ende applyDocumentDefaults()
-        $component->callAfterStateUpdated();
-    })
+                                    // 🔥 Esto dispara tu afterStateUpdated y por ende applyDocumentDefaults()
+                                    $component->callAfterStateUpdated();
+                                })
 
-    // ✅ Cuando el usuario selecciona manualmente
-    ->afterStateUpdated(function ($state, Set $set, Get $get, ?Transaction $record) {
-        if ($record?->exists) return;
-        static::applyDocumentDefaults($state, $get, $set);
-    }),
+                                // ✅ Cuando el usuario selecciona manualmente
+                                ->afterStateUpdated(function ($state, Set $set, Get $get, ?Transaction $record) {
+                                    if ($record?->exists) return;
+                                    static::applyDocumentDefaults($state, $get, $set);
+                                }),
 
 
 
@@ -162,29 +168,29 @@ public static function form(Form $form): Form
                                 ->dehydrated()
                                 ->columnSpan(1)
                                 ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
-        if ($record?->exists) return;
+                                    if ($record?->exists) return;
 
-        // Solo si viene documento precargado y el index está vacío
-        $docId = $get('op_document_id');
-        if (blank($state) && filled($docId)) {
-            $set('index', Transaction::where('op_document_id', $docId)->count() + 1);
-        }
-    }),
+                                    // Solo si viene documento precargado y el index está vacío
+                                    $docId = $get('op_document_id');
+                                    if (blank($state) && filled($docId)) {
+                                        $set('index', Transaction::where('op_document_id', $docId)->count() + 1);
+                                    }
+                                }),
 
-                            // ───── Columna 4: Id ─────
-                            TextInput::make('id')
-                                ->label('Id transaction')
-                                ->disabled()
-                                ->dehydrated()
-                                ->columnSpan(2)
-                                ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
-        if ($record?->exists) return;
+                                                        // ───── Columna 4: Id ─────
+                                                        TextInput::make('id')
+                                                            ->label('Id transaction')
+                                                            ->disabled()
+                                                            ->dehydrated()
+                                                            ->columnSpan(2)
+                                                            ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
+                                    if ($record?->exists) return;
 
-        $docId = $get('op_document_id');
-        if (blank($state) && filled($docId)) {
-            $set('id', (string) Str::uuid());
-        }
-    }),
+                                    $docId = $get('op_document_id');
+                                    if (blank($state) && filled($docId)) {
+                                        $set('id', (string) Str::uuid());
+                                    }
+                                }),
                         ]),
 
                     Section::make()
@@ -217,10 +223,12 @@ public static function form(Form $form): Form
                                 ->dehydrated()
                                 ->columnSpan(1),
 
-                            // ───── Columna 2: Vacía ─────
-                            Placeholder::make('spacer')
-                                ->label(' ')
-                                ->content(' ')
+                            DatePicker::make('due_date')
+                                ->label('Due Date')
+                                ->required()
+                                //->native(false) // opcional pero ayuda en muchos casos
+                                ->live()        // 👈 importante
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set))
                                 ->columnSpan(1),
 
                             Select::make('remmitance_code')
@@ -284,16 +292,19 @@ public static function form(Form $form): Form
                                 ->content(' ')
                                 ->columnSpan(1),
 
-                            DatePicker::make('due_date')
-                                ->label('Due Date')
-                                ->required()
-                                //->native(false) // opcional pero ayuda en muchos casos
-                                ->live()        // 👈 importante
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set))
+                            // ───── Columna 2: Vacía ─────
+                            Placeholder::make('spacer')
+                                ->label(' ')
+                                ->content(' ')
                                 ->columnSpan(1),
+
+                           
                         ]),
                 ])
                 ->columns(2),
+
+
+             
 
             // ✅✅✅ [NEW] SECCIÓN CON TABLA PREVIEW (readonly)
             Section::make('Transaction Lifecycle')
@@ -540,6 +551,7 @@ public static function infolist(Infolist $infolist): Infolist
             ])
             ->maxWidth('8xl')
             ->collapsible(),
+
     ]);
 }
 
@@ -667,6 +679,8 @@ public static function infolist(Infolist $infolist): Infolist
     {
         return [
             RelationManagers\LogsRelationManager::class,
+            RelationManagers\SupportsRelationManager::class,
+            
         ];
     }
 

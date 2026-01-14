@@ -67,7 +67,7 @@ class OperativeDocsRelationManager extends RelationManager
             'docType',
             'business',
             'schemes.costScheme.costNodexes', 
-            'transactions',
+            //'transactions',
         ]);
     }
 
@@ -376,6 +376,12 @@ class OperativeDocsRelationManager extends RelationManager
                                             ->label('Placement Schemes')
                                             ->live()
                                             ->relationship('schemes')
+
+                                            // ✅ OBLIGATORIO: al menos 1 fila
+                                            ->required()
+                                            ->minItems(1)
+                                            ->defaultItems(1)
+
                                             ->schema([
                                                 Select::make('cscheme_id')
                                                     ->label('Placement Scheme')
@@ -404,8 +410,9 @@ class OperativeDocsRelationManager extends RelationManager
                                             ])
                                             ->columns(1)
                                             ->defaultItems(0)
-                                            ->addActionLabel('Agregar esquema de colocación')
+                                            ->addActionLabel('Add placement scheme')
                                             ->reorderable(false)
+
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 // 👇 Este callback permite que se refresque el resumen en vivo
                                                 $set('schemes', $state);
@@ -427,6 +434,12 @@ class OperativeDocsRelationManager extends RelationManager
                                                 Repeater::make('insureds')
                                                     ->label('Insureds')
                                                     ->relationship()
+
+                                                    // ✅ OBLIGATORIO: al menos 1 insured
+                                                    ->required()
+                                                    ->minItems(1)
+                                                    ->defaultItems(1)
+
                                                     ->schema([
                                                         Select::make('company_id')
                                                             ->label('Company')
@@ -435,14 +448,6 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->required()
                                                             ->searchable()
                                                             ->columnSpan(4),
-
-                                                        /* Select::make('cscheme_id')
-                                                            ->label('Placement scheme')
-                                                            ->relationship('costScheme', 'id')
-                                                            ->preload()
-                                                            ->required()
-                                                            ->searchable()
-                                                            ->columnSpan(3), */
 
                                                         Select::make('cscheme_id')
                                                             ->label('Placement scheme')
@@ -1384,7 +1389,7 @@ class OperativeDocsRelationManager extends RelationManager
                 })
                 
             // ⬇️ NUEVO: reconstruir logs tras guardar y commitear
-                ->after(function ($record, array $data) {
+                /* ->after(function ($record, array $data) {
                     DB::afterCommit(function () use ($record) {
                         try {
                             $affected = app(TransactionLogBuilder::class)
@@ -1404,7 +1409,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 ->send();
                         }
                     });
-                }),
+                }), */
 
 
             /* Tables\Actions\Action::make('close')
@@ -1434,6 +1439,8 @@ class OperativeDocsRelationManager extends RelationManager
         
             Action::make('addTransaction')
                 ->label('Add transaction')
+                ->color('primary')
+                ->outlined()
                 ->icon('heroicon-o-plus-circle')
                 ->url(fn ($record) => \App\Filament\Resources\TransactionResource::getUrl('create', [
                     'op_document_id' => $record->id, // 👈 el operative_doc id (tu "document code")
@@ -1443,9 +1450,9 @@ class OperativeDocsRelationManager extends RelationManager
             Tables\Actions\EditAction::make('edit')
                 ->label('Edit')
                 ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id )
-                ->modalWidth('7xl')
+                ->modalWidth('7xl'),
                 // ⬇️ NUEVO: reconstruir logs tras guardar y commitear
-                ->after(function ($record, array $data) {
+                /* ->after(function ($record, array $data) {
                     DB::afterCommit(function () use ($record) {
                         try {
                             $affected = app(TransactionLogBuilder::class)
@@ -1465,7 +1472,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 ->send();
                         }
                     });
-                }),
+                }), */
 
             Tables\Actions\DeleteAction::make(),
         ]),

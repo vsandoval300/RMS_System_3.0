@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->engine('InnoDB');
-            $table->char('id', 36)->primary(); // UUID como string
+            //$table->engine('InnoDB');
+            $table->uuid('id')->primary(); // UUID como string
 
             $table->integer('index'); 
             $table->float('proportion');

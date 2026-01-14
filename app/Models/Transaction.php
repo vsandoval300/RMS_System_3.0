@@ -11,24 +11,23 @@ use App\Models\Traits\HasAuditLogs;
 use Illuminate\Support\Facades\DB;
 use App\Models\OperativeDoc;
 use App\Models\TransactionLog;
-use App\Models\CostNodex; // ajusta al nombre real
 use App\Services\TransactionLogsPreviewService;
 
 class Transaction extends Model
 {
-    //
-    
     use SoftDeletes, HasAuditLogs;
 
     public static bool $autoBuildLogs = true;
+
     /* ---------------------------------------------------
      |  Tabla y PK
      ---------------------------------------------------*/
     protected $table      = 'transactions';
     protected $primaryKey = 'id';
-    public    $incrementing = false;          // PK no autoincremental
-    protected $keyType      = 'string';       // PK tipo string
 
+    // ✅ UUID en Eloquent se maneja como string
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'id',
@@ -41,29 +40,26 @@ class Transaction extends Model
         'transaction_type_id',
         'transaction_status_id',
     ];
-    
+
     protected $casts = [
-        'due_date' => 'datetime',
-        'proportion' => 'decimal:6',
-        'exch_rate' => 'decimal:6',
+        'due_date'    => 'date',
+        'proportion'  => 'decimal:6',
+        'exch_rate'   => 'decimal:10',
     ];
-    
+
     /* --------------------------------------------------
      |  belongsTo
      --------------------------------------------------*/
     public function type(): BelongsTo
     {
-        // FK: transactions.transaction_type_id → transaction_types.id
         return $this->belongsTo(TransactionType::class, 'transaction_type_id');
     }
 
     public function status(): BelongsTo
     {
-        // FK: transactions.transaction_status_id → transaction_statuses.id
         return $this->belongsTo(TransactionStatus::class, 'transaction_status_id');
     }
 
-    // (Extra, por tu contexto previo)
     public function operativeDoc(): BelongsTo
     {
         return $this->belongsTo(OperativeDoc::class, 'op_document_id');
@@ -74,31 +70,28 @@ class Transaction extends Model
         return $this->belongsTo(RemmitanceCode::class, 'remmitance_code', 'remmitance_code');
     }
 
-
     /* --------------------------------------------------
      |  hasMany
      --------------------------------------------------*/
     public function logs(): HasMany
     {
-        // Enlaza por código: transaction_logs.transaction_code → transactions.remmitance_code
         return $this->hasMany(TransactionLog::class, 'transaction_id');
     }
 
-
-    /**
-     * Queremos que los logs aparezcan en el Business (como los demás).
-     */
-    protected function getAuditOwnerModel(): Model
+    public function supports(): HasMany
     {
-        return $this->operativeDoc?->business
-            ?? $this->operativeDoc
-            ?? $this;
+        return $this->hasMany(TransactionSupport::class, 'transaction_id');
     }
 
-    /**
-     * Cómo se va a ver el identificador en el event:
-     * p.ej. "Updated Transaction 2025-1MO054-001-01"
-     */
+
+    /* --------------------------------------------------
+     |  Audit helpers
+     --------------------------------------------------*/
+    protected function getAuditOwnerModel(): Model
+    {
+        return $this;
+    }
+
     protected function getAuditLabelIdentifier(): ?string
     {
         $docId = $this->operativeDoc?->id;
@@ -110,97 +103,115 @@ class Transaction extends Model
         return parent::getAuditLabelIdentifier();
     }
 
-    
+    public function auditLabel(): string
+    {
+        // Reutiliza tu lógica actual
+        $docId = $this->operativeDoc?->id;
 
-        protected static function booted()
-        {
-            static::creating(function ($model) {
-                // UUID
-                if (! $model->getKey()) {
+        if ($docId && $this->index) {
+            return "{$docId}-TX" . str_pad((string) $this->index, 2, '0', STR_PAD_LEFT);
+        }
+
+        // fallback
+        return (string) $this->id;
+    }
+
+    /* --------------------------------------------------
+     |  Booted
+     --------------------------------------------------*/
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            // ✅ UUID
+            if (! $model->getKey()) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            } else {
+                $exists = self::withTrashed()->whereKey($model->getKey())->exists();
+                if ($exists) {
                     $model->{$model->getKeyName()} = (string) Str::uuid();
-                } else {
-                    $exists = self::withTrashed()->whereKey($model->getKey())->exists();
-                    if ($exists) {
-                        $model->{$model->getKeyName()} = (string) Str::uuid();
-                    }
                 }
+            }
 
-                // Index consecutivo por documento
-                if (! $model->index) {
-                    $maxIndex = self::where('op_document_id', $model->op_document_id)->max('index');
-                    $model->index = ($maxIndex ?? 0) + 1;
-                }
+            // ✅ Index consecutivo por documento
+            if (! $model->index) {
+                $maxIndex = self::where('op_document_id', $model->op_document_id)->max('index');
+                $model->index = ($maxIndex ?? 0) + 1;
+            }
 
-                // Defaults
-                $model->transaction_type_id   ??= 1;
-                $model->transaction_status_id ??= 1;
-                $model->remmitance_code       ??= null;
-            });
+            // ✅ Defaults
+            $model->transaction_type_id   ??= 1;
+            $model->transaction_status_id ??= 1; // Pending
+            $model->remmitance_code       ??= null;
+        });
 
-            /**
-             * ✅ DUEÑO de la lógica: al crear Transaction → generar TransactionLogs
-             */
-            static::created(function (self $tx) {
+        /**
+         * ✅ Crear logs al crear Transaction
+         */
+        static::created(function (self $tx) {
+            if (! static::$autoBuildLogs) {
+                return;
+            }
 
-                if (! static::$autoBuildLogs) {
+            DB::transaction(function () use ($tx) {
+                TransactionLog::where('transaction_id', $tx->id)->forceDelete();
+
+                // ✅ IMPORTANTE: NO castear a float aquí (pierde precisión antes de tiempo)
+                $rows = app(TransactionLogsPreviewService::class)->build(
+                    opDocumentId: (string) $tx->op_document_id,
+                    typeId: (int) $tx->transaction_type_id,
+                    proportion: (string) $tx->proportion,
+                    exchRate: (string) $tx->exch_rate,
+                    remittanceCode: $tx->remmitance_code,
+                    dueDate: $tx->due_date,
+                );
+
+                if (empty($rows)) {
                     return;
                 }
 
-                DB::transaction(function () use ($tx) {
-                    TransactionLog::where('transaction_id', $tx->id)->forceDelete();
+                $now = now();
 
-                    $rows = app(TransactionLogsPreviewService::class)->build(
-                        opDocumentId: (string) $tx->op_document_id,
-                        typeId: (int) $tx->transaction_type_id,
-                        proportion: (float) $tx->proportion,
-                        exchRate: (float) $tx->exch_rate,
-                        remittanceCode: $tx->remmitance_code,
-                        dueDate: $tx->due_date,
-                    );
+                $payload = collect($rows)->map(function (array $row) use ($tx, $now) {
+                    return [
+                        'id'             => (string) Str::uuid(),
+                        'transaction_id' => $tx->id,
+                        'index'          => (int) ($row['index'] ?? 1),
 
-                    if (empty($rows)) {
-                        return;
-                    }
+                        'deduction_type' => (int) ($row['deduction_id'] ?? $row['deduction_type'] ?? 1),
+                        'from_entity'    => (int) ($row['from_entity'] ?? 0),
+                        'to_entity'      => (int) ($row['to_entity'] ?? 0),
 
-                    $now = now();
+                        'sent_date'      => null,
+                        'received_date'  => null,
 
-                    $payload = collect($rows)->map(function (array $row) use ($tx, $now) {
-                        return [
-                            'id'             => (string) Str::uuid(),
-                            'transaction_id' => $tx->id,
-                            'index'          => (int) ($row['index'] ?? 1),
-                            'deduction_type' => (int) ($row['deduction_id'] ?? $row['deduction_type'] ?? 1),
-                            'from_entity'    => (int) ($row['from_entity'] ?? 0),
-                            'to_entity'      => (int) ($row['to_entity'] ?? 0),
-                            'sent_date'      => null,
-                            'received_date'  => null,
-                            'exch_rate'      => (float) $tx->exch_rate,
-                            'proportion'     => (float) $tx->proportion,
-                            'commission_percentage' => (string) ($row['commission_percentage'] ?? 0),
-                            'gross_amount'   => (float) ($row['gross_amount'] ?? 0),
-                            'banking_fee'    => 0,
-                            'created_at'     => $now,
-                            'updated_at'     => $now,
-                        ];
-                    })->all();
+                        // ✅ Guardar sin perder decimales: manda strings
+                        'exch_rate'      => (string) ($row['exchange_rate'] ?? $tx->exch_rate),
+                        'proportion'     => (string) ($row['proportion'] ?? $tx->proportion),
 
-                    TransactionLog::insert($payload);
+                        // ✅ ya viene del nodo por step (service)
+                        'commission_percentage' => (string) ($row['commission_percentage'] ?? 0),
+
+                        'gross_amount'   => (string) ($row['gross_amount'] ?? 0),
+                        'banking_fee'    => 0,
+
+                        'created_at'     => $now,
+                        'updated_at'     => $now,
+                    ];
+                })->all();
+
+                TransactionLog::insert($payload);
+            });
+        });
+
+        static::deleted(function (self $model) {
+            self::where('op_document_id', $model->op_document_id)
+                ->orderBy('index')
+                ->get()
+                ->values()
+                ->each(function ($record, $key) {
+                    $record->index = $key + 1;
+                    $record->saveQuietly();
                 });
-            });
-
-            static::deleted(function ($model) {
-                self::where('op_document_id', $model->op_document_id)
-                    ->orderBy('index')
-                    ->get()
-                    ->values()
-                    ->each(function ($record, $key) {
-                        $record->index = $key + 1;
-                        $record->saveQuietly();
-                    });
-            });
-        }
-
-    
+        });
+    }
 }
-
-   

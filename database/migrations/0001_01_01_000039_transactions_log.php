@@ -10,12 +10,10 @@ return new class extends Migration
     {
         Schema::create('transaction_logs', function (Blueprint $table) {
 
-            $table->char('id', 36)->primary();
+            $table->uuid('id')->primary();
 
-            $table->char('transaction_id', 36);
-            $table->foreign('transaction_id')
-                ->references('id')->on('transactions')
-                ->onDelete('cascade');
+            $table->uuid('transaction_id');
+            $table->foreign('transaction_id')->references('id')->on('transactions')->cascadeOnDelete();
 
             $table->integer('index');
 

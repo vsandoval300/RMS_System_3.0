@@ -6,34 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-         Schema::create('invoice_transactions', function (Blueprint $table) {
-            $table->engine('InnoDB');
-            $table->char('id', 36)->primary(); // UUID como string
+        Schema::create('invoice_transactions', function (Blueprint $table) {
 
+            $table->uuid('id')->primary();
 
-            $table->char('invoice_id',36); // Cambia a uuid
-            $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
-            
-            $table->char('transaction_code',36); // Cambia a uuid
-            $table->foreign('transaction_code')->references('id')->on('transactions')->onDelete('cascade');
+            // invoices.id es CHAR(36)
+            $table->char('invoice_id', 36);
+            $table->foreign('invoice_id')
+                ->references('id')->on('invoices')
+                ->cascadeOnDelete();
 
-            $table->foreignId('invoice_concept_id')->constrained('invoice_concepts')->cascadeOnDelete();
-            $table->float('percentage'); // se pone el porcentaje de cobro relacionado al PA o el MA
-            $table->float('discount'); // Se usa para registrar si hay algun decuento asociado
-            
+            // transactions.id es UUID
+            $table->uuid('transaction_code');
+            $table->foreign('transaction_code')
+                ->references('id')->on('transactions')
+                ->cascadeOnDelete();
+
+            $table->foreignId('invoice_concept_id')
+                ->constrained('invoice_concepts')
+                ->cascadeOnDelete();
+
+            $table->float('percentage');
+            $table->float('discount');
+
             $table->timestamps();
             $table->softDeletes();
-        }); 
+        });
+
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('invoice_transactions');

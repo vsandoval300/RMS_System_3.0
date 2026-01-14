@@ -73,16 +73,16 @@ class BankAccountsResource extends Resource
 
                             Select::make('currency_id')
                                 ->label('Currency')
-                                //->hiddenLabel()
-                                ->inlineLabel()
-                                ->placeholder('Select currency.') // 👈 Aquí cambias el texto
+                                ->placeholder('Select currency.')
                                 ->relationship(
-                                    name: 'currency',         // ← relación en tu modelo
-                                    titleAttribute: 'name')
+                                    name: 'currency',
+                                    titleAttribute: 'name',
+                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('acronym')
+                                )
                                 ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->acronym} - {$record->name}")
-                                ->searchable()
+                                ->searchable(['name', 'acronym']) // ✅ ahora "usd" sí encuentra
                                 ->preload()
-                                ->optionsLimit(180)
+                                ->optionsLimit(1800)
                                 ->required(),
                                
                             Select::make('intermediary_bank')

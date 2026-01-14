@@ -80,8 +80,8 @@ class UserResource extends Resource
                         ->dehydrated(fn ($state) => filled($state)) // Solo guarda si hay input
                         ->maxLength(255)
                         ->required(fn (string $context): bool => $context === 'create')
-                        ->afterStateHydrated(fn ($component, $state) => $component->state('')) // Oculta valor actual
-                        ->dehydrateStateUsing(fn ($state) => !empty($state) ? Hash::make($state) : null),
+                        ->afterStateHydrated(fn ($component, $state) => $component->state('')), // Oculta valor actual
+                        //->dehydrateStateUsing(fn ($state) => !empty($state) ? Hash::make($state) : null),
 
                     Select::make('department_id')
                         ->label('Department')

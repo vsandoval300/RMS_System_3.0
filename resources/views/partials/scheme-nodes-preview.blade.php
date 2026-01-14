@@ -48,7 +48,7 @@
         </table>
     </div>
 @else
-    <div class="text-sm text-gray-400 italic">Este esquema no tiene nodos definidos.</div>
+    <div class="text-sm text-gray-400 italic">No nodes have been defined for this scheme.</div>
 @endif
 
 

@@ -139,7 +139,7 @@ class TransactionLogsPreviewService
 
                 // ✅ Nuevo: % del nodo (guardar/display sin perder decimales)
                 // Si el usuario capturó 12.345678, aquí debe verse igual
-                'commission_percentage' => (string) ($refNode?->value ?? '0'),
+                'commission_percentage' => (string) $this->toDecimalRate($refNode?->value ?? 0),
 
                 'deduction_id' => $refNode?->deduction?->id,
                 'from_entity'  => $refNode?->partner_source_id ?? $refNode?->partnerSource?->id,
