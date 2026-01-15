@@ -10,27 +10,30 @@
     @else
         <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
             <table class="w-full text-sm">
+                {{-- HEADER --}}
                 <thead
-                    class="bg-gray-50 dark:bg-white/5
-                           text-gray-700 dark:text-gray-300
-                           border-b border-gray-200 dark:border-gray-700"
+                    class="bg-gray-50 text-gray-700
+                           border-b border-gray-200
+                           dark:bg-gray-900 dark:text-white
+                           dark:border-gray-700"
                 >
-                    <tr class="text-left">
-                        <th class="px-3 py-2">#</th>
-                        <th class="px-3 py-2">Index</th>
-                        <th class="px-3 py-2">Proportion</th>
-                        <th class="px-3 py-2">Fx</th>
-                        <th class="px-3 py-2">Concept</th>
-                        <th class="px-3 py-2">Commission %</th>
-                        <th class="px-3 py-2">Source</th>
-                        <th class="px-3 py-2">Destination</th>
-                        <th class="px-3 py-2">Gross amount</th>
-                        <th class="px-3 py-2">Discount</th>
-                        <th class="px-3 py-2">Banking fee</th>
-                        <th class="px-3 py-2">Net amount</th>
+                    <tr class="text-left font-medium">
+                        <th class="px-3 py-2 whitespace-nowrap">#</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Index</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Proportion</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Fx</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Concept</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Commission %</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Source</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Destination</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Gross amount</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Discount</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Banking fee</th>
+                        <th class="px-3 py-2 whitespace-nowrap">Net amount</th>
                     </tr>
                 </thead>
 
+                {{-- BODY --}}
                 <tbody class="divide-y divide-gray-200 dark:divide-white/10">
                     @foreach ($logs as $i => $row)
                         <tr
@@ -38,7 +41,10 @@
                                    hover:bg-gray-50 dark:hover:bg-white/5"
                         >
                             <td class="px-3 py-2">{{ $i + 1 }}</td>
-                            <td class="px-3 py-2">{{ $row['index'] ?? '—' }}</td>
+
+                            <td class="px-3 py-2">
+                                {{ $row['index'] ?? '—' }}
+                            </td>
 
                             <td class="px-3 py-2">
                                 {{ isset($row['proportion'])
@@ -47,8 +53,13 @@
                                 }}
                             </td>
 
-                            <td class="px-3 py-2">{{ $row['exchange_rate'] ?? '—' }}</td>
-                            <td class="px-3 py-2">{{ $row['concept'] ?? '—' }}</td>
+                            <td class="px-3 py-2">
+                                {{ $row['exchange_rate'] ?? '—' }}
+                            </td>
+
+                            <td class="px-3 py-2">
+                                {{ $row['concept'] ?? '—' }}
+                            </td>
 
                             <td class="px-3 py-2">
                                 {{ isset($row['commission_percentage'])
@@ -57,23 +68,40 @@
                                 }}
                             </td>
 
-                            <td class="px-3 py-2">{{ $row['source'] ?? '—' }}</td>
-                            <td class="px-3 py-2">{{ $row['destination'] ?? '—' }}</td>
-
                             <td class="px-3 py-2">
-                                {{ isset($row['gross_amount']) ? number_format((float) $row['gross_amount'], 2) : '—' }}
+                                {{ $row['source'] ?? '—' }}
                             </td>
 
                             <td class="px-3 py-2">
-                                {{ isset($row['discount']) ? number_format((float) $row['discount'], 2) : '—' }}
+                                {{ $row['destination'] ?? '—' }}
                             </td>
 
                             <td class="px-3 py-2">
-                                {{ isset($row['banking_fee']) ? number_format((float) $row['banking_fee'], 2) : '—' }}
+                                {{ isset($row['gross_amount'])
+                                    ? number_format((float) $row['gross_amount'], 2)
+                                    : '—'
+                                }}
                             </td>
 
-                            <td class="px-3 py-2 font-medium">
-                                {{ isset($row['net_amount']) ? number_format((float) $row['net_amount'], 2) : '—' }}
+                            <td class="px-3 py-2">
+                                {{ isset($row['discount'])
+                                    ? number_format((float) $row['discount'], 2)
+                                    : '—'
+                                }}
+                            </td>
+
+                            <td class="px-3 py-2">
+                                {{ isset($row['banking_fee'])
+                                    ? number_format((float) $row['banking_fee'], 2)
+                                    : '—'
+                                }}
+                            </td>
+
+                            <td class="px-3 py-2 font-semibold">
+                                {{ isset($row['net_amount'])
+                                    ? number_format((float) $row['net_amount'], 2)
+                                    : '—'
+                                }}
                             </td>
                         </tr>
                     @endforeach
