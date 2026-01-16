@@ -196,7 +196,7 @@ class DatabaseSeeder extends Seeder
                BusinessesDocsRisikoSeeder::class, //Details
                BusinessDocInsuredsRisikoSeeder::class, //Insureds
                BusinessDocsSchemesRisikoSeeder::class, //Placement Schemes
-               TransactionsRisikoSeeder::class, //Transactions
+               //TransactionsRisikoSeeder::class, //Transactions
                //TransactionsLogRisikoSeeder::class, //TransactionLogs
 
 

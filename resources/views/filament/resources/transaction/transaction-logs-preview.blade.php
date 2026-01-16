@@ -97,7 +97,7 @@
                                 }}
                             </td>
 
-                            <td class="px-3 py-2 font-semibold">
+                            <td class="px-3 py-2">
                                 {{ isset($row['net_amount'])
                                     ? number_format((float) $row['net_amount'], 2)
                                     : '—'

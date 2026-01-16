@@ -16,8 +16,8 @@ return new class extends Migration
             $table->uuid('id')->primary(); // UUID como string
 
             $table->integer('index'); 
-            $table->float('proportion');
-            $table->float('exch_rate');
+            $table->decimal('proportion', 10, 6);
+            $table->decimal('exch_rate', 18, 10);
             $table->date('due_date')->nullable();
 
             // remmitance_code (SET NULL si borran el código maestro)
@@ -34,7 +34,7 @@ return new class extends Migration
             
             $table->foreignId('transaction_type_id')->constrained('transaction_types');
             $table->foreignId('transaction_status_id')->constrained('transaction_statuses');
-    
+            $table->decimal('amount', 18, 2);
             
             $table->timestamps();
             $table->softDeletes();

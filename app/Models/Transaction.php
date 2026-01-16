@@ -39,12 +39,14 @@ class Transaction extends Model
         'op_document_id',
         'transaction_type_id',
         'transaction_status_id',
+        'amount',
     ];
 
     protected $casts = [
         'due_date'    => 'date',
         'proportion'  => 'decimal:6',
         'exch_rate'   => 'decimal:10',
+        'amount'      => 'decimal:2',
     ];
 
     /* --------------------------------------------------
@@ -159,8 +161,8 @@ class Transaction extends Model
                 $rows = app(TransactionLogsPreviewService::class)->build(
                     opDocumentId: (string) $tx->op_document_id,
                     typeId: (int) $tx->transaction_type_id,
-                    proportion: (string) $tx->proportion,
-                    exchRate: (string) $tx->exch_rate,
+                    proportion: (float) $tx->proportion,   
+                    exchRate: (float) $tx->exch_rate, 
                     remittanceCode: $tx->remmitance_code,
                     dueDate: $tx->due_date,
                 );

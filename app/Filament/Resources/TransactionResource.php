@@ -199,6 +199,7 @@ public static function form(Form $form): Form
 
                             Select::make('transaction_type_id')
                                 ->label('Type')
+                                ->placeholder('Select a transaction type')
                                 ->options(
                                     TransactionType::query()
                                         ->orderBy('id')
@@ -251,7 +252,7 @@ public static function form(Form $form): Form
                                 ->label('Proportion')
                                 ->visibleOn('create')   // 👈 solo create
                                 ->dehydrated()
-                                ->placeholder('Enter the transaction proportion (0%–100%).')
+                                ->placeholder('Enter proportion (0%–100%).')
                                 ->suffix('%')
                                 ->required()
                                 ->numeric()
@@ -308,7 +309,7 @@ public static function form(Form $form): Form
 
             // ✅✅✅ [NEW] SECCIÓN CON TABLA PREVIEW (readonly)
             Section::make('Transaction Lifecycle')
-                ->description('Preview of generated transaction logs based on current form values.')
+                ->description('Preview of generated lifecycle records based on current form values.')
                 ->visibleOn('create')
                 ->schema([
                     View::make('filament.resources.transaction.transaction-logs-preview')
