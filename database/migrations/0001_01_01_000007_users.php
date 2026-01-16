@@ -19,14 +19,8 @@ return new class extends Migration
             $table->string('password');
 
             // 🔹 Nuevo: reemplazamos 'team' por 'department_id'
-            $table->foreignId('department_id')
-                ->constrained('departments')
-                ->cascadeOnDelete();
-
-            // 🔹 Nuevo: reemplazamos 'team' por 'department_id'
-          $table->foreignId('position_id')
-                ->constrained('positions')
-                ->cascadeOnDelete();
+            $table->foreignId('department_id')->constrained()->restrictOnDelete();
+            $table->foreignId('position_id')->constrained()->restrictOnDelete();
 
             /* $table->string('surname');//
             $table->string('phone')->nullable();
