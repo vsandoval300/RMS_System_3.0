@@ -950,36 +950,70 @@ class BusinessResource extends Resource
 
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make()
-                    ->label('View')
-                    ->url(fn (Business $record) =>
-                        self::getUrl('view', ['record' => $record])
-                    )
-                    ->icon('heroicon-m-eye'),  // opcional
+                    // ───────── MAIN ─────────
 
-                    // 👇 NUEVA OPCIÓN
+                    Tables\Actions\ViewAction::make()
+                        ->label('View')
+                        ->color('primary')
+                        ->url(fn (Business $record) =>
+                            self::getUrl('view', ['record' => $record])
+                        )
+                        ->icon('heroicon-m-eye'),  // opcional
+
+                    Tables\Actions\EditAction::make()
+                        ->color('primary'),
+                
+
+               
+                    // ───────── UPCOMING ─────────
+
+                    Tables\Actions\Action::make('divider_1')
+                        ->label('')
+                        ->disabled()
+                        ->extraAttributes([
+                            'class' => 'pointer-events-none border-t border-gray-700 my-1',
+                            'style' => 'height: 0; padding: 0; margin: 6px 0;',
+                        ]),
+
                     Tables\Actions\Action::make('technical_result')
-                    ->label('Technical result')
-                    ->icon('heroicon-m-calculator')
-                    ->action(fn () => Notification::make()
+                        ->label('Technical result')
+                        ->icon('heroicon-m-calculator')
+                        //->color('primary')
+                        ->disabled()
+                        ->tooltip('Coming soon.')
+                        ->action(fn () => Notification::make()
                         ->title('Technical result')
                         ->body('This feature is coming soon.')
                         ->info()
                         ->send()),
 
-                    // 👇 NUEVA OPCIÓN: Renewal
+                    
                     Tables\Actions\Action::make('renewal')
                         ->label('Renewal')
                         ->icon('heroicon-m-arrow-path')  // flechas circulares → idea de renovación
+                        //->color('primary')
+                        ->disabled()
+                        ->tooltip('Coming soon.')
                         ->action(fn () => Notification::make()
-                            ->title('Renewal')
-                            ->body('This feature is coming soon.')
-                            ->info()
-                            ->send()),
+                        ->title('Renewal')
+                        ->body('This feature is coming soon.')
+                        ->info()
+                        ->send()),
+                
 
-                    Tables\Actions\EditAction::make(),
+                    // ───────── DANGER ─────────
+
+                    Tables\Actions\Action::make('divider_1')
+                        ->label('')
+                        ->disabled()
+                        ->extraAttributes([
+                            'class' => 'pointer-events-none border-t border-gray-700 my-1',
+                            'style' => 'height: 0; padding: 0; margin: 6px 0;',
+                        ]),
+
                     Tables\Actions\DeleteAction::make(),
                 ])
+                
 
             ])
             ->bulkActions([

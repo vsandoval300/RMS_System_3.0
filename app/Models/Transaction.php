@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\OperativeDoc;
 use App\Models\TransactionLog;
 use App\Services\TransactionLogsPreviewService;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaction extends Model
 {
@@ -83,6 +84,15 @@ class Transaction extends Model
     public function supports(): HasMany
     {
         return $this->hasMany(TransactionSupport::class, 'transaction_id');
+    }
+
+    public function lastLog(): HasOne
+    {
+        return $this->hasOne(TransactionLog::class, 'transaction_id')
+            ->ofMany([
+                'index' => 'max',
+                'created_at' => 'max', // desempate (timestamp sí soporta max)
+            ]);
     }
 
 

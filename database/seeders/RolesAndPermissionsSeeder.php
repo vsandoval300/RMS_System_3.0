@@ -53,6 +53,7 @@ class RolesAndPermissionsSeeder extends Seeder
             return Str::startsWith($perm->name, $userAllowedPrefixes);
         });
         $user->syncPermissions($userPerms->values());
+        $panelUser->syncPermissions($all);
 
         // panel_user: sin permisos (intencional)
 

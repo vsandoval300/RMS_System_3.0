@@ -114,6 +114,6 @@ class UserSeeder extends Seeder
         }
 
         // 5) Otorgar todos los permisos existentes al rol super_admin
-        $superAdmin->syncPermissions(Permission::pluck('name')->toArray());
+        //$superAdmin->syncPermissions(Permission::pluck('name')->toArray());
     }
 }

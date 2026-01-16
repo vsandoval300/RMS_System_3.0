@@ -31,6 +31,7 @@ use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\View;
 use Filament\Forms\Components\Hidden;
+use App\Models\TransactionLog;
 
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
@@ -481,6 +482,26 @@ public static function infolist(Infolist $infolist): Infolist
                                         ->state(fn ($record) => $record->type?->description ?? '—')
                                         ->columnSpan(9),
                                 ]),
+
+                                // Transaction type
+                                /* InfoGrid::make(12)->extraAttributes([
+                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                ])->schema([
+                                    TextEntry::make('amount')
+                                        ->label('')
+                                        ->state('Amount:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('amount')
+                                        ->label('')
+                                        ->state(fn ($record) =>
+                                            filled($record->amount)
+                                                ? number_format((float) $record->amount, 2, '.', ',')
+                                                : '—'
+                                        )
+                                        ->columnSpan(9),
+                                ]), */
                             ]),
 
                         /* ───────────── RIGHT COLUMN ───────────── */
@@ -574,18 +595,35 @@ public static function infolist(Infolist $infolist): Infolist
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with([
-                'type',
-                'status',
-                'operativeDoc.business.reinsurer',
-                'remmitanceCode',
-            ]))
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with([
+                    'type',
+                    'status',
+                    'operativeDoc.business.reinsurer',
+                    'remmitanceCode',
+                ])
+                ->addSelect([
+                    'latest_net_amount' => TransactionLog::query()
+                        ->select('net_amount')
+                        ->whereColumn('transaction_logs.transaction_id', 'transactions.id')
+                        ->orderByDesc('index')
+                        ->limit(1),
+                ])
+            )
             ->columns([
+
+                TextColumn::make('row_number')
+                    ->label('#')
+                    ->alignCenter()
+                    ->state(fn (\Filament\Tables\Contracts\HasTable $livewire, \stdClass $rowLoop) =>
+                        ($livewire->getTableRecordsPerPage() * ($livewire->getTablePage() - 1)) + $rowLoop->iteration
+                    ),
 
                 TextColumn::make('id')
                     ->label('Id transaction')
                     ->copyable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('operativeDoc.business.reinsurer.name')
                     ->label('Reinsurer')
@@ -623,6 +661,11 @@ public static function infolist(Infolist $infolist): Infolist
                     ->sortable()
                     ->searchable(),
 
+                TextColumn::make('latest_net_amount')
+                    ->label('Net amount')
+                    ->numeric(decimalPlaces: 2)
+                    ->sortable(),     
+
                 TextColumn::make('status.transaction_status')
                     ->label('Status')
                     ->badge()
@@ -657,7 +700,6 @@ public static function infolist(Infolist $infolist): Infolist
                     ->label('Reinsurer'),
             ])
 
-
             ->filters([
                 // ...
             ])
@@ -674,7 +716,6 @@ public static function infolist(Infolist $infolist): Infolist
                 ]),
             ]);
     }
-
 
     public static function getRelations(): array
     {

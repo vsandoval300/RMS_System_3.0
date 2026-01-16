@@ -10,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -18,7 +17,6 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 
 
@@ -31,6 +29,7 @@ use Filament\Infolists\Components\ImageEntry;
 
 class DirectorResource extends Resource
 {
+
     protected static ?string $model = Director::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-minus';
@@ -414,10 +413,11 @@ class DirectorResource extends Resource
             ->defaultSort('name', 'asc')
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    // 👉 Hacemos que View NAVEGUE a la página View (que usa el infolist):
-                    Tables\Actions\ViewAction::make(),
-                        //->url(fn ($record) => static::getUrl('view', ['record' => $record]))
-                        //->openUrlInNewTab(false),
+                    Tables\Actions\Action::make('viewPage')
+                        ->label('View')
+                        ->icon('heroicon-m-eye')
+                        ->url(fn ($record) => static::getUrl('view', ['record' => $record]))
+                        ->openUrlInNewTab(false),
 
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),

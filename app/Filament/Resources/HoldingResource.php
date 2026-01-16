@@ -10,8 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use App\Models\Country;
@@ -26,8 +24,11 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
 
+
 class HoldingResource extends Resource
 {
+
+   
     protected static ?string $model = Holding::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-minus';
@@ -258,7 +259,10 @@ class HoldingResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\Action::make('viewPage')
+                        ->label('View')
+                        ->icon('heroicon-m-eye')
+                        ->url(fn ($record) => static::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
