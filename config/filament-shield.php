@@ -46,6 +46,10 @@ return [
             'delete_any',
             'force_delete',
             'force_delete_any',
+            // ✅ custom actions
+            //'technical_result',
+            //'renewal',
+            //'create_transaction'
         ],
 
         'page' => 'page',
@@ -56,7 +60,7 @@ return [
         'pages' => true,
         'widgets' => true,
         'resources' => true,
-        'custom_permissions' => false,
+        'custom_permissions' => true,
     ],
 
     'generator' => [

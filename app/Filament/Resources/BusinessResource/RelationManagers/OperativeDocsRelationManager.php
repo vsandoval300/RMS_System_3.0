@@ -40,6 +40,8 @@ use Filament\Forms\Components\ToggleButtons;
 use App\Models\CostScheme;
 use App\Models\CostNodex;
 use Filament\Tables\Actions\Action;
+use Filament\Facades\Filament;
+
 
 
 class OperativeDocsRelationManager extends RelationManager
@@ -1425,54 +1427,79 @@ class OperativeDocsRelationManager extends RelationManager
             Tables\Actions\ActionGroup::make([
                 Tables\Actions\ViewAction::make('view')
                     ->label('View')
+                    ->color('primary')
                     ->modalHeading(fn ($record) => '📄 Reviewing ' . $record->docType->name .' — '. $record->id )
                     ->modalWidth('7xl'),  
 
-                /* Tables\Actions\EditAction::make('edit')
+                
+                Tables\Actions\EditAction::make('edit')
                     ->label('Edit')
+                    ->color('primary')
                     ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id )
-                    ->modalWidth('6xl'), 
+                    ->modalWidth('7xl'),
 
-                Tables\Actions\DeleteAction::make(),
-            ]),
-        ]) */
-        
+
+                Tables\Actions\Action::make('divider_1')
+                    ->label('')
+                    ->disabled()
+                    ->extraAttributes([
+                        'class' => 'pointer-events-none border-t border-gray-900 my-1',
+                        'style' => 'height: 0; padding: 0; margin: 1px 0;',
+                    ]),
+
+
+
+            
             Action::make('addTransaction')
                 ->label('Add transaction')
                 ->color('primary')
                 ->outlined()
                 ->icon('heroicon-o-plus-circle')
-                ->url(fn ($record) => \App\Filament\Resources\TransactionResource::getUrl('create', [
-                    'op_document_id' => $record->id, // 👈 el operative_doc id (tu "document code")
-                ]))
-                ->openUrlInNewTab(false),
+                ->disabled(function (): bool {
+                    /** @var \App\Models\User|null $user */
+                    $user = Filament::auth()->user();
 
-            Tables\Actions\EditAction::make('edit')
-                ->label('Edit')
-                ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id )
-                ->modalWidth('7xl'),
-                // ⬇️ NUEVO: reconstruir logs tras guardar y commitear
-                /* ->after(function ($record, array $data) {
-                    DB::afterCommit(function () use ($record) {
-                        try {
-                            $affected = app(TransactionLogBuilder::class)
-                                ->rebuildForOperativeDoc($record->id);
+                    return ! ($user?->can('business.add_transaction') ?? false);
+                })
+                ->tooltip(function (): ?string {
+                    /** @var \App\Models\User|null $user */
+                    $user = Filament::auth()->user();
 
-                            Notification::make()
-                                ->title("Transaction logs built/updated ({$affected})")
-                                ->success()
-                                ->send();
-                        } catch (\Throwable $e) {
-                            report($e);
+                    return ($user?->can('business.add_transaction') ?? false)
+                        ? 'Add a transaction to this operative document'
+                        : 'You do not have permission to add transactions.';
+                })
+                ->action(function ($record): void {
+                    /** @var \App\Models\User|null $user */
+                    $user = Filament::auth()->user();
 
-                            Notification::make()
-                                ->title('Could not rebuild logs')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    });
-                }), */
+                    if (! ($user?->can('business.add_transaction') ?? false)) {
+                        Notification::make()
+                            ->title('Permission denied')
+                            ->body('You do not have permission to add transactions.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    redirect()->to(
+                        \App\Filament\Resources\TransactionResource::getUrl('create', [
+                            'op_document_id' => $record->id,
+                        ])
+                    );
+                }),
+
+
+
+            Tables\Actions\Action::make('divider_1')
+                    ->label('')
+                    ->disabled()
+                    ->extraAttributes([
+                        'class' => 'pointer-events-none border-t border-gray-900 my-1',
+                        'style' => 'height: 0; padding: 0; margin: 1px 0;',
+                    ]),
+
 
             Tables\Actions\DeleteAction::make(),
         ]),

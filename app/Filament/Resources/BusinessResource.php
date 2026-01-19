@@ -31,6 +31,8 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page; 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\View as ViewField;
+use Filament\Facades\Filament;
+use App\Models\User;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -506,16 +508,16 @@ class BusinessResource extends Resource
 
 
                             Split::make([
-    TextEntry::make('parent_label')->label('')->state('Parent treaty')
-        ->weight('bold')->alignment('left'),
+                                TextEntry::make('parent_label')->label('')->state('Parent treaty')
+                                    ->weight('bold')->alignment('left'),
 
-    TextEntry::make('parent_value')->label('')
-        ->state(fn ($record) => $record->parent?->treaty_code ?: '—'),
-])
-->columnSpan(4)
-->extraAttributes([
-    'style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);',
-]),
+                                TextEntry::make('parent_value')->label('')
+                                    ->state(fn ($record) => $record->parent?->treaty_code ?: '—'),
+                            ])
+                            ->columnSpan(4)
+                            ->extraAttributes([
+                                'style' => 'gap:1px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.12);',
+                            ]),
 
 
 
@@ -972,33 +974,87 @@ class BusinessResource extends Resource
                         ->disabled()
                         ->extraAttributes([
                             'class' => 'pointer-events-none border-t border-gray-700 my-1',
-                            'style' => 'height: 0; padding: 0; margin: 6px 0;',
+                            'style' => 'height: 0; padding: 0; margin: 3px 0;',
                         ]),
 
-                    Tables\Actions\Action::make('technical_result')
+                    Action::make('technical_result')
                         ->label('Technical result')
                         ->icon('heroicon-m-calculator')
-                        //->color('primary')
-                        ->disabled()
-                        ->tooltip('Coming soon.')
-                        ->action(fn () => Notification::make()
-                        ->title('Technical result')
-                        ->body('This feature is coming soon.')
-                        ->info()
-                        ->send()),
+                        ->color('primary')
+                        ->disabled(function (): bool {
+                            /** @var \App\Models\User|null $user */
+                            $user = Filament::auth()->user();
+
+                            return ! ($user?->can('business.technical_result') ?? false);
+                        })
+                        ->tooltip(function (): string {
+                            /** @var \App\Models\User|null $user */
+                            $user = Filament::auth()->user();
+
+                            return ($user?->can('business.technical_result') ?? false)
+                                ? 'View technical result'
+                                : 'You do not have permission to access Technical Result';
+                        })
+                        ->action(function (): void {
+                            /** @var \App\Models\User|null $user */
+                            $user = Filament::auth()->user();
+
+                            if (! ($user?->can('business.technical_result') ?? false)) {
+                                Notification::make()
+                                    ->title('Permission denied')
+                                    ->body('You do not have permission to access Technical Result.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title('Technical result')
+                                ->body('This feature is coming soon.')
+                                ->info()
+                                ->send();
+                        }),
 
                     
-                    Tables\Actions\Action::make('renewal')
+                    Action::make('renewal')
                         ->label('Renewal')
-                        ->icon('heroicon-m-arrow-path')  // flechas circulares → idea de renovación
-                        //->color('primary')
-                        ->disabled()
-                        ->tooltip('Coming soon.')
-                        ->action(fn () => Notification::make()
-                        ->title('Renewal')
-                        ->body('This feature is coming soon.')
-                        ->info()
-                        ->send()),
+                        ->icon('heroicon-m-arrow-path')
+                        ->color('primary')
+                        ->disabled(function (): bool {
+                            /** @var \App\Models\User|null $user */
+                            $user = Filament::auth()->user();
+
+                            return ! ($user?->can('business.renewal') ?? false);
+                        })
+                        ->tooltip(function (): string {
+                            /** @var \App\Models\User|null $user */
+                            $user = Filament::auth()->user();
+
+                            return ($user?->can('business.renewal') ?? false)
+                                ? 'Renew this business'
+                                : 'You do not have permission to renew this business';
+                        })
+                        ->action(function (): void {
+                            /** @var \App\Models\User|null $user */
+                            $user = Filament::auth()->user();
+
+                            if (! ($user?->can('business.renewal') ?? false)) {
+                                Notification::make()
+                                    ->title('Permission denied')
+                                    ->body('You do not have permission to renew this business.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title('Renewal')
+                                ->body('This feature is coming soon.')
+                                ->info()
+                                ->send();
+                        }),
                 
 
                     // ───────── DANGER ─────────
@@ -1008,7 +1064,7 @@ class BusinessResource extends Resource
                         ->disabled()
                         ->extraAttributes([
                             'class' => 'pointer-events-none border-t border-gray-700 my-1',
-                            'style' => 'height: 0; padding: 0; margin: 6px 0;',
+                            'style' => 'height: 0; padding: 0; margin: 3px 0;',
                         ]),
 
                     Tables\Actions\DeleteAction::make(),

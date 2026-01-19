@@ -12,6 +12,8 @@ use App\Models\OperativeDoc;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
+use Filament\Facades\Filament;
+
 
 class CreateTransaction extends CreateRecord
 {
@@ -21,6 +23,19 @@ class CreateTransaction extends CreateRecord
     {
         return static::getResource()::getUrl('index');
     } */
+
+    protected function authorizeAccess(): void
+    {
+        /** @var \App\Models\User|null $user */
+        $user = Filament::auth()->user();
+
+        abort_unless(
+            $user?->can('business.add_transaction') ?? false,
+            403
+        );
+    }
+
+
 
     protected function getCreatedNotification(): ?Notification
     {
