@@ -17,7 +17,7 @@ class HoldingPolicy
     {
         return $user->can('view_any_holding');
     }
-
+    //
     /**
      * Determine whether the user can view the model.
      */
