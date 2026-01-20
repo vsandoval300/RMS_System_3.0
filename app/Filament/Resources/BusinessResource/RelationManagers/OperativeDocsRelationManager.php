@@ -1475,7 +1475,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                         $data = app(OperativeDocSummaryV2Service::class)->build($record->id);
 
-                        return view('filament.resources.business.Operative-doc-summary_v2', $data);
+                        return view('filament.resources.business.operative-doc-summary_v2', $data);
                     })
                     ->modalFooterActions([
                         \Filament\Actions\Action::make('print')
