@@ -215,11 +215,15 @@ class DatabaseSeeder extends Seeder
         // =========================
         
         $this->call([
-            // === Generar permisos de Shield (en seeder separado y no interactivo)
+            // 1️⃣ Permisos custom de Business (acciones especiales)
+            CustomPermissionsSeeder::class,
+
+            // 2️⃣ Permisos automáticos de Filament Shield
             ShieldGenerateSeeder::class,
-            // === Asignar permisos a roles (tu seeder propio)
+
+            // 3️⃣ Asignación de permisos a roles
             RolesAndPermissionsSeeder::class,
-        ]);
+         ]);
 
         
 

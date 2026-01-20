@@ -41,6 +41,7 @@ use App\Models\CostScheme;
 use App\Models\CostNodex;
 use Filament\Tables\Actions\Action;
 use Filament\Facades\Filament;
+use App\Services\OperativeDocSummaryV2Service;
 
 
 
@@ -866,7 +867,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ])
 
                     ->schema([
-                        View::make('filament.resources.business.operative-doc-summary')
+                        View::make('filament.resources.business.operative-doc-summary_v1')
                             ->extraAttributes([
                                 'class' => 'bg-[#dfe0e2] text-black p-4 rounded-md'
                             ])
@@ -1439,6 +1440,60 @@ class OperativeDocsRelationManager extends RelationManager
                     ->modalWidth('7xl'),
 
 
+                // ──────  PRINT SUMMARY  ─────────────────────────
+                Action::make('printSummaryV2')
+                    ->label('Summary')
+                    ->icon('heroicon-o-printer')
+                    ->color('primary')
+                    ->outlined()
+
+                    ->disabled(function (): bool {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
+
+                        return ! ($user?->can('print_summary_business') ?? false);
+                    })
+                    ->tooltip(function (): ?string {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
+
+                        return ($user?->can('print_summary_business') ?? false)
+                            ? 'Open printable summary'
+                            : 'You do not have permission to print the summary.';
+                    })
+                    ->modalHeading(fn ($record) => "🖨️ Summary — {$record->id}")
+                    ->modalWidth('7xl')
+                    ->modalSubmitAction(false) // quita el botón "Submit" default
+                    ->modalCancelActionLabel('Close')
+
+                    ->modalContent(function ($record) {
+                        $user = Filament::auth()->user();
+                        /** @var \App\Models\User|null $user */
+                        if (! ($user?->can('print_summary_business') ?? false)) {
+                            return new HtmlString('<div class="p-4 text-sm text-gray-500">Permission denied.</div>');
+                        }
+
+                        $data = app(OperativeDocSummaryV2Service::class)->build($record->id);
+
+                        return view('filament.resources.business.Operative-doc-summary_v2', $data);
+                    })
+                    ->modalFooterActions([
+                        \Filament\Actions\Action::make('print')
+                            ->label('Print')
+                            ->icon('heroicon-o-printer')
+                            ->color('primary')
+                            ->extraAttributes([
+                                'x-on:click' => 'window.print()',
+                            ]),
+                    ]),
+
+
+
+
+
+
+
+                // ──────  DIVIDER 1  ─────────────────────────
                 Tables\Actions\Action::make('divider_1')
                     ->label('')
                     ->disabled()
@@ -1449,59 +1504,127 @@ class OperativeDocsRelationManager extends RelationManager
 
 
 
-            
-            Action::make('addTransaction')
-                ->label('Add transaction')
-                ->color('primary')
-                ->outlined()
-                ->icon('heroicon-o-plus-circle')
-                ->disabled(function (): bool {
-                    /** @var \App\Models\User|null $user */
-                    $user = Filament::auth()->user();
+                // ──────  ADD TRANSACTION  ─────────────────────────
+                Action::make('addTransaction')
+                    ->label('Add transaction')
+                    ->color('primary')
+                    ->outlined()
+                    ->icon('heroicon-o-plus-circle')
+                    ->disabled(function (): bool {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
 
-                    return ! ($user?->can('business.add_transaction') ?? false);
-                })
-                ->tooltip(function (): ?string {
-                    /** @var \App\Models\User|null $user */
-                    $user = Filament::auth()->user();
+                        return ! ($user?->can('business.add_transaction') ?? false);
+                    })
+                    ->tooltip(function (): ?string {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
 
-                    return ($user?->can('business.add_transaction') ?? false)
-                        ? 'Add a transaction to this operative document'
-                        : 'You do not have permission to add transactions.';
-                })
-                ->action(function ($record): void {
-                    /** @var \App\Models\User|null $user */
-                    $user = Filament::auth()->user();
+                        return ($user?->can('business.add_transaction') ?? false)
+                            ? 'Add a transaction to this operative document'
+                            : 'You do not have permission to add transactions.';
+                    })
+                    ->action(function ($record): void {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
 
-                    if (! ($user?->can('business.add_transaction') ?? false)) {
-                        Notification::make()
-                            ->title('Permission denied')
-                            ->body('You do not have permission to add transactions.')
-                            ->danger()
-                            ->send();
+                        if (! ($user?->can('business.add_transaction') ?? false)) {
+                            Notification::make()
+                                ->title('Permission denied')
+                                ->body('You do not have permission to add transactions.')
+                                ->danger()
+                                ->send();
 
-                        return;
-                    }
+                            return;
+                        }
 
-                    redirect()->to(
-                        \App\Filament\Resources\TransactionResource::getUrl('create', [
-                            'op_document_id' => $record->id,
-                        ])
-                    );
-                }),
-
-
-
-            Tables\Actions\Action::make('divider_1')
-                    ->label('')
-                    ->disabled()
-                    ->extraAttributes([
-                        'class' => 'pointer-events-none border-t border-gray-900 my-1',
-                        'style' => 'height: 0; padding: 0; margin: 1px 0;',
-                    ]),
+                        redirect()->to(
+                            \App\Filament\Resources\TransactionResource::getUrl('create', [
+                                'op_document_id' => $record->id,
+                            ])
+                        );
+                    }),
 
 
-            Tables\Actions\DeleteAction::make(),
+                // ──────  GO TO TRANSACTIONs  ─────────────────────────
+                Action::make('viewTransactions')
+                    ->label('View transactions')
+                    ->color('primary')
+                    ->outlined()
+                    ->icon('heroicon-o-queue-list')
+                    ->disabled(function (): bool {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
+
+                        return ! ($user?->can('business.view_transactions') ?? false);
+                    })
+                    ->tooltip(function (): ?string {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
+
+                        return ($user?->can('business.view_transactions') ?? false)
+                            ? 'Open the transactions list filtered by this document'
+                            : 'You do not have permission to view transactions.';
+                    })
+                    ->action(function ($record): void {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
+
+                        if (! ($user?->can('business.view_transactions') ?? false)) {
+                            Notification::make()
+                                ->title('Permission denied')
+                                ->body('You do not have permission to view transactions.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        // ✅ AJUSTA: relación/consulta para validar si tiene transacciones
+                        // Opción A (si tienes relación $record->transactions()):
+                        // $hasTx = $record->transactions()->exists();
+
+                        // Opción B (si NO tienes relación y tu FK en transactions es op_document_id):
+                        $hasTx = \App\Models\Transaction::query()
+                            ->where('op_document_id', $record->id) // ✅ AJUSTA nombre FK
+                            ->exists();
+
+                        if (! $hasTx) {
+                            Notification::make()
+                                ->title('No transactions')
+                                ->body('This operative document has no transactions yet.')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        // ✅ Redirige al listado con filtro aplicado (Filament v3)
+                        redirect()->to(
+                            \App\Filament\Resources\TransactionResource::getUrl('index', [
+                                'tableFilters' => [
+                                    'op_document_id' => [
+                                        'value' => $record->id,
+                                    ],
+                                ],
+                            ])
+                        );
+                    }),
+
+
+
+
+                // ──────  DIVIDER 2  ─────────────────────────
+                Tables\Actions\Action::make('divider_1')
+                        ->label('')
+                        ->disabled()
+                        ->extraAttributes([
+                            'class' => 'pointer-events-none border-t border-gray-900 my-1',
+                            'style' => 'height: 0; padding: 0; margin: 1px 0;',
+                        ]),
+
+
+                Tables\Actions\DeleteAction::make(),
         ]),
     ])    
         

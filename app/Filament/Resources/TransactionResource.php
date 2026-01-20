@@ -24,6 +24,7 @@ use Filament\Forms\Components\Placeholder;
 use App\Models\TransactionType;
 use Filament\Support\RawJs;
 use App\Models\OperativeDoc;
+use Filament\Tables\Filters\SelectFilter;
 
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Grid as InfoGrid;
@@ -701,8 +702,13 @@ public static function infolist(Infolist $infolist): Infolist
             ])
 
             ->filters([
-                // ...
+                SelectFilter::make('op_document_id')
+                    ->label('Document')
+                    ->relationship('operativeDoc', 'id') // ✅ AJUSTA: nombre de relación en Transaction
+                    ->searchable()
+                    ->preload(),
             ])
+            
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),

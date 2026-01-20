@@ -337,7 +337,7 @@
                 <th class="px-2 py-1 text-left text-gray-400"></th> 
                 <th class="px-2 py-1 text-right text-gray-400"></th>
                 <th class="px-2 py-1 text-right align-middle font-semibold font-medium" style="color: #100f0d;">Orig. Curr.</th>
-                <th class="px-2 py-1 text-right align-middle font-semibold font-medium" style="color: #100f0d;">US Dollars</th>
+                {{--<th class="px-2 py-1 text-right align-middle font-semibold font-medium" style="color: #100f0d;">US Dollars</th> --}}
             </tr>
 
         </thead>
@@ -347,7 +347,7 @@
             <tr class="bg-gray-900 text-gray-300 font-semibold">
                 <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Gross Underwritten Premium</td>
                 <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="color: #100f0d;">${{ number_format($totalPremiumFts ?? 0, 2) }}</td>
-                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="color: #100f0d;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td>
+                {{-- <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="color: #100f0d;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td> --}}
             </tr>
 
             {{--<tr>
@@ -370,7 +370,7 @@
                     <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Concept</th>
                     <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Value</th>
                     <th class="px-2 py-1 text-right"></th>
-                    <th class="px-2 py-1 text-right"></th>
+                {{-- <th class="px-2 py-1 text-right"></th> --}}
                 </tr>
 
 
@@ -411,7 +411,7 @@
                         <td class="px-2 py-1">{{ $node['deduction'] ?? '-' }}</td>
                         <td class="px-2 py-1 text-right">{{ number_format($node['value'] * 100, 2) }}%</td>
                         <td class="px-2 py-1 text-right">${{ number_format($node['deduction_amount']* -1, 2) }}</td>
-                        <td class="px-2 py-1 text-right">${{ number_format($node['deduction_usd']* -1, 2) }}</td>
+                    {{--    <td class="px-2 py-1 text-right">${{ number_format($node['deduction_usd']* -1, 2) }}</td> --}}
                     </tr>
                 @endforeach
 
@@ -422,7 +422,7 @@
                     </td> 
                     <td class="px-2 py-1 text-right text-gray-300 font-semibold" style="color: #100f0d;">Subtotal:</td>
                     <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($group['subtotal_orig']* -1, 2) }}</td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($group['subtotal_usd']* -1, 2) }}</td>
+                    {{-- <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($group['subtotal_usd']* -1, 2) }}</td> --}}
                 </tr>
 
             @empty
@@ -440,13 +440,13 @@
             <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
                 <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Total Deductions:</td>
                 <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($grandTotalOrig * -1, 2) }}</td>
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($grandTotalUsd * -1, 2) }}</td>
+                {{-- <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($grandTotalUsd * -1, 2) }}</td> --}}
             </tr>
             <tr><td colspan="4" class="py-2"></td></tr>
            <tr class="bg-gray-900 text-gray-300 font-semibold">
                 <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Net Underwritten Premium</td>
                 <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="color: #100f0d;">${{ number_format($totalPremiumFts - $grandTotalOrig?? 0, 2) }}</td>
-                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="color: #100f0d;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td>
+                {{-- <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="color: #100f0d;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td> --}}
             </tr>
         </tbody>
     </table>
@@ -455,7 +455,8 @@
     {{-------------------------------------------------------------------------------}}
     {{-- INSTALLMENTS                                                              --}}
     {{-------------------------------------------------------------------------------}}
-     <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
+    {{--
+    <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
        Installments
     </h4>
 
@@ -508,16 +509,16 @@
                 </tr>
             @endforelse
 
-            {{-- Grand Total row --}}
+            {{-- Grand Total row 
             @if (!empty($transactions))
-                {{-- Fila separadora manual --}}
+                {{-- Fila separadora manual 
                 <tr>
                     <td colspan="6" class="px-0 py-1">
                         <div class="border-t border-gray-600 w-full h-px"></div>
                     </td>
                 </tr>
 
-                {{-- Fila de totales --}}
+                {{-- Fila de totales 
                 <tr class="bg-gray-800 text-gray-300 font-semibold">
                     <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Total:</td>
                     <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">${{ number_format($grandOrig, 2) }}</td>
@@ -527,11 +528,12 @@
 
         </tbody>
     </table>
-
+    --}}
 
     {{-------------------------------------------------------------------------------}}
     {{-- INSTALLMENTS LOGS                                                         --}}
     {{-------------------------------------------------------------------------------}}
+    {{--
      <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
        Installments Log
     </h4>
@@ -614,7 +616,7 @@
                                 {{ $node['partner_short'] ?? $node['partner'] ?? '-' }}
                             </td>
 
-                            {{-- DESTINATION: usa to_entity->short_name si existe, si no cae a partner_short --}}
+                            {{-- DESTINATION: usa to_entity->short_name si existe, si no cae a partner_short 
                             <td class="px-2 py-1 text-center">
                                 {{ $destination }}
                             </td>
@@ -624,7 +626,7 @@
                             </td>
 
                             
-                            {{-- Las demás columnas pueden usar también $logRow si quieres mostrar valores reales cuando existan --}}
+                            {{-- Las demás columnas pueden usar también $logRow si quieres mostrar valores reales cuando existan 
                             <td class="px-2 py-1 text-right">
                                 {{ $grossScaled !== null ? number_format($grossScaled, 2) : '—' }}
                             </td>
@@ -654,7 +656,7 @@
 
 
     </table>
-
+    --}}
 
 
 
