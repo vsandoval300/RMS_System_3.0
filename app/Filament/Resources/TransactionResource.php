@@ -616,9 +616,17 @@ public static function infolist(Infolist $infolist): Infolist
                 TextColumn::make('row_number')
                     ->label('#')
                     ->alignCenter()
-                    ->state(fn (\Filament\Tables\Contracts\HasTable $livewire, \stdClass $rowLoop) =>
-                        ($livewire->getTableRecordsPerPage() * ($livewire->getTablePage() - 1)) + $rowLoop->iteration
-                    ),
+                    ->state(function (\Filament\Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): int {
+                        $perPage = (int) ($livewire->getTableRecordsPerPage() ?? 0);
+                        $page    = (int) ($livewire->getTablePage() ?? 1);
+
+                        // Si por alguna razón perPage llega como 0, evita cálculos raros:
+                        if ($perPage <= 0) {
+                            return (int) $rowLoop->iteration;
+                        }
+
+                        return (($page - 1) * $perPage) + (int) $rowLoop->iteration;
+                    }),
 
                 TextColumn::make('id')
                     ->label('Id transaction')

@@ -379,12 +379,9 @@ class OperativeDocsRelationManager extends RelationManager
                                             ->label('Placement Schemes')
                                             ->live()
                                             ->relationship('schemes')
-
-                                            // ✅ OBLIGATORIO: al menos 1 fila
                                             ->required()
                                             ->minItems(1)
                                             ->defaultItems(1)
-
                                             ->schema([
                                                 Select::make('cscheme_id')
                                                     ->label('Placement Scheme')
@@ -392,34 +389,69 @@ class OperativeDocsRelationManager extends RelationManager
                                                         \App\Models\CostScheme::all()->mapWithKeys(function ($scheme) {
                                                             $shareFormatted = number_format($scheme->share * 100, 2) . '%';
                                                             return [
-                                                                $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}"
+                                                                $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}",
                                                             ];
                                                         })
                                                     )
-
                                                     ->searchable()
                                                     ->preload()
                                                     ->reactive()
-                                                    ->required(),
+                                                    ->required()
+                                                    ->afterStateUpdated(function (callable $get, callable $set) {
+                                                        // ✅ cada vez que cambie un scheme, valida insureds
+                                                        $allowed = collect($get('../../schemes') ?? [])
+                                                            ->pluck('cscheme_id')
+                                                            ->filter()
+                                                            ->unique()
+                                                            ->values()
+                                                            ->all();
+
+                                                        $insureds = collect($get('../../insureds') ?? [])->map(function ($row) use ($allowed) {
+                                                            // si el cscheme del insured ya no existe en schemes, lo limpiamos
+                                                            if (! empty($row['cscheme_id']) && ! in_array($row['cscheme_id'], $allowed, true)) {
+                                                                $row['cscheme_id'] = null;
+                                                            }
+                                                            return $row;
+                                                        })->all();
+
+                                                        $set('../../insureds', $insureds);
+                                                    }),
 
                                                 Group::make()
                                                     ->schema([
                                                         View::make('partials.scheme-nodes-preview')
-                                                        ->viewData(fn ($get) => [
-                                                        'schemeId' => $get('cscheme_id'),
-                                                    ])
-                                                        ->columnSpan('full'),
+                                                            ->viewData(fn ($get) => [
+                                                                'schemeId' => $get('cscheme_id'),
+                                                            ])
+                                                            ->columnSpan('full'),
                                                     ]),
                                             ])
                                             ->columns(1)
                                             ->defaultItems(0)
                                             ->addActionLabel('Add placement scheme')
                                             ->reorderable(false)
+                                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                                // ✅ cuando cambia el arreglo schemes completo (add/remove)
+                                                $allowed = collect($state ?? [])
+                                                    ->pluck('cscheme_id')
+                                                    ->filter()
+                                                    ->unique()
+                                                    ->values()
+                                                    ->all();
 
-                                            ->afterStateUpdated(function ($state, callable $set) {
-                                                // 👇 Este callback permite que se refresque el resumen en vivo
+                                                $insureds = collect($get('../../insureds') ?? [])->map(function ($row) use ($allowed) {
+                                                    if (! empty($row['cscheme_id']) && ! in_array($row['cscheme_id'], $allowed, true)) {
+                                                        $row['cscheme_id'] = null;
+                                                    }
+                                                    return $row;
+                                                })->all();
+
+                                                $set('../../insureds', $insureds);
+
+                                                // si tú ocupas “refrescar” el tab, puedes dejarlo
                                                 $set('schemes', $state);
                                             }),
+
 
                                     ]),
                                 //--- End Tab ----------------------------------------     
@@ -1477,14 +1509,40 @@ class OperativeDocsRelationManager extends RelationManager
 
                         return view('filament.resources.business.operative-doc-summary_v2', $data);
                     })
+                    
                     ->modalFooterActions([
-                        \Filament\Actions\Action::make('print')
+                        Action::make('print')
                             ->label('Print')
                             ->icon('heroicon-o-printer')
                             ->color('primary')
                             ->extraAttributes([
-                                'x-on:click' => 'window.print()',
-                            ]),
+                                'type' => 'button',
+                                'class' => 'no-print', // 👈 AQUÍ
+                            ])
+                            ->alpineClickHandler(function ($record) {
+                                $date = $record->creation_date ?? $record->created_at ?? now();
+
+                                // 👉 31-Dec-2010
+                                $formatted = Carbon::parse($date)->format('d-M-Y');
+
+                                // 👉 Summary_2010-CMY001-001-01_(31-Dec-2010)
+                                $filename = "Summary_{$record->id}_({$formatted})";
+                                $jsFilename = json_encode($filename);
+
+                                return <<<JS
+                                    const oldTitle = document.title;
+                                    document.title = {$jsFilename};
+
+                                    const restore = () => {
+                                        document.title = oldTitle;
+                                        window.removeEventListener('afterprint', restore);
+                                    };
+
+                                    window.addEventListener('afterprint', restore);
+
+                                    window.print();
+                                JS;
+                            }),
                     ]),
 
 

@@ -132,4 +132,10 @@ class CreateTransaction extends CreateRecord
             'op_document_id' => request()->query('op_document_id'), // 👈 aquí llega el id del operative_doc
         ];
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['amount'] ??= 0; // ✅ evita null y cumple NOT NULL
+        return $data;
+    }
 }

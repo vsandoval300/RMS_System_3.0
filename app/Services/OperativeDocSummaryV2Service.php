@@ -25,6 +25,7 @@ class OperativeDocSummaryV2Service
                 'insureds.company.country', // businessdoc_insureds -> company -> country
                 'insureds.coverage',
                 'transactions' => fn ($q) => $q->orderBy('index'),   // installments
+                'transactions.logs' => fn ($q) => $q->orderBy('index'),
                 'transactions.logs.toPartner', // logs + toPartner
             ])
             ->firstOrFail();
@@ -254,6 +255,7 @@ class OperativeDocSummaryV2Service
         $logsByTxn = collect($doc->transactions ?? [])
             ->mapWithKeys(function ($txn) {
                 $rows = collect($txn->logs ?? [])
+                    ->sortBy('index') // ✅ importante
                     ->mapWithKeys(function ($log) {
                         $idx = (int) ($log->index ?? 0);
 
@@ -263,8 +265,13 @@ class OperativeDocSummaryV2Service
                                             ?? $log->toPartner?->name
                                             ?? '-',
                                 'to_full'   => $log->toPartner?->name ?? '-',
-                                'exch_rate' => $log->exch_rate,
-                                'gross'     => $log->gross_amount,
+
+                                // ✅ usa el exch_rate del log si aplica
+                                'exch_rate' => (float) ($log->exch_rate ?? 0),
+
+                                // ✅ usa el “calc” (ya proporcional) si existe
+                                'gross'     => $log->gross_amount_calc ?? $log->gross_amount,
+
                                 'discount'  => $log->commission_discount,
                                 'banking'   => $log->banking_fee,
                                 'net'       => $log->net_amount,

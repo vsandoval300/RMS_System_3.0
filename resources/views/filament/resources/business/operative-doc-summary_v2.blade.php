@@ -1,20 +1,31 @@
-<div class="overflow-y-auto border border-gray-800 rounded p-4 space-y-4" style="max-height: 1200px; background-color: #f1efea; color: #1f262a;font-family: 'Montserrat', sans-serif;">
+{{-- ✅ PRINT ROOT WRAPPER --}}
+{{--<div id="summary-print-root"
+     class="overflow-y-auto border border-gray-800 rounded p-4 space-y-4"
+     style="max-height: 1200px; background-color: #f1efea; color: #1f262a;font-family: 'Montserrat', sans-serif;"
+> --}}
+<div id="summary-print-root"
+     class="border rounded p-4 space-y-4"
+     style="
+        background-color:#f1efea;
+        color:#1f262a;
+        font-family:'Montserrat', sans-serif;
 
-    <head>
-    <!-- Otras etiquetas head dfe0e2-->
+        /* 👇 clave: el reporte usa el alto del viewport */
+        max-height: calc(100vh - 220px);
+        overflow: auto;
+     ">
+
+    {{-- ⚠️ RECOMENDACIÓN: evita <head> dentro del blade.
+         Si lo dejas, al menos que sea @once para no duplicarlo --}}
+    @once
         <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-    </head>
+    @endonce
 
-     {{-- MAIN TITTLE --}}
-    {{-- <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;"> }}
-       <td class="px-2 py-1 text-right font-extrabold text-gray-300 w-1/4"></td>
-        <td class="px-2 py-1 w-1/4">{{ $id ?? '-' }}</td>
-    </h4> --}}
-
-    <h4 class="font-semibold mt-6 mb-4" style="color:#db4a2b;font-size:15px;">
+    {{-- MAIN TITTLE --}}
+    <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size:15px;">
         <span class="px-2 py-1 text-left font-extrabold text-gray-300 w-1/4"></span>
         <span class="px-2 py-1 w-1/4">{{ $id ?? '-' }}</span>
-     </h4>
+    </h4>
     
      {{--CURRENT DATE 
     <div class="text-right text-sm font-medium text-gray-600 mb-2">
@@ -457,7 +468,7 @@
     {{-------------------------------------------------------------------------------}}
     
     <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
-       Installments
+       Transactions
     </h4>
 
 
@@ -530,79 +541,93 @@
     </table>
     
 
-    {{-------------------------------------------------------------------------------}}
-    {{-- INSTALLMENTS LOGS                                                         --}}
-    {{-------------------------------------------------------------------------------}}
-    
-     <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
-       Installments Log
+    {{--============================================================================--}}
+    {{-- INSTALLMENTS LOGS (one table per transaction)                               --}}
+    {{--============================================================================--}}
+
+    <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
+        Transactions Lifecycle
     </h4>
 
+    @php
+        $nodesFlat = collect($groupedCostNodes ?? [])
+            ->flatMap(fn ($g) => $g['nodes'] ?? [])
+            ->sortBy('index')
+            ->values();
 
-     <table class="w-full text-sm border-collapse mt-2">
-        <thead>
-             <tr class="border-b border-gray-600">
-                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">#</th>
-                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Deduction</th>
-                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Source</th>
-                <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Destination</th>
-                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Exchange Rate</th>
-                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Gross Amount</th>
-                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Discount</th>
-                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Banking Fee</th>
-                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Net Amount</th>
-                <th class="px-2 py-1 text-right font-semibold"  style="color: #100f0d;">Status</th>
-             </tr>
-        </thead>
+        $logsByTxn = collect($logsByTxn ?? []);
+        $transactions = collect($transactions ?? []);
+    @endphp
 
-        <tbody>
+    @if ($transactions->isEmpty() || $nodesFlat->isEmpty())
+        <div class="px-2 py-2 text-center text-gray-400">
+            No installments or cost nodes to display
+        </div>
+    @else
+
+        @foreach ($transactions as $tIdx => $txn)
             @php
-                $nodesFlat = collect($groupedCostNodes ?? [])
-                    ->flatMap(fn ($g) => $g['nodes'] ?? [])
-                    ->sortBy('index')
-                    ->values();
+                $txnId = $txn['id'] ?? null;
 
-                $logsByTxn = collect($logsByTxn ?? []); // 👈 viene del viewData
+                // Normaliza proportion para mostrar 55.00% aunque venga 0.55
+                $pRaw = (float) ($txn['proportion'] ?? 0);
+                $pDec = $pRaw > 1 ? $pRaw / 100 : $pRaw;
+                $pPct = $pDec * 100;
+
+                $dueDate  = $txn['due_date'] ?? null;
+                $exchRate = $txn['exch_rate'] ?? null;
+
+                // Logs del installment actual (colección indexada por nodeIndex)
+                $txnLogs = $txnId ? collect($logsByTxn[$txnId] ?? []) : collect();
             @endphp
 
-            @if (empty($transactions) || $nodesFlat->isEmpty())
-                <tr>
-                    <td colspan="10" class="px-2 py-2 text-center text-gray-400">
-                        No installments or cost nodes to display
-                    </td>
-                </tr>
-            @else
-                @foreach (($transactions ?? []) as $tIdx => $txn)
+            {{-- Subtítulo por Installment --}}
+            <div class="mt-4 mb-2 text-sm" style="color:#100f0d;">
+                <span class="font-semibold">Installment {{ $txn['index'] ?? ($tIdx + 1) }}</span>
+                <span class="ml-2 text-gray-500">
+                    (Proportion: {{ number_format($pPct, 2) }}%,
+                    Exch. Rate: {{ $exchRate !== null ? number_format((float)$exchRate, 4) : '-' }},
+                    Due: {{ $dueDate ? \Carbon\Carbon::parse($dueDate)->format('d/m/Y') : '-' }})
+                </span>
+            </div>
+
+            <table class="w-full text-sm border-collapse mt-2">
+                <thead>
+                    <tr class="border-b border-gray-600">
+                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">#</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Deduction</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Source</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d;">Destination</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Exchange Rate</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Gross Amount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Discount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Banking Fee</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Net Amount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
                     @foreach ($nodesFlat as $nIdx => $node)
                         @php
-                            $num       = ($tIdx + 1) . '.' . ($nIdx + 1);
-                            $rate      = isset($txn['exch_rate']) ? (float) $txn['exch_rate'] : null;
+                            // Número 1.1, 1.2 ... 2.1, 2.2 ...
+                            $num = ($tIdx + 1) . '.' . ($nIdx + 1);
 
-                            // match por transacción persistida + índice del log (mismo que el del nodo)
-                            $txnId     = $txn['id'] ?? null;
-                            $nodeIndex = (int)($node['index'] ?? ($nIdx + 1));
-
-                            $logRow    = $txnId ? ($logsByTxn[$txnId][$nodeIndex] ?? null) : null;
+                            $nodeIndex = (int) ($node['index'] ?? ($nIdx + 1));
+                            $logRow    = $txnId ? ($txnLogs[$nodeIndex] ?? null) : null;
 
                             $destination = $logRow['to_short']
-                                            ?? ($node['partner_short'] ?? $node['partner'] ?? '-');
-                        @endphp
-                        
-                        @php
-                            // Normaliza proportion: si viene 50 => 0.5; si ya viene 0.5 => 0.5
-                            $pRaw = (float) ($txn['proportion'] ?? 0);
-                            $prop = $pRaw > 1 ? $pRaw / 100 : $pRaw;
+                                ?? ($node['partner_short'] ?? $node['partner'] ?? '-');
 
-                            // Toma los valores del log (si existen) y escálalos por la proportion
-                            $grossScaled    = isset($logRow['gross'])    ? $logRow['gross']    * $prop : null;
-                            $discountScaled = isset($logRow['discount']) ? $logRow['discount'] * $prop : null;
-                            $bankingScaled  = isset($logRow['banking'])  ? $logRow['banking']  * $prop : null;
+                            $gross    = $logRow['gross'] ?? null;
+                            $discount = $logRow['discount'] ?? null;
+                            $banking  = $logRow['banking'] ?? null;
+                            $net      = $logRow['net'] ?? null;
 
-                            // Si net_amount es columna generada en DB, puedes mostrar:
-                            //   a) el net del registro *prop (vista previa proporcional), o
-                            //   b) el net directo del registro (sin escalar) si prefieres ver el valor real guardado.
-                            // Aquí lo dejamos escalado para ser consistente con las otras columnas:
-                            $netScaled      = isset($logRow['net'])      ? $logRow['net']      * $prop : null;
+                            // mejor tomar la tasa del log si existe, si no cae a la de la transacción
+                            $rate = $logRow['exch_rate'] ?? ($exchRate !== null ? (float) $exchRate : null);
+
+                            $status = $logRow['status'] ?? 'preview';
                         @endphp
 
                         <tr class="bg-gray-800 text-gray-300 border-b border-gray-700">
@@ -616,45 +641,124 @@
                                 {{ $node['partner_short'] ?? $node['partner'] ?? '-' }}
                             </td>
 
-                            {{-- DESTINATION: usa to_entity->short_name si existe, si no cae a partner_short --}}
-                            <td class="px-2 py-1 text-center">
+                            <td class="px-2 py-1 text-left">
                                 {{ $destination }}
                             </td>
 
                             <td class="px-2 py-1 text-right">
-                                {{ $rate !== null ? number_format($rate, 5) : '-' }}
+                                {{ $rate !== null ? number_format((float)$rate, 5) : '-' }}
                             </td>
 
-                            
-                            {{-- Las demás columnas pueden usar también $logRow si quieres mostrar valores reales cuando existan --}}
                             <td class="px-2 py-1 text-right">
-                                {{ $grossScaled !== null ? number_format($grossScaled, 2) : '—' }}
-                            </td>
-                            <td class="px-2 py-1 text-right">
-                                {{ $discountScaled !== null ? number_format($discountScaled, 2) : '—' }}
-                            </td>
-                            <td class="px-2 py-1 text-right">
-                                {{ $bankingScaled !== null ? number_format($bankingScaled, 2) : '—' }}
+                                {{ $gross !== null ? number_format((float)$gross, 2) : '—' }}
                             </td>
 
-
                             <td class="px-2 py-1 text-right">
-                                {{ $netScaled !== null ? number_format($netScaled, 2) : '—' }}
+                                {{ $discount !== null ? number_format((float)$discount, 2) : '—' }}
                             </td>
 
+                            <td class="px-2 py-1 text-right">
+                                {{ $banking !== null ? number_format((float)$banking, 2) : '—' }}
+                            </td>
+
+                            <td class="px-2 py-1 text-right">
+                                {{ $net !== null ? number_format((float)$net, 2) : '—' }}
+                            </td>
 
                             <td class="px-2 py-1 text-right">
                                 <span class="uppercase text-xs tracking-wide">
-                                    {{ $logRow['status'] ?? 'preview' }}
+                                    {{ $status }}
                                 </span>
                             </td>
                         </tr>
                     @endforeach
-                @endforeach
-            @endif
+                </tbody>
+            </table>
+
+            {{-- Separador suave entre tablas --}}
+            <div class="mt-4"></div>
+        @endforeach
+
+    @endif
+
+
+
         </tbody>    
 
 
     </table>
 
 </div>
+
+
+{{-- ✅ PRINT CSS (agregar al final del blade) --}}
+{{-- @once
+    <style>
+        @media print {
+
+            /* =====================================================
+            * 1) IMPRIMIR TODO EL CONTENIDO (sin scroll / sin cortes)
+            * ===================================================== */
+
+            /* Quita límites de altura y scroll del modal Filament */
+            .fi-modal,
+            .fi-modal-window,
+            .fi-modal-content,
+            .fi-modal-body,
+            .fi-modal-content .overflow-y-auto,
+            .fi-modal-content [style*="max-height"],
+            .fi-modal-content [class*="max-h"],
+            .fi-modal-content [class*="overflow-y"],
+            .fi-modal-content [class*="overflow-auto"] {
+                max-height: none !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            /* Wrapper principal del reporte */
+            #summary-print-root {
+                max-height: none !important;
+                height: auto !important;
+                overflow: visible !important;
+                page-break-after: auto !important;
+                background: #fff !important;
+            }
+
+            /* Cualquier wrapper interno con scroll */
+            #summary-print-root .overflow-x-auto,
+            #summary-print-root .overflow-y-auto {
+                overflow: visible !important;
+            }
+
+            /* =====================================================
+            * 2) OCULTAR UI (NO debe salir en el PDF)
+            * ===================================================== */
+
+            /* Botón Print (tu Action con class="no-print") */
+            .no-print {
+                display: none !important;
+            }
+
+            /* Header del modal (título + botón X) */
+            .fi-modal-header,
+            .fi-modal-close-btn,
+            button[aria-label="Close"],
+            .fi-icon-btn[aria-label="Close"] {
+                display: none !important;
+            }
+
+            /* Footer del modal (donde vive el botón Print) */
+            .fi-modal-footer,
+            .fi-modal-footer-actions {
+                display: none !important;
+            }
+
+        }
+
+
+
+
+
+
+    </style>
+@endonce --}}
