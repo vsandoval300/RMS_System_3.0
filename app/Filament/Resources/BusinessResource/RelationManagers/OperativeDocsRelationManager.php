@@ -42,6 +42,9 @@ use App\Models\CostNodex;
 use Filament\Tables\Actions\Action;
 use Filament\Facades\Filament;
 use App\Services\OperativeDocSummaryV2Service;
+use Filament\Forms\Set;
+use Filament\Forms\Components\Actions\Action as HeaderAction;
+use Illuminate\Support\Str;
 
 
 
@@ -81,26 +84,37 @@ class OperativeDocsRelationManager extends RelationManager
     {
         return $form->schema([
 
-
-         Hidden::make('active_panel')
-                ->default('tabs')   // 👈 por defecto Tabs abierto, Summary cerrado
-                ->reactive()
-                ->dehydrated(false) 
-                ->afterStateHydrated(function (Forms\Set $set, $state) {
+                // 🟡 Controla Tabs vs Summary
+                Hidden::make('active_panel')
+                    ->default('tabs')   // 👈 por defecto Tabs abierto, Summary cerrado
+                    ->reactive()
+                    ->dehydrated(false), 
+                /* ->afterStateHydrated(function (Forms\Set $set, $state) {
                         if (blank($state)) $set('active_panel', 'tabs');
-                    }),
-
+                    }), */
+                // 🟢 🔑 VERSIONADOR de Placement Schemes (NO se guarda en BD)
+                Hidden::make('schemes_version')
+                    ->default(fn () => (string) \Illuminate\Support\Str::uuid())
+                    ->reactive()
+                    ->dehydrated(false),
                  
 
                 // ────────  A) SECTION: TABS (colapsable)  ─────────────────────────
-                Section::make('Document Details')
+                /* Section::make('Document Details')
                     ->collapsible()
                     ->collapsed(fn (Get $get) => $get('active_panel') !== 'tabs')
                     
                     ->extraAttributes([
                         'x-on:click.self' => '$wire.set("data.active_panel","tabs"); $wire.set("active_panel","tabs");',
+                    ]) */
+                Section::make('Document Details')
+                    ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'tabs')
+                    ->headerActions([
+                        HeaderAction::make('goSummary')
+                            ->label('Overview')
+                            ->icon('heroicon-o-eye')
+                            ->action(fn (Set $set) => $set('active_panel', 'summary')),
                     ])
-                
                     ->schema([
 
 
@@ -372,191 +386,218 @@ class OperativeDocsRelationManager extends RelationManager
                                 //-------------------------------------------------------    
                                 //🟢 2.-Tab for Placement Schemes.  
                                 //-------------------------------------------------------
-                                Tab::make('Placement Schemes')
-                                    ->icon('heroicon-o-puzzle-piece')
-                                    ->schema([
-                                        Repeater::make('schemes')
-                                            ->label('Placement Schemes')
-                                            ->live()
-                                            ->relationship('schemes')
-                                            ->required()
-                                            ->minItems(1)
-                                            ->defaultItems(1)
-                                            ->schema([
-                                                Select::make('cscheme_id')
-                                                    ->label('Placement Scheme')
-                                                    ->options(
-                                                        \App\Models\CostScheme::all()->mapWithKeys(function ($scheme) {
-                                                            $shareFormatted = number_format($scheme->share * 100, 2) . '%';
-                                                            return [
-                                                                $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}",
-                                                            ];
-                                                        })
-                                                    )
-                                                    ->searchable()
-                                                    ->preload()
-                                                    ->reactive()
-                                                    ->required()
-                                                    ->afterStateUpdated(function (callable $get, callable $set) {
-                                                        // ✅ cada vez que cambie un scheme, valida insureds
-                                                        $allowed = collect($get('../../schemes') ?? [])
-                                                            ->pluck('cscheme_id')
-                                                            ->filter()
-                                                            ->unique()
-                                                            ->values()
-                                                            ->all();
+                                
+Tab::make('Placement Schemes')
+    ->icon('heroicon-o-puzzle-piece')
+    ->schema([
+        Repeater::make('schemes')
+            ->label('Placement Schemes')
+            ->live()
+            ->relationship('schemes')
 
-                                                        $insureds = collect($get('../../insureds') ?? [])->map(function ($row) use ($allowed) {
-                                                            // si el cscheme del insured ya no existe en schemes, lo limpiamos
-                                                            if (! empty($row['cscheme_id']) && ! in_array($row['cscheme_id'], $allowed, true)) {
-                                                                $row['cscheme_id'] = null;
-                                                            }
-                                                            return $row;
-                                                        })->all();
+            ->required()
+            ->minItems(1)
+            ->defaultItems(1)
 
-                                                        $set('../../insureds', $insureds);
-                                                    }),
+            ->schema([
+                Select::make('cscheme_id')
+                    ->label('Placement Scheme')
+                    ->options(
+                        \App\Models\CostScheme::query()
+                            ->orderBy('index')
+                            ->get()
+                            ->mapWithKeys(function ($scheme) {
+                                $shareFormatted = number_format($scheme->share * 100, 2) . '%';
+                                return [
+                                    $scheme->id => "{$scheme->id} · Index: {$scheme->index} · Share: {$shareFormatted} · Type: {$scheme->agreement_type}",
+                                ];
+                            })
+                            ->all()
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->reactive()
+                    ->required(),
 
-                                                Group::make()
-                                                    ->schema([
-                                                        View::make('partials.scheme-nodes-preview')
-                                                            ->viewData(fn ($get) => [
-                                                                'schemeId' => $get('cscheme_id'),
-                                                            ])
-                                                            ->columnSpan('full'),
-                                                    ]),
-                                            ])
-                                            ->columns(1)
-                                            ->defaultItems(0)
-                                            ->addActionLabel('Add placement scheme')
-                                            ->reorderable(false)
-                                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                                // ✅ cuando cambia el arreglo schemes completo (add/remove)
-                                                $allowed = collect($state ?? [])
-                                                    ->pluck('cscheme_id')
-                                                    ->filter()
-                                                    ->unique()
-                                                    ->values()
-                                                    ->all();
+                Group::make()
+                    ->schema([
+                        View::make('partials.scheme-nodes-preview')
+                            ->viewData(fn (Get $get) => [
+                                'schemeId' => $get('cscheme_id'),
+                            ])
+                            ->columnSpan('full'),
+                    ]),
+            ])
+            ->columns(1)
+            ->addActionLabel('Add placement scheme')
+            ->reorderable(false)
 
-                                                $insureds = collect($get('../../insureds') ?? [])->map(function ($row) use ($allowed) {
-                                                    if (! empty($row['cscheme_id']) && ! in_array($row['cscheme_id'], $allowed, true)) {
-                                                        $row['cscheme_id'] = null;
-                                                    }
-                                                    return $row;
-                                                })->all();
+            /**
+             * ✅ Caso BORRAR (basurero) dentro del repeater
+             */
+            ->deleteAction(fn (FormAction $action) => $action->after(function (Set $set, Get $get) {
+                $allowed = collect($get('schemes') ?? [])
+                    ->pluck('cscheme_id')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
 
-                                                $set('../../insureds', $insureds);
+                $insureds = collect($get('insureds') ?? [])
+                    ->map(function ($row) use ($allowed) {
+                        if (! empty($row['cscheme_id']) && ! in_array($row['cscheme_id'], $allowed, true)) {
+                            $row['cscheme_id'] = null;
+                        }
+                        return $row;
+                    })
+                    ->all();
 
-                                                // si tú ocupas “refrescar” el tab, puedes dejarlo
-                                                $set('schemes', $state);
-                                            }),
+                $set('insureds', $insureds);
 
+                // 👇 fuerza refresco visual del select en insureds
+                $set('schemes_version', (string) Str::uuid());
+            }))
 
-                                    ]),
+            /**
+             * ✅ Caso CAMBIOS generales (add/remove/change select)
+             */
+            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                $allowed = collect($state ?? [])
+                    ->pluck('cscheme_id')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                $insureds = collect($get('insureds') ?? [])
+                    ->map(function ($row) use ($allowed) {
+                        if (! empty($row['cscheme_id']) && ! in_array($row['cscheme_id'], $allowed, true)) {
+                            $row['cscheme_id'] = null;
+                        }
+                        return $row;
+                    })
+                    ->all();
+
+                $set('insureds', $insureds);
+
+                // 👇 fuerza refresco visual del select en insureds
+                $set('schemes_version', (string) Str::uuid());
+            }),
+    ]),
                                 //--- End Tab ----------------------------------------     
 
 
                                 //----------------------------------------------------        
                                 //🟡 3.-Tab for Insured Members.  
                                 //----------------------------------------------------
-                                Tab::make('Insured Members')
-                                    ->icon('heroicon-o-users')
-                                    ->schema([
-                                        Grid::make(12)
-                                            ->schema([
+Tab::make('Insured Members')
+    ->icon('heroicon-o-users')
+    ->schema([
+        Grid::make(12)
+            ->schema([
+                Repeater::make('insureds')
+                    ->label('Insureds')
+                    ->relationship()
+                    ->required()
+                    ->minItems(1)
+                    ->defaultItems(1)
+                    ->schema([
+                        Select::make('company_id')
+                            ->label('Company')
+                            ->relationship('company', 'name')
+                            ->preload()
+                            ->required()
+                            ->searchable()
+                            ->columnSpan(4),
 
-                                                Repeater::make('insureds')
-                                                    ->label('Insureds')
-                                                    ->relationship()
+                        Select::make('cscheme_id')
+                            ->label('Placement scheme')
+                            ->options(function (Get $get) {
+                                $ids = collect($get('../../schemes') ?? [])
+                                    ->pluck('cscheme_id')
+                                    ->filter()
+                                    ->unique()
+                                    ->values();
 
-                                                    // ✅ OBLIGATORIO: al menos 1 insured
-                                                    ->required()
-                                                    ->minItems(1)
-                                                    ->defaultItems(1)
+                                return \App\Models\CostScheme::whereIn('id', $ids)
+                                    ->get()
+                                    ->mapWithKeys(fn ($s) => [
+                                        $s->id => "{$s->id} · Index: {$s->index} · Share: " . number_format($s->share * 100, 2) . "%",
+                                    ]);
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live()
+                            ->reactive()
 
-                                                    ->schema([
-                                                        Select::make('company_id')
-                                                            ->label('Company')
-                                                            ->relationship('company', 'name')
-                                                            ->preload()
-                                                            ->required()
-                                                            ->searchable()
-                                                            ->columnSpan(4),
+                            // ✅ ESTA ES LA DIFERENCIA: forzar remount si cambian schemes
+                            ->key(fn (Get $get) => 'insured-cscheme-' . ($get('../../schemes_version') ?? 'v0'))
 
-                                                        Select::make('cscheme_id')
-                                                            ->label('Placement scheme')
-                                                            ->options(function (Get $get) {
-                                                                $ids = collect($get('../../schemes') ?? []) // sube niveles según tu estructura real
-                                                                    ->pluck('cscheme_id')
-                                                                    ->filter()
-                                                                    ->unique()
-                                                                    ->values();
+                            // ✅ al cargar, si el valor ya no es válido, límpialo
+                            ->afterStateHydrated(function (Set $set, Get $get, $state) {
+                                $allowed = collect($get('../../schemes') ?? [])
+                                    ->pluck('cscheme_id')
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->all();
 
-                                                                return \App\Models\CostScheme::whereIn('id', $ids)
-                                                                    ->get()
-                                                                    ->mapWithKeys(fn ($s) => [
-                                                                        $s->id => "{$s->id} · Index: {$s->index} · Share: ".number_format($s->share * 100, 2)."%",
-                                                                    ]);
-                                                            })
-                                                            ->searchable()
-                                                            ->preload()
-                                                            ->required()
-                                                            ->columnSpan(3),
+                                if (! empty($state) && ! in_array($state, $allowed, true)) {
+                                    $set('cscheme_id', null);
+                                }
+                            })
+                            ->columnSpan(3),
 
-                                                        Select::make('coverage_id')
-                                                            ->label('Coverage')
-                                                            ->relationship('coverage', 'name')
-                                                            ->preload()
-                                                            ->required()
-                                                            ->searchable()
-                                                            ->columnSpan(3),
+                        Select::make('coverage_id')
+                            ->label('Coverage')
+                            ->relationship('coverage', 'name')
+                            ->preload()
+                            ->required()
+                            ->searchable()
+                            ->columnSpan(3),
 
-                                                        TextInput::make('premium')
-                                                            ->label('Premium')
-                                                            ->prefix('$')
-                                                            ->type('text')                 // evita <input type="number">
-                                                            ->inputMode('decimal')         // teclado numérico en móvil
-                                                            ->live(onBlur: true)           // o ->live(debounce: 500)
-                                                            ->mask(RawJs::make('$money($input)'))   // solo para visual
-                                                            // NO usar ->stripCharacters(',') aquí
-                                                            // NO usar ->numeric() aquí
-                                                            ->dehydrateStateUsing(fn ($state) => $state !== null
-                                                                ? (float) str_replace([',', '$', ' '], '', $state)
-                                                                : null
-                                                            )
-                                                            ->step(0.01)
-                                                            ->required()
-                                                            ->columnSpan(2),
+                        TextInput::make('premium')
+                            ->label('Premium')
+                            ->prefix('$')
+                            ->type('text')
+                            ->inputMode('decimal')
+                            ->live(onBlur: true)
+                            ->mask(RawJs::make('$money($input)'))
+                            ->dehydrateStateUsing(fn ($state) => $state !== null
+                                ? (float) str_replace([',', '$', ' '], '', $state)
+                                : null
+                            )
+                            ->step(0.01)
+                            ->required()
+                            ->columnSpan(2),
+                    ])
+                    ->reorderableWithButtons()
+                    ->defaultItems(1)
+                    ->columns(12)
+                    ->addActionLabel('Add Insured')
+                    ->columnSpan(12)
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $total = collect($state)
+                            ->pluck('premium')
+                            ->filter()
+                            ->map(fn ($value) => floatval(str_replace(',', '', $value)))
+                            ->sum();
 
-                                                    ])
-                                                    ->reorderableWithButtons()
-                                                    ->defaultItems(1)
-                                                    ->columns(12)
-                                                    ->addActionLabel('Add Insured')
-                                                    //->reorderable(false)
-                                                    ->columnSpan(12) // 👈 fuerza a ocupar todo el ancho
-                                                    ->live()
-                                                    ->afterStateUpdated(function ($state, callable $set) {
-                                                        $total = collect($state)
-                                                            ->pluck('premium')
-                                                            ->filter()
-                                                            ->map(fn ($value) => floatval(str_replace(',', '', $value)))
-                                                            ->sum();
+                        $set('insureds_total', number_format($total, 2, '.', ','));
+                    }),
 
-                                                        $set('insureds_total', number_format($total, 2, '.', ','));
-                                                    }),
+                Placeholder::make('')->columnSpan(9),
 
-                                                Placeholder::make('')->columnSpan(9),
-
-                                                TextInput::make('insureds_total')
-                                                    ->label('Grand Total Premium')
-                                                    ->prefix('$')
-                                                    ->disabled()
-                                                    ->dehydrated(false)
-                                                    ->columnSpan(3), // 👈 mismo span para alinear con el repeater
-                                            ]),
-                                    ]),  
+                TextInput::make('insureds_total')
+                    ->label('Grand Total Premium')
+                    ->prefix('$')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->columnSpan(3),
+            ]),
+    ]),  
                                 //--- End Tab ----------------------------------------          
 
 
@@ -885,7 +926,7 @@ class OperativeDocsRelationManager extends RelationManager
                 // ─────────  C) SECTION: (colapsable)  ───────────────────────────────────────── 
                 // 🟡 SUMMARY Section
                 // ──────────────────────────────────────────────────────────────────────────────
-                Section::make('Overview')
+                /* Section::make('Overview')
                     ->collapsible()
                     ->collapsed(fn (Get $get) => $get('active_panel') !== 'summary')
                     ->extraAttributes([
@@ -896,7 +937,17 @@ class OperativeDocsRelationManager extends RelationManager
                     // ⬇️ Botón para exportar/preview/imprimir
                     ->headerActions([
                         FormAction::make('Export to pdf'),
-                    ])
+                    ]) */
+                    Section::make('Overview')
+                        ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'summary')
+                        ->headerActions([
+                            HeaderAction::make('goTabs')
+                                ->label('Document Details')
+                                ->icon('heroicon-o-document-text')
+                                ->action(fn (Set $set) => $set('active_panel', 'tabs')),
+
+                            
+                        ])
 
                     ->schema([
                         View::make('filament.resources.business.operative-doc-summary_v1')

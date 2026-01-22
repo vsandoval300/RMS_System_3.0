@@ -12,8 +12,8 @@
     </h4> --}}
 
     <h4 class="font-semibold mt-6 mb-4" style="color:#db4a2b;font-size:15px;">
-        <span class="px-2 py-1 text-left font-extrabold text-gray-300 w-1/4"></span>
-        <span class="px-2 py-1 w-1/4">{{ $id ?? '-' }}</span>
+        <span class="py-1 text-left font-extrabold text-gray-300 w-1/4"></span>
+        <span class="py-1 w-1/4">{{ $id ?? '-' }}</span>
      </h4>
     
      {{--CURRENT DATE 
@@ -308,7 +308,7 @@
 
 
 
-    <br>
+    
 
 
     {{-------------------------------------------------------------------------------}}
@@ -659,7 +659,7 @@
     --}}
 
 
-
+<div style="height: 32px;"></div>
 
 
 
