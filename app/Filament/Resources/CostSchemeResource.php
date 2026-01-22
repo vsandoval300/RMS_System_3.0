@@ -146,7 +146,11 @@ class CostSchemeResource extends Resource
                                                         $set('description', 'Each and every loss, subject to the applicable annual aggregate.');
                                                     }
                                                 })
-                                                ->helperText('Please provide a brief description of the document.')
+                                                ->helperText(fn ($record) =>
+                                                    $record
+                                                        ? 'Review and update the description of the placement scheme as needed.'
+                                                        : 'You may keep the default text or replace it with a brief description of the placement scheme.'
+                                                )
                                                 ->columnSpan('full'),
 
                                         ]),

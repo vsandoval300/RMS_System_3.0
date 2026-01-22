@@ -45,6 +45,8 @@ use App\Services\OperativeDocSummaryV2Service;
 use Filament\Forms\Set;
 use Filament\Forms\Components\Actions\Action as HeaderAction;
 use Illuminate\Support\Str;
+use App\Models\Coverage;
+use App\Models\Business;
 
 
 
@@ -97,6 +99,11 @@ class OperativeDocsRelationManager extends RelationManager
                     ->default(fn () => (string) \Illuminate\Support\Str::uuid())
                     ->reactive()
                     ->dehydrated(false),
+
+                Hidden::make('coverage_helper_tick')
+                    ->default((string) Str::uuid())
+                    ->dehydrated(false)
+                    ->reactive(),    
                  
 
                 // ────────  A) SECTION: TABS (colapsable)  ─────────────────────────
@@ -548,26 +555,71 @@ class OperativeDocsRelationManager extends RelationManager
                                                             })
                                                             ->columnSpan(3),
 
-                                                        Select::make('coverage_id')
-                                                            ->label('Coverage')
-                                                            ->options(function ($livewire) {
-                                                                $business = method_exists($livewire, 'getOwnerRecord')
-                                                                    ? $livewire->getOwnerRecord()
-                                                                    : null;
+Select::make('coverage_id')
+    ->label('Coverage')
+    ->options(function ($livewire) {
+        $business = method_exists($livewire, 'getOwnerRecord')
+            ? $livewire->getOwnerRecord()
+            : null;
 
-                                                                if (! $business) return [];
+        if (! $business) return [];
 
-                                                                return $business->liabilityStructures()
-                                                                    ->with('coverage:id,name')
-                                                                    ->get()
-                                                                    ->pluck('coverage.name', 'coverage.id')
-                                                                    ->filter()
-                                                                    ->unique()
-                                                                    ->toArray();
-                                                            })
-                                                            ->searchable()
-                                                            ->required()
-                                                            ->columnSpan(3),
+        return $business->liabilityStructures()
+            ->with('coverage:id,name')
+            ->get()
+            ->pluck('coverage.name', 'coverage.id')
+            ->filter()
+            ->unique()
+            ->toArray();
+    })
+
+    // ✅ Para que, si el valor ya existe pero ya no está en options(),
+    // el select muestre un texto humano y no el id.
+    ->getOptionLabelUsing(function ($value): ?string {
+        if (blank($value)) return null;
+
+        return Coverage::query()->whereKey($value)->value('name')
+            ?? "Coverage #{$value} (removed from Liability Structures)";
+    })
+
+    // ✅ Helper dinámico que NO se rompe por tipos (string/int)
+    ->helperText(function (Get $get, $livewire): string {
+        $default = 'Select a coverage defined in the business Liability Structures.';
+        $coverageId = $get('coverage_id');
+
+        if (blank($coverageId)) return $default;
+
+        $business = method_exists($livewire, 'getOwnerRecord')
+            ? $livewire->getOwnerRecord()
+            : null;
+
+        if (! $business) return $default;
+
+        // Normaliza TODO a string para comparación estricta confiable
+        $coverageId = (string) $coverageId;
+
+        $validIds = $business->liabilityStructures()
+            ->pluck('coverage_id')
+            ->filter()
+            ->unique()
+            ->map(fn ($id) => (string) $id)
+            ->values()
+            ->all();
+
+        if (! in_array($coverageId, $validIds, true)) {
+            return 'This coverage was removed from Liability Structures. Please select a valid coverage.';
+        }
+
+        return $default;
+    })
+
+    // ✅ Importante dentro de repeater para que recalculen closures al cambiar
+    ->reactive()
+    ->live()
+
+    ->searchable()
+    ->required()
+    ->columnSpan(3),
 
 
                                                         TextInput::make('premium')
