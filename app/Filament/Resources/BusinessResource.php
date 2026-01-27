@@ -33,6 +33,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\View as ViewField;
 use Filament\Facades\Filament;
 use App\Models\User;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 
 
 // 👇 IMPORTS para INFOLIST
@@ -670,18 +672,21 @@ class BusinessResource extends Resource
                     ->alignCenter(),
 
                 TextColumn::make('business_code')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('index')
                     ->numeric()
                     ->sortable(),
 
                 TextColumn::make('reinsurance_type')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                     
                 TextColumn::make('reinsurer.short_name')
                     ->label('Reinsurer')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('coverage_acronyms')
                     ->label('Coverages')
@@ -725,11 +730,13 @@ class BusinessResource extends Resource
 
                 TextColumn::make('currency.acronym')
                     ->label('Currency')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('parent_id')
                     ->label('Treaty')
                     ->searchable()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
@@ -765,7 +772,35 @@ class BusinessResource extends Resource
             ])
             
             ->filters([
-                //
+                // 🔹 Filtro por Reinsurer
+                SelectFilter::make('reinsurer_id')
+                    ->label('Reinsurer')
+                    ->relationship('reinsurer', 'short_name')
+                    ->searchable()
+                    ->preload(),
+
+                // 🔹 Filtro por rango de fechas (created_at)
+                Filter::make('created_at')
+                    ->label('Created date')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label('From date'),
+                        DatePicker::make('until')
+                            ->label('To date'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'] ?? null,
+                                fn (Builder $query, $date) =>
+                                    $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['until'] ?? null,
+                                fn (Builder $query, $date) =>
+                                    $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
             ])
 
 
@@ -1071,12 +1106,12 @@ class BusinessResource extends Resource
                 ])
                 
 
-            ])
-            ->bulkActions([
-                    Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
+            //->bulkActions([
+                    //Tables\Actions\BulkActionGroup::make([
+                    //Tables\Actions\DeleteBulkAction::make(),
+             //   ]),
+            //]);
     }
 
     public static function getRelations(): array
