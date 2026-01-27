@@ -47,6 +47,10 @@ use Filament\Forms\Components\Actions\Action as HeaderAction;
 use Illuminate\Support\Str;
 use App\Models\Coverage;
 use App\Models\Business;
+use Filament\Tables\Actions\Action as TableAction;
+use Filament\Actions\StaticAction; 
+use Filament\Forms\Components\Alert;
+
 
 
 
@@ -79,7 +83,23 @@ class OperativeDocsRelationManager extends RelationManager
         ]);
     }
 
+    // ✅ CAMBIO 1: helpers SIN $livewire (StaticAction NO puede resolverlo)
+    protected function getModalActivePanel(): string
+    {
+        // Estado actual del form del modal (Create/Edit)
+        $state = $this->getMountedTableActionForm()?->getRawState() ?? [];
+
+        return (string) ($state['active_panel'] ?? 'tabs');
+    }
+
+    protected function isOverviewActive(): bool
+    {
+        return $this->getModalActivePanel() === 'summary';
+    }
+
+
     
+
 
     // ──────FORM CREATE / EDIT  ─────────────────────────
     public function form(Form $form): Form
@@ -89,6 +109,7 @@ class OperativeDocsRelationManager extends RelationManager
                 // 🟡 Controla Tabs vs Summary
                 Hidden::make('active_panel')
                     ->default('tabs')   // 👈 por defecto Tabs abierto, Summary cerrado
+                    ->live()  
                     ->reactive()
                     ->dehydrated(false), 
                 /* ->afterStateHydrated(function (Forms\Set $set, $state) {
@@ -160,8 +181,9 @@ class OperativeDocsRelationManager extends RelationManager
                                         Section::make('Details')
                                             ->schema([
                                                 Textarea::make('description')
-                                                    ->label('Tittle')
+                                                    ->label('Description')
                                                     ->required()
+                                                    ->dehydratedWhenHidden() 
                                                     //->maxLength(255),
                                                     //->columnSpanFull(),
                                                     ->columnSpan(['md' => 12]),
@@ -172,21 +194,22 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->columns(12)
                                                     ->schema([
                                                         Select::make('operative_doc_type_id')
-                                                                ->label('Document Type')
-                                                                ->relationship(
-                                                                    name: 'docType',
-                                                                    titleAttribute: 'name',
-                                                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('id') // 👈 orden por id
-                                                                )
-                                                                ->getOptionLabelFromRecordUsing(
-                                                                    fn ($record) => "{$record->id} - {$record->name}"
-                                                                )
-                                                                ->required()
-                                                                ->live()
-                                                                ->preload()
-                                                                ->columnSpan(3), 
+                                                            ->label('Document Type')
+                                                            ->relationship(
+                                                                name: 'docType',
+                                                                titleAttribute: 'name',
+                                                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('id') // 👈 orden por id
+                                                            )
+                                                            ->getOptionLabelFromRecordUsing(
+                                                                fn ($record) => "{$record->id} - {$record->name}"
+                                                            )
+                                                            ->required()
+                                                            ->dehydratedWhenHidden() 
+                                                            ->live()
+                                                            ->preload()
+                                                            ->columnSpan(3), 
                                                                 
-                                                        TextInput::make('af_mf')
+                                                        /* TextInput::make('af_mf')
                                                                 ->label(' Service Fee')
                                                                 ->required()
                                                                 ->suffix('%')                    // solo visual
@@ -204,7 +227,33 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 ->dehydrateStateUsing(fn ($state) =>
                                                                     $state === null ? null : round((float) str_replace(',', '', $state) / 100, 6)
                                                                 )
-                                                                ->columnSpan(3),
+                                                                ->columnSpan(3), */
+
+                                                        TextInput::make('af_mf')
+                                                            ->label('Service Fee')
+                                                            ->default(0) // default cero
+                                                            ->required()
+                                                            ->prefix('$')
+                                                            ->type('text')                   
+                                                            ->inputMode('decimal')           
+                                                            ->rules(['numeric', 'min:0'])    // solo positivos, sin máximo
+                                                            ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+
+                                                            // 👉 Mostrar siempre con 2 decimales
+                                                            ->formatStateUsing(fn ($state) =>
+                                                                $state === null ? '0.00' : number_format((float) $state, 2, '.', '')
+                                                            )
+
+                                                            // 👉 Guardar con 2 decimales (sin dividir entre 100)
+                                                            ->dehydrateStateUsing(fn ($state) =>
+                                                                $state === null || $state === ''
+                                                                    ? 0.00
+                                                                    : round((float) str_replace(',', '', $state), 2)
+                                                            )
+
+                                                            ->columnSpan(3),
+
+
                                                     ])
                                                     ->columnSpan(['md' => 12])
                                                     ->compact(),             
@@ -233,6 +282,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         ->label('From')
                                                         ->inlineLabel()
                                                         ->required()
+                                                        ->dehydratedWhenHidden() 
                                                         ->displayFormat('d/m/Y')
                                                         ->native(false)
                                                         ->before('expiration_date')
@@ -259,6 +309,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         ->label('To')
                                                         ->inlineLabel()
                                                         ->required()
+                                                        ->dehydratedWhenHidden() 
                                                         ->displayFormat('d/m/Y')
                                                         ->native(false)
                                                         ->after('inception_date')
@@ -554,72 +605,73 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 }
                                                             })
                                                             ->columnSpan(3),
+                                                            
 
-Select::make('coverage_id')
-    ->label('Coverage')
-    ->options(function ($livewire) {
-        $business = method_exists($livewire, 'getOwnerRecord')
-            ? $livewire->getOwnerRecord()
-            : null;
+                                                        Select::make('coverage_id')
+                                                            ->label('Coverage')
+                                                            ->options(function ($livewire) {
+                                                                $business = method_exists($livewire, 'getOwnerRecord')
+                                                                    ? $livewire->getOwnerRecord()
+                                                                    : null;
 
-        if (! $business) return [];
+                                                                if (! $business) return [];
 
-        return $business->liabilityStructures()
-            ->with('coverage:id,name')
-            ->get()
-            ->pluck('coverage.name', 'coverage.id')
-            ->filter()
-            ->unique()
-            ->toArray();
-    })
+                                                                return $business->liabilityStructures()
+                                                                    ->with('coverage:id,name')
+                                                                    ->get()
+                                                                    ->pluck('coverage.name', 'coverage.id')
+                                                                    ->filter()
+                                                                    ->unique()
+                                                                    ->toArray();
+                                                            })
 
-    // ✅ Para que, si el valor ya existe pero ya no está en options(),
-    // el select muestre un texto humano y no el id.
-    ->getOptionLabelUsing(function ($value): ?string {
-        if (blank($value)) return null;
+                                                            // ✅ Para que, si el valor ya existe pero ya no está en options(),
+                                                            // el select muestre un texto humano y no el id.
+                                                            ->getOptionLabelUsing(function ($value): ?string {
+                                                                if (blank($value)) return null;
 
-        return Coverage::query()->whereKey($value)->value('name')
-            ?? "Coverage #{$value} (removed from Liability Structures)";
-    })
+                                                                return Coverage::query()->whereKey($value)->value('name')
+                                                                    ?? "Coverage #{$value} (removed from Liability Structures)";
+                                                            })
 
-    // ✅ Helper dinámico que NO se rompe por tipos (string/int)
-    ->helperText(function (Get $get, $livewire): string {
-        $default = 'Select a coverage defined in the business Liability Structures.';
-        $coverageId = $get('coverage_id');
+                                                            // ✅ Helper dinámico que NO se rompe por tipos (string/int)
+                                                            ->helperText(function (Get $get, $livewire): string {
+                                                                $default = 'Select a coverage defined in the business Liability Structures.';
+                                                                $coverageId = $get('coverage_id');
 
-        if (blank($coverageId)) return $default;
+                                                                if (blank($coverageId)) return $default;
 
-        $business = method_exists($livewire, 'getOwnerRecord')
-            ? $livewire->getOwnerRecord()
-            : null;
+                                                                $business = method_exists($livewire, 'getOwnerRecord')
+                                                                    ? $livewire->getOwnerRecord()
+                                                                    : null;
 
-        if (! $business) return $default;
+                                                                if (! $business) return $default;
 
-        // Normaliza TODO a string para comparación estricta confiable
-        $coverageId = (string) $coverageId;
+                                                                // Normaliza TODO a string para comparación estricta confiable
+                                                                $coverageId = (string) $coverageId;
 
-        $validIds = $business->liabilityStructures()
-            ->pluck('coverage_id')
-            ->filter()
-            ->unique()
-            ->map(fn ($id) => (string) $id)
-            ->values()
-            ->all();
+                                                                $validIds = $business->liabilityStructures()
+                                                                    ->pluck('coverage_id')
+                                                                    ->filter()
+                                                                    ->unique()
+                                                                    ->map(fn ($id) => (string) $id)
+                                                                    ->values()
+                                                                    ->all();
 
-        if (! in_array($coverageId, $validIds, true)) {
-            return 'This coverage was removed from Liability Structures. Please select a valid coverage.';
-        }
+                                                                if (! in_array($coverageId, $validIds, true)) {
+                                                                    return 'This coverage was removed from Liability Structures. Please select a valid coverage.';
+                                                                }
 
-        return $default;
-    })
+                                                                return $default;
+                                                            })
 
-    // ✅ Importante dentro de repeater para que recalculen closures al cambiar
-    ->reactive()
-    ->live()
+                                                            // ✅ Importante dentro de repeater para que recalculen closures al cambiar
+                                                            ->reactive()
+                                                            ->live()
 
-    ->searchable()
-    ->required()
-    ->columnSpan(3),
+                                                            ->searchable()
+                                                            ->required()
+                                                            ->columnSpan(3),
 
 
                                                         TextInput::make('premium')
@@ -1003,6 +1055,41 @@ Select::make('coverage_id')
                     ->headerActions([
                         FormAction::make('Export to pdf'),
                     ]) */
+
+                    Section::make()
+                    ->schema([
+                        Placeholder::make('')
+                            ->content(new HtmlString('
+                                <div class="space-y-2">
+                                    <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                        Warning
+                                    </h2>
+
+                                    <div class="
+                                        flex items-center gap-2
+                                        text-sm rounded-md p-3 border
+                                        bg-warning-50 border-gray-200
+                                        dark:bg-warning-900/20 dark:border-white/10
+                                    ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-danger-600 dark:text-danger-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 9v2m0 4h.01M10.29 3.86l-8.3 14.38A1 1 0 002.83 20h16.34a1 1 0 00.86-1.76L11.71 3.86a1 1 0 00-1.72 0z" />
+                                        </svg>
+
+                                        <span class="font-bold text-danger-700 dark:text-danger-300">
+                                            Please switch back to &quot;Document Details&quot; to continue.
+                                        </span>
+                                    </div>
+                                </div>
+                            '))
+                            ->extraAttributes([
+                                'class' => '!p-0 !border-0 !bg-transparent',
+                            ]),
+                    ])
+                    ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'summary')
+                    ->hiddenOn('view'),
+                        
+
                     Section::make('Overview')
                         ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'summary')
                         ->headerActions([
@@ -1495,7 +1582,27 @@ Select::make('coverage_id')
                 ->modalSubmitActionLabel('Create')     // 👈 botón principal
                 ->modalCancelActionLabel('Cancel')     // 👈 botón cancelar
 
-             
+                // ✅ CAMBIO 3A-1: Deshabilita el botón CREATE cuando estás en Overview (summary)
+                ->modalSubmitAction(fn (\Filament\Actions\StaticAction $action) => $action
+                    ->disabled(fn () => $this->isOverviewActive())
+                    ->tooltip(fn () => $this->isOverviewActive()
+                        ? 'Go back to "Document Details" to continue.'
+                        : null
+                    )
+                )
+
+                // ✅ CAMBIO 3A-2: tu "seguro" en before, pero SIN $livewire
+                ->before(function (TableAction $action) {
+                    if ($this->isOverviewActive()) {
+                        Notification::make()
+                            ->title('Overview mode')
+                            ->body('Go back to "Document Details" before creating.')
+                            ->warning()
+                            ->send();
+
+                        $action->halt();
+                    }
+                })
 
 
                 ->beforeFormFilled(function ($livewire, $action) {
@@ -1574,25 +1681,49 @@ Select::make('coverage_id')
 
         ->actions([
             Tables\Actions\ActionGroup::make([
+
                 Tables\Actions\ViewAction::make('view')
                     ->label('View')
-                    ->color('primary')
+                    //->color('primary')
                     ->modalHeading(fn ($record) => '📄 Reviewing ' . $record->docType->name .' — '. $record->id )
                     ->modalWidth('7xl'),  
 
                 
                 Tables\Actions\EditAction::make('edit')
                     ->label('Edit')
-                    ->color('primary')
+                    //->color('primary')
                     ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id )
-                    ->modalWidth('7xl'),
+                    ->modalWidth('7xl')
+
+                    // ✅ CAMBIO 3B-1: Deshabilita el botón SAVE CHANGES cuando estás en Overview (summary)
+                    ->modalSubmitAction(fn (\Filament\Actions\StaticAction $action) => $action
+                        ->disabled(fn () => $this->isOverviewActive())
+                        ->tooltip(fn () => $this->isOverviewActive()
+                            ? 'Go back to "Document Details" to continue.'
+                            : null
+                        )
+                    )
+
+                    // ✅ CAMBIO 3B-2: tu "seguro" en before, pero SIN $livewire
+                    ->before(function (TableAction $action) {
+                        if ($this->isOverviewActive()) {
+                            Notification::make()
+                                ->title('Overview mode')
+                                ->body('Go back to "Document Details" before saving.')
+                                ->warning()
+                                ->send();
+
+                            $action->halt();
+                        }
+                    }),
+
 
 
                 // ──────  PRINT SUMMARY  ─────────────────────────
                 Action::make('printSummaryV2')
                     ->label('Summary')
                     ->icon('heroicon-o-printer')
-                    ->color('primary')
+                    //->color('primary')
                     ->outlined()
 
                     ->disabled(function (): bool {
