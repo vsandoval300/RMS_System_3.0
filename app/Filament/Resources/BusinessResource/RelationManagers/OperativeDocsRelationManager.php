@@ -198,16 +198,59 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->relationship(
                                                                 name: 'docType',
                                                                 titleAttribute: 'name',
-                                                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('id') // 👈 orden por id
+                                                                modifyQueryUsing: function (Builder $query) {
+                                                                    $query->orderBy('id');
+
+                                                                    // ✅ CAMBIO: si Slip ya existe, ocultar opción 1 del selector (solo en CREATE)
+                                                                    $record = $this->getMountedTableActionRecord(); // null = create, no-null = edit
+                                                                    if ($record) {
+                                                                        return;
+                                                                    }
+
+                                                                    $business = $this->getOwnerRecord();
+
+                                                                    $slipExists = $business?->operativeDocs()
+                                                                        ->where('operative_doc_type_id', 1)
+                                                                        ->exists() ?? false;
+
+                                                                    if ($slipExists) {
+                                                                        $query->where('id', '!=', 1);
+                                                                    }
+                                                                }
                                                             )
-                                                            ->getOptionLabelFromRecordUsing(
-                                                                fn ($record) => "{$record->id} - {$record->name}"
-                                                            )
+                                                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->id} - {$record->name}")
                                                             ->required()
-                                                            ->dehydratedWhenHidden() 
+                                                            ->dehydrated() // ✅ aunque esté disabled, manda el valor
                                                             ->live()
                                                             ->preload()
-                                                            ->columnSpan(3), 
+                                                            ->columnSpan(3)
+                                                            ->default(function () {
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                return $slipExists ? null : 1;
+                                                            })
+                                                            ->afterStateHydrated(function (Set $set, $record, $state) {
+                                                                if ($record) return; // Edit: no tocar
+
+                                                                if (blank($state)) {
+                                                                    $set('operative_doc_type_id', 1); // ✅ asegura state para que se dehydrate
+                                                                }
+                                                            })
+                                                            ->disabled(function ($record) {
+                                                                if ($record) return true;
+
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                return ! $slipExists; // primer doc => slip bloqueado
+                                                            }), 
                                                                 
                                                         /* TextInput::make('af_mf')
                                                                 ->label(' Service Fee')
@@ -1627,20 +1670,30 @@ class OperativeDocsRelationManager extends RelationManager
 
 
                 })
-                ->mutateFormDataUsing(function (array $data, $livewire) {
-                    if (! isset($data['id'])) {
-                        $business = $livewire->ownerRecord;
 
+
+                ->mutateFormDataUsing(function (array $data, $livewire) {
+                    $business = $livewire->ownerRecord;
+
+                    // ✅ tu lógica actual de generar ID (la dejas igual)
+                    if (! isset($data['id'])) {
                         $lastIndex = $business->operativeDocs()
                             ->withTrashed()
                             ->get()
-                            ->map(function ($doc) {
-                                return intval(substr($doc->id, -2));
-                            })
+                            ->map(fn ($doc) => intval(substr($doc->id, -2)))
                             ->max();
 
                         $newIndex = $lastIndex ? $lastIndex + 1 : 1;
                         $data['id'] = $business->business_code . '-' . str_pad($newIndex, 2, '0', STR_PAD_LEFT);
+                    }
+
+                    // ✅ CAMBIO: si es el primer documento, fuerza Slip = 1
+                    $slipExists = $business->operativeDocs()
+                        ->where('operative_doc_type_id', 1)
+                        ->exists();
+
+                    if (! $slipExists && empty($data['operative_doc_type_id'])) {
+                        $data['operative_doc_type_id'] = 1;
                     }
 
                     return $data;
@@ -1715,9 +1768,17 @@ class OperativeDocsRelationManager extends RelationManager
 
                             $action->halt();
                         }
+                    })
+
+                    ->mutateFormDataUsing(function (array $data, $livewire, $record) {
+
+                        // ✅ CAMBIO A4: si el record es Slip, no permitas cambiar el tipo
+                        if ((int) ($record->operative_doc_type_id ?? 0) === 1) {
+                            $data['operative_doc_type_id'] = 1; // fuerza Slip
+                        }
+
+                        return $data;
                     }),
-
-
 
                 // ──────  PRINT SUMMARY  ─────────────────────────
                 Action::make('printSummaryV2')
