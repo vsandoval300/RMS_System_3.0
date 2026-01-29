@@ -126,6 +126,11 @@ class BusinessResource extends Resource
                                             ->preload() // 👈 fuerza la carga inmediata de los options
                                             ->native(false)
                                             ->placeholder('Select a reinsurer')
+                                            ->helperText(fn ($record) =>
+                                                $record
+                                                    ? 'Edit the value if necessary.'
+                                                    : 'Select the most suitable option.'
+                                            )
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
                                                 if ($operation !== 'create' || !$state) {
@@ -221,6 +226,11 @@ class BusinessResource extends Resource
                                             'Third party' => 'Third party',
                                         ])
                                         ->default('Own')
+                                        ->helperText(fn ($record) =>
+                                            $record
+                                                ? 'Edit the value if necessary.'
+                                                : 'You can keep the default value or choose a different one.'
+                                        )
                                         ->required()
                                         ->searchable()
                                         ->columnSpan(2),   
@@ -235,6 +245,11 @@ class BusinessResource extends Resource
                                             'Strategic' => 'Strategic',
                                         ])
                                         ->default('Strategic')
+                                        ->helperText(fn ($record) =>
+                                            $record
+                                                ? 'Edit the value if necessary.'
+                                                : 'You can keep the default value or choose a different one.'
+                                        )
                                         ->required()
                                         ->searchable()
                                         ->columnSpan(2),  
@@ -259,6 +274,11 @@ class BusinessResource extends Resource
                                             ->searchable()
                                             ->preload()
                                             ->optionsLimit(180)
+                                            ->helperText(fn ($record) =>
+                                                $record
+                                                    ? 'Edit the value if necessary.'
+                                                    : 'Select the most suitable option.'
+                                            )
                                             ->nullable(),
 
                                         Select::make('renewed_from_id')
@@ -267,6 +287,11 @@ class BusinessResource extends Resource
                                             ->relationship('renewedFrom', 'business_code')
                                             ->searchable()
                                             ->preload()
+                                            ->helperText(fn ($record) =>
+                                                $record
+                                                    ? 'Edit the value if necessary.'
+                                                    : 'Select the most suitable option.'
+                                            )
                                             ->nullable(),
                                     ])
                                     ->columnSpan(4),
@@ -299,8 +324,14 @@ class BusinessResource extends Resource
                                 ->placeholder('Select a reinsurer type')
                                 ->options([
                                     'Facultative' => 'Facultative',
+                                    'Treay' => 'Treaty',
                                 ])
                                 ->default('Facultative')   // 👈 valor por defecto
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'You can keep the default value or choose a different one.'
+                                )
                                 //->disabled()
                                 ->required()
                                 ->searchable(),
@@ -316,6 +347,11 @@ class BusinessResource extends Resource
                                     'Non-Life' => 'Non-Life',
                                 ])
                                 ->default('Non-Life')
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'You can keep the default value or choose a different one.'
+                                )
                                 ->required()
                                 ->searchable(),   
                                 
@@ -329,6 +365,11 @@ class BusinessResource extends Resource
                                     'Estimated' => 'Estimated',
                                 ])
                                 ->default('Fixed')
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'You can keep the default value or choose a different one.'
+                                )
                                 ->required()
                                 ->searchable(),   
                                 
@@ -341,7 +382,12 @@ class BusinessResource extends Resource
                                     'Claims occurrence' => 'Claims occurrence',
                                     'Claims made' => 'Claims made',
                                 ])
-                                ->default('Claims occurrence')
+                                //->default('Claims occurrence')
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'Choose an option from the list.'
+                                )
                                 ->required()
                                 ->searchable(),   
                                 
@@ -357,7 +403,12 @@ class BusinessResource extends Resource
                                 ->searchable(['name', 'acronym']) // ✅ ahora "usd" sí encuentra
                                 ->preload()
                                 ->optionsLimit(1800)
-                                ->default(157) 
+                                ->default(157)
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'You can keep the default value or choose a different one.'
+                                ) 
                                 ->required(),    
 
                             Select::make('region_id')
@@ -368,7 +419,12 @@ class BusinessResource extends Resource
                                 ->relationship('Region', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()
-                                ->default(2) 
+                                //->default(2) 
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'Select the most suitable option.'
+                                )
                                 ->required(),  
 
                             Select::make('producer_id')
@@ -381,6 +437,11 @@ class BusinessResource extends Resource
                                 ->preload()
                                 ->optionsLimit(300)
                                 ->default(96)
+                                ->helperText(fn ($record) =>
+                                    $record
+                                        ? 'Edit the value if necessary.'
+                                        : 'You can keep the default value or choose a different one.'
+                                )
                                 ->required(),
                                 
 
