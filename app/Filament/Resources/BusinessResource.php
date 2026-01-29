@@ -329,7 +329,7 @@ class BusinessResource extends Resource
                                 ->placeholder('Select a reinsurer type')
                                 ->options([
                                     'Facultative' => 'Facultative',
-                                    'Treay' => 'Treaty',
+                                    'Treaty' => 'Treaty',
                                 ])
                                 ->default('Facultative')   // 👈 valor por defecto
                                 ->helperText(fn ($record) =>
