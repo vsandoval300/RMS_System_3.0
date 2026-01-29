@@ -55,26 +55,26 @@ class ManagerResource extends Resource
                 ->schema([
 
                     TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->unique(
-                        ignoreRecord: true,
-                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
-                    )
-                    ->live(onBlur: false)
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->extraAttributes(['class' => 'w-1/2'])
-                    ->helperText('First letter of each word will be capitalised.'),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Name')
+                        ->required()
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
+                        ->live(onBlur: false)
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->extraAttributes(['class' => 'w-1/2'])
+                        ->helperText('First letter of each word will be capitalised.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                     Textarea::make('address')
-                    ->label('Address')
-                    ->placeholder('Please provide manager address')
-                    ->required()
-                    ->columnSpan('full')
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state))))
-                    ->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Address')
+                        ->placeholder('Please provide manager address')
+                        ->required()
+                        ->columnSpan('full')
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state))))
+                        ->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('country_id')
                         ->label(__('Country'))

@@ -606,6 +606,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->label('Company')
                                                             ->relationship('company', 'name')
                                                             ->preload()
+                                                            ->optionsLimit(1000)
                                                             ->required()
                                                             ->searchable()
                                                             ->columnSpan(4),

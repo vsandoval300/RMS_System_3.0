@@ -97,7 +97,9 @@ class CoveragesResource extends Resource
                     ->preload(),
                     //->extraAttributes(['class' => 'w-1/2']),
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->collapsible(),
             ]);
     }
 

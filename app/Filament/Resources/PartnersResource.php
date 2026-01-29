@@ -53,68 +53,68 @@ class PartnersResource extends Resource
                 ->schema([
 
                     TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->unique(
-                        ignoreRecord: true,
-                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
-                    )
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
-                    ->helperText('First letter of each word will be capitalised.'),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Name')
+                        ->required()
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->helperText('First letter of each word will be capitalised.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('short_name')
-                    ->label('Short Name')
-                    ->required()
-                    ->unique(
-                        ignoreRecord: true,
-                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
-                    )
-                    //->live(onBlur: false)
-                    ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.'),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Short Name')
+                        ->required()
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
+                        //->live(onBlur: false)
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('short_name', strtoupper($state)))
+                        ->helperText('Only uppercase letters allowed.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                     TextInput::make('acronym')
-                    ->label('Acronym')
-                    ->required()
-                    ->unique(
-                        ignoreRecord: true,
-                        modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
-                    )
-                    //->live(onBlur: false)
-                    ->maxLength(3)
-                    ->rule('regex:/^[A-Z]+$/')
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
-                    ->helperText('Only uppercase letters allowed.'),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Acronym')
+                        ->required()
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
+                        //->live(onBlur: false)
+                        ->maxLength(3)
+                        ->rule('regex:/^[A-Z]+$/')
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
+                        ->helperText('Only uppercase letters allowed.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('partner_types_id')
-                    ->label('Partner Type')
-                    ->relationship('partnerType', 'name') // relación del modelo + campo visible
-                    ->searchable()
-                    ->required()
-                    ->preload(),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Partner Type')
+                        ->relationship('partnerType', 'name') // relación del modelo + campo visible
+                        ->searchable()
+                        ->required()
+                        ->preload(),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                     Select::make('country_id')
-                    ->label('Country')
-                    ->options(function () {
-                        return Country::orderBy('name')
-                            ->get()
-                            ->mapWithKeys(fn ($country) => [
-                                $country->id => "{$country->alpha_3} - {$country->name}"
-                            ]);
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->optionsLimit(300)
-                    ->required()
-                    ->placeholder('Select a country')
-                    ->helperText('Choose the reinsurer\'s country.'),
-                    //->extraAttributes(['class' => 'w-1/2']),
+                        ->label('Country')
+                        ->options(function () {
+                            return Country::orderBy('name')
+                                ->get()
+                                ->mapWithKeys(fn ($country) => [
+                                    $country->id => "{$country->alpha_3} - {$country->name}"
+                                ]);
+                        })
+                        ->searchable()
+                        ->preload()
+                        ->optionsLimit(300)
+                        ->required()
+                        ->placeholder('Select a country')
+                        ->helperText('Choose the reinsurer\'s country.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
 
                 ])
                 ->maxWidth('5xl')

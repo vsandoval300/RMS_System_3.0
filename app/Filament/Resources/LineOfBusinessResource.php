@@ -84,7 +84,9 @@ class LineOfBusinessResource extends Resource
                     ->required()
                     ->searchable(),  
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->collapsible(),
             ]);
     }
 

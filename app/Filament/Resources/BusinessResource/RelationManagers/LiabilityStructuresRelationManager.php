@@ -16,6 +16,10 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+
 
 class LiabilityStructuresRelationManager extends RelationManager
 {
@@ -53,7 +57,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->dehydrated(false) // 👈 evita que se guarde desde el form
                             ->columnSpan(2), */
 
-                        Forms\Components\Select::make('coverage_id')
+                        Select::make('coverage_id')
                             ->label('Coverage')
                             ->options(fn () =>
                                 \App\Models\Coverage::query()
@@ -61,8 +65,28 @@ class LiabilityStructuresRelationManager extends RelationManager
                                     ->pluck('name', 'id')
                             )
                             ->searchable()
+                            ->preload()
+                            ->optionsLimit(300)
                             ->required()
                             ->columnSpan(7),
+
+                        /* Select::make('country_id')
+                            ->label('Country')
+                            ->options(function () {
+                                return Country::orderBy('name')
+                                    ->get()
+                                    ->mapWithKeys(fn ($country) => [
+                                        $country->id => "{$country->alpha_3} - {$country->name}"
+                                    ]);
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(300)
+                            ->required()
+                            ->placeholder('Select a country')
+                            ->helperText('Choose the reinsurer\'s country.'), */
+
+                            
                         
                         Section::make()
                         ->schema([
@@ -91,7 +115,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                     Grid::make(12)
                         
                         ->schema([
-                            Forms\Components\TextInput::make('limit')
+                            TextInput::make('limit')
                                 ->label('Limit')
                                 ->required()
                                 ->mask(
@@ -100,19 +124,23 @@ class LiabilityStructuresRelationManager extends RelationManager
                                     JS)
                                 )
                                 ->dehydrateStateUsing($toNumber)   // "5,000,000" -> "5000000"
+                                ->placeholder('1,000,000.00')
+                                ->helperText('Enter an amount.')
                                 ->columnSpan(3),
                                 
 
-                            Forms\Components\Textarea::make('limit_desc')
+                            Textarea::make('limit_desc')
                                 ->label('Description')
                                 ->required()
                                 ->rows(2)
-                                ->columnSpan(9), // 1.5x lo que era antes (6 → 9)
+                                ->columnSpan(9) // 1.5x lo que era antes (6 → 9)
+                                ->placeholder('Fill in limit description'),
+                        
                         ]),
 
                         Grid::make(12)
                             ->schema([
-                                Forms\Components\TextInput::make('sublimit')
+                                TextInput::make('sublimit')
                                     ->label('Sublimit')
                                     ->mask(
                                         RawJs::make(<<<'JS'
@@ -120,18 +148,21 @@ class LiabilityStructuresRelationManager extends RelationManager
                                         JS)
                                     )
                                     ->dehydrateStateUsing($toNumber)   // '' -> null (no 22P02)
+                                    ->placeholder('1,000,000.00')
+                                    ->helperText('Enter an amount.')
                                     ->columnSpan(3),
                                     
 
-                                Forms\Components\Textarea::make('sublimit_desc')
+                                Textarea::make('sublimit_desc')
                                     ->label('Description')
                                     ->rows(2)
-                                    ->columnSpan(9),
+                                    ->columnSpan(9)
+                                    ->placeholder('Fill in sublimit description'),
                             ]),
 
                         Grid::make(12)
                             ->schema([
-                                Forms\Components\TextInput::make('deductible')
+                                TextInput::make('deductible')
                                     ->label('Deductible')
                                     ->mask(
                                         RawJs::make(<<<'JS'
@@ -139,12 +170,15 @@ class LiabilityStructuresRelationManager extends RelationManager
                                         JS)
                                     )
                                     ->dehydrateStateUsing($toNumber)   // '' -> null (no 22P02)
+                                    ->placeholder('1,000,000.00 or 30')
+                                    ->helperText('Enter an amount or a number of days.')
                                     ->columnSpan(3),
 
-                                Forms\Components\Textarea::make('deductible_desc')
+                                Textarea::make('deductible_desc')
                                     ->label('Description')
                                     ->rows(2)
-                                    ->columnSpan(9),
+                                    ->columnSpan(9)
+                                    ->placeholder('Fill in deductible description'),
                             ]),
                     ])
                     ->columns(1)
@@ -167,18 +201,20 @@ class LiabilityStructuresRelationManager extends RelationManager
                         $query->orderBy('index', $direction)
                     ),
             ])
+
             ->defaultGroup('coverage.name')
-            ->defaultSort('coverage.name')  
+            ->defaultSort('coverage.name')
+            //->preload()
+            //->optionsLimit(300)  
             
 
-
             ->columns([
-                Tables\Columns\TextColumn::make('index')
+                TextColumn::make('index')
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('coverage.name')
+                TextColumn::make('coverage.name')
                     ->label('Coverage')
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->sortable()
@@ -189,13 +225,13 @@ class LiabilityStructuresRelationManager extends RelationManager
                         'style' => 'width: 250px; white-space: normal; vertical-align: top;',
                     ]),
                 
-                Tables\Columns\TextColumn::make('limit')
+                TextColumn::make('limit')
                     ->label('Limit')
                     ->sortable()
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->formatStateUsing(fn ($state) => $state == 0 ? null : number_format($state, 0)),
 
-                Tables\Columns\TextColumn::make('limit_desc')
+                TextColumn::make('limit_desc')
                     ->label('Limit Description')
                     ->label('Limit Description')
                     ->verticalAlignment(VerticalAlignment::Start) 
@@ -204,14 +240,14 @@ class LiabilityStructuresRelationManager extends RelationManager
                         'style' => 'width: 275px; white-space: normal; vertical-align: top;',
                     ]),
 
-                Tables\Columns\TextColumn::make('sublimit')
+                TextColumn::make('sublimit')
                     ->label('Sublimit')
                     ->numeric()
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->sortable()
                     ->formatStateUsing(fn ($state) => $state == 0 ? null : number_format($state, 0)),
 
-                Tables\Columns\TextColumn::make('sublimit_desc')
+                TextColumn::make('sublimit_desc')
                     ->label('Sublimit Description')
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->wrap()
@@ -219,14 +255,14 @@ class LiabilityStructuresRelationManager extends RelationManager
                         'style' => 'width: 275px; white-space: normal; vertical-align: top;',
                     ]),
 
-                Tables\Columns\TextColumn::make('deductible')
+                TextColumn::make('deductible')
                     ->label('Deductible')
                     ->numeric()
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->sortable()
                     ->formatStateUsing(fn ($state) => $state == 0 ? null : number_format($state, 0)),
 
-                Tables\Columns\TextColumn::make('deductible_desc')
+                TextColumn::make('deductible_desc')
                     ->label('Deductible Description')
                     ->limit(40)
                     ->verticalAlignment(VerticalAlignment::Start) 
