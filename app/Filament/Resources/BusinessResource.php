@@ -129,7 +129,7 @@ class BusinessResource extends Resource
                                             ->helperText(fn ($record) =>
                                                 $record
                                                     ? 'Edit the value if necessary.'
-                                                    : 'Select the most suitable option.'
+                                                    : 'Choose the most suitable option.'
                                             )
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
@@ -211,6 +211,11 @@ class BusinessResource extends Resource
                                         ->label('Description')
                                         //->hiddenLabel()
                                         ->placeholder('Fill in the business description')
+                                        ->helperText(fn ($record) =>
+                                            $record
+                                                ? 'Update the business description if necessary.'
+                                                : 'Provide a short description of the business and its main purpose.'
+                                        )
                                         ->required()
                                         //->columnSpanFull()
                                         ->rows(5) 
@@ -225,11 +230,11 @@ class BusinessResource extends Resource
                                             'Own' => 'Own',
                                             'Third party' => 'Third party',
                                         ])
-                                        ->default('Own')
+                                        //->default('Own')
                                         ->helperText(fn ($record) =>
                                             $record
                                                 ? 'Edit the value if necessary.'
-                                                : 'You can keep the default value or choose a different one.'
+                                                : 'Choose an option from the list.'
                                         )
                                         ->required()
                                         ->searchable()
@@ -244,11 +249,11 @@ class BusinessResource extends Resource
                                             'Traditional' => 'Traditional',
                                             'Strategic' => 'Strategic',
                                         ])
-                                        ->default('Strategic')
+                                        //->default('Strategic')
                                         ->helperText(fn ($record) =>
                                             $record
                                                 ? 'Edit the value if necessary.'
-                                                : 'You can keep the default value or choose a different one.'
+                                                : 'Choose an option from the list.'
                                         )
                                         ->required()
                                         ->searchable()
@@ -423,7 +428,7 @@ class BusinessResource extends Resource
                                 ->helperText(fn ($record) =>
                                     $record
                                         ? 'Edit the value if necessary.'
-                                        : 'Select the most suitable option.'
+                                        : 'Choose the most suitable option.'
                                 )
                                 ->required(),  
 
