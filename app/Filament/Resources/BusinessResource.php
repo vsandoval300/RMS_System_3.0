@@ -129,7 +129,7 @@ class BusinessResource extends Resource
                                             ->helperText(fn ($record) =>
                                                 $record
                                                     ? 'Edit the value if necessary.'
-                                                    : 'Choose the most suitable option.'
+                                                    : ''
                                             )
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
@@ -214,7 +214,7 @@ class BusinessResource extends Resource
                                         ->helperText(fn ($record) =>
                                             $record
                                                 ? 'Update the business description if necessary.'
-                                                : 'Provide a short description of the business and its main purpose.'
+                                                : ''
                                         )
                                         ->required()
                                         //->columnSpanFull()
@@ -234,7 +234,7 @@ class BusinessResource extends Resource
                                         ->helperText(fn ($record) =>
                                             $record
                                                 ? 'Edit the value if necessary.'
-                                                : 'Choose an option from the list.'
+                                                : ''
                                         )
                                         ->required()
                                         ->searchable()
@@ -253,7 +253,7 @@ class BusinessResource extends Resource
                                         ->helperText(fn ($record) =>
                                             $record
                                                 ? 'Edit the value if necessary.'
-                                                : 'Choose an option from the list.'
+                                                : ''
                                         )
                                         ->required()
                                         ->searchable()
@@ -282,7 +282,7 @@ class BusinessResource extends Resource
                                             ->helperText(fn ($record) =>
                                                 $record
                                                     ? 'Edit the value if necessary.'
-                                                    : 'Select the most suitable option.'
+                                                    : ''
                                             )
                                             ->nullable(),
 
@@ -295,7 +295,7 @@ class BusinessResource extends Resource
                                             ->helperText(fn ($record) =>
                                                 $record
                                                     ? 'Edit the value if necessary.'
-                                                    : 'Select the most suitable option.'
+                                                    : ''
                                             )
                                             ->nullable(),
                                     ])
@@ -391,7 +391,7 @@ class BusinessResource extends Resource
                                 ->helperText(fn ($record) =>
                                     $record
                                         ? 'Edit the value if necessary.'
-                                        : 'Choose an option from the list.'
+                                        : ''
                                 )
                                 ->required()
                                 ->searchable(),   
@@ -428,7 +428,7 @@ class BusinessResource extends Resource
                                 ->helperText(fn ($record) =>
                                     $record
                                         ? 'Edit the value if necessary.'
-                                        : 'Choose the most suitable option.'
+                                        : ''
                                 )
                                 ->required(),  
 
