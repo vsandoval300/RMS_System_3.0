@@ -17,7 +17,7 @@ class DirectorPolicy
     {
         return $user->can('view_any_director');
     }
-    //
+
     /**
      * Determine whether the user can view the model.
      */

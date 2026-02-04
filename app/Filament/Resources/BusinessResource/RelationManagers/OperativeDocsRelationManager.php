@@ -26,6 +26,8 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\View;
 use Filament\Forms\Components\Hidden;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Get;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
@@ -135,7 +137,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ->extraAttributes([
                         'x-on:click.self' => '$wire.set("data.active_panel","tabs"); $wire.set("active_panel","tabs");',
                     ]) */
-                Section::make('Document Details')
+                Section::make('Primary Document Data')
                     ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'tabs')
                     ->headerActions([
                         HeaderAction::make('goSummary')
@@ -160,10 +162,13 @@ class OperativeDocsRelationManager extends RelationManager
                                     ->schema([
 
                                         //Primera burbuja: solo Id Document
-                                        Section::make()
-                                            ->schema([
+                                        /* Section::make()
+                                            ->schema([*/
+                                        Section::make('General Information')
+                                                    ->columns(12)
+                                                    ->schema([      
                                                 Grid::make(12)
-                                                    ->schema([
+                                                    ->schema([ 
                                                         Placeholder::make('')
                                                             ->columnSpan(12), // deja media fila vacía
 
@@ -173,26 +178,37 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->dehydrated() //CAMBIO
                                                             ->required()
                                                             ->columnSpan(3),
-                                                    ]),
-                                            ])
-                                            ->compact(),
+                                                     ]),
+                                           /* ])
+                                            ->compact(), */
 
                                         //Segunda burbuja: el resto de los campos
-                                        Section::make('Details')
-                                            ->schema([
+                                        /* Section::make('General Information')
+                                            ->schema([ */
+
+                                          
                                                 Textarea::make('description')
                                                     ->label('Description')
                                                     ->required()
+                                                    ->placeholder('Fill in the document description')
                                                     ->dehydratedWhenHidden() 
-                                                    //->maxLength(255),
-                                                    //->columnSpanFull(),
+                                                    ->autosize()
                                                     ->columnSpan(['md' => 12]),
 
 
 
-                                                Section::make()
+                                                /* Section::make('')
                                                     ->columns(12)
-                                                    ->schema([
+                                                    ->schema([ */
+
+                                                        Placeholder::make('')
+                                                        ->content('Please select the document type first, then enter the service fee to be charged (Management Fee or Access Fee).')
+                                                        ->extraAttributes([
+                                                            'class' => 'text-sm text-gray-600 dark:text-gray-400 text-left'
+                                                        ])
+                                                        ->columnSpanFull()
+                                                        ->hiddenOn('view'),
+
                                                         Select::make('operative_doc_type_id')
                                                             ->label('Document Type')
                                                             ->relationship(
@@ -252,29 +268,19 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 return ! $slipExists; // primer doc => slip bloqueado
                                                             }), 
                                                                 
-                                                        /* TextInput::make('af_mf')
-                                                                ->label(' Service Fee')
-                                                                ->required()
-                                                                ->suffix('%')                    // solo visual
-                                                                ->type('text')                   // ⬅️ evita spinner
-                                                                ->inputMode('decimal')           // teclado numérico en móvil
-                                                                ->rules(['numeric','min:0','max:100'])  // valida 0–100
-                                                                ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+                                                        Placeholder::make('gap1')
+                                                            ->hiddenLabel()
+                                                            ->columnSpan(6),
 
-                                                                // Mostrar 3.50 cuando en BD hay 0.035
-                                                                ->formatStateUsing(fn ($state) =>
-                                                                    $state === null ? null : number_format((float)$state * 100, 2, '.', '')
-                                                                )
+                                                        
 
-                                                                // Guardar 0.035 cuando el usuario escribe 3.50
-                                                                ->dehydrateStateUsing(fn ($state) =>
-                                                                    $state === null ? null : round((float) str_replace(',', '', $state) / 100, 6)
-                                                                )
-                                                                ->columnSpan(3), */
+                                                        
+
 
                                                         TextInput::make('af_mf')
                                                             ->label('Service Fee')
                                                             ->default(0) // default cero
+                                                            //->helpertext('Enter the service amount (Management Fee or Access Fee).')
                                                             ->required()
                                                             ->prefix('$')
                                                             ->type('text')                   
@@ -302,24 +308,36 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->compact(),             
                                                     
 
+                                     // ───── Columna 2: Vacía ─────
+                                    Placeholder::make('spacer')
+                                        ->label(' ')
+                                        ->content(' ')
+                                        ->columnSpan(3),
+                                        
 
-                                        Section::make('Coverage period')
+                                    /* ])
+                                    ->columns(2)
+                                    ->compact(), */
+
+                                    Section::make('Coverage Period')
                                             ->columns(12)
                                             ->schema([
-                                                    Placeholder::make('')
+                                                    Placeholder::make('coverage_period_hint')
+                                                        ->label(' ')
                                                         ->content(function (Get $get) {
                                                             $from = $get('inception_date');
                                                             $to   = $get('expiration_date');
                                                             $days = $get('coverage_days');
 
-                                                            $base = 'Select the coverage dates (From–To). The period (days) updates automatically.';
+                                                            $base = 'Select the coverage dates (From–To). The coverage period in days is calculated automatically.';
                                                             if ($from && $to && $days) {
                                                                 return "$base Current selection: $from → $to ($days days).";
                                                             }
-                                                            return "$base End date must be after the start date.";
+                                                            return "$base The end date must be later than the start date.";
                                                         })
-                                                        ->extraAttributes(['class' => 'text-sm text-gray-800 leading-tight'])
-                                                        ->columnSpanFull(),
+                                                        ->extraAttributes(['class' => 'text-sm text-gray-600 dark:text-gray-400 leading-tight'])
+                                                        ->columnSpanFull()
+                                                        ->hiddenOn('view'),
 
                                                     DatePicker::make('inception_date')
                                                         ->label('From')
@@ -399,11 +417,14 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ])
                                             ->columnSpan(['md' => 12])
                                             ->compact(),
-
-                                    ])
-                                    ->columns(2)
-                                    ->compact(),
                                                      
+                                    
+                                     // ───── Columna 2: Vacía ─────
+                                    Placeholder::make('spacer')
+                                        ->label(' ')
+                                        ->content(' ')
+                                        ->columnSpan(3),
+                                    
                                     //Tercera burbuja: solo el archivo
                                     Section::make('File Upload')
                                         ->schema([
@@ -478,6 +499,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->helperText('Only PDF files are allowed.'), */
 
                                         ])
+                                        ->columnSpan(['md' => 12])
                                         ->compact(),
 
                                     ]),
@@ -760,302 +782,6 @@ class OperativeDocsRelationManager extends RelationManager
                                             ]),
                                     ]),  
                                 //--- End Tab ----------------------------------------          
-
-
-                        
-                                //----------------------------------------------------        
-                                //⚪️ 4.-Tab for Installments 
-                                //----------------------------------------------------                                                                                                                               
-                                /* Tab::make('Installments')
-                                    ->icon('heroicon-o-banknotes')
-                                    ->reactive()
-                                    ->live()
-                                    ->schema([
-
-                                        // 🟡 nonce para forzar re-render del grid (no se guarda en BD)
-                                        Hidden::make('logs_nonce')
-                                            ->default(0)
-                                            ->reactive()
-                                            ->dehydrated(false),
-
-                                        Repeater::make('transactions')
-                                            ->label('Installments')
-                                            ->relationship()
-                                            ->schema([
-                                                Hidden::make('id')
-                                                    ->dehydrated()
-                                                    ->dehydrateStateUsing(fn ($state) => $state ?: null), // 🛠️ CHG: '' → null para no mandar id vacío
-
-                                                TextInput::make('index')
-                                                    ->label('Index')
-                                                    ->disabled()
-                                                    ->dehydrated()
-                                                    ->required()
-                                                    ->live()
-                                                    ->numeric()
-                                                    ->columnSpan(1),
-
-                                                TextInput::make('proportion')
-                                                    ->label('Proportion')
-                                                    ->suffix('%')
-                                                    ->required()
-                                                    // 🟡 Dispara solo al confirmar (no por cada tecla)
-                                                    ->live(onBlur: true)
-                                                    ->minValue(0)
-                                                    ->maxValue(100)
-                                                    ->step(0.01)
-                                                    ->mask(RawJs::make('$money($input, ".", ",", 2)'))
-                                                    ->reactive()
-                                                    ->formatStateUsing(fn ($state) => $state !== null ? round($state * 100, 2) : null) // decimal → %
-                                                    ->dehydrateStateUsing(fn ($state) => floatval(str_replace(',', '', $state)) / 100) // % → decimal
-                                                    // 🟡 Si hay alguna fila completa, refrescamos el preview
-                                                    ->afterStateUpdated(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
-                                                        $rows = collect($get('transactions') ?? []);
-                                                        $isAnyComplete = $rows->contains(function ($r) {
-                                                            $prop = $r['proportion'] ?? null;
-                                                            if (is_string($prop)) $prop = floatval(str_replace(',', '', $prop));
-                                                            if ($prop !== null && $prop > 1) $prop = $prop / 100;
-                                                            $rate = isset($r['exch_rate']) ? (float) $r['exch_rate'] : null;
-                                                            $due  = $r['due_date'] ?? null;
-                                                            // 🟡 Validar fecha real en formato Y-m-d (evita contar placeholders tipo dd/mm/yyyy)
-                                                            $dueOk = is_string($due) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $due);
-                                                            return $prop !== null && $rate && $rate > 0 && $dueOk;
-                                                        });
-                                                        if ($isAnyComplete) $set('logs_nonce', ($get('logs_nonce') ?? 0) + 1);
-                                                    })
-                                                    ->columnSpan(1),
-
-                                                TextInput::make('exch_rate')
-                                                    ->label('Exchange Rate')
-                                                    ->numeric()
-                                                    ->required()
-                                                    // 🟡 Dispara solo al confirmar
-                                                    ->live(onBlur: true)
-                                                    ->step(0.00001)
-                                                    // 🟡 Refresca únicamente si hay una fila completa
-                                                    ->afterStateUpdated(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
-                                                        $rows = collect($get('transactions') ?? []);
-                                                        $isAnyComplete = $rows->contains(function ($r) {
-                                                            $prop = $r['proportion'] ?? null;
-                                                            if (is_string($prop)) $prop = floatval(str_replace(',', '', $prop));
-                                                            if ($prop !== null && $prop > 1) $prop = $prop / 100;
-                                                            $rate = isset($r['exch_rate']) ? (float) $r['exch_rate'] : null;
-                                                            $due  = $r['due_date'] ?? null;
-                                                            $dueOk = is_string($due) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $due);
-                                                            return $prop !== null && $rate && $rate > 0 && $dueOk;
-                                                        });
-                                                        if ($isAnyComplete) $set('logs_nonce', ($get('logs_nonce') ?? 0) + 1);
-                                                    })
-                                                    ->columnSpan(1),
-
-                                                DatePicker::make('due_date')
-                                                    ->label('Due Date')
-                                                    ->required()
-                                                    // 🟡 Dispara solo al cerrar/confirmar
-                                                    ->live(onBlur: true)
-                                                    // 🟡 Refresca únicamente si hay una fila completa
-                                                    ->afterStateUpdated(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
-                                                        $rows = collect($get('transactions') ?? []);
-                                                        $isAnyComplete = $rows->contains(function ($r) {
-                                                            $prop = $r['proportion'] ?? null;
-                                                            if (is_string($prop)) $prop = floatval(str_replace(',', '', $prop));
-                                                            if ($prop !== null && $prop > 1) $prop = $prop / 100;
-                                                            $rate = isset($r['exch_rate']) ? (float) $r['exch_rate'] : null;
-                                                            $due  = $r['due_date'] ?? null;
-                                                            $dueOk = is_string($due) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $due);
-                                                            return $prop !== null && $rate && $rate > 0 && $dueOk;
-                                                        });
-                                                        if ($isAnyComplete) $set('logs_nonce', ($get('logs_nonce') ?? 0) + 1);
-                                                    })
-                                                    ->columnSpan(1),
-
-                                                // Campos ocultos: se asignan automáticamente
-                                                Hidden::make('remmitance_code')->default(null),
-                                                Hidden::make('transaction_type_id')->default(1),
-                                                Hidden::make('transaction_status_id')->default(1),
-                                                Hidden::make('op_document_id')->default(fn () => $this->getOwnerRecord()?->id),
-                                            ])
-                                            ->reorderableWithButtons()
-                                            ->defaultItems(0)
-                                            ->columns(4)
-
-
-
-
-                                            // ✅ Guardado MANUAL: no borrar hijos implícitamente, actualizar existentes y crear nuevos
-                                            ->saveRelationshipsUsing(function (\Filament\Forms\Components\Repeater $component, ?array $state) {
-   
-                                                $state = $state ?? []; // 🔧
-
-                                                $relation = $component->getRelationship();   // HasMany transactions()
-                                                $parent   = $relation->getParent();          // OperativeDoc dueño
-                                                $query    = $relation->getQuery();           // Builder transactions
-
-                                                // Helpers de normalización
-                                                $parseFloat = function ($v) {
-                                                    if ($v === null || $v === '') return null;
-                                                    if (is_string($v)) $v = str_replace([',', ' '], '', $v);
-                                                    return is_numeric($v) ? (float) $v : null;
-                                                };
-
-                                                // Acepta 3.5 → 0.035 y 35 → 0.35 (igual que tu lógica de preview)
-                                                $parsePercentishToDecimal = function ($v) use ($parseFloat) {
-                                                    $n = $parseFloat($v);
-                                                    if ($n === null) return null;
-                                                    return $n > 1 ? $n / 100 : $n;
-                                                };
-
-                                                // 1) Hijos existentes (activos; SoftDeletes excluye los borrados)
-                                                $existing    = $query->get()->keyBy('id');
-                                                $existingIds = $existing->keys();
-
-                                                // 2) Estado entrante
-                                                $incoming    = collect($state ?? [])->values();
-                                                $incomingIds = $incoming->pluck('id')->filter()->values();
-
-                                                // 3) Borrados manuales (los que ya no vienen)
-                                                $idsToDelete = $existingIds->diff($incomingIds);
-                                                if ($idsToDelete->isNotEmpty()) {
-                                                    $query->whereIn('id', $idsToDelete->all())
-                                                        ->get()
-                                                        ->each(fn ($m) => $m->delete()); // Soft delete + eventos (reindex en booted)
-                                                }
-
-                                                // 4) Actualizar existentes
-                                                $incoming->filter(fn ($row) => !empty($row['id']))
-                                                    ->each(function ($row) use ($existing, $parsePercentishToDecimal, $parseFloat) {
-                                                        $id = $row['id'];
-                                                        if (! $existing->has($id)) return;
-
-                                                        // Normalizaciones
-                                                        $propDec  = $parsePercentishToDecimal($row['proportion'] ?? null);
-                                                        $exchRate = $parseFloat($row['exch_rate'] ?? null);
-
-                                                        // Validaciones server-side
-                                                        if ($propDec !== null && ($propDec < 0 || $propDec > 1)) {
-                                                            throw ValidationException::withMessages([
-                                                                "transactions" => "Installment #".($row['index'] ?? '?').": Proportion debe estar entre 0% y 100%.",
-                                                            ]);
-                                                        }
-
-                                                        $existing[$id]->fill([
-                                                            'index'                 => $row['index'] ?? null,
-                                                            'proportion'            => $propDec,     // 👈 guardamos DECIMAL (0–1)
-                                                            'exch_rate'             => $exchRate,
-                                                            'due_date'              => $row['due_date'] ?? null,
-                                                            'remmitance_code'       => $row['remmitance_code'] ?? null,
-                                                            'transaction_type_id'   => $row['transaction_type_id'] ?? 1,
-                                                            'transaction_status_id' => $row['transaction_status_id'] ?? 1,
-                                                            // op_document_id se mantiene
-                                                        ])->save();
-                                                    });
-
-                                                // 5) Crear nuevos
-                                                $toCreate = $incoming->filter(fn ($row) => empty($row['id']))
-                                                    ->map(function ($row) use ($parent, $parsePercentishToDecimal, $parseFloat) {
-                                                        $propDec  = $parsePercentishToDecimal($row['proportion'] ?? null);
-                                                        $exchRate = $parseFloat($row['exch_rate'] ?? null);
-
-                                                        if ($propDec !== null && ($propDec < 0 || $propDec > 1)) {
-                                                            throw \Illuminate\Validation\ValidationException::withMessages([
-                                                                "transactions" => "Installment #".($row['index'] ?? '?').": Proportion debe estar entre 0% y 100%.",
-                                                            ]);
-                                                        }
-
-                                                        return [
-                                                            'index'                 => $row['index'] ?? null,
-                                                            'proportion'            => $propDec,     // 👈 DECIMAL (0–1)
-                                                            'exch_rate'             => $exchRate,
-                                                            'due_date'              => $row['due_date'] ?? null,
-                                                            'remmitance_code'       => $row['remmitance_code'] ?? null,
-                                                            'transaction_type_id'   => $row['transaction_type_id'] ?? 1,
-                                                            'transaction_status_id' => $row['transaction_status_id'] ?? 1,
-                                                            'op_document_id'        => $parent->getKey(),
-                                                        ];
-                                                    })->all();
-
-                                                if (!empty($toCreate)) {
-                                                    $relation->createMany($toCreate);
-                                                }
-                                            })
-
-
-
-
-
-
-                                            // 🛠️ Hooks por ítem (conservados)
-                                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
-                                                // Si por alguna razón el ítem nuevo trae 'id' (clonado), lo quitamos
-                                                if (array_key_exists('id', $data) && $data['id'] !== null) {
-                                                    unset($data['id']);
-                                                }
-                                                return $data;
-                                            })
-
-                                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
-                                                // Normaliza id vacío a null para evitar confusiones
-                                                if (($data['id'] ?? null) === '') {
-                                                    unset($data['id']);
-                                                }
-                                                return $data;
-                                            })
-
-
-
-
-
-
-            
-                                            // 🟡 Al AGREGAR: reindexa y sube el nonce
-                                            ->addAction(fn (\Filament\Forms\Components\Actions\Action $action) =>
-                                                $action->label('New Installment')
-                                                    ->after(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
-                                                        $tx = collect($get('transactions') ?? [])
-                                                            ->values()
-                                                            ->map(function ($row, $i) {
-                                                                $row['index'] = $i + 1;
-                                                                return $row;
-                                                            })->all();
-
-                                                        // Limpiar ids duplicados si se clonó una fila
-                                                        $seen = [];
-                                                        foreach ($tx as &$row) {
-                                                            if (!empty($row['id'])) {
-                                                                if (isset($seen[$row['id']])) {
-                                                                    $row['id'] = null; // fuerza INSERT sin PK duplicada
-                                                                } else {
-                                                                    $seen[$row['id']] = true;
-                                                                }
-                                                            }
-                                                        }
-                                                        unset($row);
-
-                                                        $set('transactions', $tx);
-                                                        $set('logs_nonce', ($get('logs_nonce') ?? 0) + 1);
-                                                    })
-                                            )
-
-                                            // 🟡 Al ELIMINAR: reindexa y refresca inmediatamente el grid
-                                            ->deleteAction(fn (\Filament\Forms\Components\Actions\Action $action) =>
-                                                $action->after(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
-                                                    $tx = collect($get('transactions') ?? [])
-                                                        ->values()
-                                                        ->map(function ($row, $i) {
-                                                            $row['index'] = $i + 1;
-                                                            return $row;
-                                                        })->all();
-
-                                                    $set('transactions', $tx);
-                                                    $set('logs_nonce', ($get('logs_nonce') ?? 0) + 1);
-                                                })
-                                            ), 
-
-                                        // ⬆️ ─── END Repeater
-                                       
-
-                                    ]), //─── End Tab ─────────────────────────────────────────── */
-
                            
                         ])
                         ->columnSpanFull(), //─────── END tabs ──────────────────────────────────
@@ -1484,13 +1210,13 @@ class OperativeDocsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('index')
+            TextColumn::make('index')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
                 ->sortable()
                 ->searchable(),
 
-            Tables\Columns\TextColumn::make('id')
+            TextColumn::make('id')
                 ->label('Document code')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
@@ -1500,14 +1226,14 @@ class OperativeDocsRelationManager extends RelationManager
                 ->tooltip(fn ($state) => $state) 
                 ->extraAttributes(['class' => 'w-64']), // 👈 Ajusta el ancho
 
-            Tables\Columns\TextColumn::make('docType.name')
+            TextColumn::make('docType.name')
                 ->label('Doc Type')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
                 ->sortable()
                 ->searchable(),
 
-            Tables\Columns\TextColumn::make('description')
+            TextColumn::make('description')
                 ->searchable()
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
@@ -1516,17 +1242,17 @@ class OperativeDocsRelationManager extends RelationManager
                         'style' => 'width: 250px; white-space: normal; vertical-align: top;',
                     ]),
 
-            Tables\Columns\TextColumn::make('inception_date')
+            TextColumn::make('inception_date')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)   
                 ->date(),
 
-            Tables\Columns\TextColumn::make('expiration_date')
+            TextColumn::make('expiration_date')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
                 ->date(),
             
-            Tables\Columns\TextColumn::make('status')
+            TextColumn::make('status')
                 ->label('Status')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
@@ -1542,7 +1268,7 @@ class OperativeDocsRelationManager extends RelationManager
                     'Expired'  => 'danger',
                 }),
 
-            Tables\Columns\IconColumn::make('document_path')
+            IconColumn::make('document_path')
                 ->label('File')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)
@@ -1635,7 +1361,16 @@ class OperativeDocsRelationManager extends RelationManager
                     )
                 )
 
-                // ✅ CAMBIO 3A-2: tu "seguro" en before, pero SIN $livewire
+                // ✅ CAMBIO 3A-2: Deshabilita el botón CANCEL cuando estás en Overview (summary)
+                ->modalCancelAction(fn (\Filament\Actions\StaticAction $action) => $action
+                    ->disabled(fn () => $this->isOverviewActive())
+                    ->tooltip(fn () => $this->isOverviewActive()
+                        ? 'Go back to "Document Details" to continue.'
+                        : null
+                    )
+                )
+
+                // ✅ CAMBIO 3A-3: tu "seguro" en before, pero SIN $livewire
                 ->before(function (TableAction $action) {
                     if ($this->isOverviewActive()) {
                         Notification::make()
@@ -1700,36 +1435,6 @@ class OperativeDocsRelationManager extends RelationManager
                     return $data;
                 })
                 
-            // ⬇️ NUEVO: reconstruir logs tras guardar y commitear
-                /* ->after(function ($record, array $data) {
-                    DB::afterCommit(function () use ($record) {
-                        try {
-                            $affected = app(TransactionLogBuilder::class)
-                                ->rebuildForOperativeDoc($record->id);
-
-                            Notification::make()
-                                ->title("Transaction logs built/updated ({$affected})")
-                                ->success()
-                                ->send();
-                        } catch (\Throwable $e) {
-                            report($e);
-
-                            Notification::make()
-                                ->title('Could not rebuild logs')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    });
-                }), */
-
-
-            /* Tables\Actions\Action::make('close')
-                    ->label('Close')
-                    ->icon('heroicon-o-x-mark')
-                    ->color('gray')
-                    ->outlined()
-                    ->url(route('filament.admin.resources.businesses.index')), */
         ])
 
 
@@ -1751,6 +1456,15 @@ class OperativeDocsRelationManager extends RelationManager
 
                     // ✅ CAMBIO 3B-1: Deshabilita el botón SAVE CHANGES cuando estás en Overview (summary)
                     ->modalSubmitAction(fn (\Filament\Actions\StaticAction $action) => $action
+                        ->disabled(fn () => $this->isOverviewActive())
+                        ->tooltip(fn () => $this->isOverviewActive()
+                            ? 'Go back to "Document Details" to continue.'
+                            : null
+                        )
+                    )
+
+                    // ✅ CAMBIO 3B-2: Deshabilita el botón CANCEL cuando estás en Overview (summary)
+                    ->modalCancelAction(fn (\Filament\Actions\StaticAction $action) => $action
                         ->disabled(fn () => $this->isOverviewActive())
                         ->tooltip(fn () => $this->isOverviewActive()
                             ? 'Go back to "Document Details" to continue.'
