@@ -617,6 +617,32 @@ class OperativeDocsRelationManager extends RelationManager
                                     ->schema([
                                         Grid::make(12)
                                             ->schema([
+
+                                                // 🟡 👇 AQUÍ VA LA LEYENDA (antes del Repeater)
+                                                Placeholder::make('insureds_notice')
+                                                    ->content(new HtmlString(
+                                                        '<strong>Important:</strong> Please register the 
+                                                        <em>Gross Reinsurance Premium</em> 
+                                                        <strong>per coverage and per insured company</strong>.
+                                                        <br>
+                                                        Placement scheme shares and totals are calculated automatically.'
+                                                    ))
+                                                    ->extraAttributes([
+                                                        'class' => '
+                                                            text-sm text-gray-600 dark:text-gray-400
+                                                            bg-gray-50 dark:bg-gray-800
+                                                            border border-gray-200 dark:border-gray-700
+                                                            rounded-md p-3
+                                                        ',
+                                                    ])
+                                                    ->columnSpan(12),
+
+
+
+
+
+
+                                                // 🟡 👇 Inicio del Repeater
                                                 Repeater::make('insureds')
                                                     ->label('Insureds')
                                                     ->relationship()
@@ -761,7 +787,52 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->addActionLabel('Add Insured')
                                                     ->columnSpan(12)
                                                     ->live()
-                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                    //Calculo del valor Total Gross Reinsurance Premium
+                                                    ->afterStateUpdated(function (array $state, Set $set) {
+                                                        // 1) scheme ids usados en insureds
+                                                        $schemeIds = collect($state)
+                                                            ->pluck('cscheme_id')
+                                                            ->filter()
+                                                            ->unique()
+                                                            ->values()
+                                                            ->all();
+
+                                                        // 2) Mapa schemeId => share (ej. 0.70 / 1.00 / 0.30)
+                                                        $shareByScheme = \App\Models\CostScheme::query()
+                                                            ->whereIn('id', $schemeIds)
+                                                            ->pluck('share', 'id')
+                                                            ->map(fn ($v) => (float) $v)
+                                                            ->toArray();
+
+                                                        // 3) Total ponderado Σ(premium * share)
+                                                        $weightedTotal = collect($state)
+                                                            ->map(function ($row) use ($shareByScheme) {
+                                                                $premiumRaw = $row['premium'] ?? 0;
+                                                                $premium = (float) str_replace([',', '$', ' '], '', (string) $premiumRaw);
+
+                                                                $schemeId = $row['cscheme_id'] ?? null;
+                                                                $share = (float) ($shareByScheme[$schemeId] ?? 0);
+
+                                                                return $premium * $share;
+                                                            })
+                                                            ->sum();
+
+                                                        // 4) # de compañías únicas (company_id)
+                                                        $companiesCount = collect($state)
+                                                            ->pluck('company_id')
+                                                            ->filter()
+                                                            ->unique()
+                                                            ->count();
+
+                                                        // 5) Divide entre compañías únicas (evita división entre 0)
+                                                        $final = $companiesCount > 0
+                                                            ? ($weightedTotal / $companiesCount)
+                                                            : 0;
+
+                                                        $set('insureds_total', number_format($final, 2, '.', ','));
+                                                    }),
+
+                                                    /* ->afterStateUpdated(function ($state, callable $set) {
                                                         $total = collect($state)
                                                             ->pluck('premium')
                                                             ->filter()
@@ -769,12 +840,16 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->sum();
 
                                                         $set('insureds_total', number_format($total, 2, '.', ','));
-                                                    }),
+                                                    }), */
 
                                                 Placeholder::make('')->columnSpan(9),
 
                                                 TextInput::make('insureds_total')
-                                                    ->label('Grand Total Premium')
+                                                    ->label(new HtmlString(
+                                                        'Grand Total<br><span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                                        Gross Reinsurance Premium
+                                                        </span>'
+                                                    ))
                                                     ->prefix('$')
                                                     ->disabled()
                                                     ->dehydrated(false)
