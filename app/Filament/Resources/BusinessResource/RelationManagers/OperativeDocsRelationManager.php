@@ -621,22 +621,34 @@ class OperativeDocsRelationManager extends RelationManager
                                                 // 🟡 👇 AQUÍ VA LA LEYENDA (antes del Repeater)
                                                 Placeholder::make('insureds_notice')
                                                     ->content(new HtmlString(
-                                                        '<strong>Important:</strong> Please register the 
-                                                        <em>Gross Reinsurance Premium</em> 
-                                                        <strong>per coverage and per insured company</strong>.
-                                                        <br>
-                                                        Placement scheme shares and totals are calculated automatically.'
+                                                        '
+                                                        <div class="flex gap-2 items-start">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="h-5 w-5 mt-0.5 text-warning-600 dark:text-warning-400 flex-shrink-0"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M12 9v2m0 4h.01M10.29 3.86l-8.3 14.38A1 1 0 002.83 20h16.34a1 1 0 00.86-1.76L11.71 3.86a1 1 0 00-1.72 0z" />
+                                                            </svg>
+
+                                                            <div>
+                                                                <strong>Important:</strong>
+                                                                Please register the <em>Gross Reinsurance Premium</em>
+                                                                <strong>per coverage and per insured company</strong>.
+                                                                <br>
+                                                                Placement scheme shares and totals are calculated automatically.
+                                                            </div>
+                                                        </div>
+                                                        '
                                                     ))
                                                     ->extraAttributes([
                                                         'class' => '
                                                             text-sm text-gray-600 dark:text-gray-400
-                                                            bg-gray-50 dark:bg-gray-800
-                                                            border border-gray-200 dark:border-gray-700
+                                                            bg-warning-50 dark:bg-warning-900/20
+                                                            border border-warning-200 dark:border-warning-700
                                                             rounded-md p-3
                                                         ',
                                                     ])
                                                     ->columnSpan(12),
-
 
 
 
