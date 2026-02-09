@@ -222,6 +222,7 @@ class DatabaseSeeder extends Seeder
             ShieldGenerateSeeder::class,
 
             // 3️⃣ Asignación de permisos a roles
+            //UnderwriterBasicRoleSeeder::class,
             RolesAndPermissionsSeeder::class,
          ]);
 

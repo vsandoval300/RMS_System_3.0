@@ -175,14 +175,11 @@ class CostSchemeResource extends Resource
                                 ->label('')
                                 ->relationship('costNodexes')
                                 ->default([])
+                                ->orderColumn('index')     // ✅ guarda el orden en DB usando la columna index
+                                ->reorderable()            // ✅ drag & drop habilitado
                                 ->schema([
-                                    // 👇 Campo oculto que sí se guarda
-                                    Hidden::make('id')
-                                        ->dehydrated(),
-                                        //->hidden(), // No se muestra, pero se guarda
-
-                                    Hidden::make('index')
-                                        ->dehydrated(), // 👈 este es el que se guarda en BD
+                                    Hidden::make('id')->dehydrated(),
+                                    Hidden::make('index')->dehydrated(),
 
                                     Placeholder::make('index_display')
                                         ->label('Index')
@@ -282,42 +279,39 @@ class CostSchemeResource extends Resource
                             })                           
                             ->columns(11)
                             ->addActionLabel('Add cost node')
-                            ->reorderable(false)
                             ->deletable(true)
                             ->addable(true)
 
 
                             // ⬇️ Al agregar/quitar filas, reindexas y luego recalculas el total
-                            ->afterStateUpdated(function (array $state, callable $set, callable $get) {
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                // ✅ cuando reordenas / agregas / quitas, reindexamos el estado
+                                if (! is_array($state)) return;
+
                                 $schemeId = $get('id');
 
-                                if (! $schemeId || ! is_string($schemeId)) {
-                                    return;
-                                }
-
                                 $newState = [];
-                                $index = 1;
+                                $i = 1;
 
                                 foreach ($state as $key => $item) {
-                                    if (! is_array($item)) {
-                                        continue;
-                                    }
+                                    if (! is_array($item)) continue;
 
-                                    // Siempre reindexamos
-                                    $item['index'] = $index;
+                                    $item['index'] = $i; // ✅ actualiza el index (visual y el que se guarda)
 
-                                    // ⚠️ Solo generamos ID si el nodo es nuevo
-                                    if (empty($item['id'])) {
-                                        $item['id'] = $schemeId . '-' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+                                    // ✅ si es nuevo, genera ID (solo si aún no existe)
+                                    if (empty($item['id']) && $schemeId) {
+                                        $token = Str::lower(Str::ulid()->toBase32());
+                                        $token = substr($token, 0, 6); // 👈 ojo: ajusta según tu varchar del campo "id"
+                                        $item['id'] = "{$schemeId}-{$token}";
                                     }
 
                                     $newState[$key] = $item;
-                                    $index++;
+                                    $i++;
                                 }
 
                                 $set('costNodexes', $newState);
 
-                                // 🟢 Recalcular total tras add/remove
+                                // recalcula total
                                 $total = collect($newState)
                                     ->pluck('value')
                                     ->filter()
@@ -383,29 +377,6 @@ class CostSchemeResource extends Resource
                     
         ]);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
