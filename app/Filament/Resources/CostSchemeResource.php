@@ -300,8 +300,7 @@ class CostSchemeResource extends Resource
 
                                     // ✅ si es nuevo, genera ID (solo si aún no existe)
                                     if (empty($item['id']) && $schemeId) {
-                                        $token = Str::lower(Str::ulid()->toBase32());
-                                        $token = substr($token, 0, 6); // 👈 ojo: ajusta según tu varchar del campo "id"
+                                        $token = Str::lower(Str::ulid()->toBase32()); // 26 chars
                                         $item['id'] = "{$schemeId}-{$token}";
                                     }
 
