@@ -75,6 +75,7 @@ class BusinessResource extends Resource
                 'reinsurer:id,short_name',
                 'currency:id,acronym,name',
                 'coverages:id,acronym,name',
+                'renewedFrom:id,business_code',
             ])
             ->withCount([
                 'operativeDocs',
@@ -941,8 +942,21 @@ class BusinessResource extends Resource
                         );
                     }),
 
+              /*   TextColumn::make('renewed_from_id')
+                    ->label('Renewed from')
+                    ->searchable(), */
+
                 TextColumn::make('renewed_from_id')
                     ->label('Renewed from')
+                    ->placeholder('—')
+                    ->url(function (?string $state) {
+                        $code = is_string($state) ? trim($state) : null;
+
+                        return filled($code)
+                            ? BusinessResource::getUrl('view', ['record' => $code])
+                            : null;
+                    })
+                    //->openUrlInNewTab() // opcional
                     ->searchable(),
 
                 TextColumn::make('currency.acronym')

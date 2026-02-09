@@ -41,7 +41,8 @@ class CostScheme extends Model
     /** CostNodes relacionados (vía tabla pivote cost_scheme_nodes) */
     public function costNodexes()
     {
-        return $this->hasMany(CostNodex::class, 'cscheme_id', 'id');
+        return $this->hasMany(CostNodex::class, 'cscheme_id', 'id')
+            ->orderBy('index'); // 👈 aquí
     }
 
 

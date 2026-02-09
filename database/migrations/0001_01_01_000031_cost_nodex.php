@@ -15,7 +15,7 @@ return new class extends Migration
             $table->engine('InnoDB');
 
             // Definir 'business_code' como la clave primaria
-            $table->string('id', 21)->primary();
+            $table->string('id', 50)->primary();
             $table->integer('index'); 
 
             $table->bigInteger('concept')->unsigned();
