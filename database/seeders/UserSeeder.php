@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
             ['name' => 'Arturo Ramírez Sánchez Villar', 'email' => 'a.ramirez@rainmakergroup.com', 'password' => 'Ars123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '2'],
             ['name' => 'Sandra Geraldine Castillo Dorantes', 'email' => 's.castillo@rainmakergroup.com', 'password' => 'Sgc123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '1'],
             ['name' => 'Carlos Eduardo Lara Uribe', 'email' => 'c.lara@rainmakergroup.com', 'password' => 'Cel123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '1'],
-            ['name' => 'Elizabeth García Cruz', 'email' => 'elizabeth.garcia@rainmakergroup.com', 'password' => 'Egc123', 'role' => 'panel_user', 'department_id' => '1', 'position_id' => '1'],
+            
 
             // --- Operations Team ---
             ['name' => 'José Luis Márquez', 'email' => 'l.marquez@rainmakergroup.com', 'password' => 'Jlm123', 'role' => 'panel_user', 'department_id' => '2', 'position_id' => '18'],

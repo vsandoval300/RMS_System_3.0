@@ -856,7 +856,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                 Placeholder::make('')->columnSpan(9),
 
-                                                TextInput::make('insureds_total')
+                                                /* TextInput::make('insureds_total')
                                                     ->label(new HtmlString(
                                                         'Grand Total<br><span class="text-sm font-normal text-gray-500 dark:text-gray-400">
                                                         Gross Reinsurance Premium
@@ -865,7 +865,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->prefix('$')
                                                     ->disabled()
                                                     ->dehydrated(false)
-                                                    ->columnSpan(3),
+                                                    ->columnSpan(3), */
                                             ]),
                                     ]),  
                                 //--- End Tab ----------------------------------------          
