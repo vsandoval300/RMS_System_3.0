@@ -643,8 +643,8 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->extraAttributes([
                                                         'class' => '
                                                             text-sm text-gray-600 dark:text-gray-400
-                                                            bg-warning-50 dark:bg-warning-900/20
-                                                            border border-warning-200 dark:border-warning-700
+                                                            bg-warning-50 dark:bg-gray-800/40
+                                                            border border-warning-100/40 dark:border-gray-700
                                                             rounded-md p-3
                                                         ',
                                                     ])

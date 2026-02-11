@@ -3,25 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CompaniesResource\Pages;
-use App\Filament\Resources\CompaniesResource\RelationManagers;
 use App\Models\Company;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Country;
 use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Validation\Rules\Unique;
+
 
 
 // 👇 IMPORTS para INFOLIST
@@ -52,6 +47,7 @@ class CompaniesResource extends Resource
                 Section::make('Companies Details')
                 ->columns(1)    // ← aquí defines dos columnas
                 ->schema([
+                    
 
                     TextInput::make('name')
                     ->label('Name')
@@ -113,7 +109,9 @@ class CompaniesResource extends Resource
                         ->required(),
                         //->extraAttributes(['class' => 'w-1/2']),
 
-                ]),
+                ])
+                ->maxWidth('5xl')
+                ->collapsible(),
 
             ]);
     }

@@ -245,7 +245,7 @@ class CostSchemeResource extends Resource
                                         ->maxValue(100)
                                         ->dehydrated() // ✅ IMPORTANTÍSIMO
                                         ->disabled(fn (Get $get) => (int) $get('concept') === $exemptId) // 👈 bloquea si es exempt
-                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 5, '.', '') : '0.00000')
+                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 10, '.', '') : '0.00000')
                                         ->dehydrateStateUsing(fn ($state) => ($state !== null && $state !== '') ? $state / 100 : 0)
                                         ->extraInputAttributes(['class' => 'text-right tabular-nums'])
                                         ->columnSpan(2),
@@ -415,14 +415,15 @@ class CostSchemeResource extends Resource
                 TextColumn::make('agreement_type')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('created_at')->since(),
+                TextColumn::make('created_at')
+                    ->sortable()
+                    ->since(),
                 TextColumn::make('updated_at')->since(),
             ])
             //->defaultSort('created_at', 'asc')
             ->defaultSort('id', 'asc')
             ->filters([])
-            
-             ->actions([
+            ->actions([
                 Tables\Actions\ActionGroup::make([
                     /* Tables\Actions\ViewAction::make()
                     ->label('View')
