@@ -301,6 +301,22 @@ class BusinessResource extends Resource
                                             ->nullable(),
                                     ])
                                     ->columnSpan(4),
+
+
+
+                                Section::make('')
+                                ->compact()
+                                ->columns(2)
+                                
+                                    ->schema([ 
+                            
+                                        TextInput::make('source_code')
+                                            ->label('Original id')
+                                            ->dehydrated()
+                                            ->placeholder('Enter original id if necessary.')
+                                            ->columnSpan(1),
+                                    ])
+                                    ->columnSpan(4),    
                                     
                             Placeholder::make('')
                                 ->content('')      // vacío
@@ -312,6 +328,9 @@ class BusinessResource extends Resource
                         
                         ])
                         ->columnSpan(2),
+
+
+
 
                  Section::make('Contract Attributes')
                     ->compact()
@@ -650,6 +669,30 @@ class BusinessResource extends Resource
                                                 ]),
                                         ]),
 
+
+                                    InfoSection::make()
+                                        ->compact()
+                                        ->schema([
+                                            InfoGrid::make(12)
+                                            ->extraAttributes(['style' => 'gap:1px;padding:1px 0;'])
+                                                ->schema([
+
+                                                    TextEntry::make('source_code')
+                                                        ->label('')
+                                                        ->state(function ($record) {
+                                                            $value = $record->parent?->treaty_code ?: '—';
+
+                                                            return new HtmlString(
+                                                                "<strong>Original Id:</strong> {$value}"
+                                                            );
+                                                        })
+                                                        ->columnSpan(4),
+
+
+
+                                                ]),
+                                        ]),    
+
                     ])
                     ->columnSpan(8),
 
@@ -799,7 +842,7 @@ class BusinessResource extends Resource
                                         "<strong>Approval status:</strong> {$value}"
                                     );
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(2),
 
                             TextEntry::make('approval_date_entry')
                                 ->label('')
@@ -810,7 +853,7 @@ class BusinessResource extends Resource
                                         "<strong>Approval date:</strong> {$value}"
                                     );
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(2),
 
                             TextEntry::make('lifecycle_status_entry')
                                 ->label('')
@@ -829,7 +872,7 @@ class BusinessResource extends Resource
                                         "<strong>Lifecycle status:</strong> {$value}"
                                     );
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(2),
 
                             TextEntry::make('created_at_entry')
                                 ->label('')
@@ -841,6 +884,17 @@ class BusinessResource extends Resource
                                     );
                                 })
                                 ->columnSpan(3),
+
+                            TextEntry::make('created_by_user')
+                                ->label('')
+                                ->state(function ($record) {
+                                        $value = $record->created_by_user ?: '—';
+
+                                        return new HtmlString(
+                                            "<strong>Created by:</strong> {$value}"
+                                        );
+                                    })
+                                ->columnSpan(3)    
 
 
                                                             

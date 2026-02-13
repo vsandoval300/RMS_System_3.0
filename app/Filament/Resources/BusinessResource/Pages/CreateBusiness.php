@@ -7,6 +7,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
+use Illuminate\Support\Facades\Auth;
 
 
 class CreateBusiness extends CreateRecord
@@ -79,6 +80,13 @@ class CreateBusiness extends CreateRecord
                 ->color('gray')
                 ->outlined(),
         ];
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['created_by_user'] = Auth::id(); // 👈 guarda el user logueado
+
+        return $data;
     }
 
 

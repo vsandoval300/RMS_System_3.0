@@ -30,7 +30,7 @@ class Business extends Model
         'producer_id', 'currency_id', 'region_id',
         'approval_status', 'approval_status_updated_at',
         'business_lifecycle_status', 'business_lifecycle_status_updated_at',
-        'created_by_user'
+        'created_by_user','source_code'
     ];
 
     protected $casts = [
