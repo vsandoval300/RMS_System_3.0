@@ -66,7 +66,7 @@ class Business extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'created_by_user');
+        return $this->belongsTo(User::class,'created_by_user');
     }
 
     /* ---------------------------------------------------

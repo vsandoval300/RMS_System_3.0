@@ -120,56 +120,13 @@ class BusinessResource extends Resource
 
                                         Select::make('reinsurer_id')
                                             ->label('Reinsurer')
-                                            //->hiddenLabel()
                                             ->relationship('reinsurer', 'name')
                                             ->required()
                                             ->searchable()
-                                            ->preload() // 👈 fuerza la carga inmediata de los options
+                                            ->preload()
                                             ->native(false)
                                             ->placeholder('Select a reinsurer')
-                                            ->helperText(fn ($record) =>
-                                                $record
-                                                    ? 'Edit the value if necessary.'
-                                                    : ''
-                                            )
-                                            ->live(onBlur: true)
-                                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
-                                                if ($operation !== 'create' || !$state) {
-                                                    return;
-                                                }
-
-                                                $reinsurer = Reinsurer::find($state);
-
-                                                if (! $reinsurer) {
-                                                    return;
-                                                }
-
-                                                $year = Carbon::now()->format('Y');
-                                                $acronym = Str::upper($reinsurer->acronym);
-                                                $number = str_pad($reinsurer->cns_reinsurer ?? $reinsurer->id, 3, '0', STR_PAD_LEFT);
-
-                                                $prefix = "{$year}-{$acronym}{$number}";
-
-                                                // Buscar el último código existente que empiece con ese prefijo
-                                                $lastBusiness = Business::query()
-                                                    ->withTrashed() // 👈 incluye borrados (deleted_at no null)
-                                                    ->where('business_code', 'like', "$prefix-%")
-                                                    ->orderByDesc('business_code')
-                                                    ->first();
-
-                                                // Extraer el consecutivo y sumarle 1
-                                                $lastNumber = 0;
-
-                                                if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->business_code, $matches)) {
-                                                    $lastNumber = (int)$matches[1];
-                                                }
-
-                                                $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-
-                                                $businessCode = "{$prefix}-{$consecutive}";
-
-                                                $set('business_code', $businessCode);
-                                            })
+                                            ->helperText(fn ($record) => $record ? 'Edit the value if necessary.' : '')
                                             ->columnSpan(2),
 
                                         TextInput::make('index')
@@ -191,6 +148,7 @@ class BusinessResource extends Resource
                                             ->dehydrated()
                                             ->required()
                                             ->unique(ignoreRecord: true)
+                                            ->hiddenOn('create')
                                             ->columnSpan(1),
 
 
@@ -680,7 +638,7 @@ class BusinessResource extends Resource
                                                     TextEntry::make('source_code')
                                                         ->label('')
                                                         ->state(function ($record) {
-                                                            $value = $record->parent?->treaty_code ?: '—';
+                                                            $value = $record->source_code ?: '—';
 
                                                             return new HtmlString(
                                                                 "<strong>Original Id:</strong> {$value}"
@@ -888,7 +846,9 @@ class BusinessResource extends Resource
                             TextEntry::make('created_by_user')
                                 ->label('')
                                 ->state(function ($record) {
-                                        $value = $record->created_by_user ?: '—';
+                                        $value = $record->user->name;
+
+                                        
 
                                         return new HtmlString(
                                             "<strong>Created by:</strong> {$value}"
