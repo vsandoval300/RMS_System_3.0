@@ -98,10 +98,12 @@ class CreateCostScheme extends CreateRecord
 
     protected function getCreatedNotification(): ?Notification
     {
+        $id = $this->record?->id ?? '';
+
         return Notification::make()
             ->success()
             ->title('Placement Scheme created')
-            ->body('The new Placement Scheme has been created successfully.');
+            ->body("The new Placement Scheme {$id} has been created successfully.");
     }
 
 

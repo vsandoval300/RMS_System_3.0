@@ -123,6 +123,7 @@ class CostSchemeResource extends Resource
                                                 ->disabled()
                                                 ->dehydrated()
                                                 ->required()
+                                                ->hiddenOn('create')
                                                 ->afterStateHydrated(fn ($component, $state) => $component->state($state))
                                                 ->columnSpan(1),
                                         ]),
