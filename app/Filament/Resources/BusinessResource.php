@@ -846,8 +846,7 @@ class BusinessResource extends Resource
                             TextEntry::make('created_by_user')
                                 ->label('')
                                 ->state(function ($record) {
-                                        $value = $record->user->name;
-
+                                        $value = $record->user?->name ?? '-';
                                         
 
                                         return new HtmlString(
