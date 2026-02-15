@@ -1575,7 +1575,11 @@ class OperativeDocsRelationManager extends RelationManager
                     ->label('View')
                     //->color('primary')
                     ->modalHeading(fn ($record) => '📄 Reviewing ' . $record->docType->name .' — '. $record->id )
-                    ->modalWidth('7xl'),  
+                    ->modalWidth('7xl') 
+
+                    // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false), // opcional, si quieres que ESC no lo cierre
 
                 
                 Tables\Actions\EditAction::make('edit')
@@ -1583,6 +1587,10 @@ class OperativeDocsRelationManager extends RelationManager
                     //->color('primary')
                     ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id )
                     ->modalWidth('7xl')
+
+                    // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false) // opcional, si quieres que ESC no lo cierre
 
                     // ✅ CAMBIO 3B-1: Deshabilita el botón SAVE CHANGES cuando estás en Overview (summary)
                     ->modalSubmitAction(fn (\Filament\Actions\StaticAction $action) => $action
