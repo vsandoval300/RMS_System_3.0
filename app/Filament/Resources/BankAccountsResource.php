@@ -73,6 +73,7 @@ class BankAccountsResource extends Resource
 
                             Select::make('currency_id')
                                 ->label('Currency')
+                                ->inlineLabel()
                                 ->placeholder('Select currency.')
                                 ->relationship(
                                     name: 'currency',

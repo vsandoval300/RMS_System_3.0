@@ -398,7 +398,7 @@ class BusinessResource extends Resource
                                 ->label('Region')
                                 //->hiddenLabel()
                                 //->inlineLabel()
-                                ->placeholder('Select business currency.') // 👈 Aquí cambias el texto
+                                ->placeholder('Select business region.') // 👈 Aquí cambias el texto
                                 ->relationship('Region', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()

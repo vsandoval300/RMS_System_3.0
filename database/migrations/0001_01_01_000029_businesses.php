@@ -17,8 +17,8 @@ return new class extends Migration
 
             // Definir 'business_code' como la clave primaria
             $table->string('business_code', 19)->primary();
-            
-            $table->integer('index'); 
+
+            $table->integer('index');
             $table->text('description');
             $table->enum('reinsurance_type', ['Facultative', 'Treaty']);
             $table->enum('risk_covered', ['Life', 'Non-Life']);
@@ -35,7 +35,7 @@ return new class extends Migration
                   ->references('treaty_code')
                   ->on('treaties')
                   ->nullOnDelete();
-                  
+
             $table->string('renewed_from_id', 19)->nullable();
             $table->foreignId('producer_id')->constrained('partners');
             $table->foreignId('currency_id')->constrained('currencies');
@@ -60,7 +60,15 @@ return new class extends Migration
                 'Cancelled',
             ])->default('On Hold');
             $table->timestamp('business_lifecycle_status_updated_at')->nullable();
-            
+
+            // ✅ NUEVO: Campo agregado desde la segunda migración
+            $table->string('source_code')->nullable()->after('business_code');
+
+            // ✅ NUEVO: Campo agregado desde la segunda migración
+            $table->foreignId('created_by_user')
+                  ->nullable()
+                  ->constrained('users')
+                  ->cascadeOnDelete();
 
             $table->timestamps();
             $table->softDeletes();
@@ -73,6 +81,12 @@ return new class extends Migration
     public function down(): void
     {
         DB::unprepared('DROP TRIGGER IF EXISTS update_underwritten_year_and_month');
+
+        // ✅ NUEVO: Drop FK antes de borrar la tabla (más seguro)
+        Schema::table('businesses', function (Blueprint $table) {
+            $table->dropForeign(['created_by_user']);
+        });
+
         Schema::dropIfExists('businesses');
     }
 };

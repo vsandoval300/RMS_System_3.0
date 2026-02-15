@@ -270,9 +270,48 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 
                                                         Placeholder::make('gap1')
                                                             ->hiddenLabel()
-                                                            ->columnSpan(6),
+                                                            ->columnSpan(3),
 
                                                         
+                                                        TextInput::make('roe_fs')
+                                                            ->label('Exchange rate')
+                                                            ->required()
+                                                            ->inputMode('decimal')
+                                                            ->rules(['numeric', 'min:0'])
+                                                            ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+
+                                                            // 🔒 Bloquear edición si moneda del Business es USD (157)
+                                                            ->readOnly(fn ($livewire) =>
+                                                                method_exists($livewire, 'getOwnerRecord')
+                                                                && (int) $livewire->getOwnerRecord()?->currency_id === 157
+                                                            )
+
+                                                            // ✅ MOSTRAR 1.00000000 si es USD aunque el state sea null
+                                                            ->formatStateUsing(function ($state, $livewire) {
+                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
+                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+
+                                                                if ($state === null || $state === '') {
+                                                                    return $isUsd ? number_format(1, 8, '.', '') : null;
+                                                                }
+
+                                                                return number_format((float) $state, 8, '.', '');
+                                                            })
+
+                                                            // ✅ GUARDAR 1 si es USD y viene vacío; si no, null
+                                                            ->dehydrateStateUsing(function ($state, $livewire) {
+                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
+                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+
+                                                                if ($state === null || $state === '') {
+                                                                    return $isUsd ? 1 : null;
+                                                                }
+
+                                                                return round((float) str_replace(',', '', $state), 8);
+                                                            })
+
+                                                            ->dehydrated()
+                                                            ->columnSpan(3),
 
                                                         
 
