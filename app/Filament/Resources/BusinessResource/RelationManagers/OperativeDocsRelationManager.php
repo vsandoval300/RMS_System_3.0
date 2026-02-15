@@ -1474,6 +1474,10 @@ class OperativeDocsRelationManager extends RelationManager
                 ->modalHeading('➕ Create Operative Doc')
                 ->modalWidth('7xl')
 
+                // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                ->closeModalByClickingAway(false)
+                ->closeModalByEscaping(false) // opcional, si quieres que ESC no lo cierre
+
                 ->createAnother(false)                 // 👈 oculta "Create & create another"
                 ->modalSubmitActionLabel('Create')     // 👈 botón principal
                 ->modalCancelActionLabel('Cancel')     // 👈 botón cancelar
