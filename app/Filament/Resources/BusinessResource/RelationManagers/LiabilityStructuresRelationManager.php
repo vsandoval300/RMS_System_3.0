@@ -286,8 +286,10 @@ class LiabilityStructuresRelationManager extends RelationManager
                     ->createAnother(false)            // 👈 oculta "Create & create another"
                     ->modalHeading('➕ New Liability Structure')   // 👈 título del modal
                     ->modalSubmitActionLabel('Create')// (opcional) etiqueta del botón principal
-                    ->modalCancelActionLabel('Cancel'),// (opcional) etiqueta del botón cancelar
-
+                    ->modalCancelActionLabel('Cancel')// (opcional) etiqueta del botón cancelar
+                    // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false), // opcional, si quieres que ESC no lo cierre
 
                     /* Tables\Actions\Action::make('close')
                     ->label('Close')
@@ -299,9 +301,15 @@ class LiabilityStructuresRelationManager extends RelationManager
 
             ->actions([
                     Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\ViewAction::make()
+                        // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                        ->closeModalByClickingAway(false)
+                        ->closeModalByEscaping(false), // opcional, si quieres que ESC no lo cierre
                     Tables\Actions\EditAction::make()
-                        ->modalHeading('📝 Modifying Liability Structure'), // 👈 título del modal
+                        ->modalHeading('📝 Modifying Liability Structure') // 👈 título del modal
+                        // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                        ->closeModalByClickingAway(false)
+                        ->closeModalByEscaping(false), // opcional, si quieres que ESC no lo cierre
                     Tables\Actions\DeleteAction::make(),
                     ]),
                
