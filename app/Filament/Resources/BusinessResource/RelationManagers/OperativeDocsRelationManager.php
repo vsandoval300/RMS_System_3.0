@@ -704,6 +704,9 @@ class OperativeDocsRelationManager extends RelationManager
                                                         Select::make('company_id')
                                                             ->label('Company')
                                                             ->relationship('company', 'name')
+                                                            ->getOptionLabelFromRecordUsing(
+                                                                fn ($record) => "{$record->name} ({$record->acronym})"
+                                                            )
                                                             ->preload()
                                                             ->optionsLimit(1000)
                                                             ->required()

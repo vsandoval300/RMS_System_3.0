@@ -25,7 +25,7 @@ return new class extends Migration
             $table->enum('business_type', ['Own', 'Third party']);
             $table->enum('premium_type', ['Fixed', 'Estimated']);
             $table->enum('purpose', ['Strategic', 'Traditional']);
-            $table->enum('claims_type', ['Claims occurrence', 'Claims made']);
+            $table->enum('claims_type', ['Claims occurrence', 'Claims made','Hybrid']);
 
             // Claves foráneas a otras tablas
             $table->foreignId('reinsurer_id')->constrained('reinsurers');

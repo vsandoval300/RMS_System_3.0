@@ -364,6 +364,7 @@ class BusinessResource extends Resource
                                 ->options([
                                     'Claims occurrence' => 'Claims occurrence',
                                     'Claims made' => 'Claims made',
+                                    'Hybrid' => 'Hybrid',
                                 ])
                                 //->default('Claims occurrence')
                                 ->helperText(fn ($record) =>

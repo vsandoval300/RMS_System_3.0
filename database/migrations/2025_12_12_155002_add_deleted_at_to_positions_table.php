@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,9 +10,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('positions', function (Blueprint $table) {
-            //
-        });
+        // ⚠️ MySQL no permite modificar ENUM fácilmente con Blueprint,
+        // por eso usamos SQL directo.
+
+        DB::statement("
+            ALTER TABLE businesses 
+            MODIFY claims_type 
+            ENUM('Claims occurrence', 'Claims made', 'Hybrid')
+            NOT NULL
+        ");
     }
 
     /**
@@ -21,8 +26,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('positions', function (Blueprint $table) {
-            //
-        });
+        // Revertimos al ENUM original
+        DB::statement("
+            ALTER TABLE businesses 
+            MODIFY claims_type 
+            ENUM('Claims occurrence', 'Claims made')
+            NOT NULL
+        ");
     }
 };
