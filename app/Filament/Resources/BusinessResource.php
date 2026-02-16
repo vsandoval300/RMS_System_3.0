@@ -988,7 +988,13 @@ class BusinessResource extends Resource
                     ->label('Source id')
                     ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),    
+                    ->toggleable(isToggledHiddenByDefault: true),   
+                    
+                TextColumn::make('created_by_user')
+                    ->label('Created by')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),       
 
                 TextColumn::make('created_at')
                     ->dateTime()
