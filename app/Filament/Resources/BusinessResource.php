@@ -76,6 +76,7 @@ class BusinessResource extends Resource
                 'currency:id,acronym,name',
                 'coverages:id,acronym,name',
                 'renewedFrom:id,business_code',
+                'user:id,name',
             ])
             ->withCount([
                 'operativeDocs',
@@ -990,11 +991,11 @@ class BusinessResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),   
                     
-                TextColumn::make('created_by_user')
+                TextColumn::make('user.name')
                     ->label('Created by')
                     ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),       
+                    ->toggleable(isToggledHiddenByDefault: true),      
 
                 TextColumn::make('created_at')
                     ->dateTime()
