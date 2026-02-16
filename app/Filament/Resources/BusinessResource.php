@@ -642,7 +642,7 @@ class BusinessResource extends Resource
                                                             $value = $record->source_code ?: '—';
 
                                                             return new HtmlString(
-                                                                "<strong>Original Id:</strong> {$value}"
+                                                                "<strong>Source Id:</strong> {$value}"
                                                             );
                                                         })
                                                         ->columnSpan(4),
@@ -983,6 +983,12 @@ class BusinessResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('source_code')
+                    ->label('Source id')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),    
 
                 TextColumn::make('created_at')
                     ->dateTime()
