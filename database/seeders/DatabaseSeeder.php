@@ -126,12 +126,111 @@ class DatabaseSeeder extends Seeder
                BusinessDocInsuredsCellMayabSeeder::class, //Insureds
                BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
                TransactionsCellMayabSeeder::class, //Transactions
-               TransactionsLogCellMayabSeeder::class, //TransactionLogs 
-            
+               TransactionsLogCellMayabSeeder::class, //TransactionLogs             
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
 
+            //=============================================
+            //FILES FOR MAYAB 2026
+            //=============================================
+               BusinessesMayabSeeder2026::class, //1
+               LiabilityStructureMayabSeeder2026::class, //2
+            //Files for Placement Schemes==================
+               CschemeMayabSeeder2026::class, //6
+               CostNodesxMayabSeeder2026::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsMayabSeeder2026::class, //Details
+               BusinessDocInsuredsMayabSeeder2026::class, //Insureds
+               BusinessDocsSchemesMayabSeeder2026::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+
+            //=============================================
+            //FILES FOR TOBAH 2026
+            //=============================================
+               BusinessesTobahSeeder2026::class, //1
+               LiabilityStructureTobahSeeder2026::class, //2
+            //Files for Placement Schemes==================
+               CschemeTobahSeeder2026::class, //6
+               CostNodesxTobahSeeder2026::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsTobahSeeder2026::class, //Details
+               BusinessDocInsuredsTobahSeeder2026::class, //Insureds
+               BusinessDocsSchemesTobahSeeder2026::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+
+            //=============================================
+            //FILES FOR OMEGA 2026
+            //=============================================
+               BusinessesOmegaSeeder2026::class, //1
+               LiabilityStructureOmegaSeeder2026::class, //2
+            //Files for Placement Schemes==================
+               CschemeOmegaSeeder2026::class, //6
+               CostNodesxOmegaSeeder2026::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsOmegaSeeder2026::class, //Details
+               BusinessDocInsuredsOmegaSeeder2026::class, //Insureds
+               BusinessDocsSchemesOmegaSeeder2026::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+            
+            //=============================================
+            //FILES FOR MESOAMERICA 2026
+            //=============================================
+               BusinessesMesoamericaSeeder2026::class, //1
+               LiabilityStructureMesoamericaSeeder2026::class, //2
+            //Files for Placement Schemes==================
+               CschemeMesoamericaSeeder2026::class, //6
+               CostNodesxMesoamericaSeeder2026::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsMesoamericaSeeder2026::class, //Details
+               BusinessDocInsuredsMesoamericaSeeder2026::class, //Insureds
+               BusinessDocsSchemesMesoamericaSeeder2026::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+            
+            //=============================================
+            //FILES FOR INVICTUS 2026
+            //=============================================
+               BusinessesInvictusSeeder2026::class, //1
+               LiabilityStructureInvictusSeeder2026::class, //2
+            //Files for Placement Schemes==================
+               CschemeInvictusSeeder2026::class, //6
+               CostNodesxInvictusSeeder2026::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsInvictusSeeder2026::class, //Details
+               BusinessDocInsuredsInvictusSeeder2026::class, //Insureds
+               BusinessDocsSchemesInvictusSeeder2026::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+            
+            
+            
+            
+            
+            
             /*
             //=============================================
             //FILES FOR YELMO

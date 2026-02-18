@@ -1493,5 +1493,13 @@ class CompaniesSeeder extends Seeder
         $company->industry_id = '16';
         $company->country_id = '144';
         $company->save();
+
+        $company = new Company();
+        $company->name = 'Promotora Saludanat S.A. De C.V.';
+        $company->acronym = 'SALUDANAT';
+        $company->activity = 'Mexican company associated with “Súper Naturista,” focused on the commercialization of natural products and healthy lifestyle solutions. It operates mainly in Mexico City (CDMX) and the State of Mexico, offering sales positions, customer service roles, and supervisory opportunities, with statutory benefits and direct hiring.';
+        $company->industry_id = '26';
+        $company->country_id = '144';
+        $company->save();
     }
 }

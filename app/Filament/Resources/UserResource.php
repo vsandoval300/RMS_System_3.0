@@ -386,6 +386,15 @@ public static function infolist(Infolist $infolist): Infolist
         return $table
         ->modifyQueryUsing(fn (Builder $query) => $query->with('department'))
         ->columns([
+
+            TextColumn::make('id')
+                ->label('Id')
+                ->sortable()
+                ->searchable()
+                ->copyable()
+                //->toggleable(isToggledHiddenByDefault: true)
+                ->extraAttributes(['class' => 'w-24 text-gray-500']),
+
             TextColumn::make('name')
                 ->label('Name')
                 ->formatStateUsing(function (string $state): string {

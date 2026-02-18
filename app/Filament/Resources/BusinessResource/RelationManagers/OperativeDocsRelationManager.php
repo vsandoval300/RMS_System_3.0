@@ -22,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\View;
@@ -83,6 +84,11 @@ class OperativeDocsRelationManager extends RelationManager
             'schemes.costScheme.costNodexes', 
             //'transactions',
         ]);
+        /* ->withExists([
+            // ✅ true si EL BUSINESS del registro tiene al menos un doc tipo 5
+            'business.OperativeDocs as business_has_cancellation' => fn (Builder $q) =>
+                $q->where('operative_doc_type_id', 5),
+        ]); */
     }
 
     // ✅ CAMBIO 1: helpers SIN $livewire (StaticAction NO puede resolverlo)
@@ -378,6 +384,81 @@ class OperativeDocsRelationManager extends RelationManager
                                                         ->columnSpanFull()
                                                         ->hiddenOn('view'),
 
+                                                    /* DateTimePicker::make('inception_date')
+                                                        ->label('From')
+                                                        ->inlineLabel()
+                                                        ->required()
+                                                        ->dehydratedWhenHidden()
+                                                        ->displayFormat('d/m/Y H:i')     // lo que ve el usuario
+                                                        ->format('Y-m-d H:i:s')          // lo que se guarda (string)
+                                                        ->seconds(false)                 // solo hora:minuto
+                                                        ->native(false)
+                                                        ->before('expiration_date')
+                                                        ->live()
+                                                        ->afterStateHydrated(function (Forms\Set $set, $state, Forms\Get $get, $record) {
+                                                            if ($record?->inception_date) {
+                                                                $set('inception_date', $record->inception_date->format('Y-m-d H:i:s'));
+                                                            }
+
+                                                            $from = $get('inception_date');
+                                                            $to   = $get('expiration_date');
+
+                                                            if ($from && $to) {
+                                                                $set('coverage_days', \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to)));
+                                                            }
+                                                        })
+                                                        ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
+                                                            $from = $state;
+                                                            $to   = $get('expiration_date');
+
+                                                            if (! $from || ! $to) return $set('coverage_days', null);
+
+                                                            $f = \Carbon\Carbon::parse($from);
+                                                            $t = \Carbon\Carbon::parse($to);
+
+                                                            if ($f->gte($t)) return $set('coverage_days', null);
+
+                                                            $set('coverage_days', $f->diffInDays($t));
+                                                        })
+                                                        ->columnSpan(3),
+
+                                                    DateTimePicker::make('expiration_date')
+                                                        ->label('To')
+                                                        ->inlineLabel()
+                                                        ->required()
+                                                        ->dehydratedWhenHidden()
+                                                        ->displayFormat('d/m/Y H:i')
+                                                        ->format('Y-m-d H:i:s')
+                                                        ->seconds(false)
+                                                        ->native(false)
+                                                        ->after('inception_date')
+                                                        ->live()
+                                                        ->afterStateHydrated(function (Forms\Set $set, $state, Forms\Get $get, $record) {
+                                                            if ($record?->expiration_date) {
+                                                                $set('expiration_date', $record->expiration_date->format('Y-m-d H:i:s'));
+                                                            }
+
+                                                            $from = $get('inception_date');
+                                                            $to   = $get('expiration_date');
+
+                                                            if ($from && $to) {
+                                                                $set('coverage_days', \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to)));
+                                                            }
+                                                        })
+                                                        ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
+                                                            $to   = $state;
+                                                            $from = $get('inception_date');
+
+                                                            if (! $from || ! $to) return $set('coverage_days', null);
+
+                                                            $f = \Carbon\Carbon::parse($from);
+                                                            $t = \Carbon\Carbon::parse($to);
+
+                                                            if ($t->lte($f)) return $set('coverage_days', null);
+
+                                                            $set('coverage_days', $f->diffInDays($t));
+                                                        })
+                                                        ->columnSpan(3), */
                                                     DatePicker::make('inception_date')
                                                         ->label('From')
                                                         ->inlineLabel()
@@ -671,7 +752,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             <div>
                                                                 <strong>Important:</strong>
-                                                                Please register the <em>Gross Reinsurance Premium</em>
+                                                                Please register the <em>Annual Gross Reinsurance Premium</em>
                                                                 <strong>per coverage and per insured company</strong>.
                                                                 <br>
                                                                 Placement scheme shares and totals are calculated automatically.
@@ -1048,12 +1129,48 @@ class OperativeDocsRelationManager extends RelationManager
                                     $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
 
                                     $raw = $insured['premium'] ?? 0;
-                                    $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
+
+                                    /* $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
                                     if (is_string($clean)) {
                                         $parts = explode('.', $clean, 3);
                                         $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
                                     }
-                                    $premium = floatval($clean);
+                                    $premium = floatval($clean); */
+
+                                    // ✅ Parse premium conservando signo (-) y soportando paréntesis contables ( ... )
+                                    if (is_string($raw)) {
+                                        $isNegative = false;
+
+                                        // Formato contable: ($1,234.56)
+                                        if (preg_match('/^\s*\(.*\)\s*$/', $raw)) {
+                                            $isNegative = true;
+                                        }
+
+                                        // Mantén dígitos, punto y signo "-"
+                                        $clean = preg_replace('/[^0-9.\-]/', '', $raw);
+
+                                        // Quita cualquier "-" que no esté al inicio
+                                        $clean = ltrim($clean, '+');
+                                        $clean = preg_replace('/(?!^)-/', '', $clean);
+
+                                        // Limita a 2 decimales si viene con más (manteniendo el comportamiento que ya tenías)
+                                        $parts = explode('.', $clean, 3);
+                                        $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
+
+                                        $premium = floatval($clean);
+
+                                        // Si venía con paréntesis y el número quedó positivo, lo hacemos negativo
+                                        if ($isNegative && $premium > 0) {
+                                            $premium *= -1;
+                                        }
+                                    } else {
+                                        // Si ya viene numérico, respétalo
+                                        $premium = floatval($raw);
+                                    }
+
+
+
+
 
                                     return [
                                         'cscheme_id' => $insured['cscheme_id'] ?? null, // 👈 IMPORTANTE
@@ -1380,6 +1497,33 @@ class OperativeDocsRelationManager extends RelationManager
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
                 ->date(),
+
+            /* TextColumn::make('status')
+                ->label('Status')
+                ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->badge()
+                ->state(function ($record) {
+                    // ✅ PRIORIDAD 1: Cancelled si el business tiene endorsement cancelación (tipo 5)
+                    if (($record->business_has_cancellation ?? false) === true) {
+                        return 'Cancelled';
+                    }
+
+                    // ✅ Si no está cancelado, aplica tu lógica normal por fechas
+                    return match (true) {
+                        now()->lt($record->inception_date)   => 'Pending',
+                        now()->lte($record->expiration_date) => 'In Force',
+                        default                              => 'Expired',
+                    };
+                })
+                ->color(fn (string $state): string => match ($state) {
+                    'Cancelled' => 'danger',
+                    'Pending'   => 'gray',
+                    'In Force'  => 'success',
+                    'Expired'   => 'danger',
+                    default     => 'gray',
+                }), */
+    
             
             TextColumn::make('status')
                 ->label('Status')
