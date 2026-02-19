@@ -1089,6 +1089,10 @@ class OperativeDocsRelationManager extends RelationManager
                             ->reactive()
                             ->reactive()
                             ->viewData(function ($get, $record, $livewire) {
+
+                                // ✅ NEW: tomar Exchange Rate del formulario (campo roe_fs)
+                                $roeFs = floatval($get('roe_fs') ?? 0);
+
                                 $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
 
                                 /*================================================================
@@ -1254,27 +1258,20 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalPremiumFts = collect($insureds)->sum('premium_fts');
 
                                 /*================================================================
-                                |  Converted Premium (igual, pero ahora usa el totalPremiumFts)
+                                |  Converted Premium (USD) -> AHORA USA roe_fs (NO installments)
                                 =================================================================*/
+                                // ✅✅✅ CHANGE [ROE-2]: US Dollars = Orig Curr / roe_fs
+                                // (deja $transactions como está porque lo usas para logs)
                                 $transactions = collect($get('transactions') ?? []);
-                                $totalConvertedPremium = 0;
-
-                                foreach ($transactions as $txn) {
-                                    $proportion = floatval($txn['proportion'] ?? 0) / 100;
-                                    $rate = floatval($txn['exch_rate'] ?? 0);
-
-                                    if ($rate > 0) {
-                                        $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
-                                    } else {
-                                        $totalConvertedPremium = 1;
-                                    }
-                                }
+                                $totalConvertedPremium = ($roeFs > 0)
+                                    ? ($totalPremiumFts / $roeFs)
+                                    : 0;
 
                                 /*================================================================
                                 |  ✅✅✅ COSTS BREAKDOWN (FIX: NO duplicar share)
                                 |  - Base por scheme = SUM(premium_fts) de insureds de ese scheme
                                 |  - Deduction = base_scheme * node.value
-                                |  - USD base por scheme usando installments
+                                |  - USD base por scheme = base_orig / roe_fs
                                 =================================================================*/
 
                                 // ✅ MOD [CB-1]: base Orig. Curr por scheme (sum premium_fts del scheme)
@@ -1282,21 +1279,10 @@ class OperativeDocsRelationManager extends RelationManager
                                     ->groupBy('cscheme_id')             // ✅ MOD [CB-1]
                                     ->map(fn ($rows) => $rows->sum('premium_fts')); // ✅ MOD [CB-1]
 
-                                // ✅ MOD [CB-2]: base USD por scheme (aplicando installments)
-                                $convertedFtsByScheme = $premiumFtsByScheme->map(function ($schemeFts) use ($transactions) { // ✅ MOD [CB-2]
-                                    $converted = 0.0;                                                                   // ✅ MOD [CB-2]
-
-                                    foreach ($transactions as $txn) {                                                    // ✅ MOD [CB-2]
-                                        $proportion = floatval($txn['proportion'] ?? 0) / 100;                           // ✅ MOD [CB-2]
-                                        $rate       = floatval($txn['exch_rate'] ?? 0);                                  // ✅ MOD [CB-2]
-
-                                        if ($rate > 0) {                                                                 // ✅ MOD [CB-2]
-                                            $converted += ($schemeFts * $proportion) / $rate;                            // ✅ MOD [CB-2]
-                                        }                                                                                // ✅ MOD [CB-2]
-                                    }                                                                                    // ✅ MOD [CB-2]
-
-                                    return $converted;                                                                    // ✅ MOD [CB-2]
-                                });                                                                                       // ✅ MOD [CB-2]
+                                // ✅✅✅ CHANGE [ROE-3]: base USD por scheme = base Orig / roe_fs
+                                $convertedFtsByScheme = $premiumFtsByScheme->map(function ($schemeFts) use ($roeFs) {
+                                    return ($roeFs > 0) ? ($schemeFts / $roeFs) : 0.0;
+                                });                                                                                      // ✅ MOD [CB-2]
 
                                 // ✅ MOD [CB-3]: recalcular groupedCostNodes con fórmula correcta
                                 $totalDeductionOrig = 0;
@@ -1359,6 +1345,10 @@ class OperativeDocsRelationManager extends RelationManager
                                     })
                                     ->values()
                                     ->toArray();
+
+                                // ✅✅✅ CHANGE [NET-1]: netos consistentes (no depender de recalculo en Blade)
+                                $netUnderwrittenOrig = $totalPremiumFts - $totalDeductionOrig;
+                                $netUnderwrittenUsd  = $totalConvertedPremium - $totalDeductionUsd;    
 
                                 /*================================================================
                                 |  LOGS (igual que lo tenías)
@@ -1430,6 +1420,13 @@ class OperativeDocsRelationManager extends RelationManager
 
                                     'transactions' => collect($get('transactions') ?? [])->values(),
                                     'logsByTxn' => $logsByTxn,
+
+                                    // ✅ opcional (por si lo quieres mostrar en summary/pdf)
+                                    'roe_fs' => $roeFs,
+                                    // ✅✅✅ CHANGE [NET-2]
+                                    'netUnderwrittenOrig' => $netUnderwrittenOrig,
+                                    'netUnderwrittenUsd'  => $netUnderwrittenUsd,
+                                    
                                 ];
                             }),
                     ])

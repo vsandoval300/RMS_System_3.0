@@ -225,6 +225,25 @@ class DatabaseSeeder extends Seeder
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
+
+            //=============================================
+            //FILES FOR RISIKO 2026
+            //=============================================
+               BusinessesRisikoSeeder2026::class, //1
+               LiabilityStructureRisikoSeeder2026::class, //2
+            //Files for Placement Schemes==================
+               CschemeRisikoSeeder2026::class, //6
+               CostNodesxRisikoSeeder2026::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsRisikoSeeder2026::class, //Details
+               BusinessDocInsuredsRisikoSeeder2026::class, //Insureds
+               BusinessDocsSchemesRisikoSeeder2026::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
             
             
             
