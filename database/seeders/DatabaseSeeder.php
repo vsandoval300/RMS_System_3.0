@@ -115,18 +115,18 @@ class DatabaseSeeder extends Seeder
             //=============================================
             //FILES FOR CELL-MAYAB
             //=============================================
-               BusinessesCellMayabSeeder::class, //1
-               LiabilityStructureCellMayabSeeder::class, //2
+               //BusinessesCellMayabSeeder::class, //1
+               //LiabilityStructureCellMayabSeeder::class, //2
             //Files for Placement Schemes==================
-               CschemeCellMayabSeeder::class, //6
-               CostNodesxCellMayabSeeder::class, //4
+               //CschemeCellMayabSeeder::class, //6
+               //CostNodesxCellMayabSeeder::class, //4
             //CschemeCnodesCellMayabSeeder::class, //7
             //Files for Business Documents=================
-               BusinessesDocsCellMayabSeeder::class, //Details
-               BusinessDocInsuredsCellMayabSeeder::class, //Insureds
-               BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
-               TransactionsCellMayabSeeder::class, //Transactions
-               TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+               //BusinessesDocsCellMayabSeeder::class, //Details
+               //BusinessDocInsuredsCellMayabSeeder::class, //Insureds
+               //BusinessDocsSchemesCellMayabSeeder::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
@@ -302,18 +302,18 @@ class DatabaseSeeder extends Seeder
             //=============================================
             //FILES FOR RISIKO
             //=============================================
-               TreatiesRisikoSeeder::class,
+               /* TreatiesRisikoSeeder::class,
                TreatiesDocRisikoSeeder::class,
                BusinessesRisikoSeeder::class, //1
-               LiabilityStructureRisikoSeeder::class, //2
+               LiabilityStructureRisikoSeeder::class, //2 */
             //Files for Placement Schemes==================
-               CschemeRisikoSeeder::class, //6
-               CostNodesxRisikoSeeder::class, //4
+               /* CschemeRisikoSeeder::class, //6
+               CostNodesxRisikoSeeder::class, //4 */
             //CschemeCnodesRisikoSeeder::class, //7
             //Files for Business Documents=================
-               BusinessesDocsRisikoSeeder::class, //Details
+               /* BusinessesDocsRisikoSeeder::class, //Details
                BusinessDocInsuredsRisikoSeeder::class, //Insureds
-               BusinessDocsSchemesRisikoSeeder::class, //Placement Schemes
+               BusinessDocsSchemesRisikoSeeder::class, //Placement Schemes */
                //TransactionsRisikoSeeder::class, //Transactions
                //TransactionsLogRisikoSeeder::class, //TransactionLogs
 

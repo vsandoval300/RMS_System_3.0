@@ -166,6 +166,14 @@ class PartnersSeeder extends Seeder
         $partner=new partner();         $partner->name = 'SMG Seguros';        $partner->short_name = 'SMG Seguros - [INC]';        $partner->acronym = 'SMG';          $partner->partner_types_id = '3';          $partner->country_id = '11';         $partner->save(); 
         $partner=new partner();         $partner->name = 'Southbridge Insurance Company';        $partner->short_name = 'Southbridge Insurance - [INC]';        $partner->acronym = 'SOU';          $partner->partner_types_id = '3';          $partner->country_id = '45';         $partner->save(); 
         $partner=new partner();         $partner->name = 'Unnio Seguros Generales';        $partner->short_name = 'Unnio Seguros - [INC]';        $partner->acronym = 'UNN';          $partner->partner_types_id = '3';          $partner->country_id = '45';         $partner->save(); 
+        $partner=new partner();         $partner->name = 'American Home Assurance Company';        $partner->short_name = 'American Home [REC]';        $partner->acronym = 'AHA';          $partner->partner_types_id = '5';          $partner->country_id = '236';         $partner->save(); 
+        $partner=new partner();         $partner->name = 'New Hampshire Insurance Company';        $partner->short_name = 'New Hampshire [REC]';        $partner->acronym = 'NHI';          $partner->partner_types_id = '5';          $partner->country_id = '236';         $partner->save(); 
+        $partner=new partner();         $partner->name = 'National Union Fire Insurance Company Of Pittsburgh, Pa';        $partner->short_name = 'National Union Fire [REC]';        $partner->acronym = 'NUF';          $partner->partner_types_id = '5';          $partner->country_id = '236';         $partner->save(); 
+        $partner=new partner();         $partner->name = 'Aseguradora Suiza Salvadoreña, S.a.';        $partner->short_name = 'Asesuisa [INC]';        $partner->acronym = 'ASS';          $partner->partner_types_id = '3';          $partner->country_id = '67';         $partner->save(); 
+        $partner=new partner();         $partner->name = 'Cg United Insurance Ltd';        $partner->short_name = 'CG Insurance [INC]';        $partner->acronym = 'CGI';          $partner->partner_types_id = '3';          $partner->country_id = '20';         $partner->save(); 
+
+
+
 
     }
 }

@@ -367,7 +367,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     Section::make('Coverage Period')
                                             ->columns(12)
                                             ->schema([
-                                                    Placeholder::make('coverage_period_hint')
+                                                    /* Placeholder::make('coverage_period_hint')
                                                         ->label(' ')
                                                         ->content(function (Get $get) {
                                                             $from = $get('inception_date');
@@ -382,9 +382,36 @@ class OperativeDocsRelationManager extends RelationManager
                                                         })
                                                         ->extraAttributes(['class' => 'text-sm text-gray-600 dark:text-gray-400 leading-tight'])
                                                         ->columnSpanFull()
+                                                        ->hiddenOn('view'), */
+
+                                                    Placeholder::make('coverage_period_hint')
+                                                        ->label(' ')
+                                                        ->content(function (Get $get) {
+
+                                                            $from = $get('inception_date');
+                                                            $to   = $get('expiration_date');
+                                                            $days = $get('coverage_days');
+
+                                                            $base = 'Select the coverage dates (From–To). The coverage period in days is calculated automatically.';
+
+                                                            if ($from && $to && $days) {
+
+                                                                // ✅ Ignorar hora → trabajar solo con fecha calendario
+                                                                $fromDate = Carbon::parse($from)->startOfDay()->format('Y-m-d');
+                                                                $toDate   = Carbon::parse($to)->startOfDay()->format('Y-m-d');
+
+                                                                $daysInt = (int) $days;
+
+                                                                return "$base Current selection: $fromDate → $toDate ($days days).";
+                                                            }
+
+                                                            return "$base The end date must be later than the start date.";
+                                                        })
+                                                        ->extraAttributes(['class' => 'text-sm text-gray-600 dark:text-gray-400 leading-tight'])
+                                                        ->columnSpanFull()
                                                         ->hiddenOn('view'),
 
-                                                    /* DateTimePicker::make('inception_date')
+                                                    DateTimePicker::make('inception_date')
                                                         ->label('From')
                                                         ->inlineLabel()
                                                         ->required()
@@ -404,7 +431,12 @@ class OperativeDocsRelationManager extends RelationManager
                                                             $to   = $get('expiration_date');
 
                                                             if ($from && $to) {
-                                                                $set('coverage_days', \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to)));
+                                                                $f = Carbon::parse($from)->startOfDay();
+                                                                $t = Carbon::parse($to)->startOfDay();
+
+                                                                if ($f->gte($t)) return $set('coverage_days', null);
+
+                                                                $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
                                                             }
                                                         })
                                                         ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
@@ -413,12 +445,12 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             if (! $from || ! $to) return $set('coverage_days', null);
 
-                                                            $f = \Carbon\Carbon::parse($from);
-                                                            $t = \Carbon\Carbon::parse($to);
+                                                            $f = Carbon::parse($from)->startOfDay();
+                                                            $t = Carbon::parse($to)->startOfDay();
 
                                                             if ($f->gte($t)) return $set('coverage_days', null);
 
-                                                            $set('coverage_days', $f->diffInDays($t));
+                                                            $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
                                                         })
                                                         ->columnSpan(3),
 
@@ -442,7 +474,12 @@ class OperativeDocsRelationManager extends RelationManager
                                                             $to   = $get('expiration_date');
 
                                                             if ($from && $to) {
-                                                                $set('coverage_days', \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to)));
+                                                                $f = Carbon::parse($from)->startOfDay();
+                                                                $t = Carbon::parse($to)->startOfDay();
+
+                                                                if ($t->lte($f)) return $set('coverage_days', null);
+
+                                                                $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
                                                             }
                                                         })
                                                         ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
@@ -451,15 +488,17 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             if (! $from || ! $to) return $set('coverage_days', null);
 
-                                                            $f = \Carbon\Carbon::parse($from);
-                                                            $t = \Carbon\Carbon::parse($to);
+                                                            $f = Carbon::parse($from)->startOfDay();
+                                                            $t = Carbon::parse($to)->startOfDay();
 
                                                             if ($t->lte($f)) return $set('coverage_days', null);
 
-                                                            $set('coverage_days', $f->diffInDays($t));
+                                                            $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
                                                         })
-                                                        ->columnSpan(3), */
-                                                    DatePicker::make('inception_date')
+                                                        ->columnSpan(3),
+
+
+                                                    /* DatePicker::make('inception_date')
                                                         ->label('From')
                                                         ->inlineLabel()
                                                         ->required()
@@ -511,7 +550,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             if ($t->lte($f)) return $set('coverage_days', null);
                                                             $set('coverage_days', $f->diffInDays($t));
                                                         })
-                                                        ->columnSpan(3),
+                                                        ->columnSpan(3), */
 
                                                     // ⬅️ Espaciador de 3 columnas
                                                     Placeholder::make('gap_exp_to_period')
@@ -531,6 +570,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         ->disabled()
                                                         ->dehydrated(false)
                                                         ->suffix('days')
+                                                        ->formatStateUsing(fn ($state) => $state !== null ? (int) $state : null) // ✅ NEW
                                                         ->extraInputAttributes(['class' => 'text-right'])
                                                         ->placeholder('—')
                                                         ->columnSpan(3),
@@ -1023,18 +1063,6 @@ class OperativeDocsRelationManager extends RelationManager
                 // ─────────  C) SECTION: (colapsable)  ───────────────────────────────────────── 
                 // 🟡 SUMMARY Section
                 // ──────────────────────────────────────────────────────────────────────────────
-                /* Section::make('Overview')
-                    ->collapsible()
-                    ->collapsed(fn (Get $get) => $get('active_panel') !== 'summary')
-                    ->extraAttributes([
-                        'x-on:click.self' => '$wire.set("data.active_panel","summary"); $wire.set("active_panel","summary");',
-                        'class' => 'max-h-[700px] overflow-y-auto',
-                    ])
-
-                    // ⬇️ Botón para exportar/preview/imprimir
-                    ->headerActions([
-                        FormAction::make('Export to pdf'),
-                    ]) */
 
                     Section::make()
                     ->schema([
@@ -1220,13 +1248,15 @@ class OperativeDocsRelationManager extends RelationManager
                                 $inception   = $get('inception_date');
                                 $expiration  = $get('expiration_date');
 
-                                $start       = $inception ? \Carbon\Carbon::parse($inception) : null;
-                                $end         = $expiration ? \Carbon\Carbon::parse($expiration) : null;
+                                /* $start       = $inception ? \Carbon\Carbon::parse($inception) : null;
+                                $end         = $expiration ? \Carbon\Carbon::parse($expiration) : null; */
+                                $start = $inception  ? \Carbon\Carbon::parse($inception)->startOfDay() : null;
+                                $end   = $expiration ? \Carbon\Carbon::parse($expiration)->startOfDay() : null;
 
                                 // ✅ MOD [LEAP-1]: define días del año (según el año del start)
                                 $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
                                 // ✅ MOD [LEAP-2]: calcula coverageDays normal
-                                $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+                                $coverageDays = ($start && $end) ? (int) $start->diffInDays($end) : 0;
                                 // ✅ MOD [LEAP-3]: regla anti-distorsión (tu caso 31/12/2011 -> 31/12/2012)
                                 if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
                                     $coverageDays = $daysInYear;
@@ -1487,13 +1517,22 @@ class OperativeDocsRelationManager extends RelationManager
 
             TextColumn::make('inception_date')
                 ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->dateTime('d/m/Y H:i'),
+
+            TextColumn::make('expiration_date')
+                ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->dateTime('d/m/Y H:i'),
+            /* TextColumn::make('inception_date')
+                ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)   
                 ->date(),
 
             TextColumn::make('expiration_date')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
-                ->date(),
+                ->date(), */
 
             /* TextColumn::make('status')
                 ->label('Status')

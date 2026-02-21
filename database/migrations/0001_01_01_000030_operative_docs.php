@@ -20,8 +20,10 @@ return new class extends Migration
             $table->foreignId('operative_doc_type_id')->constrained('business_doc_types');
             $table->integer('index');
             $table->text('description');
-            $table->date('inception_date');
-            $table->date('expiration_date');
+            //$table->date('inception_date');
+            //$table->date('expiration_date');
+            $table->timestamp('inception_date');
+            $table->timestamp('expiration_date');
             $table->string('document_path',200)->nullable();
 
             //$table->boolean('client_payment_tracking')->default(false);

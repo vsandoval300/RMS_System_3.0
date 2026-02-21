@@ -88,10 +88,9 @@
                     Coverage days:
                 </td>
                 <td class="px-2 py-1 font-thin">
-                    {{ isset($inceptionDate, $expirationDate)
-                        ? \Carbon\Carbon::parse($inceptionDate)->diffInDays(\Carbon\Carbon::parse($expirationDate))
-                        : '-' }}
+                    {{ isset($coverageDays) ? (int) $coverageDays : '-' }}
                 </td>
+                
                 <td></td>
                 <td></td>
             </tr>
