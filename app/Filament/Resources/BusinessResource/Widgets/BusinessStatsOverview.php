@@ -20,17 +20,17 @@ class BusinessStatsOverview extends BaseWidget
         return [
             //
             Stat::make('Total Businesses', Business::count())
-                ->description('Total en la base de datos')
+                ->description('Total in the database')
                 ->icon('heroicon-o-building-office')
                 ->color('primary'),
 
             Stat::make('Facultative', Business::where('reinsurance_type', 'Facultative')->count())
-                ->description('Negocios Facultativos')
+                ->description('Facultative Businesses')
                 ->icon('heroicon-o-shield-check')
                 ->color('success'),
 
             Stat::make('In Force', Business::where('business_lifecycle_status', 'In Force')->count())
-                ->description('Actualmente vigentes')
+                ->description('Currently in force')
                 ->icon('heroicon-o-clock')
                 ->color('info'),
         ];
