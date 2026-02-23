@@ -1068,211 +1068,290 @@ class BusinessResource extends Resource
             // ║ Underwritten Report                                                     ║
             // ╚═════════════════════════════════════════════════════════════════════════╝
 
-            ->headerActions([
-                Action::make('export')
-                    ->label('Export Report')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->modalHeading('Export Reports')
-                    ->modalSubmitActionLabel('Generate')
-                    ->closeModalByClickingAway(false)
-                    ->closeModalByEscaping(false) 
-                    ->form([
-                        Select::make('report_type')
-                            ->label('Report Type')
-                            ->options([
-                                'operative_docs'      => 'Operative Docs (Insured + Nodes)',
-                                'underwritten_report' => 'Underwritten Report (by Deduction)',
-                            ])
-                            ->default('operative_docs')
-                            ->required(),
+->headerActions([
+    Action::make('export')
+        ->label('Export Report')
+        ->icon('heroicon-o-arrow-down-tray')
+        ->modalHeading('Export Reports')
+        ->modalSubmitActionLabel('Generate')
+        ->closeModalByClickingAway(false)
+        ->closeModalByEscaping(false)
+        ->form([
+            Select::make('report_type')
+                ->label('Report Type')
+                ->options([
+                    'operative_docs'      => 'Underwritten – Coverage Period',
+                    'underwritten_report' => 'Underwritten – Reporting Month',
+                ])
+                ->default('operative_docs')
+                ->required()
+                ->live(),
 
-                        Select::make('reinsurer_ids')
-                            ->label('Reinsurer(s)')
-                            ->placeholder('All reinsurers')
-                            ->options(fn () => \App\Models\Reinsurer::orderBy('name')->pluck('name', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->multiple(),
+            Select::make('reinsurer_ids')
+                ->label('Reinsurer(s)')
+                ->placeholder('All reinsurers')
+                ->options(fn () => \App\Models\Reinsurer::orderBy('name')->pluck('name', 'id'))
+                ->searchable()
+                ->preload()
+                ->multiple(),
 
-                        DatePicker::make('from_date')->label('From date')->required(),
-                        DatePicker::make('to_date')->label('To date')->required(),
-                    ])
-                    ->action(function (array $data) {
+            // =========================
+            // Coverage Period (inception)
+            // =========================
+            DatePicker::make('from_date')
+                ->label('From date')
+                ->required(fn ($get) => $get('report_type') === 'operative_docs')
+                ->visible(fn ($get) => $get('report_type') === 'operative_docs')
+                ->native(false),
 
-                        $from   = $data['from_date'] ?? null;
-                        $to     = $data['to_date']   ?? null;
-                        $report = $data['report_type'] ?? null;
+            DatePicker::make('to_date')
+                ->label('To date')
+                ->required(fn ($get) => $get('report_type') === 'operative_docs')
+                ->visible(fn ($get) => $get('report_type') === 'operative_docs')
+                ->native(false),
 
-                        if (!$from || !$to || !$report) {
-                            Notification::make()->title('Please select report type and both dates.')->warning()->send();
-                            return;
+            // =========================
+            // Reporting Month Range (rep_date)
+            // =========================
+            DatePicker::make('rep_from')
+                ->label('Reporting month from')
+                ->displayFormat('F Y')     // February 2026
+                ->format('Y-m-01')         // guarda día 01
+                ->required(fn ($get) => $get('report_type') === 'underwritten_report')
+                ->visible(fn ($get) => $get('report_type') === 'underwritten_report')
+                ->native(false)
+                ->closeOnDateSelection()
+                ->live(),
+
+            DatePicker::make('rep_to')
+                ->label('Reporting month to')
+                ->displayFormat('F Y')
+                ->format('Y-m-01')
+                ->required(fn ($get) => $get('report_type') === 'underwritten_report')
+                ->visible(fn ($get) => $get('report_type') === 'underwritten_report')
+                ->native(false)
+                ->closeOnDateSelection()
+                ->live(),
+        ])
+        ->action(function (array $data) {
+
+            $report = $data['report_type'] ?? null;
+
+            $reinsurerIds = collect($data['reinsurer_ids'] ?? [])
+                ->filter()
+                ->values();
+
+            $scope = $reinsurerIds->isEmpty()
+                ? 'all-reinsurers'
+                : ('reinsurers-' . $reinsurerIds->implode('-'));
+
+            $reportLabels = [
+                'operative_docs'      => 'OperativeDocs_report',
+                'underwritten_report' => 'Underwritten_report',
+            ];
+            $reportLabel  = $reportLabels[$report] ?? ($report ?? 'report');
+
+            // -----------------------------
+            // Determine date range & column
+            // -----------------------------
+            if ($report === 'operative_docs') {
+                $from = $data['from_date'] ?? null;
+                $to   = $data['to_date'] ?? null;
+
+                if (!$from || !$to) {
+                    Notification::make()
+                        ->title('Please select both dates.')
+                        ->warning()
+                        ->send();
+                    return;
+                }
+
+                $rangeLabelFrom = Carbon::parse($from)->format('Ymd');
+                $rangeLabelTo   = Carbon::parse($to)->format('Ymd');
+
+                $dateColumn = 'operative_docs.inception_date';
+                $dateStart  = Carbon::parse($from)->startOfDay();
+                $dateEnd    = Carbon::parse($to)->endOfDay();
+            }
+            elseif ($report === 'underwritten_report') {
+                $repFrom = $data['rep_from'] ?? null;
+                $repTo   = $data['rep_to'] ?? null;
+
+                if (!$repFrom || !$repTo) {
+                    Notification::make()
+                        ->title('Please select a reporting month range.')
+                        ->warning()
+                        ->send();
+                    return;
+                }
+
+                $repFromC = Carbon::parse($repFrom)->startOfMonth();
+                $repToC   = Carbon::parse($repTo)->endOfMonth();
+
+                if ($repFromC->gt($repToC)) {
+                    Notification::make()
+                        ->title('Reporting month "from" must be before "to".')
+                        ->warning()
+                        ->send();
+                    return;
+                }
+
+                // ✅ para el query (meses completos)
+                $dateColumn = 'operative_docs.rep_date';
+                $dateStart  = $repFromC->startOfDay();
+                $dateEnd    = $repToC->endOfDay();
+
+                // ✅ para el nombre del archivo: Jan2026_to_Feb2026
+                $rangeLabelFrom = $repFromC->format('MY'); // Jan2026
+                $rangeLabelTo   = $repToC->format('MY');   // Feb2026
+            }
+            else {
+                Notification::make()
+                    ->title('Unsupported report type.')
+                    ->danger()
+                    ->send();
+                return;
+            }
+
+            // -----------------------------
+            // Filename
+            // -----------------------------
+            if ($report === 'underwritten_report') {
+                // ✅ Underwritten_report_Jan2026_to_Feb2026.xlsx
+                $filename = sprintf(
+                    'Underwritten_report_%s_to_%s.xlsx',
+                    $rangeLabelFrom,
+                    $rangeLabelTo
+                );
+            } else {
+                // ✅ OperativeDocs_report_{scope}_YYYYMMDD_to_YYYYMMDD.xlsx (como ya lo traías)
+                $filename = sprintf(
+                    '%s_%s_%s_to_%s.xlsx',
+                    $reportLabel,
+                    $scope,
+                    $rangeLabelFrom,
+                    $rangeLabelTo
+                );
+            }
+
+            // ---------------------------------------------------------
+            // Flat query: 1 registro por (insured_row_id × node)
+            // ---------------------------------------------------------
+            $flat = OperativeDoc::query()
+                ->with([
+                    'business.reinsurer',
+                    'business.currency',
+                    'business.liabilityStructures',
+                    'docType',
+                ])
+                ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
+                ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
+                    $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
+                )
+
+                // ✅ filtro dinámico por columna (inception_date vs rep_date)
+                ->whereBetween($dateColumn, [$dateStart, $dateEnd])
+
+                // insureds
+                ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
+                ->leftJoin('companies', 'companies.id', '=', 'businessdoc_insureds.company_id')
+                ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
+                ->leftJoin('coverages', 'coverages.id', '=', 'businessdoc_insureds.coverage_id')
+
+                // scheme del insured
+                ->leftJoin('cost_schemes as insured_scheme', 'insured_scheme.id', '=', 'businessdoc_insureds.cscheme_id')
+
+                // nodes
+                ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'insured_scheme.id')
+
+                // deductions label
+                ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
+
+                // partner source
+                ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
+
+                ->orderBy('businesses.business_code')
+                ->orderBy('operative_docs.id')
+                ->orderBy('businessdoc_insureds.id')
+                ->orderBy('cost_nodesx.index')
+
+                ->select([
+                    'operative_docs.*',
+
+                    'insured_scheme.share as share',
+
+                    'companies.name as insured_name',
+                    'countries.name as country_name',
+                    'coverages.name as coverage_name',
+                    'businessdoc_insureds.premium as insured_premium',
+
+                    'businessdoc_insureds.id as insured_row_id',
+                    'businessdoc_insureds.cscheme_id as insured_cscheme_id',
+
+                    'cost_nodesx.id as node_id',
+                    'cost_nodesx.cscheme_id as node_cscheme_id',
+                    'cost_nodesx.index as node_index',
+                    'cost_nodesx.value as node_value',
+
+                    'deductions.concept as deduction_concept',
+
+                    'p_src.name as node_source_name',
+                    'p_src.acronym as node_source_acronym',
+                ])
+                ->get();
+
+            if ($flat->isEmpty()) {
+                Notification::make()
+                    ->title('No records found for the selected range.')
+                    ->info()
+                    ->send();
+                return;
+            }
+
+            // ---------------------------------------------------------
+            // Build wide (1 row per insured)
+            // ---------------------------------------------------------
+            $wide = $flat
+                ->groupBy(fn ($r) => $r->insured_row_id ?? ($r->id . '|no-insured'))
+                ->map(function ($rows) {
+                    $first = $rows->first();
+
+                    $schemeId = $first->insured_cscheme_id;
+
+                    $schemeNodes = $rows
+                        ->filter(fn ($r) => $schemeId && ($r->node_cscheme_id ?? null) === $schemeId)
+                        ->unique('node_id')
+                        ->sortBy(fn ($r) => (int) ($r->node_index ?? 0))
+                        ->values();
+
+                    $first->nodes_list = $schemeNodes->map(function ($r) {
+                        $source = trim(($r->node_source_name ?? '') . ' - [' . ($r->node_source_acronym ?? '') . ']');
+                        if ($source === '- []') {
+                            $source = null;
                         }
 
-                        $reinsurerIds = collect($data['reinsurer_ids'] ?? [])->filter()->values();
-
-                        $scope = $reinsurerIds->isEmpty()
-                            ? 'all-reinsurers'
-                            : ('reinsurers-' . $reinsurerIds->implode('-'));
-
-                        $reportLabels = [
-                            'operative_docs'      => 'OperativeDocs_report',
-                            'underwritten_report' => 'Underwritten_report',
+                        return [
+                            'deduction_type' => $r->deduction_concept ?? null,
+                            'source'         => $source ?: null,
+                            'value'          => is_null($r->node_value) ? null : (float) $r->node_value,
                         ];
-                        $reportLabel  = $reportLabels[$report] ?? $report;
+                    })->all();
 
-                        $filename = sprintf(
-                            '%s_%s_%s_to_%s.xlsx',
-                            $reportLabel,
-                            $scope,
-                            Carbon::parse($from)->format('Ymd'),
-                            Carbon::parse($to)->format('Ymd')
-                        );
+                    return $first;
+                })
+                ->values();
 
-                        // ---------------------------------------------------------
-                        // 1) Flat query: 1 registro por (insured_row_id × node)
-                        // ---------------------------------------------------------
-                        $flat = OperativeDoc::query()
-                            ->with([
-                                'business.reinsurer',
-                                'business.currency',
-                                'business.liabilityStructures',
-                                'docType',
-                            ])
-                            ->whereDate('operative_docs.inception_date', '>=', $from)
-                            ->whereDate('operative_docs.inception_date', '<=', $to)
-                            ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
-                            ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
-                                $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
-                            )
+            $maxNodes = (int) ($wide
+                ->map(fn ($d) => is_array($d->nodes_list ?? null) ? count($d->nodes_list) : 0)
+                ->max() ?? 0);
 
-                            // insureds (base del desglose)
-                            ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
-                            ->leftJoin('companies', 'companies.id', '=', 'businessdoc_insureds.company_id')
-                            ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
-                            ->leftJoin('coverages', 'coverages.id', '=', 'businessdoc_insureds.coverage_id')
-
-                            // scheme asociado AL insured (para share)
-                            ->leftJoin('cost_schemes as insured_scheme', 'insured_scheme.id', '=', 'businessdoc_insureds.cscheme_id')
-
-                            // nodes del scheme del insured
-                            ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'insured_scheme.id')
-
-                            // deductions label (concept)
-                            ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
-
-                            // partners con alias (SOURCE)
-                            ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
-
-                            ->orderBy('businesses.business_code')
-                            ->orderBy('operative_docs.id')
-                            ->orderBy('businessdoc_insureds.id')
-                            ->orderBy('cost_nodesx.index')
-
-                            ->select([
-                                'operative_docs.*',
-
-                                // share del scheme del insured
-                                'insured_scheme.share as share',
-
-                                // insured breakdown
-                                'companies.name as insured_name',
-                                'countries.name as country_name',
-                                'coverages.name as coverage_name',
-                                'businessdoc_insureds.premium as insured_premium',
-
-                                // insured row + cscheme asociado al insured
-                                'businessdoc_insureds.id as insured_row_id',
-                                'businessdoc_insureds.cscheme_id as insured_cscheme_id',
-
-                                // nodes
-                                'cost_nodesx.id as node_id',
-                                'cost_nodesx.cscheme_id as node_cscheme_id',
-                                'cost_nodesx.index as node_index',
-                                'cost_nodesx.value as node_value',
-
-                                // label para Node_*_Deduction_Type
-                                'deductions.concept as deduction_concept',
-
-                                // source text
-                                'p_src.name as node_source_name',
-                                'p_src.acronym as node_source_acronym',
-                            ])
-                            ->get();
-
-                        if ($flat->isEmpty()) {
-                            Notification::make()->title('No records found for the selected range.')->info()->send();
-                            return;
-                        }
-
-                        // ---------------------------------------------------------
-                        // 2) Operative Docs (Insured + Nodes) ✅ SIN MATRIZ VIEJA
-                        // ---------------------------------------------------------
-                        if ($report === 'operative_docs') {
-
-                            $wide = $flat
-                                ->groupBy(fn ($r) => $r->insured_row_id ?? ($r->id . '|no-insured'))
-                                ->map(function ($rows) {
-
-                                    $first = $rows->first();
-
-                                    // nodos SOLO del cscheme del insured
-                                    $schemeId = $first->insured_cscheme_id;
-
-                                    $schemeNodes = $rows
-                                        ->filter(fn ($r) => $schemeId && ($r->node_cscheme_id ?? null) === $schemeId)
-                                        ->unique('node_id')
-                                        ->sortBy(fn ($r) => (int) ($r->node_index ?? 0))
-                                        ->values();
-
-                                    $first->nodes_list = $schemeNodes->map(function ($r) {
-                                        $source = trim(($r->node_source_name ?? '') . ' - [' . ($r->node_source_acronym ?? '') . ']');
-                                        if ($source === '- []') {
-                                            $source = null;
-                                        }
-
-                                        return [
-                                            'deduction_type' => $r->deduction_concept ?? null,
-                                            'source'         => $source ?: null,
-                                            'value'          => is_null($r->node_value) ? null : (float) $r->node_value,
-                                        ];
-                                    })->all();
-
-                                    return $first;
-                                })
-                                ->values();
-
-                            $maxNodes = (int) ($wide
-                                ->map(fn ($d) => is_array($d->nodes_list ?? null) ? count($d->nodes_list) : 0)
-                                ->max() ?? 0);
-
-                            return Excel::download(
-                                new \App\Exports\OperativeDocsExport($wide, $maxNodes),
-                                $filename
-                            );
-                        }
-
-                        // ---------------------------------------------------------
-                        // 3) Underwritten Report (by Deduction)
-                        // ---------------------------------------------------------
-                        if ($report === 'underwritten_report') {
-
-                            // ✅ Aquí lo dejamos como lo traías, pero OJO:
-                            // Tu UnderwrittenReportExport debe aceptar (Collection $rows) en su constructor.
-                            $wide = $flat
-                                ->groupBy(fn ($r) => $r->insured_row_id ?? ($r->id . '|no-insured'))
-                                ->map(fn ($rows) => $rows->first())
-                                ->values();
-
-                            return Excel::download(
-                                new \App\Exports\UnderwrittenReportExport($wide),
-                                $filename
-                            );
-                        }
-
-                        Notification::make()->title('Unsupported report type.')->danger()->send();
-                        return;
-                    }),
-            ])
+            // Export (tu OperativeDocsExport no cambia)
+            return Excel::download(
+                new \App\Exports\OperativeDocsExport($wide, $maxNodes),
+                $filename
+            );
+        }),
+])
 
 
 
