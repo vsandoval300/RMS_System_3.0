@@ -279,10 +279,10 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->columnSpan(3), */
 
                                                         DatePicker::make('rep_date')
-                                                            ->label('Report date')
+                                                            ->label('Underwriting Month')
                                                             ->required()
                                                             ->dehydratedWhenHidden()
-                                                            ->displayFormat('m/Y')     // lo que ve el usuario
+                                                            ->displayFormat('F Y')     // lo que ve el usuario
                                                             ->format('Y-m-01')          // lo que se guarda (string)
                                                             ->seconds(false)                 // solo hora:minuto
                                                             ->native(false)
