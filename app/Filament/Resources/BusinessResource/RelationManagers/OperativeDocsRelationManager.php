@@ -274,10 +274,21 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 return ! $slipExists; // primer doc => slip bloqueado
                                                             }), 
                                                                 
-                                                        Placeholder::make('gap1')
+                                                        /* Placeholder::make('gap1')
                                                             ->hiddenLabel()
-                                                            ->columnSpan(3),
+                                                            ->columnSpan(3), */
 
+                                                        DatePicker::make('rep_date')
+                                                            ->label('Report date')
+                                                            ->required()
+                                                            ->dehydratedWhenHidden()
+                                                            ->displayFormat('m/Y')     // lo que ve el usuario
+                                                            ->format('Y-m-01')          // lo que se guarda (string)
+                                                            ->seconds(false)                 // solo hora:minuto
+                                                            ->native(false)
+                                                            ->closeOnDateSelection()
+                                                            ->live()
+                                                            ->columnSpan(3),
                                                         
                                                         TextInput::make('roe_fs')
                                                             ->label('Exchange rate')

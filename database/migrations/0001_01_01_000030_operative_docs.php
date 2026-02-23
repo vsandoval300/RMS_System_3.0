@@ -37,6 +37,7 @@ return new class extends Migration
 
             $table->float('af_mf');
             $table->float('roe_fs')->nullable();
+            $table->date('rep_date')->nullable();
 
             // ✅ NUEVO: Campo agregado desde la segunda migración
             $table->foreignId('created_by_user')->nullable()->constrained('users')->cascadeOnDelete();
