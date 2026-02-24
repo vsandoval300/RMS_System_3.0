@@ -123,6 +123,7 @@ class CostSchemeResource extends Resource
                                                 ->disabled()
                                                 ->dehydrated()
                                                 ->required()
+                                                ->hiddenOn('create')
                                                 ->afterStateHydrated(fn ($component, $state) => $component->state($state))
                                                 ->columnSpan(1),
                                         ]),
@@ -245,7 +246,7 @@ class CostSchemeResource extends Resource
                                         ->maxValue(100)
                                         ->dehydrated() // ✅ IMPORTANTÍSIMO
                                         ->disabled(fn (Get $get) => (int) $get('concept') === $exemptId) // 👈 bloquea si es exempt
-                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 5, '.', '') : '0.00000')
+                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 10, '.', '') : '0.00000')
                                         ->dehydrateStateUsing(fn ($state) => ($state !== null && $state !== '') ? $state / 100 : 0)
                                         ->extraInputAttributes(['class' => 'text-right tabular-nums'])
                                         ->columnSpan(2),
@@ -300,8 +301,7 @@ class CostSchemeResource extends Resource
 
                                     // ✅ si es nuevo, genera ID (solo si aún no existe)
                                     if (empty($item['id']) && $schemeId) {
-                                        $token = Str::lower(Str::ulid()->toBase32());
-                                        $token = substr($token, 0, 6); // 👈 ojo: ajusta según tu varchar del campo "id"
+                                        $token = Str::lower(Str::ulid()->toBase32()); // 26 chars
                                         $item['id'] = "{$schemeId}-{$token}";
                                     }
 
@@ -416,14 +416,15 @@ class CostSchemeResource extends Resource
                 TextColumn::make('agreement_type')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('created_at')->since(),
+                TextColumn::make('created_at')
+                    ->sortable()
+                    ->since(),
                 TextColumn::make('updated_at')->since(),
             ])
             //->defaultSort('created_at', 'asc')
             ->defaultSort('id', 'asc')
             ->filters([])
-            
-             ->actions([
+            ->actions([
                 Tables\Actions\ActionGroup::make([
                     /* Tables\Actions\ViewAction::make()
                     ->label('View')

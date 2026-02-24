@@ -1493,5 +1493,29 @@ class CompaniesSeeder extends Seeder
         $company->industry_id = '16';
         $company->country_id = '144';
         $company->save();
+
+        $company = new Company();
+        $company->name = 'Promotora Saludanat S.A. De C.V.';
+        $company->acronym = 'SALUDANAT';
+        $company->activity = 'Mexican company associated with “Súper Naturista,” focused on the commercialization of natural products and healthy lifestyle solutions. It operates mainly in Mexico City (CDMX) and the State of Mexico, offering sales positions, customer service roles, and supervisory opportunities, with statutory benefits and direct hiring.';
+        $company->industry_id = '26';
+        $company->country_id = '144';
+        $company->save();
+
+        $company = new Company();
+        $company->name = 'Consolidated Government Dependencies and Entities of Mexico';
+        $company->acronym = 'CGDEM';
+        $company->activity = 'To consolidate and organise information related to Mexican Government dependencies and entities into a unified framework that facilitates identification, analysis, coordination and reference of public institutions, supporting transparency, administrative efficiency and structured management within the system.';
+        $company->industry_id = '14';
+        $company->country_id = '144';
+        $company->save();
+
+        $company = new Company();
+        $company->name = 'Tren Maya, S.A. de C.V.';
+        $company->acronym = 'TREN_MAYA';
+        $company->activity = 'To develop, operate and manage the Tren Maya as a key rail infrastructure project that promotes economic and tourism growth in southeastern Mexico, providing railway, complementary and commercial services while obtaining and administering the concessions, permits and authorisations required to fulfil its operational and development objectives.';
+        $company->industry_id = '14';
+        $company->country_id = '144';
+        $company->save();
     }
 }

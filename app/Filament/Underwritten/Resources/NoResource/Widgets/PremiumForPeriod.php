@@ -6,14 +6,16 @@ use Filament\Widgets\ChartWidget;
 use  App\Models\Reinsurer;
 use App\Models\Business;
 use App\Services\PremiumForPeriodService;
+use Filament\Support\RawJs;
 
 class PremiumForPeriod extends ChartWidget
 {
-    protected static ?string $heading = 'Premium subscribed per period';
+    protected static ?string $heading = 'Underwritten Premium';
 
-    public ?string $filter = 'all';
+    public ?int $reinsurer = null;
+    protected static bool $isLazy = false;
 
-    protected function getFilters(): ?array
+    /*protected function getFilters(): ?array
     {
         return [
             'all' => 'All reinsurers',
@@ -21,29 +23,21 @@ class PremiumForPeriod extends ChartWidget
             ->orderBy('name')
             ->pluck('name', 'id')   // [id => name]
             ->toArray();
-    }
+    }*/
 
     protected function getData(): array
     {
        
-        $filter = $this->filter ?? 'all';
-
-        $data = app(PremiumForPeriodService::class)->anualFTS($filter);
+        //$filter = $this->filter ?? 'all';
+        //dd($this->reinsurer);
+        $data = app(PremiumForPeriodService::class)->anualFTS($this->reinsurer);
 
 
         return [
             'datasets' => [
-            // [
-            //     'label' => 'FTP',
-            //     'data' => $data['ftp'],
-            //     'borderColor' => '#3b82f6',
-            //     'tension' => 0.4,
-            // ],
             [
                 'label' => 'FTS',
                 'data' => $data['fts'],
-                'borderColor' => '#10b981',
-                'tension' => 0.4,
             ],
         ],
         'labels' => $data['labels'],

@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class PremiumForPeriodService
 {
-    public function anualFTS($reinsurerId): array
+    public function anualFTS(?int $reinsurerId = null, ?int $year = null): array
     {
         $query = OperativeDoc::query()
-            ->whereYear('inception_date', '>=', 2010)
+            ->whereYear('rep_date', '>=', 2010)
             ->with([
                 'docType',
                 'business.currency',
@@ -22,21 +22,26 @@ class PremiumForPeriodService
                 'insureds.company.country',
                 'insureds.coverage',
                 'transactions.logs.toPartner',
-            ]);
+            ])
 
-            if ($reinsurerId !== 'all') {
+             // filtra solo si $reinsurerId tiene valor
+            ->when($reinsurerId, fn($q) => $q->whereHas('business', fn($b) => $b->where('reinsurer_id', $reinsurerId)))
+            // filtra solo si $year tiene valor
+            ->when($year, fn($q) => $q->whereYear('rep_date', $year));
+
+            /* if ($reinsurerId !== null) {
                 $query->whereHas('business', function ($q) use ($reinsurerId) {
                     $q->where('reinsurer_id', $reinsurerId);
                 });
-            }
+            } */
 
         $docs = $query->get();
-
+        
         $grouped = [];
 
         foreach ($docs as $doc) {
 
-            $year = \Carbon\Carbon::parse($doc->inception_date)->year;
+            $year = \Carbon\Carbon::parse($doc->rep_date)->year;
 
             $inception = \Carbon\Carbon::parse($doc->inception_date);
             $expiration = \Carbon\Carbon::parse($doc->expiration_date);
@@ -64,6 +69,10 @@ class PremiumForPeriodService
                     : 0;
 
                 $fts += $ftpIndividual * $share;
+
+                $totalConvertedPremium = ($doc->roe_fs > 0)
+                    ? ($fts / $doc->roe_fs)
+                    : 0;
             }
 
             if (!isset($grouped[$year])) {
@@ -74,7 +83,7 @@ class PremiumForPeriodService
             }
 
             $grouped[$year]['ftp'] += $ftp;
-            $grouped[$year]['fts'] += $fts;
+            $grouped[$year]['fts'] += $totalConvertedPremium;
 
         }
 

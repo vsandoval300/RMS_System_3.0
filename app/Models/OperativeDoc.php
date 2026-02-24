@@ -31,14 +31,16 @@ class OperativeDoc extends Model
         'inception_date',
         'expiration_date',
         'af_mf',
+        'roe_fs',
         'document_path',
         //'client_payment_tracking',
         'business_code',          // FK hacia businesses
+        'created_by_user',
     ];
 
     protected $casts = [
-        'inception_date'  => 'date',
-        'expiration_date' => 'date',
+        'inception_date'  => 'datetime',
+        'expiration_date' => 'datetime',
     ];
 
     /* --------------------------------------------------
@@ -58,6 +60,11 @@ class OperativeDoc extends Model
     public function docType()
     {
         return $this->belongsTo(BusinessDocType::class,'operative_doc_type_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by_user');
     }
 
     /* --------------------------------------------------

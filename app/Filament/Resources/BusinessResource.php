@@ -76,6 +76,7 @@ class BusinessResource extends Resource
                 'currency:id,acronym,name',
                 'coverages:id,acronym,name',
                 'renewedFrom:id,business_code',
+                'user:id,name',
             ])
             ->withCount([
                 'operativeDocs',
@@ -120,56 +121,13 @@ class BusinessResource extends Resource
 
                                         Select::make('reinsurer_id')
                                             ->label('Reinsurer')
-                                            //->hiddenLabel()
                                             ->relationship('reinsurer', 'name')
                                             ->required()
                                             ->searchable()
-                                            ->preload() // 👈 fuerza la carga inmediata de los options
+                                            ->preload()
                                             ->native(false)
                                             ->placeholder('Select a reinsurer')
-                                            ->helperText(fn ($record) =>
-                                                $record
-                                                    ? 'Edit the value if necessary.'
-                                                    : ''
-                                            )
-                                            ->live(onBlur: true)
-                                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
-                                                if ($operation !== 'create' || !$state) {
-                                                    return;
-                                                }
-
-                                                $reinsurer = Reinsurer::find($state);
-
-                                                if (! $reinsurer) {
-                                                    return;
-                                                }
-
-                                                $year = Carbon::now()->format('Y');
-                                                $acronym = Str::upper($reinsurer->acronym);
-                                                $number = str_pad($reinsurer->cns_reinsurer ?? $reinsurer->id, 3, '0', STR_PAD_LEFT);
-
-                                                $prefix = "{$year}-{$acronym}{$number}";
-
-                                                // Buscar el último código existente que empiece con ese prefijo
-                                                $lastBusiness = Business::query()
-                                                    ->withTrashed() // 👈 incluye borrados (deleted_at no null)
-                                                    ->where('business_code', 'like', "$prefix-%")
-                                                    ->orderByDesc('business_code')
-                                                    ->first();
-
-                                                // Extraer el consecutivo y sumarle 1
-                                                $lastNumber = 0;
-
-                                                if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->business_code, $matches)) {
-                                                    $lastNumber = (int)$matches[1];
-                                                }
-
-                                                $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-
-                                                $businessCode = "{$prefix}-{$consecutive}";
-
-                                                $set('business_code', $businessCode);
-                                            })
+                                            ->helperText(fn ($record) => $record ? 'Edit the value if necessary.' : '')
                                             ->columnSpan(2),
 
                                         TextInput::make('index')
@@ -191,6 +149,7 @@ class BusinessResource extends Resource
                                             ->dehydrated()
                                             ->required()
                                             ->unique(ignoreRecord: true)
+                                            ->hiddenOn('create')
                                             ->columnSpan(1),
 
 
@@ -301,6 +260,22 @@ class BusinessResource extends Resource
                                             ->nullable(),
                                     ])
                                     ->columnSpan(4),
+
+
+
+                                Section::make('')
+                                ->compact()
+                                ->columns(2)
+                                
+                                    ->schema([ 
+                            
+                                        TextInput::make('source_code')
+                                            ->label('Original id')
+                                            ->dehydrated()
+                                            ->placeholder('Enter original id if necessary.')
+                                            ->columnSpan(1),
+                                    ])
+                                    ->columnSpan(4),    
                                     
                             Placeholder::make('')
                                 ->content('')      // vacío
@@ -312,6 +287,9 @@ class BusinessResource extends Resource
                         
                         ])
                         ->columnSpan(2),
+
+
+
 
                  Section::make('Contract Attributes')
                     ->compact()
@@ -387,6 +365,7 @@ class BusinessResource extends Resource
                                 ->options([
                                     'Claims occurrence' => 'Claims occurrence',
                                     'Claims made' => 'Claims made',
+                                    'Hybrid' => 'Hybrid',
                                 ])
                                 //->default('Claims occurrence')
                                 ->helperText(fn ($record) =>
@@ -421,7 +400,7 @@ class BusinessResource extends Resource
                                 ->label('Region')
                                 //->hiddenLabel()
                                 //->inlineLabel()
-                                ->placeholder('Select business currency.') // 👈 Aquí cambias el texto
+                                ->placeholder('Select business region.') // 👈 Aquí cambias el texto
                                 ->relationship('Region', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()
@@ -650,6 +629,30 @@ class BusinessResource extends Resource
                                                 ]),
                                         ]),
 
+
+                                    InfoSection::make()
+                                        ->compact()
+                                        ->schema([
+                                            InfoGrid::make(12)
+                                            ->extraAttributes(['style' => 'gap:1px;padding:1px 0;'])
+                                                ->schema([
+
+                                                    TextEntry::make('source_code')
+                                                        ->label('')
+                                                        ->state(function ($record) {
+                                                            $value = $record->source_code ?: '—';
+
+                                                            return new HtmlString(
+                                                                "<strong>Source Id:</strong> {$value}"
+                                                            );
+                                                        })
+                                                        ->columnSpan(4),
+
+
+
+                                                ]),
+                                        ]),    
+
                     ])
                     ->columnSpan(8),
 
@@ -799,7 +802,7 @@ class BusinessResource extends Resource
                                         "<strong>Approval status:</strong> {$value}"
                                     );
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(2),
 
                             TextEntry::make('approval_date_entry')
                                 ->label('')
@@ -810,7 +813,7 @@ class BusinessResource extends Resource
                                         "<strong>Approval date:</strong> {$value}"
                                     );
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(2),
 
                             TextEntry::make('lifecycle_status_entry')
                                 ->label('')
@@ -829,7 +832,7 @@ class BusinessResource extends Resource
                                         "<strong>Lifecycle status:</strong> {$value}"
                                     );
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(2),
 
                             TextEntry::make('created_at_entry')
                                 ->label('')
@@ -841,6 +844,18 @@ class BusinessResource extends Resource
                                     );
                                 })
                                 ->columnSpan(3),
+
+                            TextEntry::make('created_by_user')
+                                ->label('')
+                                ->state(function ($record) {
+                                        $value = $record->user?->name ?? '-';
+                                        
+
+                                        return new HtmlString(
+                                            "<strong>Created by:</strong> {$value}"
+                                        );
+                                    })
+                                ->columnSpan(3)    
 
 
                                                             
@@ -970,6 +985,18 @@ class BusinessResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('source_code')
+                    ->label('Source id')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),   
+                    
+                TextColumn::make('user.name')
+                    ->label('Created by')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),      
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -1047,17 +1074,18 @@ class BusinessResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->modalHeading('Export Reports')
                     ->modalSubmitActionLabel('Generate')
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false) 
                     ->form([
                         Select::make('report_type')
                             ->label('Report Type')
                             ->options([
-                                'operative_docs'     => 'Operative Docs (by Node Concept)',
-                                'underwritten_report'=> 'Underwritten Report (by Deduction)',
+                                'operative_docs'      => 'Operative Docs (Insured + Nodes)',
+                                'underwritten_report' => 'Underwritten Report (by Deduction)',
                             ])
                             ->default('operative_docs')
                             ->required(),
 
-                        // 🔹 Filtros
                         Select::make('reinsurer_ids')
                             ->label('Reinsurer(s)')
                             ->placeholder('All reinsurers')
@@ -1082,7 +1110,10 @@ class BusinessResource extends Resource
 
                         $reinsurerIds = collect($data['reinsurer_ids'] ?? [])->filter()->values();
 
-                        $scope        = $reinsurerIds->isEmpty() ? 'all-reinsurers' : ('reinsurers-' . $reinsurerIds->implode('-'));
+                        $scope = $reinsurerIds->isEmpty()
+                            ? 'all-reinsurers'
+                            : ('reinsurers-' . $reinsurerIds->implode('-'));
+
                         $reportLabels = [
                             'operative_docs'      => 'OperativeDocs_report',
                             'underwritten_report' => 'Underwritten_report',
@@ -1097,7 +1128,9 @@ class BusinessResource extends Resource
                             Carbon::parse($to)->format('Ymd')
                         );
 
-                        // 1) Consulta única con ambos conceptos disponibles
+                        // ---------------------------------------------------------
+                        // 1) Flat query: 1 registro por (insured_row_id × node)
+                        // ---------------------------------------------------------
                         $flat = OperativeDoc::query()
                             ->with([
                                 'business.reinsurer',
@@ -1105,47 +1138,64 @@ class BusinessResource extends Resource
                                 'business.liabilityStructures',
                                 'docType',
                             ])
-                            ->whereDate('inception_date', '>=', $from)
-                            ->whereDate('inception_date', '<=', $to)
+                            ->whereDate('operative_docs.inception_date', '>=', $from)
+                            ->whereDate('operative_docs.inception_date', '<=', $to)
                             ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
                             ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
                                 $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
                             )
 
-                            // shares
-                            ->leftJoin('businessdoc_schemes', 'businessdoc_schemes.op_document_id', '=', 'operative_docs.id')
-                            ->leftJoin('cost_schemes', 'cost_schemes.id', '=', 'businessdoc_schemes.cscheme_id')
-
-                            // insureds
+                            // insureds (base del desglose)
                             ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
                             ->leftJoin('companies', 'companies.id', '=', 'businessdoc_insureds.company_id')
                             ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
                             ->leftJoin('coverages', 'coverages.id', '=', 'businessdoc_insureds.coverage_id')
 
-                            // cost nodes + partner
-                            ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'cost_schemes.id')
-                            ->leftJoin('partners', 'partners.id', '=', 'cost_nodesx.partner_destination_id') 
+                            // scheme asociado AL insured (para share)
+                            ->leftJoin('cost_schemes as insured_scheme', 'insured_scheme.id', '=', 'businessdoc_insureds.cscheme_id')
 
-                            // deductions (para el segundo reporte)
+                            // nodes del scheme del insured
+                            ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'insured_scheme.id')
+
+                            // deductions label (concept)
                             ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
 
+                            // partners con alias (SOURCE)
+                            ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
+
                             ->orderBy('businesses.business_code')
+                            ->orderBy('operative_docs.id')
+                            ->orderBy('businessdoc_insureds.id')
+                            ->orderBy('cost_nodesx.index')
+
                             ->select([
                                 'operative_docs.*',
 
-                                // campos “planos”
-                                'cost_schemes.share as share',
-                                'companies.name   as insured_name',
-                                'countries.name   as country_name',
-                                'coverages.name   as coverage_name',
+                                // share del scheme del insured
+                                'insured_scheme.share as share',
+
+                                // insured breakdown
+                                'companies.name as insured_name',
+                                'countries.name as country_name',
+                                'coverages.name as coverage_name',
                                 'businessdoc_insureds.premium as insured_premium',
 
-                                // nodos de costo
-                                'partners.name           as partner_name',
-                                'partners.acronym        as partner_acronym',
-                                'cost_nodesx.concept     as node_concept',       // 👈 para OperativeDocsExport
-                                'deductions.concept      as deduction_concept',  // 👈 para UnderwrittenReportExport
-                                'cost_nodesx.value       as node_value',
+                                // insured row + cscheme asociado al insured
+                                'businessdoc_insureds.id as insured_row_id',
+                                'businessdoc_insureds.cscheme_id as insured_cscheme_id',
+
+                                // nodes
+                                'cost_nodesx.id as node_id',
+                                'cost_nodesx.cscheme_id as node_cscheme_id',
+                                'cost_nodesx.index as node_index',
+                                'cost_nodesx.value as node_value',
+
+                                // label para Node_*_Deduction_Type
+                                'deductions.concept as deduction_concept',
+
+                                // source text
+                                'p_src.name as node_source_name',
+                                'p_src.acronym as node_source_acronym',
                             ])
                             ->get();
 
@@ -1154,65 +1204,75 @@ class BusinessResource extends Resource
                             return;
                         }
 
-                        // 2) Ramificación por tipo de reporte
+                        // ---------------------------------------------------------
+                        // 2) Operative Docs (Insured + Nodes) ✅ SIN MATRIZ VIEJA
+                        // ---------------------------------------------------------
                         if ($report === 'operative_docs') {
-                            // Encabezados dinámicos por CONCEPTO del nodo
-                            $partners = $flat->pluck('partner_acronym')->filter()->unique()->values();
-                            $concepts = $flat->pluck('node_concept')->filter()->unique()->values();
 
-                            // Pivot partner(node_acronym) × node_concept
-                            $wide = $flat->groupBy('id')->map(function ($rows) {
-                                $first = $rows->first();
-                                $matrix = [];
-                                foreach ($rows as $r) {
-                                    if (!$r->partner_acronym || !$r->node_concept) continue;
-                                    $p = $r->partner_acronym;
-                                    $c = $r->node_concept;
-                                    $matrix[$p][$c] = ($matrix[$p][$c] ?? 0) + (float) ($r->node_value ?? 0);
-                                }
-                                $first->pc_matrix = $matrix;
-                                return $first;
-                            })->values();
+                            $wide = $flat
+                                ->groupBy(fn ($r) => $r->insured_row_id ?? ($r->id . '|no-insured'))
+                                ->map(function ($rows) {
+
+                                    $first = $rows->first();
+
+                                    // nodos SOLO del cscheme del insured
+                                    $schemeId = $first->insured_cscheme_id;
+
+                                    $schemeNodes = $rows
+                                        ->filter(fn ($r) => $schemeId && ($r->node_cscheme_id ?? null) === $schemeId)
+                                        ->unique('node_id')
+                                        ->sortBy(fn ($r) => (int) ($r->node_index ?? 0))
+                                        ->values();
+
+                                    $first->nodes_list = $schemeNodes->map(function ($r) {
+                                        $source = trim(($r->node_source_name ?? '') . ' - [' . ($r->node_source_acronym ?? '') . ']');
+                                        if ($source === '- []') {
+                                            $source = null;
+                                        }
+
+                                        return [
+                                            'deduction_type' => $r->deduction_concept ?? null,
+                                            'source'         => $source ?: null,
+                                            'value'          => is_null($r->node_value) ? null : (float) $r->node_value,
+                                        ];
+                                    })->all();
+
+                                    return $first;
+                                })
+                                ->values();
+
+                            $maxNodes = (int) ($wide
+                                ->map(fn ($d) => is_array($d->nodes_list ?? null) ? count($d->nodes_list) : 0)
+                                ->max() ?? 0);
 
                             return Excel::download(
-                                new \App\Exports\OperativeDocsExport($wide, $partners, $concepts),
+                                new \App\Exports\OperativeDocsExport($wide, $maxNodes),
                                 $filename
                             );
                         }
 
+                        // ---------------------------------------------------------
+                        // 3) Underwritten Report (by Deduction)
+                        // ---------------------------------------------------------
                         if ($report === 'underwritten_report') {
-                            // Encabezados dinámicos por CONCEPTO de deductions
-                            $partners = $flat->pluck('partner_acronym')->filter()->unique()->values();
-                            $concepts = $flat->pluck('deduction_concept')->filter()->unique()->values();
 
-                            // Pivot partner(node_acronym) × deduction_concept
-                            $wide = $flat->groupBy('id')->map(function ($rows) {
-                                $first = $rows->first();
-                                $matrix = [];
-                                foreach ($rows as $r) {
-                                    if (!$r->partner_acronym || !$r->deduction_concept) continue;
-                                    $p = $r->partner_acronym;
-                                    $c = $r->deduction_concept;
-                                    $matrix[$p][$c] = ($matrix[$p][$c] ?? 0) + (float) ($r->node_value ?? 0);
-                                }
-                                $first->pc_matrix = $matrix;
-                                return $first;
-                            })->values();
+                            // ✅ Aquí lo dejamos como lo traías, pero OJO:
+                            // Tu UnderwrittenReportExport debe aceptar (Collection $rows) en su constructor.
+                            $wide = $flat
+                                ->groupBy(fn ($r) => $r->insured_row_id ?? ($r->id . '|no-insured'))
+                                ->map(fn ($rows) => $rows->first())
+                                ->values();
 
                             return Excel::download(
-                                new \App\Exports\UnderwrittenReportExport($wide, $partners, $concepts),
+                                new \App\Exports\UnderwrittenReportExport($wide),
                                 $filename
                             );
                         }
 
-                        // Fallback (por si llega un valor inesperado)
                         Notification::make()->title('Unsupported report type.')->danger()->send();
                         return;
                     }),
-
-
             ])
-
 
 
 

@@ -275,14 +275,28 @@ class BanksResource extends Resource
             ->filters([
                 //
             ])
+
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false),
+            ])
+
+
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
-                    //->modalWidth('md'),
-                    Tables\Actions\EditAction::make(),
+
+                    Tables\Actions\EditAction::make()
+                        ->closeModalByClickingAway(false)
+                        ->closeModalByEscaping(false),
+
                     Tables\Actions\DeleteAction::make(),
-                ])
+                ]),
             ])
+
+
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

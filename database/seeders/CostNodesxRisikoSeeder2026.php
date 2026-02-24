@@ -1,0 +1,35 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\CostNodex;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class CostNodesxRisikoSeeder2026 extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0001-kpgFe10PkX3Y6V8c01avKi4qYS';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0001';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0001-3E9iH9x1XFHCXfFR1r59WquxHF';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.03';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0001';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0002-jQe6f1gYQRDv8nxUzm1WjaYKtA';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '55 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0002';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0002-WjxNSDGNMi2VYb4yLdJFLn66bA';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.2';         $CostNodex->partner_source_id = '55';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0002';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0002-VbtZzVL9CEjmyqQeCv90K8aUhD';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.024';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0002';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0003-NpfibG9JF85J4krgnzJ6UY6mDR';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '55 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0003';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0003-AFRFczXmiLgexuH1jf7KxNRVV7';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.2';         $CostNodex->partner_source_id = '55';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0003';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0003-yzRFAYx0dwAiyFaH4EuyDmxZ20';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.024';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0003';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0004-d6y6dr414f5D8VYiSaxqg25H3E';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '55 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0004';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0004-Ru5XnX6zFtz9X2aaiAbShNCTaP';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.2';         $CostNodex->partner_source_id = '55';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0004';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0004-fVFf2nJrgQ1S2nCfn9N8e5KfLn';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.024';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0004';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0005-28cS6R6vkKwa7hc5ZLrG4N9GC2';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0005';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0005-XerLKM0K31eR3kRRZq5834GhUd';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.03';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0005';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0006-F40PV0ZGxx7wJAFDeicH3cNJEM';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0006';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0006-UcPAWQ4CDaFaA8X4AuQWXXA1hu';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.03';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0006';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0007-89S9BkK4gzCet46nzUphMXvmk1';       $CostNodex->index = '1';        $CostNodex->concept = '4';        $CostNodex->value = '0.02';         $CostNodex->partner_source_id = '2';        $CostNodex->partner_destination_id =  '13 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0007';         $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20260115-0007-Wy7paHeh3iRgBUZ0S7kFfFkTNh';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.0294';         $CostNodex->partner_source_id = '13';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20260115-0007';         $CostNodex->save(); 
+    }
+}

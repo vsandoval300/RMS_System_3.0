@@ -22,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\View;
@@ -83,6 +84,11 @@ class OperativeDocsRelationManager extends RelationManager
             'schemes.costScheme.costNodexes', 
             //'transactions',
         ]);
+        /* ->withExists([
+            // ✅ true si EL BUSINESS del registro tiene al menos un doc tipo 5
+            'business.OperativeDocs as business_has_cancellation' => fn (Builder $q) =>
+                $q->where('operative_doc_type_id', 5),
+        ]); */
     }
 
     // ✅ CAMBIO 1: helpers SIN $livewire (StaticAction NO puede resolverlo)
@@ -270,9 +276,48 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 
                                                         Placeholder::make('gap1')
                                                             ->hiddenLabel()
-                                                            ->columnSpan(6),
+                                                            ->columnSpan(3),
 
                                                         
+                                                        TextInput::make('roe_fs')
+                                                            ->label('Exchange rate')
+                                                            ->required()
+                                                            ->inputMode('decimal')
+                                                            ->rules(['numeric', 'min:0'])
+                                                            ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+
+                                                            // 🔒 Bloquear edición si moneda del Business es USD (157)
+                                                            ->readOnly(fn ($livewire) =>
+                                                                method_exists($livewire, 'getOwnerRecord')
+                                                                && (int) $livewire->getOwnerRecord()?->currency_id === 157
+                                                            )
+
+                                                            // ✅ MOSTRAR 1.00000000 si es USD aunque el state sea null
+                                                            ->formatStateUsing(function ($state, $livewire) {
+                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
+                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+
+                                                                if ($state === null || $state === '') {
+                                                                    return $isUsd ? number_format(1, 8, '.', '') : null;
+                                                                }
+
+                                                                return number_format((float) $state, 8, '.', '');
+                                                            })
+
+                                                            // ✅ GUARDAR 1 si es USD y viene vacío; si no, null
+                                                            ->dehydrateStateUsing(function ($state, $livewire) {
+                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
+                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+
+                                                                if ($state === null || $state === '') {
+                                                                    return $isUsd ? 1 : null;
+                                                                }
+
+                                                                return round((float) str_replace(',', '', $state), 8);
+                                                            })
+
+                                                            ->dehydrated()
+                                                            ->columnSpan(3),
 
                                                         
 
@@ -322,7 +367,7 @@ class OperativeDocsRelationManager extends RelationManager
                                     Section::make('Coverage Period')
                                             ->columns(12)
                                             ->schema([
-                                                    Placeholder::make('coverage_period_hint')
+                                                    /* Placeholder::make('coverage_period_hint')
                                                         ->label(' ')
                                                         ->content(function (Get $get) {
                                                             $from = $get('inception_date');
@@ -337,9 +382,123 @@ class OperativeDocsRelationManager extends RelationManager
                                                         })
                                                         ->extraAttributes(['class' => 'text-sm text-gray-600 dark:text-gray-400 leading-tight'])
                                                         ->columnSpanFull()
+                                                        ->hiddenOn('view'), */
+
+                                                    Placeholder::make('coverage_period_hint')
+                                                        ->label(' ')
+                                                        ->content(function (Get $get) {
+
+                                                            $from = $get('inception_date');
+                                                            $to   = $get('expiration_date');
+                                                            $days = $get('coverage_days');
+
+                                                            $base = 'Select the coverage dates (From–To). The coverage period in days is calculated automatically.';
+
+                                                            if ($from && $to && $days) {
+
+                                                                // ✅ Ignorar hora → trabajar solo con fecha calendario
+                                                                $fromDate = Carbon::parse($from)->startOfDay()->format('Y-m-d');
+                                                                $toDate   = Carbon::parse($to)->startOfDay()->format('Y-m-d');
+
+                                                                $daysInt = (int) $days;
+
+                                                                return "$base Current selection: $fromDate → $toDate ($days days).";
+                                                            }
+
+                                                            return "$base The end date must be later than the start date.";
+                                                        })
+                                                        ->extraAttributes(['class' => 'text-sm text-gray-600 dark:text-gray-400 leading-tight'])
+                                                        ->columnSpanFull()
                                                         ->hiddenOn('view'),
 
-                                                    DatePicker::make('inception_date')
+                                                    DateTimePicker::make('inception_date')
+                                                        ->label('From')
+                                                        ->inlineLabel()
+                                                        ->required()
+                                                        ->dehydratedWhenHidden()
+                                                        ->displayFormat('d/m/Y H:i')     // lo que ve el usuario
+                                                        ->format('Y-m-d H:i:s')          // lo que se guarda (string)
+                                                        ->seconds(false)                 // solo hora:minuto
+                                                        ->native(false)
+                                                        ->before('expiration_date')
+                                                        ->live()
+                                                        ->afterStateHydrated(function (Forms\Set $set, $state, Forms\Get $get, $record) {
+                                                            if ($record?->inception_date) {
+                                                                $set('inception_date', $record->inception_date->format('Y-m-d H:i:s'));
+                                                            }
+
+                                                            $from = $get('inception_date');
+                                                            $to   = $get('expiration_date');
+
+                                                            if ($from && $to) {
+                                                                $f = Carbon::parse($from)->startOfDay();
+                                                                $t = Carbon::parse($to)->startOfDay();
+
+                                                                if ($f->gte($t)) return $set('coverage_days', null);
+
+                                                                $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
+                                                            }
+                                                        })
+                                                        ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
+                                                            $from = $state;
+                                                            $to   = $get('expiration_date');
+
+                                                            if (! $from || ! $to) return $set('coverage_days', null);
+
+                                                            $f = Carbon::parse($from)->startOfDay();
+                                                            $t = Carbon::parse($to)->startOfDay();
+
+                                                            if ($f->gte($t)) return $set('coverage_days', null);
+
+                                                            $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
+                                                        })
+                                                        ->columnSpan(3),
+
+                                                    DateTimePicker::make('expiration_date')
+                                                        ->label('To')
+                                                        ->inlineLabel()
+                                                        ->required()
+                                                        ->dehydratedWhenHidden()
+                                                        ->displayFormat('d/m/Y H:i')
+                                                        ->format('Y-m-d H:i:s')
+                                                        ->seconds(false)
+                                                        ->native(false)
+                                                        ->after('inception_date')
+                                                        ->live()
+                                                        ->afterStateHydrated(function (Forms\Set $set, $state, Forms\Get $get, $record) {
+                                                            if ($record?->expiration_date) {
+                                                                $set('expiration_date', $record->expiration_date->format('Y-m-d H:i:s'));
+                                                            }
+
+                                                            $from = $get('inception_date');
+                                                            $to   = $get('expiration_date');
+
+                                                            if ($from && $to) {
+                                                                $f = Carbon::parse($from)->startOfDay();
+                                                                $t = Carbon::parse($to)->startOfDay();
+
+                                                                if ($t->lte($f)) return $set('coverage_days', null);
+
+                                                                $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
+                                                            }
+                                                        })
+                                                        ->afterStateUpdated(function (Forms\Set $set, $state, Forms\Get $get) {
+                                                            $to   = $state;
+                                                            $from = $get('inception_date');
+
+                                                            if (! $from || ! $to) return $set('coverage_days', null);
+
+                                                            $f = Carbon::parse($from)->startOfDay();
+                                                            $t = Carbon::parse($to)->startOfDay();
+
+                                                            if ($t->lte($f)) return $set('coverage_days', null);
+
+                                                            $set('coverage_days', (int) $f->diffInDays($t)); // ✅ entero, ignora hora
+                                                        })
+                                                        ->columnSpan(3),
+
+
+                                                    /* DatePicker::make('inception_date')
                                                         ->label('From')
                                                         ->inlineLabel()
                                                         ->required()
@@ -391,7 +550,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             if ($t->lte($f)) return $set('coverage_days', null);
                                                             $set('coverage_days', $f->diffInDays($t));
                                                         })
-                                                        ->columnSpan(3),
+                                                        ->columnSpan(3), */
 
                                                     // ⬅️ Espaciador de 3 columnas
                                                     Placeholder::make('gap_exp_to_period')
@@ -411,6 +570,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         ->disabled()
                                                         ->dehydrated(false)
                                                         ->suffix('days')
+                                                        ->formatStateUsing(fn ($state) => $state !== null ? (int) $state : null) // ✅ NEW
                                                         ->extraInputAttributes(['class' => 'text-right'])
                                                         ->placeholder('—')
                                                         ->columnSpan(3),
@@ -632,7 +792,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             <div>
                                                                 <strong>Important:</strong>
-                                                                Please register the <em>Gross Reinsurance Premium</em>
+                                                                Please register the <em>Annual Gross Reinsurance Premium</em>
                                                                 <strong>per coverage and per insured company</strong>.
                                                                 <br>
                                                                 Placement scheme shares and totals are calculated automatically.
@@ -643,8 +803,8 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->extraAttributes([
                                                         'class' => '
                                                             text-sm text-gray-600 dark:text-gray-400
-                                                            bg-warning-50 dark:bg-warning-900/20
-                                                            border border-warning-200 dark:border-warning-700
+                                                            bg-warning-50 dark:bg-gray-800/40
+                                                            border border-warning-100/40 dark:border-gray-700
                                                             rounded-md p-3
                                                         ',
                                                     ])
@@ -665,6 +825,9 @@ class OperativeDocsRelationManager extends RelationManager
                                                         Select::make('company_id')
                                                             ->label('Company')
                                                             ->relationship('company', 'name')
+                                                            ->getOptionLabelFromRecordUsing(
+                                                                fn ($record) => "{$record->name} ({$record->acronym})"
+                                                            )
                                                             ->preload()
                                                             ->optionsLimit(1000)
                                                             ->required()
@@ -856,7 +1019,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                 Placeholder::make('')->columnSpan(9),
 
-                                                TextInput::make('insureds_total')
+                                                /* TextInput::make('insureds_total')
                                                     ->label(new HtmlString(
                                                         'Grand Total<br><span class="text-sm font-normal text-gray-500 dark:text-gray-400">
                                                         Gross Reinsurance Premium
@@ -865,7 +1028,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->prefix('$')
                                                     ->disabled()
                                                     ->dehydrated(false)
-                                                    ->columnSpan(3),
+                                                    ->columnSpan(3), */
                                             ]),
                                     ]),  
                                 //--- End Tab ----------------------------------------          
@@ -900,18 +1063,6 @@ class OperativeDocsRelationManager extends RelationManager
                 // ─────────  C) SECTION: (colapsable)  ───────────────────────────────────────── 
                 // 🟡 SUMMARY Section
                 // ──────────────────────────────────────────────────────────────────────────────
-                /* Section::make('Overview')
-                    ->collapsible()
-                    ->collapsed(fn (Get $get) => $get('active_panel') !== 'summary')
-                    ->extraAttributes([
-                        'x-on:click.self' => '$wire.set("data.active_panel","summary"); $wire.set("active_panel","summary");',
-                        'class' => 'max-h-[700px] overflow-y-auto',
-                    ])
-
-                    // ⬇️ Botón para exportar/preview/imprimir
-                    ->headerActions([
-                        FormAction::make('Export to pdf'),
-                    ]) */
 
                     Section::make()
                     ->schema([
@@ -966,6 +1117,10 @@ class OperativeDocsRelationManager extends RelationManager
                             ->reactive()
                             ->reactive()
                             ->viewData(function ($get, $record, $livewire) {
+
+                                // ✅ NEW: tomar Exchange Rate del formulario (campo roe_fs)
+                                $roeFs = floatval($get('roe_fs') ?? 0);
+
                                 $business = method_exists($livewire, 'getOwnerRecord') ? $livewire->getOwnerRecord() : null;
 
                                 /*================================================================
@@ -1006,12 +1161,48 @@ class OperativeDocsRelationManager extends RelationManager
                                     $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
 
                                     $raw = $insured['premium'] ?? 0;
-                                    $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
+
+                                    /* $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
                                     if (is_string($clean)) {
                                         $parts = explode('.', $clean, 3);
                                         $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
                                     }
-                                    $premium = floatval($clean);
+                                    $premium = floatval($clean); */
+
+                                    // ✅ Parse premium conservando signo (-) y soportando paréntesis contables ( ... )
+                                    if (is_string($raw)) {
+                                        $isNegative = false;
+
+                                        // Formato contable: ($1,234.56)
+                                        if (preg_match('/^\s*\(.*\)\s*$/', $raw)) {
+                                            $isNegative = true;
+                                        }
+
+                                        // Mantén dígitos, punto y signo "-"
+                                        $clean = preg_replace('/[^0-9.\-]/', '', $raw);
+
+                                        // Quita cualquier "-" que no esté al inicio
+                                        $clean = ltrim($clean, '+');
+                                        $clean = preg_replace('/(?!^)-/', '', $clean);
+
+                                        // Limita a 2 decimales si viene con más (manteniendo el comportamiento que ya tenías)
+                                        $parts = explode('.', $clean, 3);
+                                        $clean = isset($parts[1]) ? $parts[0] . '.' . $parts[1] : $parts[0];
+
+                                        $premium = floatval($clean);
+
+                                        // Si venía con paréntesis y el número quedó positivo, lo hacemos negativo
+                                        if ($isNegative && $premium > 0) {
+                                            $premium *= -1;
+                                        }
+                                    } else {
+                                        // Si ya viene numérico, respétalo
+                                        $premium = floatval($raw);
+                                    }
+
+
+
+
 
                                     return [
                                         'cscheme_id' => $insured['cscheme_id'] ?? null, // 👈 IMPORTANTE
@@ -1057,13 +1248,15 @@ class OperativeDocsRelationManager extends RelationManager
                                 $inception   = $get('inception_date');
                                 $expiration  = $get('expiration_date');
 
-                                $start       = $inception ? \Carbon\Carbon::parse($inception) : null;
-                                $end         = $expiration ? \Carbon\Carbon::parse($expiration) : null;
+                                /* $start       = $inception ? \Carbon\Carbon::parse($inception) : null;
+                                $end         = $expiration ? \Carbon\Carbon::parse($expiration) : null; */
+                                $start = $inception  ? \Carbon\Carbon::parse($inception)->startOfDay() : null;
+                                $end   = $expiration ? \Carbon\Carbon::parse($expiration)->startOfDay() : null;
 
                                 // ✅ MOD [LEAP-1]: define días del año (según el año del start)
                                 $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
                                 // ✅ MOD [LEAP-2]: calcula coverageDays normal
-                                $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
+                                $coverageDays = ($start && $end) ? (int) $start->diffInDays($end) : 0;
                                 // ✅ MOD [LEAP-3]: regla anti-distorsión (tu caso 31/12/2011 -> 31/12/2012)
                                 if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
                                     $coverageDays = $daysInYear;
@@ -1095,27 +1288,20 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalPremiumFts = collect($insureds)->sum('premium_fts');
 
                                 /*================================================================
-                                |  Converted Premium (igual, pero ahora usa el totalPremiumFts)
+                                |  Converted Premium (USD) -> AHORA USA roe_fs (NO installments)
                                 =================================================================*/
+                                // ✅✅✅ CHANGE [ROE-2]: US Dollars = Orig Curr / roe_fs
+                                // (deja $transactions como está porque lo usas para logs)
                                 $transactions = collect($get('transactions') ?? []);
-                                $totalConvertedPremium = 0;
-
-                                foreach ($transactions as $txn) {
-                                    $proportion = floatval($txn['proportion'] ?? 0) / 100;
-                                    $rate = floatval($txn['exch_rate'] ?? 0);
-
-                                    if ($rate > 0) {
-                                        $totalConvertedPremium += ($totalPremiumFts * $proportion) / $rate;
-                                    } else {
-                                        $totalConvertedPremium = 1;
-                                    }
-                                }
+                                $totalConvertedPremium = ($roeFs > 0)
+                                    ? ($totalPremiumFts / $roeFs)
+                                    : 0;
 
                                 /*================================================================
                                 |  ✅✅✅ COSTS BREAKDOWN (FIX: NO duplicar share)
                                 |  - Base por scheme = SUM(premium_fts) de insureds de ese scheme
                                 |  - Deduction = base_scheme * node.value
-                                |  - USD base por scheme usando installments
+                                |  - USD base por scheme = base_orig / roe_fs
                                 =================================================================*/
 
                                 // ✅ MOD [CB-1]: base Orig. Curr por scheme (sum premium_fts del scheme)
@@ -1123,21 +1309,10 @@ class OperativeDocsRelationManager extends RelationManager
                                     ->groupBy('cscheme_id')             // ✅ MOD [CB-1]
                                     ->map(fn ($rows) => $rows->sum('premium_fts')); // ✅ MOD [CB-1]
 
-                                // ✅ MOD [CB-2]: base USD por scheme (aplicando installments)
-                                $convertedFtsByScheme = $premiumFtsByScheme->map(function ($schemeFts) use ($transactions) { // ✅ MOD [CB-2]
-                                    $converted = 0.0;                                                                   // ✅ MOD [CB-2]
-
-                                    foreach ($transactions as $txn) {                                                    // ✅ MOD [CB-2]
-                                        $proportion = floatval($txn['proportion'] ?? 0) / 100;                           // ✅ MOD [CB-2]
-                                        $rate       = floatval($txn['exch_rate'] ?? 0);                                  // ✅ MOD [CB-2]
-
-                                        if ($rate > 0) {                                                                 // ✅ MOD [CB-2]
-                                            $converted += ($schemeFts * $proportion) / $rate;                            // ✅ MOD [CB-2]
-                                        }                                                                                // ✅ MOD [CB-2]
-                                    }                                                                                    // ✅ MOD [CB-2]
-
-                                    return $converted;                                                                    // ✅ MOD [CB-2]
-                                });                                                                                       // ✅ MOD [CB-2]
+                                // ✅✅✅ CHANGE [ROE-3]: base USD por scheme = base Orig / roe_fs
+                                $convertedFtsByScheme = $premiumFtsByScheme->map(function ($schemeFts) use ($roeFs) {
+                                    return ($roeFs > 0) ? ($schemeFts / $roeFs) : 0.0;
+                                });                                                                                      // ✅ MOD [CB-2]
 
                                 // ✅ MOD [CB-3]: recalcular groupedCostNodes con fórmula correcta
                                 $totalDeductionOrig = 0;
@@ -1200,6 +1375,10 @@ class OperativeDocsRelationManager extends RelationManager
                                     })
                                     ->values()
                                     ->toArray();
+
+                                // ✅✅✅ CHANGE [NET-1]: netos consistentes (no depender de recalculo en Blade)
+                                $netUnderwrittenOrig = $totalPremiumFts - $totalDeductionOrig;
+                                $netUnderwrittenUsd  = $totalConvertedPremium - $totalDeductionUsd;    
 
                                 /*================================================================
                                 |  LOGS (igual que lo tenías)
@@ -1271,6 +1450,13 @@ class OperativeDocsRelationManager extends RelationManager
 
                                     'transactions' => collect($get('transactions') ?? [])->values(),
                                     'logsByTxn' => $logsByTxn,
+
+                                    // ✅ opcional (por si lo quieres mostrar en summary/pdf)
+                                    'roe_fs' => $roeFs,
+                                    // ✅✅✅ CHANGE [NET-2]
+                                    'netUnderwrittenOrig' => $netUnderwrittenOrig,
+                                    'netUnderwrittenUsd'  => $netUnderwrittenUsd,
+                                    
                                 ];
                             }),
                     ])
@@ -1331,13 +1517,49 @@ class OperativeDocsRelationManager extends RelationManager
 
             TextColumn::make('inception_date')
                 ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->dateTime('d/m/Y H:i'),
+
+            TextColumn::make('expiration_date')
+                ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->dateTime('d/m/Y H:i'),
+            /* TextColumn::make('inception_date')
+                ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)   
                 ->date(),
 
             TextColumn::make('expiration_date')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start) 
-                ->date(),
+                ->date(), */
+
+            /* TextColumn::make('status')
+                ->label('Status')
+                ->sortable()
+                ->verticalAlignment(VerticalAlignment::Start)
+                ->badge()
+                ->state(function ($record) {
+                    // ✅ PRIORIDAD 1: Cancelled si el business tiene endorsement cancelación (tipo 5)
+                    if (($record->business_has_cancellation ?? false) === true) {
+                        return 'Cancelled';
+                    }
+
+                    // ✅ Si no está cancelado, aplica tu lógica normal por fechas
+                    return match (true) {
+                        now()->lt($record->inception_date)   => 'Pending',
+                        now()->lte($record->expiration_date) => 'In Force',
+                        default                              => 'Expired',
+                    };
+                })
+                ->color(fn (string $state): string => match ($state) {
+                    'Cancelled' => 'danger',
+                    'Pending'   => 'gray',
+                    'In Force'  => 'success',
+                    'Expired'   => 'danger',
+                    default     => 'gray',
+                }), */
+    
             
             TextColumn::make('status')
                 ->label('Status')
@@ -1434,6 +1656,10 @@ class OperativeDocsRelationManager extends RelationManager
                 ->label('➕ New Operative Doc')
                 ->modalHeading('➕ Create Operative Doc')
                 ->modalWidth('7xl')
+
+                // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                ->closeModalByClickingAway(false)
+                ->closeModalByEscaping(false) // opcional, si quieres que ESC no lo cierre
 
                 ->createAnother(false)                 // 👈 oculta "Create & create another"
                 ->modalSubmitActionLabel('Create')     // 👈 botón principal
@@ -1532,7 +1758,11 @@ class OperativeDocsRelationManager extends RelationManager
                     ->label('View')
                     //->color('primary')
                     ->modalHeading(fn ($record) => '📄 Reviewing ' . $record->docType->name .' — '. $record->id )
-                    ->modalWidth('7xl'),  
+                    ->modalWidth('7xl') 
+
+                    // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false), // opcional, si quieres que ESC no lo cierre
 
                 
                 Tables\Actions\EditAction::make('edit')
@@ -1540,6 +1770,10 @@ class OperativeDocsRelationManager extends RelationManager
                     //->color('primary')
                     ->modalHeading(fn ($record) => '📝 Modifying ' . $record->docType->name .' — '. $record->id )
                     ->modalWidth('7xl')
+
+                    // ✅ NUEVO: Modal persistente (no cerrar por click fuera / ESC)
+                    ->closeModalByClickingAway(false)
+                    ->closeModalByEscaping(false) // opcional, si quieres que ESC no lo cierre
 
                     // ✅ CAMBIO 3B-1: Deshabilita el botón SAVE CHANGES cuando estás en Overview (summary)
                     ->modalSubmitAction(fn (\Filament\Actions\StaticAction $action) => $action
