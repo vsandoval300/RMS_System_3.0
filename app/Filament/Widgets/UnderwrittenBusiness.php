@@ -10,26 +10,16 @@ class UnderwrittenBusiness extends ChartWidget
 {
     protected static ?string $heading = 'Businesses per year';
 
-    // 👇 filtro activo (por defecto "all")
-    public ?string $filter = 'all';
-
-    protected function getFilters(): ?array
-    {
-        return [
-            'all' => 'All reinsurers',
-        ] + Reinsurer::query()
-            ->orderBy('name')
-            ->pluck('name', 'id')   // [id => name]
-            ->toArray();
-    }
+    public ?int $reinsurer = null;
+    protected static bool $isLazy = false;
 
     protected function getData(): array
     {
         $query = Business::query();
 
         // 👇 si el filtro NO es "all", filtramos por reinsurer_id
-        if ($this->filter && $this->filter !== 'all') {
-            $query->where('reinsurer_id', $this->filter);
+        if ($this->reinsurer) {
+            $query->where('reinsurer_id', $this->reinsurer);
         }
 
         $rows = $query
