@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('operative_docs', function (Blueprint $table) {
+        /* Schema::table('operative_docs', function (Blueprint $table) {
 
             // 👇 Campo nuevo
             $table->date('rep_date')
                   ->nullable()
                   ->after('roe_fs'); 
                   // puedes cambiar la posición si prefieres
-        });
+        }); */
     }
 
     /**
@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('operative_docs', function (Blueprint $table) {
+        /* Schema::table('operative_docs', function (Blueprint $table) {
             $table->dropColumn('rep_date');
-        });
+        }); */
     }
 };
