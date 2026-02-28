@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\HasAuditLogs;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CostScheme extends Model
 {
@@ -23,14 +24,15 @@ class CostScheme extends Model
         'share',
         'agreement_type',
         'description',
+        'created_by_user', // ✅ NUEVO
 
     ];
 
-    /* ─── hasMany & belongsToMany ─── */
-    /* public function businessDocSchemes()
+    // ✅ NUEVO: quién lo creó
+    public function createdBy(): BelongsTo
     {
-        return $this->hasMany(BusinessOpDocsScheme::class, 'cost_scheme_id');
-    } */
+        return $this->belongsTo(User::class, 'created_by_user');
+    }
 
     public function businessDocSchemes()
     {

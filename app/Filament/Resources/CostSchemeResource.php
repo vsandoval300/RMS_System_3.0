@@ -15,6 +15,7 @@ use Filament\Forms\Components\Repeater;
 use App\Models\Partner;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Filament\Forms\Components\TextInput;
@@ -24,6 +25,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\TextInput\Mask;
+use Filament\Forms\Components\Checkbox;
 use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
@@ -41,6 +43,13 @@ use Filament\Infolists\Components\RepeatableEntry;
 class CostSchemeResource extends Resource
 {
     protected static ?string $model = CostScheme::class;
+
+    // ✅ AQUÍ (a nivel clase)
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['createdBy:id,name']); // evita N+1 en la columna createdBy.name
+    }
 
     protected static ?string $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationGroup = 'Underwritten';
@@ -161,7 +170,7 @@ class CostSchemeResource extends Resource
                         ])
                         ->columns(12),
                 ])
-                ->maxWidth('7xl')
+                ->maxWidth('8xl')
                 ->collapsible(),
                 // ╔═════════════════════════════════════════════════════════════════════════╗
                 // ║ Table Repeater para Nodos de Costo                                      ║
@@ -187,21 +196,6 @@ class CostSchemeResource extends Resource
                                         ->content(fn ($get) => $get('index'))
                                         ->columnSpan(1),
 
-                                    /* Select::make('concept')
-                                        ->label('Deduction Type')
-                                        ->relationship('deduction', 'concept')
-                                        ->placeholder('Select deduction')
-                                        ->preload()
-                                        ->searchable()
-                                        ->required()
-                                        ->reactive() // 👈 necesario para disparar dependencias
-                                        ->afterStateUpdated(function ($state, callable $set) {
-                                            if ($state != 3) {   // 👈 si NO es referral
-                                                $set('referral_partner', null); // 👈 limpia el valor
-                                            }
-                                        })
-                                        ->columnSpan(2), */
-
                                     Select::make('concept')
                                         ->label('Deduction Type')
                                         ->relationship('deduction', 'concept')
@@ -213,7 +207,6 @@ class CostSchemeResource extends Resource
                                             if ((int) $state === $exemptId) {
                                                 $set('value', 0);
                                             }
-                                            // ❌ no lo limpies a null
                                         })
                                         ->columnSpan(2),
 
@@ -251,34 +244,31 @@ class CostSchemeResource extends Resource
                                         ->extraInputAttributes(['class' => 'text-right tabular-nums'])
                                         ->columnSpan(2),
 
-                                        
+                                    // ✅ NUEVO CHECK
+                                    /* Checkbox::make('apply_to_gross')
+                                        ->label('GRP')
+                                        ->inline(false) 
+                                        ->default(false)
+                                        ->columnSpan(1), */
 
-                                    /* TextInput::make('value')
-                                        ->label('Value')
-                                        ->suffix('%')
-                                        ->type('text')
-                                        ->inputMode('decimal') 
-                                        ->live(onBlur: true)
-                                        ->required()
-                                        ->minValue(0)
-                                        ->maxValue(100)
-                                        ->formatStateUsing(fn ($state) => $state !== null ? number_format($state * 100, 5, '.', '') : null)
-                                        ->dehydrateStateUsing(fn ($state) => $state !== null ? $state / 100 : null)
-                                        ->extraInputAttributes([
-                                            'class' => 'text-right tabular-nums', // ← alinea a la derecha y usa dígitos monoespaciados
-                                        ])
-                                        ->columnSpan(2), */
+                                    Toggle::make('apply_to_gross')
+                                        ->label('GRP')
+                                        ->default(false)
+                                        ->inline(false)
+                                        ->columnSpan(1),    
 
                             ])
                             ->mutateRelationshipDataBeforeCreateUsing(function (array $data) {
                                 $data['value'] ??= 0; // 👈 garantiza que SIEMPRE exista
+                                $data['apply_to_gross'] ??= false; // ✅ opcional pero recomendado
                                 return $data;
                             })
                             ->mutateRelationshipDataBeforeSaveUsing(function (array $data) {
                                 $data['value'] ??= 0; // 👈 también en updates
+                                $data['apply_to_gross'] ??= false; // ✅ opcional pero recomendado
                                 return $data;
                             })                           
-                            ->columns(11)
+                            ->columns(12)
                             ->addActionLabel('Add cost node')
                             ->deletable(true)
                             ->addable(true)
@@ -372,7 +362,7 @@ class CostSchemeResource extends Resource
 
 
                         ])
-                        ->maxWidth('7xl')
+                        ->maxWidth('8xl')
                         ->collapsible(),
                     
         ]);
@@ -420,6 +410,12 @@ class CostSchemeResource extends Resource
                     ->sortable()
                     ->since(),
                 TextColumn::make('updated_at')->since(),
+
+                TextColumn::make('createdBy.name')
+                    ->label('Created by')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             //->defaultSort('created_at', 'asc')
             ->defaultSort('id', 'asc')

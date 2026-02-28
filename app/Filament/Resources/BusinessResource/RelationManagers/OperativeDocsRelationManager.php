@@ -1329,7 +1329,95 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalDeductionOrig = 0;
                                 $totalDeductionUsd  = 0;
 
-                                $groupedCostNodes = $costNodes
+
+$groupedCostNodes = $costNodes
+    ->groupBy('cscheme_id')
+    ->map(function ($nodes, $schemeId) use (
+        &$totalDeductionOrig,
+        &$totalDeductionUsd,
+        $premiumFtsByScheme,
+        $convertedFtsByScheme
+    ) {
+        /** @var \App\Models\CostNodex $first */
+        $first      = $nodes->first();
+        $shareFloat = (float) ($first->scheme_share ?? 0); // solo display
+
+        // Base por scheme (orig y usd)
+        $schemeBaseOrig = (float) ($premiumFtsByScheme[$schemeId] ?? 0);
+        $schemeBaseUsd  = (float) ($convertedFtsByScheme[$schemeId] ?? 0);
+
+        // ✅ running base (gross - deducciones previas)
+        $runningBaseOrig = $schemeBaseOrig;
+        $runningBaseUsd  = $schemeBaseUsd;
+
+        // ✅ asegurar orden por index
+        $sortedNodes = $nodes->sortBy(fn ($n) => (int) ($n->index ?? 0))->values();
+
+        $nodeList = collect();
+
+        foreach ($sortedNodes as $node) {
+            /** @var \App\Models\CostNodex $node */
+            $rate = (float) ($node->value ?? 0); // ej 0.02
+
+            $applyToGross = (bool) ($node->apply_to_gross ?? false);
+
+            // ✅ NUEVA REGLA:
+            // - FALSE => base = schemeBase (gross)
+            // - TRUE  => base = runningBase (gross - prev deductions)
+            $baseOrigForNode = $applyToGross ? $runningBaseOrig : $schemeBaseOrig;
+            $baseUsdForNode  = $applyToGross ? $runningBaseUsd  : $schemeBaseUsd;
+
+            $deductionOrig = $baseOrigForNode * $rate;
+            $deductionUsd  = $baseUsdForNode  * $rate;
+
+            // ✅ actualizar running base SIEMPRE (para que TRUE posteriores tomen neto acumulado)
+            $runningBaseOrig -= $deductionOrig;
+            $runningBaseUsd  -= $deductionUsd;
+
+            $nodeList->push([
+                'index'            => $node->index,
+                'partner'          => $node->partnerSource?->name ?? '-',
+                'partner_short'    => $node->partnerSource?->short_name
+                                    ?? $node->partnerSource?->name
+                                    ?? '-',
+                'deduction'        => $node->deduction?->concept ?? '-',
+                'value'            => $rate,
+
+                // ✅ NUEVO: flag para debug / display si lo quieres
+                'apply_to_gross'   => $applyToGross,
+
+                'share'            => $shareFloat, // solo display
+
+                // ✅ base usada por nodo (para fórmula / auditoría)
+                'scheme_base_orig' => $schemeBaseOrig,     // gross base
+                'scheme_base_usd'  => $schemeBaseUsd,      // gross base
+                'node_base_orig'   => $baseOrigForNode,    // base real del cálculo
+                'node_base_usd'    => $baseUsdForNode,     // base real del cálculo
+
+                'deduction_amount' => $deductionOrig,
+                'deduction_usd'    => $deductionUsd,
+            ]);
+        }
+
+        $subtotalOrig = $nodeList->sum('deduction_amount');
+        $subtotalUsd  = $nodeList->sum('deduction_usd');
+
+        $totalDeductionOrig += $subtotalOrig;
+        $totalDeductionUsd  += $subtotalUsd;
+
+        return [
+            'scheme_id'        => $schemeId,
+            'share'            => $shareFloat,
+            'scheme_base_orig' => $schemeBaseOrig,
+            'scheme_base_usd'  => $schemeBaseUsd,
+            'nodes'            => $nodeList->values(),
+            'subtotal_orig'    => $subtotalOrig,
+            'subtotal_usd'     => $subtotalUsd,
+        ];
+    })
+    ->values()
+    ->toArray();
+                                /* $groupedCostNodes = $costNodes
                                     ->groupBy('cscheme_id')
                                     ->map(function ($nodes, $schemeId) use (
                                         &$totalDeductionOrig,
@@ -1337,7 +1425,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         $premiumFtsByScheme,
                                         $convertedFtsByScheme
                                     ) {
-                                        /** @var \App\Models\CostNodex $first */
+                                        // @var \App\Models\CostNodex $first
                                         $first      = $nodes->first();
                                         $shareFloat = (float) ($first->scheme_share ?? 0); // ✅ MOD [CB-3] solo display
 
@@ -1385,7 +1473,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ];
                                     })
                                     ->values()
-                                    ->toArray();
+                                    ->toArray(); */
 
                                 // ✅✅✅ CHANGE [NET-1]: netos consistentes (no depender de recalculo en Blade)
                                 $netUnderwrittenOrig = $totalPremiumFts - $totalDeductionOrig;

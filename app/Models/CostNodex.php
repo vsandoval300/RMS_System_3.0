@@ -17,23 +17,29 @@ class CostNodex extends Model
     public    $incrementing = false;          // PK no autoincremental
     protected $keyType      = 'string';       // PK tipo string
 
-
     protected $fillable = [
         'id',
         'index',
         'concept',
         'value',
+
+        // ✅ NUEVO CAMPO
+        'apply_to_gross',
+
         'partner_source_id',
-        'partner_destination_id', // nuevo campo
+        'partner_destination_id',
         'cscheme_id',
-        
+    ];
+
+    // ✅ Recomendado: casteo a boolean
+    protected $casts = [
+        'apply_to_gross' => 'boolean',
     ];
 
     // ----------------------------------
     //            Relaciones
     // ----------------------------------
 
-    /* ─── belongsTo ─── */
     // 🔁 Partner origen
     public function partnerSource()
     {
@@ -50,11 +56,7 @@ class CostNodex extends Model
     {
         return $this->belongsTo(Partner::class);
     }
-    /** Relación con esquema de costos */
-    /* public function costSchemes()
-    {
-        return $this->belongsTo(CostScheme::class, 'cscheme_id');
-    } */
+
     /** Relación con los tipos de deducciones */
     public function deduction()
     {
@@ -65,11 +67,10 @@ class CostNodex extends Model
     {
         return $this->belongsTo(CostScheme::class, 'cscheme_id');
     }
-    
+
     // 🔑 Donde se guardan los logs del hijo: en el padre
     protected function getAuditOwnerModel(): Model
     {
-        // Si existe padre, guárdalo ahí; si no, en el propio hijo (fallback)
         return $this->costScheme ?? $this;
     }
 
@@ -88,12 +89,13 @@ class CostNodex extends Model
 
         return match ($field) {
             'concept' => Deduction::find($value)?->concept ?? $value,
-            'partner_source_id'  => Partner::find($value)?->name ?? $value,
-            'partner_destination_id'  => Partner::find($value)?->name ?? $value,
-            default       => $value,
+            'partner_source_id'      => Partner::find($value)?->name ?? $value,
+            'partner_destination_id' => Partner::find($value)?->name ?? $value,
+
+            // ✅ (Opcional) audit más legible
+            'apply_to_gross' => (bool) $value ? 'Yes' : 'No',
+
+            default => $value,
         };
     }
-
-
 }
-
