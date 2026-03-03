@@ -608,37 +608,31 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->acceptedFileTypes(['application/pdf'])
                                                 ->preserveFilenames(false)
 
-                                                // 1) Subida con nombre estable (basado en id) y limpieza del anterior si cambia
+                                                // ✅ 1) BD string -> UI array (Filament v3 lo maneja así)
+                                                ->formatStateUsing(fn ($state) => filled($state) ? [$state] : [])
+
+                                                // ✅ 2) Guardar el archivo subido con nombre estable
                                                 ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, $record, Get $get) {
                                                     $base = (string) ($get('id') ?: $record?->id);
                                                     $name = $base . '.' . ($file->getClientOriginalExtension() ?: 'pdf');
                                                     $dir  = 'reinsurers/OperativeDocuments';
+
                                                     Storage::disk('s3')->putFileAs($dir, $file, $name, ['visibility' => 'public']);
-                                                    return "{$dir}/{$name}"; // <- esto se guarda en document_path
-                                                })
-                                                
-                                                // 2) Borrado físico cuando Filament elimina el archivo subido
-                                                ->deleteUploadedFileUsing(function (?string $file) {
-                                                    if ($file && Storage::disk('s3')->exists($file)) {
-                                                        Storage::disk('s3')->delete($file);
-                                                    }
+
+                                                    return "{$dir}/{$name}"; // Filament guarda esto en el state (array)
                                                 })
 
-                                                // 3) Si el usuario hace "clear" (icono de bote), borra en S3 y fuerza que BD quede en NULL
-                                                ->afterStateUpdated(function ($state, \Filament\Forms\Set $set, \Filament\Forms\Get $get, $record) {
-                                                    // Cuando se limpia el campo, $state viene como null/''.
-                                                    if (blank($state) && $record?->document_path) {
-                                                        if (Storage::disk('s3')->exists($record->document_path)) {
-                                                            Storage::disk('s3')->delete($record->document_path);
-                                                        }
-                                                        // Asegura que el form state sea null para persistirlo
-                                                        $set('document_path', null);
+                                                // ✅ 3) UI array -> BD string
+                                                ->dehydrateStateUsing(function ($state) {
+                                                    if (is_array($state)) {
+                                                        return $state[0] ?? null;
                                                     }
+
+                                                    return $state;
                                                 })
 
-                                                // 4) SIEMPRE deshidratar; y mutar '' -> null para que se escriba en BD
-                                                ->dehydrated() // (sin callback) siempre escribe el estado
-                                                ->mutateDehydratedStateUsing(fn ($state) => blank($state) ? null : $state)
+                                                // ✅ 4) IMPORTANTE: NO escribir si viene vacío (así NO pisa el valor existente)
+                                                ->dehydrated(fn ($state) => filled($state) || (is_array($state) && count($state)))
 
                                                 ->downloadable()
                                                 ->openable()
@@ -647,7 +641,6 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ? 'Existing file: ' . basename($record->document_path)
                                                     : 'No file uploaded yet.'
                                                 )
-                                                //->dehydrated(fn ($state) => filled($state))
                                                 ->helperText('Only PDF files are allowed.'),
 
 
@@ -1330,93 +1323,93 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalDeductionUsd  = 0;
 
 
-$groupedCostNodes = $costNodes
-    ->groupBy('cscheme_id')
-    ->map(function ($nodes, $schemeId) use (
-        &$totalDeductionOrig,
-        &$totalDeductionUsd,
-        $premiumFtsByScheme,
-        $convertedFtsByScheme
-    ) {
-        /** @var \App\Models\CostNodex $first */
-        $first      = $nodes->first();
-        $shareFloat = (float) ($first->scheme_share ?? 0); // solo display
+                                $groupedCostNodes = $costNodes
+                                    ->groupBy('cscheme_id')
+                                    ->map(function ($nodes, $schemeId) use (
+                                        &$totalDeductionOrig,
+                                        &$totalDeductionUsd,
+                                        $premiumFtsByScheme,
+                                        $convertedFtsByScheme
+                                    ) {
+                                        /** @var \App\Models\CostNodex $first */
+                                        $first      = $nodes->first();
+                                        $shareFloat = (float) ($first->scheme_share ?? 0); // solo display
 
-        // Base por scheme (orig y usd)
-        $schemeBaseOrig = (float) ($premiumFtsByScheme[$schemeId] ?? 0);
-        $schemeBaseUsd  = (float) ($convertedFtsByScheme[$schemeId] ?? 0);
+                                        // Base por scheme (orig y usd)
+                                        $schemeBaseOrig = (float) ($premiumFtsByScheme[$schemeId] ?? 0);
+                                        $schemeBaseUsd  = (float) ($convertedFtsByScheme[$schemeId] ?? 0);
 
-        // ✅ running base (gross - deducciones previas)
-        $runningBaseOrig = $schemeBaseOrig;
-        $runningBaseUsd  = $schemeBaseUsd;
+                                        // ✅ running base (gross - deducciones previas)
+                                        $runningBaseOrig = $schemeBaseOrig;
+                                        $runningBaseUsd  = $schemeBaseUsd;
 
-        // ✅ asegurar orden por index
-        $sortedNodes = $nodes->sortBy(fn ($n) => (int) ($n->index ?? 0))->values();
+                                        // ✅ asegurar orden por index
+                                        $sortedNodes = $nodes->sortBy(fn ($n) => (int) ($n->index ?? 0))->values();
 
-        $nodeList = collect();
+                                        $nodeList = collect();
 
-        foreach ($sortedNodes as $node) {
-            /** @var \App\Models\CostNodex $node */
-            $rate = (float) ($node->value ?? 0); // ej 0.02
+                                        foreach ($sortedNodes as $node) {
+                                            /** @var \App\Models\CostNodex $node */
+                                            $rate = (float) ($node->value ?? 0); // ej 0.02
 
-            $applyToGross = (bool) ($node->apply_to_gross ?? false);
+                                            $applyToGross = (bool) ($node->apply_to_gross ?? false);
 
-            // ✅ NUEVA REGLA:
-            // - FALSE => base = schemeBase (gross)
-            // - TRUE  => base = runningBase (gross - prev deductions)
-            $baseOrigForNode = $applyToGross ? $runningBaseOrig : $schemeBaseOrig;
-            $baseUsdForNode  = $applyToGross ? $runningBaseUsd  : $schemeBaseUsd;
+                                            // ✅ NUEVA REGLA:
+                                            // - FALSE => base = schemeBase (gross)
+                                            // - TRUE  => base = runningBase (gross - prev deductions)
+                                            $baseOrigForNode = $applyToGross ? $runningBaseOrig : $schemeBaseOrig;
+                                            $baseUsdForNode  = $applyToGross ? $runningBaseUsd  : $schemeBaseUsd;
 
-            $deductionOrig = $baseOrigForNode * $rate;
-            $deductionUsd  = $baseUsdForNode  * $rate;
+                                            $deductionOrig = $baseOrigForNode * $rate;
+                                            $deductionUsd  = $baseUsdForNode  * $rate;
 
-            // ✅ actualizar running base SIEMPRE (para que TRUE posteriores tomen neto acumulado)
-            $runningBaseOrig -= $deductionOrig;
-            $runningBaseUsd  -= $deductionUsd;
+                                            // ✅ actualizar running base SIEMPRE (para que TRUE posteriores tomen neto acumulado)
+                                            $runningBaseOrig -= $deductionOrig;
+                                            $runningBaseUsd  -= $deductionUsd;
 
-            $nodeList->push([
-                'index'            => $node->index,
-                'partner'          => $node->partnerSource?->name ?? '-',
-                'partner_short'    => $node->partnerSource?->short_name
-                                    ?? $node->partnerSource?->name
-                                    ?? '-',
-                'deduction'        => $node->deduction?->concept ?? '-',
-                'value'            => $rate,
+                                            $nodeList->push([
+                                                'index'            => $node->index,
+                                                'partner'          => $node->partnerSource?->name ?? '-',
+                                                'partner_short'    => $node->partnerSource?->short_name
+                                                                    ?? $node->partnerSource?->name
+                                                                    ?? '-',
+                                                'deduction'        => $node->deduction?->concept ?? '-',
+                                                'value'            => $rate,
 
-                // ✅ NUEVO: flag para debug / display si lo quieres
-                'apply_to_gross'   => $applyToGross,
+                                                // ✅ NUEVO: flag para debug / display si lo quieres
+                                                'apply_to_gross'   => $applyToGross,
 
-                'share'            => $shareFloat, // solo display
+                                                'share'            => $shareFloat, // solo display
 
-                // ✅ base usada por nodo (para fórmula / auditoría)
-                'scheme_base_orig' => $schemeBaseOrig,     // gross base
-                'scheme_base_usd'  => $schemeBaseUsd,      // gross base
-                'node_base_orig'   => $baseOrigForNode,    // base real del cálculo
-                'node_base_usd'    => $baseUsdForNode,     // base real del cálculo
+                                                // ✅ base usada por nodo (para fórmula / auditoría)
+                                                'scheme_base_orig' => $schemeBaseOrig,     // gross base
+                                                'scheme_base_usd'  => $schemeBaseUsd,      // gross base
+                                                'node_base_orig'   => $baseOrigForNode,    // base real del cálculo
+                                                'node_base_usd'    => $baseUsdForNode,     // base real del cálculo
 
-                'deduction_amount' => $deductionOrig,
-                'deduction_usd'    => $deductionUsd,
-            ]);
-        }
+                                                'deduction_amount' => $deductionOrig,
+                                                'deduction_usd'    => $deductionUsd,
+                                            ]);
+                                        }
 
-        $subtotalOrig = $nodeList->sum('deduction_amount');
-        $subtotalUsd  = $nodeList->sum('deduction_usd');
+                                        $subtotalOrig = $nodeList->sum('deduction_amount');
+                                        $subtotalUsd  = $nodeList->sum('deduction_usd');
 
-        $totalDeductionOrig += $subtotalOrig;
-        $totalDeductionUsd  += $subtotalUsd;
+                                        $totalDeductionOrig += $subtotalOrig;
+                                        $totalDeductionUsd  += $subtotalUsd;
 
-        return [
-            'scheme_id'        => $schemeId,
-            'share'            => $shareFloat,
-            'scheme_base_orig' => $schemeBaseOrig,
-            'scheme_base_usd'  => $schemeBaseUsd,
-            'nodes'            => $nodeList->values(),
-            'subtotal_orig'    => $subtotalOrig,
-            'subtotal_usd'     => $subtotalUsd,
-        ];
-    })
-    ->values()
-    ->toArray();
+                                        return [
+                                            'scheme_id'        => $schemeId,
+                                            'share'            => $shareFloat,
+                                            'scheme_base_orig' => $schemeBaseOrig,
+                                            'scheme_base_usd'  => $schemeBaseUsd,
+                                            'nodes'            => $nodeList->values(),
+                                            'subtotal_orig'    => $subtotalOrig,
+                                            'subtotal_usd'     => $subtotalUsd,
+                                        ];
+                                    })
+                                    ->values()
+                                    ->toArray();
                                 /* $groupedCostNodes = $costNodes
                                     ->groupBy('cscheme_id')
                                     ->map(function ($nodes, $schemeId) use (
