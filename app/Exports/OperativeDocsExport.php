@@ -261,7 +261,7 @@ class OperativeDocsExport implements
     $row[] = $netGwpUsd;
 
     return $row;
-}
+    }
 
 
     public function columnFormats(): array
@@ -274,16 +274,35 @@ class OperativeDocsExport implements
             'S' => '#,##0.00',                         // Max Limit Liab
         ];
 
-        // ⚠️ Nota: NO se cambia aquí porque no movimos Cost_Scheme_ID de lugar,
-        // solo reafirmamos el orden ya correcto entre headings() y map().
-        $costSchemeColLetter = 'Z';
-        $firstNodeColIndex   = $this->excelColToIndex($costSchemeColLetter) + 1; // AA
+        // =========================================================
+        // ✅ Dinámico: ubicar columnas basado en headings()
+        // =========================================================
+        $headings = $this->headings();
 
+        $costSchemePos = array_search('Cost_Scheme_ID', $headings, true);
+        if ($costSchemePos === false) {
+            // Si por alguna razón no existe, regresamos lo básico sin romper export
+            return $formats;
+        }
+
+        // headings() es 0-based, Excel es 1-based
+        $costSchemeColIndex = $costSchemePos + 1;
+
+        // La primera col del bloque Node_* es la siguiente a Cost_Scheme_ID
+        $firstNodeColIndex = $costSchemeColIndex + 1;
+
+        // =========================================================
+        // ✅ Node_*_Value en porcentaje con decimales dinámicos
+        // (Deduction_Type, Source, Value) => Value es la 3ra col => +2
+        // =========================================================
         for ($i = 0; $i < $this->maxNodes; $i++) {
             $valueColIndex = $firstNodeColIndex + ($i * 3) + 2;
             $formats[$this->indexToExcelCol($valueColIndex)] = '0.################%';
         }
 
+        // =========================================================
+        // ✅ Amount_oc: después del bloque (maxNodes * 3)
+        // =========================================================
         $firstAmountOcIndex = $firstNodeColIndex + ($this->maxNodes * 3);
         for ($i = 0; $i < $this->maxNodes; $i++) {
             $formats[$this->indexToExcelCol($firstAmountOcIndex + $i)] = '#,##0.00';
@@ -295,11 +314,17 @@ class OperativeDocsExport implements
         $formats[$this->indexToExcelCol($totalDiscountsOcIndex)] = '#,##0.00';
         $formats[$this->indexToExcelCol($netGwpOcIndex)]         = '#,##0.00';
 
+        // =========================================================
+        // ✅ GWP_usd: 3 columnas después de Net_GWP_oc
+        // =========================================================
         $gwpUsdStartIndex = $netGwpOcIndex + 1;
         $formats[$this->indexToExcelCol($gwpUsdStartIndex + 0)] = '#,##0.00';
         $formats[$this->indexToExcelCol($gwpUsdStartIndex + 1)] = '#,##0.00';
         $formats[$this->indexToExcelCol($gwpUsdStartIndex + 2)] = '#,##0.00';
 
+        // =========================================================
+        // ✅ Amount_usd: después de las 3 columnas GWP_usd
+        // =========================================================
         $firstAmountUsdIndex = $gwpUsdStartIndex + 3;
         for ($i = 0; $i < $this->maxNodes; $i++) {
             $formats[$this->indexToExcelCol($firstAmountUsdIndex + $i)] = '#,##0.00';
