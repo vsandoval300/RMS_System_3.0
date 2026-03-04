@@ -604,36 +604,20 @@ class OperativeDocsRelationManager extends RelationManager
                                                 ->label('File')
                                                 ->disk('s3')
                                                 ->directory('reinsurers/OperativeDocuments')
-                                                ->visibility('public')
-                                                ->acceptedFileTypes(['application/pdf'])
-                                                ->preserveFilenames(false)
+                                                ->acceptedFileTypes([
+                                                    'application/pdf',
+                                                    'application/x-pdf', // a veces llega así
+                                                ])
+                                                ->maxSize(20480) // 20MB (ajusta)
+                                                ->visibility('private') // recomendado en S3 moderno (ACLs bloqueadas)
+                                                ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, Get $get, $record) {
+                                                    $base = $record?->id ?: (string) Str::uuid();
+                                                    $ext  = $file->getClientOriginalExtension() ?: 'pdf';
 
-                                                // ✅ 1) BD string -> UI array (Filament v3 lo maneja así)
-                                                ->formatStateUsing(fn ($state) => filled($state) ? [$state] : [])
-
-                                                // ✅ 2) Guardar el archivo subido con nombre estable
-                                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, $record, Get $get) {
-                                                    $base = (string) ($get('id') ?: $record?->id);
-                                                    $name = $base . '.' . ($file->getClientOriginalExtension() ?: 'pdf');
-                                                    $dir  = 'reinsurers/OperativeDocuments';
-
-                                                    Storage::disk('s3')->putFileAs($dir, $file, $name, ['visibility' => 'public']);
-
-                                                    return "{$dir}/{$name}"; // Filament guarda esto en el state (array)
+                                                    return "{$base}.{$ext}";
                                                 })
-
-                                                // ✅ 3) UI array -> BD string
-                                                ->dehydrateStateUsing(function ($state) {
-                                                    if (is_array($state)) {
-                                                        return $state[0] ?? null;
-                                                    }
-
-                                                    return $state;
-                                                })
-
-                                                // ✅ 4) IMPORTANTE: NO escribir si viene vacío (así NO pisa el valor existente)
-                                                ->dehydrated(fn ($state) => filled($state) || (is_array($state) && count($state)))
-
+                                                // Si NO quieres que el usuario borre el archivo existente desde el form:
+                                                ->deletable(false)
                                                 ->downloadable()
                                                 ->openable()
                                                 ->previewable(true)
