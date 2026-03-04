@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Underwritten\Widgets;
 
 use App\Models\Reinsurer;
 use Filament\Forms\Components\Select;

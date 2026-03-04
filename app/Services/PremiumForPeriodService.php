@@ -96,4 +96,61 @@ class PremiumForPeriodService
         ];
 
     }
+
+    public function mensualFtpFtsPorReinsurers(array $reinsurerIds, int $year)
+    {
+        if (empty($reinsurerIds)) {
+            // Evitar consulta vacía que devuelve nada
+            return collect();
+        }
+
+        return DB::table('operative_docs as od')
+            ->join('businesses as b', 'b.business_code', '=', 'od.business_code')
+            ->join('reinsurers as r', 'r.id', '=', 'b.reinsurer_id')
+            ->join('businessdoc_insureds as i', 'i.op_document_id', '=', 'od.id')
+            ->leftJoin('businessdoc_schemes as s', 's.op_document_id', '=', 'od.id')
+            ->leftJoin('cost_schemes as cs', 'cs.id', '=', 's.cscheme_id')
+            ->whereRaw('EXTRACT(YEAR FROM od.rep_date) = ?', [$year])
+            ->whereIn('r.id', $reinsurerIds)
+            ->selectRaw("
+                r.id AS reinsurer_id,
+                r.name AS reinsurer_name,
+                DATE_TRUNC('month', od.rep_date) AS month_date,
+                TO_CHAR(DATE_TRUNC('month', od.rep_date), 'Mon') AS month_label,
+
+                -- Cálculo FTP exacto
+                SUM(
+                    (i.premium / 
+                        CASE WHEN EXTRACT(YEAR FROM od.inception_date) % 4 = 0 THEN 366 ELSE 365 END
+                    ) * (od.expiration_date::date - od.inception_date::date)
+                ) AS ftp,
+
+                -- Cálculo FTS exacto
+                SUM(
+                    (
+                        (i.premium / 
+                            CASE WHEN EXTRACT(YEAR FROM od.inception_date) % 4 = 0 THEN 366 ELSE 365 END
+                        ) * (od.expiration_date::date - od.inception_date::date)
+                    ) * COALESCE(cs.share, 0)
+                    / NULLIF(od.roe_fs,0)
+                ) AS fts
+            ")
+            ->groupBy('r.id', 'r.name', DB::raw("DATE_TRUNC('month', od.rep_date)"))
+            ->orderBy(DB::raw("DATE_TRUNC('month', od.rep_date)"))
+            ->get();
+    }
+
+    public function topReinsurersByYear(int $year, int $limit = 5)
+    {
+        return DB::table('operative_docs as od')
+            ->join('businesses as b', 'b.business_code', '=', 'od.business_code')
+            ->join('reinsurers as r', 'r.id', '=', 'b.reinsurer_id')
+            ->join('businessdoc_insureds as i', 'i.op_document_id', '=', 'od.id')
+            ->whereRaw('EXTRACT(YEAR FROM od.rep_date) = ?', [$year])
+            ->selectRaw("r.id, r.name, SUM(i.premium) as total")
+            ->groupBy('r.id', 'r.name')
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get();
+    }
 }

@@ -22,10 +22,9 @@ class UnderwrittenDashboard extends Page
     protected function getHeaderWidgets(): array
     {
         return [
-            // UnderwrittenBusiness::class,
-            //PremiumForPeriod::class
-            \App\Filament\Widgets\UnderwrittenOverview::class,
-            \App\Filament\Widgets\UnderwrittenProfile::class,
+
+            \App\Filament\Underwritten\Widgets\UnderwrittenOverview::class,
+            \App\Filament\Underwritten\Widgets\UnderwrittenProfile::class,
         ];
     }
 

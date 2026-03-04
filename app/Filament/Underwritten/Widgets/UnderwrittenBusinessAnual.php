@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Underwritten\Widgets;
 
 use App\Models\Business;
 use App\Models\Reinsurer;
 use Filament\Widgets\ChartWidget;
 
-class UnderwrittenBusiness extends ChartWidget
+class UnderwrittenBusinessAnual extends ChartWidget
 {
     protected static ?string $heading = 'Businesses per year';
 

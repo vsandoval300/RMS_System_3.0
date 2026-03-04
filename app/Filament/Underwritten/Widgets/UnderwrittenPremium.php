@@ -10,29 +10,87 @@ class UnderwrittenPremium extends ChartWidget
 {
     protected static ?string $heading = 'Underwritten Premium';
 
-    public ?int $reinsurer = null;
+    public ?array $reinsurer = [];
     public ?int $year = null;
 
     protected static bool $isLazy = false;
 
-    protected function getData(): array
+       protected function getType(): string
     {
-        $data = app(PremiumForPeriodService::class)->anualFTS($this->reinsurer, $this->year);
+        return 'line';
+    }
 
+    protected function getListeners(): array
+    {
         return [
-            'datasets' => [
-                [
-                    'label' => 'FTS',
-                    'data' => $data['fts'],
-                ],
-            ],
-            'labels' => $data['labels'],
+            'refreshChart' => '$refresh',
         ];
     }
 
-    protected function getType(): string
+    protected function getData(): array
     {
-        return 'line';
+        $service = app(PremiumForPeriodService::class);
+        $year = $this->year ?? now()->year;
+
+        // Si no se seleccionó reinsurers → Top 5 del año
+        if (empty($this->reinsurer)) {
+            $top = $service->topReinsurersByYear($year);
+            $reinsurerIds = $top->pluck('id')->toArray();
+        } else {
+            $reinsurerIds = $this->reinsurer;
+        }
+
+        // Consulta mensual con FTP y FTS
+        $results = $service->mensualFtpFtsPorReinsurers($reinsurerIds, $year);
+
+        $months = collect([
+            'Jan','Feb','Mar','Apr','May','Jun',
+            'Jul','Aug','Sep','Oct','Nov','Dec'
+        ]);
+
+        $datasets = [];
+
+        foreach ($results->groupBy('reinsurer_name') as $reinsurer => $data) {
+
+            $valuesFtp = [];
+            $valuesFts = [];
+
+            foreach ($months as $month) {
+                $record = $data->firstWhere('month_label', $month);
+                $valuesFtp[] = $record ? (float) $record->ftp : 0;
+                $valuesFts[] = $record ? (float) $record->fts : 0;
+            }
+
+            // // Línea sólida FTP
+            // $datasets[] = [
+            //     'label' => $reinsurer . ' (FTP)',
+            //     'data' => $valuesFtp,
+            //     'borderColor' => $this->colorFromString($reinsurer . 'ftp'),
+            //     'backgroundColor' => 'transparent',
+            //     'tension' => 0.3,
+            // ];
+
+            // Línea punteada FTS
+            $datasets[] = [
+                'label' => $reinsurer . ' (FTS)',
+                'data' => $valuesFts,
+                'borderColor' => $this->colorFromString($reinsurer . 'fts'),
+                'backgroundColor' => 'transparent',
+                //'borderDash' => [5,5],
+                'tension' => 0.3,
+            ];
+        }
+
+        return [
+            'labels' => $months,
+            'datasets' => $datasets,
+        ];
+    }
+
+    // Genera un color consistente por string
+    private function colorFromString(string $string): string
+    {
+        return '#' . substr(md5($string), 0, 6);
     }
 
 }

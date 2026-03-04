@@ -57,7 +57,7 @@ class UserStatistics extends BaseWidget
             Stat::make('Active for 30 days', $last30),
             Stat::make('Inactive Users',  $activeLast30)
                 ->description(round(($last30 / $total) * 100) . '% of users'), 
-            Stat::make('Average time on page', '3:12'),
+            //Stat::make('Average time on page', '3:12'),
         ];
     }
 }

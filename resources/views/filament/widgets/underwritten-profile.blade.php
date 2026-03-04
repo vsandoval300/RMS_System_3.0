@@ -10,7 +10,7 @@
             [
                 'reinsurer' => $this->reinsurer,
                 'year' => $this->year
-            ], key('businessYear-chart-' . $this->reinsurer . '-' . $this->year)
+            ], key('businessYear-chart-' . $this->year)
         )
 
         @livewire(
@@ -18,7 +18,7 @@
             [
                 'reinsurer' => $this->reinsurer,
                 'year' => $this->year
-            ], key('premium-chart-' . $this->reinsurer . '-' . $this->year)
+            ], key('premium-chart-' . $this->year)
         )
     </div>
 

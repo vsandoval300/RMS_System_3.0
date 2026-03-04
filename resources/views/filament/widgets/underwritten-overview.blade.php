@@ -5,7 +5,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        @livewire(\App\Filament\Widgets\UnderwrittenBusiness::class, [
+        @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::class, [
             'reinsurer' => $this->reinsurer
         ], key('business-chart-' . $this->reinsurer))
 
