@@ -27,7 +27,7 @@ class UnderwrittenPremium extends ChartWidget
     {
         $data = app(PremiumForPeriodService::class)
             ->monthlyFTSByYear($this->reinsurer, $this->years);
-         Log::info('Datos para chart', $data);
+
         return [
             'datasets' => $data['datasets'],
             'labels' => $data['labels'],

@@ -52,12 +52,6 @@ class UnderwrittenBusiness extends ChartWidget
 
         $rows = $query->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Inicializar meses
-        |--------------------------------------------------------------------------
-        */
-
         $grouped = [];
 
         foreach ($this->years as $year) {
@@ -71,12 +65,6 @@ class UnderwrittenBusiness extends ChartWidget
 
             $grouped[$year][$month] = (int)$row->total;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Colores para cada línea
-        |--------------------------------------------------------------------------
-        */
 
         $colors = [
             '#FF6384',
@@ -120,60 +108,3 @@ class UnderwrittenBusiness extends ChartWidget
         return 'line';
     }
 }
-// class UnderwrittenBusiness extends ChartWidget
-// {
-//     protected static ?string $heading = 'Chart';
-
-//     public ?int $reinsurer = null;
-//     public ?array $years = [];
-
-//     protected static bool $isLazy = false;
-
-//     protected function getListeners(): array
-//     {
-//         return [
-//             'refreshChart' => '$refresh',
-//         ];
-//     }
-
-//     protected function getData(): array
-//     {
-//         $query = Business::query();
-
-//         if($this->reinsurer) {
-//             $query->where('reinsurer_id', $this->reinsurer);
-//         }
-
-//         if ($this->years) {
-//             $query->whereYear('created_at', $this->years);
-//         }
-//         $rows = $query
-//             ->selectRaw("DATE_PART('year', created_at) AS year, COUNT(*) AS total")
-//             ->groupBy('year')
-//             ->orderBy('year')
-//             ->get();
-
-//         return [
-//             'datasets' => [
-//                 [
-//                     'label' => 'Businesses',
-//                     'data'  => $rows->pluck('total'),
-//                 ],
-//             ],
-//             'labels' => $rows->pluck('year'),
-//         ];
-//         // $data = app(PremiumForPeriodService::class)
-//         //     ->monthlyBusinessByYear($this->reinsurer, $this->years);
-
-//         // return [
-//         //     'datasets' => $data['datasets'],
-//         //     'labels' => $data['labels'],
-//         // ];
-
-//     }
-
-//     protected function getType(): string
-//     {
-//         return 'line';
-//     }
-// }
