@@ -21,13 +21,10 @@ class UnderwrittenProfile extends Widget implements HasForms
     protected static string $view = 'filament.widgets.underwritten-profile';
     protected int|string|array $columnSpan = 'full';
 
-    public ?array $reinsurer = null;
-    public ?int $year = null;
+    public ?int $reinsurer = null;
+    public array $years = [];
 
-    // public function mount():void
-    // {
-    //     $this->form->fill();
-    // }
+    protected $listeners = ['refreshChart' => '$refresh'];
 
     protected function getFormSchema(): array
     {
@@ -35,15 +32,15 @@ class UnderwrittenProfile extends Widget implements HasForms
             Grid::make(2)->schema([
                 Select::make('reinsurer')
                     ->label('Reinsurer')
-                    ->multiple()
                     ->options(Reinsurer::pluck('name', 'id'))
                     ->searchable()
                     ->live(),
 
-                Select::make('year')
+                Select::make('years')
                     ->label('Underwritten Year')
+                    ->multiple()
                     ->options(
-                        range(date('Y'), 2018) // ajusta tu rango real
+                       $this->getYearOptions() // ajusta tu rango real
                     )
                     ->live(),
             ]),
@@ -58,7 +55,12 @@ class UnderwrittenProfile extends Widget implements HasForms
         return array_combine($years, $years);
     }
 
-    public function updated($property)
+    public function updatedReinsurer()
+    {
+        $this->dispatch('refreshChart');
+    }
+
+    public function updatedYears()
     {
         $this->dispatch('refreshChart');
     }

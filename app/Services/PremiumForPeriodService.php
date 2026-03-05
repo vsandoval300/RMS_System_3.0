@@ -97,60 +97,320 @@ class PremiumForPeriodService
 
     }
 
-    public function mensualFtpFtsPorReinsurers(array $reinsurerIds, int $year)
+    /* public function monthlyFTSByYear(?int $reinsurerId = null, array $years = []): array
     {
-        if (empty($reinsurerIds)) {
-            // Evitar consulta vacía que devuelve nada
-            return collect();
+        if (empty($years)) {
+            $years = [now()->year];
         }
 
-        return DB::table('operative_docs as od')
-            ->join('businesses as b', 'b.business_code', '=', 'od.business_code')
-            ->join('reinsurers as r', 'r.id', '=', 'b.reinsurer_id')
-            ->join('businessdoc_insureds as i', 'i.op_document_id', '=', 'od.id')
-            ->leftJoin('businessdoc_schemes as s', 's.op_document_id', '=', 'od.id')
-            ->leftJoin('cost_schemes as cs', 'cs.id', '=', 's.cscheme_id')
-            ->whereRaw('EXTRACT(YEAR FROM od.rep_date) = ?', [$year])
-            ->whereIn('r.id', $reinsurerIds)
-            ->selectRaw("
-                r.id AS reinsurer_id,
-                r.name AS reinsurer_name,
-                DATE_TRUNC('month', od.rep_date) AS month_date,
-                TO_CHAR(DATE_TRUNC('month', od.rep_date), 'Mon') AS month_label,
+        $months = [
+            1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',
+            7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'
+        ];
 
-                -- Cálculo FTP exacto
-                SUM(
-                    (i.premium / 
-                        CASE WHEN EXTRACT(YEAR FROM od.inception_date) % 4 = 0 THEN 366 ELSE 365 END
-                    ) * (od.expiration_date::date - od.inception_date::date)
-                ) AS ftp,
+        $grouped = [];
 
-                -- Cálculo FTS exacto
+        foreach ($years as $year) {
+            $grouped[(int)$year] = array_fill(1, 12, 0);
+        }
+
+        OperativeDoc::query()
+
+            ->select([
+                'id',
+                'rep_date',
+                'inception_date',
+                'expiration_date',
+                'roe_fs'
+            ])
+
+            ->when($years, function ($q) use ($years) {
+
+                $q->where(function ($query) use ($years) {
+
+                    foreach ($years as $year) {
+                        $query->orWhereBetween('rep_date', [
+                            "$year-01-01",
+                            "$year-12-31"
+                        ]);
+                    }
+
+                });
+
+            })
+
+            ->when($reinsurerId, fn($q) =>
+                $q->whereHas('business', fn($b) =>
+                    $b->where('reinsurer_id', $reinsurerId)
+                )
+            )
+
+            ->with([
+                'insureds:id,op_document_id,premium,cscheme_id',
+
+                'schemes.costScheme:id,share'
+            ])
+
+            ->chunk(500, function ($docs) use (&$grouped) {
+
+                foreach ($docs as $doc) {
+
+                    $date = \Carbon\Carbon::parse($doc->rep_date);
+
+                    $year = $date->year;
+                    $month = $date->month;
+
+                    if (!isset($grouped[$year][$month])) {
+                        continue;
+                    }
+
+                    $inception = \Carbon\Carbon::parse($doc->inception_date);
+                    $expiration = \Carbon\Carbon::parse($doc->expiration_date);
+
+                    $daysInYear = $inception->isLeapYear() ? 366 : 365;
+                    $coverageDays = $inception->diffInDays($expiration);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | OPTIMIZACIÓN CLAVE
+                    |--------------------------------------------------------------------------
+                    | Creamos un mapa de shares UNA SOLA VEZ
+                    | cscheme_id => share
+                    
+
+                    $shares = [];
+
+                    foreach ($doc->schemes as $scheme) {
+
+                        $shares[$scheme->costScheme->id] =
+                            $scheme->costScheme->share ?? 0;
+
+                    }
+
+                    $fts = 0;
+
+                    foreach ($doc->insureds as $insured) {
+
+                        $share = $shares[$insured->cscheme_id] ?? 0;
+
+                        $ftpIndividual = ($daysInYear > 0)
+                            ? ($insured->premium / $daysInYear) * $coverageDays
+                            : 0;
+
+                        $fts += $ftpIndividual * $share;
+                    }
+
+                    $totalConvertedPremium = ($doc->roe_fs > 0)
+                        ? ($fts / $doc->roe_fs)
+                        : 0;
+
+                    $grouped[$year][$month] += $totalConvertedPremium;
+                }
+            });
+
+        $datasets = [];
+
+        foreach ($grouped as $year => $monthsData) {
+
+            $datasets[] = [
+                'label' => (string) $year,
+                'data' => array_values($monthsData),
+            ];
+        }
+
+        return [
+            'labels' => array_values($months),
+            'datasets' => $datasets,
+        ];
+    } */
+
+    public function monthlyFTSByYear(?int $reinsurerId = null, array $years = []): array
+    {
+        if (empty($years)) {
+            $years = [now()->year];
+        }
+
+        $months = [
+            1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',
+            7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'
+        ];
+
+        $query = DB::table('operative_docs as d')
+
+            ->join('businessdoc_insureds as i','i.op_document_id','=','d.id')
+
+            ->join('businessdoc_schemes as s','s.op_document_id','=','d.id')
+
+            ->join('cost_schemes as cs','cs.id','=','s.cscheme_id')
+
+            ->join('businesses as b','b.business_code','=','d.business_code')
+
+            ->selectRaw('
+                EXTRACT(YEAR FROM d.rep_date) as year,
+                EXTRACT(MONTH FROM d.rep_date) as month,
+
                 SUM(
                     (
-                        (i.premium / 
-                            CASE WHEN EXTRACT(YEAR FROM od.inception_date) % 4 = 0 THEN 366 ELSE 365 END
-                        ) * (od.expiration_date::date - od.inception_date::date)
-                    ) * COALESCE(cs.share, 0)
-                    / NULLIF(od.roe_fs,0)
-                ) AS fts
-            ")
-            ->groupBy('r.id', 'r.name', DB::raw("DATE_TRUNC('month', od.rep_date)"))
-            ->orderBy(DB::raw("DATE_TRUNC('month', od.rep_date)"))
-            ->get();
+                        (i.premium /
+                            CASE
+                                WHEN EXTRACT(YEAR FROM d.inception_date)::int % 4 = 0
+                                THEN 366
+                                ELSE 365
+                            END
+                        )
+                        *
+                        DATE_PART(\'day\', d.expiration_date - d.inception_date)
+                    )
+                    *
+                    cs.share
+                    /
+                    NULLIF(d.roe_fs,0)
+                ) as fts
+            ')
+
+            ->whereIn(DB::raw('EXTRACT(YEAR FROM d.rep_date)'), $years)
+
+            ->when($reinsurerId, fn($q) =>
+                $q->where('b.reinsurer_id',$reinsurerId)
+            )
+
+            ->groupByRaw('year, month')
+
+            ->orderByRaw('year, month');
+
+        $rows = $query->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Transformar resultado para ChartJS
+        |--------------------------------------------------------------------------
+        */
+
+        $grouped = [];
+
+        foreach ($years as $year) {
+            $grouped[$year] = array_fill(1,12,0);
+        }
+
+        foreach ($rows as $row) {
+
+            $year = (int)$row->year;
+            $month = (int)$row->month;
+
+            $grouped[$year][$month] = (float)$row->fts;
+        }
+
+        // Define colores para las líneas
+        $colors = [
+            '#FF6384', // rojo
+            '#36A2EB', // azul
+            '#FFCE56', // amarillo
+            '#4BC0C0', // verde
+            '#9966FF', // morado
+            '#FF9F40', // naranja
+            '#8A2BE2', // azul violeta
+            '#00CED1', // turquesa
+            '#FF4500', // naranja fuerte
+            '#228B22', // verde bosque
+        ];
+
+        $datasets = [];
+        $colorIndex = 0;
+
+        foreach ($grouped as $year => $monthsData) {
+            $color = $colors[$colorIndex % count($colors)];
+
+            $datasets[] = [
+                'label' => (string)$year,
+                'data' => array_values($monthsData),
+                'borderColor' => $color,
+                'backgroundColor' => $color . '80', // 50% opacidad
+                'fill' => false,
+                'tension' => 0.3, // para líneas suavizadas (opcional)
+                'pointRadius' => 3,
+                'pointHoverRadius' => 6,
+            ];
+
+            $colorIndex++;
+        }
+
+        return [
+            'labels' => array_values($months),
+            'datasets' => $datasets,
+        ];
     }
 
-    public function topReinsurersByYear(int $year, int $limit = 5)
+    // Función equivalente a monthlyFTSByYear pero para "Business"
+    public function monthlyBusinessByYear(?int $reinsurerId = null, array $years = []): array
     {
-        return DB::table('operative_docs as od')
-            ->join('businesses as b', 'b.business_code', '=', 'od.business_code')
-            ->join('reinsurers as r', 'r.id', '=', 'b.reinsurer_id')
-            ->join('businessdoc_insureds as i', 'i.op_document_id', '=', 'od.id')
-            ->whereRaw('EXTRACT(YEAR FROM od.rep_date) = ?', [$year])
-            ->selectRaw("r.id, r.name, SUM(i.premium) as total")
-            ->groupBy('r.id', 'r.name')
-            ->orderByDesc('total')
-            ->limit($limit)
-            ->get();
+        if (empty($years)) {
+            $years = [now()->year];
+        }
+
+        $months = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun',
+            7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
+        ];
+
+        $query = DB::table('operative_docs as d')
+            ->join('businessdoc_insureds as i', 'i.op_document_id', '=', 'd.id')
+            ->join('businesses as b', 'b.business_code', '=', 'd.business_code')
+            ->selectRaw('
+                EXTRACT(YEAR FROM d.rep_date) as year,
+                EXTRACT(MONTH FROM d.rep_date) as month,
+                SUM(i.premium) as total_business
+            ')
+            ->whereIn(DB::raw('EXTRACT(YEAR FROM d.rep_date)'), $years)
+            ->when($reinsurerId, fn($q) =>
+                $q->where('b.reinsurer_id', $reinsurerId)
+            )
+            ->groupByRaw('year, month')
+            ->orderByRaw('year, month');
+
+        $rows = $query->get();
+
+        // Inicializa todos los meses con 0
+        $grouped = [];
+        foreach ($years as $year) {
+            $grouped[$year] = array_fill(1, 12, 0);
+        }
+
+        foreach ($rows as $row) {
+            $year = (int)$row->year;
+            $month = (int)$row->month;
+            $grouped[$year][$month] = (float)$row->total_business;
+        }
+
+        // Colores
+        $colors = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+            '#9966FF', '#FF9F40', '#8A2BE2', '#00CED1',
+            '#FF4500', '#228B22',
+        ];
+
+        $datasets = [];
+        $colorIndex = 0;
+
+        foreach ($grouped as $year => $monthsData) {
+            $color = $colors[$colorIndex % count($colors)];
+
+            $datasets[] = [
+                'label' => (string)$year,
+                'data' => array_values($monthsData),
+                'borderColor' => $color,
+                'backgroundColor' => $color . '80', // 50% opacidad
+                'fill' => false,
+                'tension' => 0.3,
+                'pointRadius' => 3,
+                'pointHoverRadius' => 6,
+            ];
+
+            $colorIndex++;
+        }
+
+        return [
+            'labels' => array_values($months),
+            'datasets' => $datasets,
+        ];
     }
 }

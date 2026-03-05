@@ -9,16 +9,16 @@
            App\Filament\Underwritten\Widgets\UnderwrittenBusiness::class,
             [
                 'reinsurer' => $this->reinsurer,
-                'year' => $this->year
-            ], key('businessYear-chart-' . $this->year)
+                'years' => $this->years
+            ], key('businessYear-chart-' . implode('-', $this->years))
         )
 
         @livewire(
             App\Filament\Underwritten\Widgets\UnderwrittenPremium::class,
             [
                 'reinsurer' => $this->reinsurer,
-                'year' => $this->year
-            ], key('premium-chart-' . $this->year)
+                'years' => $this->years
+            ], key('premium-chart-' . implode('-', $this->years ?? []))
         )
     </div>
 
