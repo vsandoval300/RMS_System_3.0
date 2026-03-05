@@ -99,13 +99,12 @@ class OperativeDocsExport implements
         : null;
 
     $maxLimitLiab = 0.0;
+
     foreach ($doc->business?->liabilityStructures ?? [] as $ls) {
         $limit = (float) ($ls->limit ?? 0);
-        $cls   = (float) ($ls->cls ?? 0);
-        if ($cls > 1) {
-            $cls /= 100;
-        }
-        $maxLimitLiab += $limit * $cls;
+
+        // 🔵 ignorar completamente el campo cls
+        $maxLimitLiab += $limit;
     }
 
     $placementType = ($doc->business?->renewed_from_id) ? 'Renewal' : 'New';

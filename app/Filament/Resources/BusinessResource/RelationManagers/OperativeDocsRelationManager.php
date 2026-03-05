@@ -623,7 +623,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                 return "{$base}.pdf";
                                             })
-                                            ->deletable(false)
+                                            ->deletable()
                                             ->downloadable()
                                             ->openable()
                                             ->previewable(true)
