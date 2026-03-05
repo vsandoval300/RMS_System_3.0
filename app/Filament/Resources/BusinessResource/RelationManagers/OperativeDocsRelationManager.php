@@ -53,6 +53,9 @@ use App\Models\Business;
 use Filament\Tables\Actions\Action as TableAction;
 use Filament\Actions\StaticAction; 
 use Filament\Forms\Components\Alert;
+use App\Models\OperativeDoc;
+
+
 
 
 
@@ -600,32 +603,35 @@ class OperativeDocsRelationManager extends RelationManager
                                     Section::make('File Upload')
                                         ->schema([
 
+                                            
                                             FileUpload::make('document_path')
-                                                ->label('File')
-                                                ->disk('s3')
-                                                ->directory('reinsurers/OperativeDocuments')
-                                                ->acceptedFileTypes([
-                                                    'application/pdf',
-                                                    'application/x-pdf', // a veces llega así
-                                                ])
-                                                ->maxSize(20480) // 20MB (ajusta)
-                                                ->visibility('private') // recomendado en S3 moderno (ACLs bloqueadas)
-                                                ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, Get $get, $record) {
-                                                    $base = $record?->id ?: (string) Str::uuid();
-                                                    $ext  = $file->getClientOriginalExtension() ?: 'pdf';
+                                            ->label('File')
+                                            ->disk('s3')
+                                            ->directory('reinsurers/OperativeDocuments')
+                                            ->acceptedFileTypes(['application/pdf', 'application/x-pdf'])
+                                            ->visibility('private')
+                                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, Get $get, $record) {
 
-                                                    return "{$base}.{$ext}";
-                                                })
-                                                // Si NO quieres que el usuario borre el archivo existente desde el form:
-                                                ->deletable(false)
-                                                ->downloadable()
-                                                ->openable()
-                                                ->previewable(true)
-                                                ->hint(fn ($record) => $record?->document_path
-                                                    ? 'Existing file: ' . basename($record->document_path)
-                                                    : 'No file uploaded yet.'
-                                                )
-                                                ->helperText('Only PDF files are allowed.'),
+                                                // ✅ 1) PRIORIDAD: Id generado en el FORM (Create)
+                                                $formId = $get('id'); // <- el campo "Id Document" que muestras en tu screenshot
+
+                                                // ✅ 2) Si ya existe record (Edit), usa el id del record
+                                                $base = $formId ?: ($record?->id ?: (string) Str::uuid());
+
+                                                // ✅ normaliza un poco por si trae espacios raros
+                                                $base = trim((string) $base);
+
+                                                return "{$base}.pdf";
+                                            })
+                                            ->deletable(false)
+                                            ->downloadable()
+                                            ->openable()
+                                            ->previewable(true)
+                                            ->hint(fn ($record) => $record?->document_path
+                                                ? 'Existing file: ' . basename($record->document_path)
+                                                : 'No file uploaded yet.'
+                                            )
+                                            ->helperText('Only PDF files are allowed.'),
 
 
                                             /* FileUpload::make('document_path')
