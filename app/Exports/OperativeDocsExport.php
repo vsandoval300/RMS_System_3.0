@@ -82,6 +82,7 @@ class OperativeDocsExport implements
 
         $base[] = 'Total_Discounts_usd';
         $base[] = 'Net_GWP_usd';
+        $base[] = 'Rep_Date';
 
         return $base;
     }
@@ -93,6 +94,7 @@ class OperativeDocsExport implements
     $created    = optional($doc->created_at)?->format('Y-m-d');
     $inception  = optional($doc->inception_date)?->format('Y-m-d');
     $expiration = optional($doc->expiration_date)?->format('Y-m-d');
+    $repDate = optional($doc->rep_date)?->format('Y-m-d');
 
     $coverageDays = ($doc->inception_date && $doc->expiration_date)
         ? Carbon::parse($doc->inception_date)->diffInDays(Carbon::parse($doc->expiration_date))
@@ -258,6 +260,7 @@ class OperativeDocsExport implements
 
     $row[] = $totalDiscountsUsd;
     $row[] = $netGwpUsd;
+    $row[] = $repDate;
 
     return $row;
     }
@@ -274,66 +277,75 @@ class OperativeDocsExport implements
         ];
 
         // =========================================================
-        // ✅ Dinámico: ubicar columnas basado en headings()
+        // ✅ Robusto: ubicar columnas por NOMBRE (headings)
+        // Esto evita desfaces cuando maxNodes = 0 o cambia el orden
         // =========================================================
         $headings = $this->headings();
 
-        $costSchemePos = array_search('Cost_Scheme_ID', $headings, true);
-        if ($costSchemePos === false) {
-            // Si por alguna razón no existe, regresamos lo básico sin romper export
-            return $formats;
-        }
-
-        // headings() es 0-based, Excel es 1-based
-        $costSchemeColIndex = $costSchemePos + 1;
-
-        // La primera col del bloque Node_* es la siguiente a Cost_Scheme_ID
-        $firstNodeColIndex = $costSchemeColIndex + 1;
+        // helper: heading -> Excel Col (A, B, C...)
+        $colOf = function (string $label) use ($headings) {
+            $pos = array_search($label, $headings, true);
+            return $pos === false ? null : $this->indexToExcelCol($pos + 1); // +1 porque Excel es 1-based
+        };
 
         // =========================================================
         // ✅ Node_*_Value en porcentaje con decimales dinámicos
-        // (Deduction_Type, Source, Value) => Value es la 3ra col => +2
         // =========================================================
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $valueColIndex = $firstNodeColIndex + ($i * 3) + 2;
-            $formats[$this->indexToExcelCol($valueColIndex)] = '0.################%';
+        for ($i = 1; $i <= $this->maxNodes; $i++) {
+            if ($col = $colOf("Node_{$i}_Value")) {
+                $formats[$col] = '0.################%';
+            }
         }
 
         // =========================================================
-        // ✅ Amount_oc: después del bloque (maxNodes * 3)
+        // ✅ Node_* Amount_oc y Amount_usd como montos
         // =========================================================
-        $firstAmountOcIndex = $firstNodeColIndex + ($this->maxNodes * 3);
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $formats[$this->indexToExcelCol($firstAmountOcIndex + $i)] = '#,##0.00';
+        for ($i = 1; $i <= $this->maxNodes; $i++) {
+            if ($col = $colOf("Node_{$i}_Amount_oc")) {
+                $formats[$col] = '#,##0.00';
+            }
+            if ($col = $colOf("Node_{$i}_Amount_usd")) {
+                $formats[$col] = '#,##0.00';
+            }
         }
 
-        $totalDiscountsOcIndex = $firstAmountOcIndex + $this->maxNodes;
-        $netGwpOcIndex         = $totalDiscountsOcIndex + 1;
-
-        $formats[$this->indexToExcelCol($totalDiscountsOcIndex)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($netGwpOcIndex)]         = '#,##0.00';
-
         // =========================================================
-        // ✅ GWP_usd: 3 columnas después de Net_GWP_oc
+        // ✅ Montos OC (incluye las 3 amarillas + totals)
         // =========================================================
-        $gwpUsdStartIndex = $netGwpOcIndex + 1;
-        $formats[$this->indexToExcelCol($gwpUsdStartIndex + 0)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($gwpUsdStartIndex + 1)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($gwpUsdStartIndex + 2)] = '#,##0.00';
-
-        // =========================================================
-        // ✅ Amount_usd: después de las 3 columnas GWP_usd
-        // =========================================================
-        $firstAmountUsdIndex = $gwpUsdStartIndex + 3;
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $formats[$this->indexToExcelCol($firstAmountUsdIndex + $i)] = '#,##0.00';
+        foreach ([
+            'GWP_Annualised_oc',
+            'GWP_ftp_oc',
+            'GWP_fts_oc',
+            'Total_Discounts_oc',
+            'Net_GWP_oc',
+        ] as $h) {
+            if ($col = $colOf($h)) {
+                $formats[$col] = '#,##0.00';
+            }
         }
 
-        $totalDiscountsUsdIndex = $firstAmountUsdIndex + $this->maxNodes;
-        $netGwpUsdIndex         = $totalDiscountsUsdIndex + 1;
+        // =========================================================
+        // ✅ Montos USD (incluye las 3 que te faltaban al final)
+        // =========================================================
+        foreach ([
+            'GWP_Annualised_usd',
+            'GWP_ftp_usd',
+            'GWP_fts_usd',
+            'Total_Discounts_usd',
+            'Net_GWP_usd',
+        ] as $h) {
+            if ($col = $colOf($h)) {
+                $formats[$col] = '#,##0.00';
+            }
+        }
 
-        $formats[$this->indexToExcelCol($totalDiscountsUsdIndex)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($netGwpUsdIndex)]         = '#,##0.00';
+        // =========================================================
+        // ✅ NEW: Rep_Date al final como fecha
+        // (asegúrate de agregar 'Rep_Date' en headings() y map())
+        // =========================================================
+        if ($col = $colOf('Rep_Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
+        }
 
         return $formats;
     }

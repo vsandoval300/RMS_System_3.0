@@ -42,6 +42,7 @@ class OperativeDoc extends Model
     protected $casts = [
         'inception_date'  => 'datetime',
         'expiration_date' => 'datetime',
+        'rep_date' => 'date', // o 'datetime' si incluye hora
     ];
 
     /* --------------------------------------------------

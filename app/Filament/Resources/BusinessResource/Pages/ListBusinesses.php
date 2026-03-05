@@ -226,6 +226,9 @@ Action::make('export')
             ->select([
                 'operative_docs.*',
 
+                // ✅ NEW: fuerza a que rep_date venga como atributo accesible en el modelo
+                'operative_docs.rep_date as rep_date',
+
                 'insured_scheme.share as share',
 
                 'companies.name as insured_name',
