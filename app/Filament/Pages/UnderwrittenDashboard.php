@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use App\Filament\Widgets\UnderwrittenBusiness;   // 👈 ESTE namespace
 
 class UnderwrittenDashboard extends Page
 {
@@ -20,7 +19,14 @@ class UnderwrittenDashboard extends Page
     protected function getHeaderWidgets(): array
     {
         return [
-            UnderwrittenBusiness::class,
+
+            \App\Filament\Underwritten\Widgets\UnderwrittenOverview::class,
+            \App\Filament\Underwritten\Widgets\UnderwrittenProfile::class,
         ];
+    }
+
+    public function getHeaderWidgetsColumns(): int | array
+    {
+        return 1;
     }
 }
