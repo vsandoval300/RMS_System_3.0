@@ -1,12 +1,9 @@
 <?php
 
-namespace App\Filament\Underwritten\Resources\NoResource\Widgets;
+namespace App\Filament\Underwritten\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use  App\Models\Reinsurer;
-use App\Models\Business;
 use App\Services\PremiumForPeriodService;
-use Filament\Support\RawJs;
 
 class PremiumForPeriod extends ChartWidget
 {

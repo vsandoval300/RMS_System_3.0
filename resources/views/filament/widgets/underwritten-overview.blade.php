@@ -9,7 +9,7 @@
             'reinsurer' => $this->reinsurer
         ], key('business-chart-' . $this->reinsurer))
 
-        @livewire(\App\Filament\Underwritten\Resources\NoResource\Widgets\PremiumForPeriod::class, [
+        @livewire(\App\Filament\Underwritten\Widgets\PremiumForPeriod::class, [
             'reinsurer' => $this->reinsurer
         ], key('premium-chart-' . $this->reinsurer))
     </div>

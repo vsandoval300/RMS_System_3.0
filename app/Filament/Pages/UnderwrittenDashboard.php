@@ -4,9 +4,6 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use App\Filament\Widgets\UnderwrittenBusiness;   // 👈 ESTE namespace
-use App\Filament\Underwritten\Resources\NoResource\Widgets\PremiumForPeriod;
-use App\Filament\Underwritten\Resources\UnderwrittenResource\Widgets\BusinessForPeriod;
 
 class UnderwrittenDashboard extends Page
 {
