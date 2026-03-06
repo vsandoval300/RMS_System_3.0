@@ -15,23 +15,10 @@ class PremiumForPeriod extends ChartWidget
     public ?int $reinsurer = null;
     protected static bool $isLazy = false;
 
-    /*protected function getFilters(): ?array
-    {
-        return [
-            'all' => 'All reinsurers',
-        ] + Reinsurer::query()
-            ->orderBy('name')
-            ->pluck('name', 'id')   // [id => name]
-            ->toArray();
-    }*/
-
     protected function getData(): array
     {
-       
-        //$filter = $this->filter ?? 'all';
-        //dd($this->reinsurer);
-        $data = app(PremiumForPeriodService::class)->anualFTS($this->reinsurer);
 
+        $data = app(PremiumForPeriodService::class)->anualFTS($this->reinsurer);
 
         return [
             'datasets' => [
@@ -47,5 +34,29 @@ class PremiumForPeriod extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+
+                    'grid' => [
+                        'color' => 'rgba(156, 163, 175, 0.15)', // líneas horizontales suaves
+                        'drawBorder' => false,
+                    ],
+
+                    'ticks' => [
+                        'color' => '#9CA3AF',
+                        'padding' => 8,
+                        'font' => [
+                            'size' => 11,
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 }

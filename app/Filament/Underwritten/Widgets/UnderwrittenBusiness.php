@@ -88,7 +88,7 @@ class UnderwrittenBusiness extends ChartWidget
                 'label' => (string)$year,
                 'data' => array_values($monthsData),
                 'borderColor' => $color,
-                'backgroundColor' => $color.'80',
+                //'backgroundColor' => $color.'80',
                 'fill' => false,
                 'tension' => 0.3,
                 'pointRadius' => 3,
@@ -100,6 +100,30 @@ class UnderwrittenBusiness extends ChartWidget
         return [
             'labels' => array_values($months),
             'datasets' => $datasets
+        ];
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+
+                    'grid' => [
+                        'color' => 'rgba(156, 163, 175, 0.15)', // líneas horizontales suaves
+                        'drawBorder' => false,
+                    ],
+
+                    'ticks' => [
+                        'color' => '#9CA3AF',
+                        'padding' => 8,
+                        'font' => [
+                            'size' => 11,
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 

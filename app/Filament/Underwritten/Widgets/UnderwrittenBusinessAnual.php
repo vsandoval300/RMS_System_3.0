@@ -43,4 +43,28 @@ class UnderwrittenBusinessAnual extends ChartWidget
     {
         return 'line';
     }
+
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+
+                    'grid' => [
+                        'color' => 'rgba(156, 163, 175, 0.15)', // líneas horizontales suaves
+                        'drawBorder' => false,
+                    ],
+
+                    'ticks' => [
+                        'color' => '#9CA3AF',
+                        'padding' => 8,
+                        'font' => [
+                            'size' => 11,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
 }

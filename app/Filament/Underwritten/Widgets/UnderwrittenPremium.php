@@ -34,6 +34,22 @@ class UnderwrittenPremium extends ChartWidget
         ];
     }
 
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+
+                    'grid' => [
+                        'color' => 'rgba(156, 163, 175, 0.15)', // líneas horizontales suaves
+                        'drawBorder' => false,
+                    ],
+                ],
+            ],
+        ];
+    }
+
     protected function getType(): string
     {
         return 'line';

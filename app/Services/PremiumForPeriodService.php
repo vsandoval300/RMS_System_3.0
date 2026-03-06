@@ -97,132 +97,6 @@ class PremiumForPeriodService
 
     }
 
-    /* public function monthlyFTSByYear(?int $reinsurerId = null, array $years = []): array
-    {
-        if (empty($years)) {
-            $years = [now()->year];
-        }
-
-        $months = [
-            1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',
-            7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'
-        ];
-
-        $grouped = [];
-
-        foreach ($years as $year) {
-            $grouped[(int)$year] = array_fill(1, 12, 0);
-        }
-
-        OperativeDoc::query()
-
-            ->select([
-                'id',
-                'rep_date',
-                'inception_date',
-                'expiration_date',
-                'roe_fs'
-            ])
-
-            ->when($years, function ($q) use ($years) {
-
-                $q->where(function ($query) use ($years) {
-
-                    foreach ($years as $year) {
-                        $query->orWhereBetween('rep_date', [
-                            "$year-01-01",
-                            "$year-12-31"
-                        ]);
-                    }
-
-                });
-
-            })
-
-            ->when($reinsurerId, fn($q) =>
-                $q->whereHas('business', fn($b) =>
-                    $b->where('reinsurer_id', $reinsurerId)
-                )
-            )
-
-            ->with([
-                'insureds:id,op_document_id,premium,cscheme_id',
-
-                'schemes.costScheme:id,share'
-            ])
-
-            ->chunk(500, function ($docs) use (&$grouped) {
-
-                foreach ($docs as $doc) {
-
-                    $date = \Carbon\Carbon::parse($doc->rep_date);
-
-                    $year = $date->year;
-                    $month = $date->month;
-
-                    if (!isset($grouped[$year][$month])) {
-                        continue;
-                    }
-
-                    $inception = \Carbon\Carbon::parse($doc->inception_date);
-                    $expiration = \Carbon\Carbon::parse($doc->expiration_date);
-
-                    $daysInYear = $inception->isLeapYear() ? 366 : 365;
-                    $coverageDays = $inception->diffInDays($expiration);
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | OPTIMIZACIÓN CLAVE
-                    |--------------------------------------------------------------------------
-                    | Creamos un mapa de shares UNA SOLA VEZ
-                    | cscheme_id => share
-                    
-
-                    $shares = [];
-
-                    foreach ($doc->schemes as $scheme) {
-
-                        $shares[$scheme->costScheme->id] =
-                            $scheme->costScheme->share ?? 0;
-
-                    }
-
-                    $fts = 0;
-
-                    foreach ($doc->insureds as $insured) {
-
-                        $share = $shares[$insured->cscheme_id] ?? 0;
-
-                        $ftpIndividual = ($daysInYear > 0)
-                            ? ($insured->premium / $daysInYear) * $coverageDays
-                            : 0;
-
-                        $fts += $ftpIndividual * $share;
-                    }
-
-                    $totalConvertedPremium = ($doc->roe_fs > 0)
-                        ? ($fts / $doc->roe_fs)
-                        : 0;
-
-                    $grouped[$year][$month] += $totalConvertedPremium;
-                }
-            });
-
-        $datasets = [];
-
-        foreach ($grouped as $year => $monthsData) {
-
-            $datasets[] = [
-                'label' => (string) $year,
-                'data' => array_values($monthsData),
-            ];
-        }
-
-        return [
-            'labels' => array_values($months),
-            'datasets' => $datasets,
-        ];
-    } */
 
     public function monthlyFTSByYear(?int $reinsurerId = null, array $years = []): array
     {
@@ -324,9 +198,9 @@ class PremiumForPeriodService
                 'label' => (string)$year,
                 'data' => array_values($monthsData),
                 'borderColor' => $color,
-                'backgroundColor' => $color . '80', // 50% opacidad
+                //'backgroundColor' => $color . '80', // 50% opacidad
                 'fill' => false,
-                'tension' => 0.3, // para líneas suavizadas (opcional)
+                //'tension' => 0.3, // para líneas suavizadas (opcional)
                 'pointRadius' => 3,
                 'pointHoverRadius' => 6,
             ];
