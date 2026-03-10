@@ -21,7 +21,7 @@ class ListStaticsDashboards extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            UserStatistics::class,
+            //UserStatistics::class,
         ];
     }
 }

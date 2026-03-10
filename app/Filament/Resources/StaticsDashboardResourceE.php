@@ -31,22 +31,22 @@ class StaticsDashboardResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                //
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+        return $table;
+            // ->columns([
+            //     //
+            // ])
+            // ->filters([
+            //     //
+            // ])
+            // ->actions([
+            //     Tables\Actions\ViewAction::make(),
+            //     Tables\Actions\EditAction::make(),
+            // ])
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ]);
     }
 
     public static function getRelations(): array
@@ -58,12 +58,12 @@ class StaticsDashboardResource extends Resource
 
     public static function getPages(): array
     {
-        return [
-            'index' => Pages\ListStaticsDashboards::route('/'),
-            'create' => Pages\CreateStaticsDashboard::route('/create'),
-            'view' => Pages\ViewStaticsDashboard::route('/{record}'),
-            'edit' => Pages\EditStaticsDashboard::route('/{record}/edit'),
-        ];
+        // return [
+        //     'index' => Pages\ListStaticsDashboards::route('/'),
+        //     'create' => Pages\CreateStaticsDashboard::route('/create'),
+        //     'view' => Pages\ViewStaticsDashboard::route('/{record}'),
+        //     'edit' => Pages\EditStaticsDashboard::route('/{record}/edit'),
+        // ];
     }
 
     public static function getWidgets(): array
