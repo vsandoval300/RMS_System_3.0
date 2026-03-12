@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\ApprovalStatus;           // 👈 tu Enum PHP 8.1+
-use App\Enums\BusinessLifecycleStatus;  // 👈 tu Enum PHP 8.1+
+use App\Enums\ApprovalStatus;
+use App\Enums\BusinessLifecycleStatus;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon; // ✅ INSERTADO: para manejo de fechas
 
 class Business extends Model
 {
@@ -19,8 +20,8 @@ class Business extends Model
      ---------------------------------------------------*/
     protected $table      = 'businesses';
     protected $primaryKey = 'business_code';
-    public    $incrementing = false;          // PK no autoincremental
-    protected $keyType      = 'string';       // PK tipo string
+    public    $incrementing = false;
+    protected $keyType      = 'string';
 
     protected $fillable = [
         'business_code', 'index', 'description',
@@ -30,12 +31,12 @@ class Business extends Model
         'producer_id', 'currency_id', 'region_id',
         'approval_status', 'approval_status_updated_at',
         'business_lifecycle_status', 'business_lifecycle_status_updated_at',
-        'created_by_user','source_code'
+        'created_by_user', 'source_code'
     ];
 
     protected $casts = [
-        'approval_status'           => ApprovalStatus::class,
-        'business_lifecycle_status' => BusinessLifecycleStatus::class,
+        'approval_status'            => ApprovalStatus::class,
+        'business_lifecycle_status'  => BusinessLifecycleStatus::class,
         'approval_status_updated_at' => 'datetime',
         'created_at'                 => 'datetime',
         'updated_at'                 => 'datetime',
@@ -49,7 +50,7 @@ class Business extends Model
         return $this->belongsTo(Reinsurer::class);
     }
 
-    public function producer()          // tabla partners (foreignId producer_id)
+    public function producer()
     {
         return $this->belongsTo(Partner::class, 'producer_id');
     }
@@ -66,55 +67,49 @@ class Business extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class,'created_by_user');
+        return $this->belongsTo(User::class, 'created_by_user');
     }
 
     /* ---------------------------------------------------
     |  ➜  Relaciones self-referenciales
     ---------------------------------------------------*/
-    /* public function parent()
-    {
-        return $this->belongsTo(self::class,'parent_id');  
-    } */
-
     public function renewedFrom()
     {
-        return $this->belongsTo(self::class,'renewed_from_id');
+        return $this->belongsTo(self::class, 'renewed_from_id');
     }
 
     /* ---------------------------------------------------
      |  ➜  Relaciones hasMany / hasOne
      ---------------------------------------------------*/
-   /*  public function children()   // inverso de parent()
+    public function renewals()
     {
-        return $this->hasMany(self::class,'parent_id','business_code');
-    } */
-
-    public function renewals()   // inverso de renewedFrom()
-    {
-        return $this->hasMany(self::class,'renewed_from_id','business_code');
+        return $this->hasMany(self::class, 'renewed_from_id', 'business_code');
     }
 
     public function liabilityStructures()
     {
-        return $this->hasMany(LiabilityStructure::class,'business_code', 'business_code');
+        return $this->hasMany(LiabilityStructure::class, 'business_code', 'business_code');
     }
 
     public function operativeDocs()
     {
-        return $this->hasMany(OperativeDoc::class,'business_code','business_code');
+        return $this->hasMany(OperativeDoc::class, 'business_code', 'business_code');
     }
 
     public function coverages()
     {
-        return $this->belongsToMany(Coverage::class, 'liability_structures',
-            'business_code', 'coverage_id', 'business_code', 'id'
+        return $this->belongsToMany(
+            Coverage::class,
+            'liability_structures',
+            'business_code',
+            'coverage_id',
+            'business_code',
+            'id'
         )->distinct();
     }
 
     protected function getAuditLabelIdentifier(): ?string
     {
-        // Para Business, el identificador que quieres es business_code
         return $this->business_code ?: null;
     }
 
@@ -128,43 +123,117 @@ class Business extends Model
         return $this->belongsTo(Treaty::class, 'parent_id', 'treaty_code');
     }
 
-/* Claro. En tu modelo Business, la función booted():
-    Se ejecuta cuando el modelo se “inicializa” y sirve para registrar eventos de Eloquent (ganchos lifecycle).
-    Intercepta el borrado y la restauración de un Business para propagar esas acciones a sus hijos LiabilityStructure.
+    /* =========================================================
+     |  ✅ INSERTADO: Resolver lifecycle status del negocio
+     |  Reglas actuales:
+     |  1) Sin documentos => On Hold
+     |  2) Si al menos un doc está vigente:
+     |        - si alguno vence en <= 30 días => To Expire
+     |        - si no => In Force
+     |  3) Si no hay docs vigentes:
+     |        - si el documento más reciente es cancelación (type 5) => Cancelled
+     |        - si no => Expired
+     ========================================================= */
+    public function resolveLifecycleStatus(?Carbon $today = null): BusinessLifecycleStatus
+    {
+        $today = ($today ?? now())->copy()->startOfDay();
 
-En concreto:
-    1. static::deleting(...)
-        Soft delete ($business->delete()): marca con deleted_at todos los liability_structures
-         relacionados (each->delete()), imitando una “cascada suave”.
-        Force delete ($business->forceDelete() o si el registro ya está “trashed” y vuelves a borrar): elimina
-         físicamente los liability_structures (withTrashed()->forceDelete()).
+        $docs = $this->operativeDocs()
+            ->withoutTrashed()
+            ->get([
+                'id',
+                'index',
+                'operative_doc_type_id',
+                'inception_date',
+                'expiration_date',
+            ]);
 
-    2. static::restoring(...)
-        Si restauras el Business ($business->restore()), restaura también todos los liability_structures que estaban
-         en papelera (onlyTrashed()->restore()).
+        // Caso 1: sin documentos
+        if ($docs->isEmpty()) {
+            return BusinessLifecycleStatus::ON_HOLD;
+        }
 
-¿Por qué es necesario?
-    Los FK con onDelete('cascade') solo actúan en hard deletes a nivel de BD.
-    Con SoftDeletes, la BD no hace cascada; por eso registramos estos eventos para mantener la integridad lógica
-     (padre e hijos comparten el mismo estado: activo/borrado/restaurado).
+        // Caso 2: documentos vigentes
+        $activeDocs = $docs->filter(function ($doc) use ($today) {
+            if (empty($doc->inception_date) || empty($doc->expiration_date)) {
+                return false;
+            }
 
-Requisitos/prácticas:
-    El hijo (LiabilityStructure) debe usar use SoftDeletes;.
-    Borrar/restaurar con Eloquent (no con Query Builder plano) para que sí se disparen los eventos. */
+            $start = Carbon::parse($doc->inception_date)->startOfDay();
+            $end   = Carbon::parse($doc->expiration_date)->startOfDay();
+
+            return $today->betweenIncluded($start, $end);
+        });
+
+        if ($activeDocs->isNotEmpty()) {
+            $hasToExpire = $activeDocs->contains(function ($doc) use ($today) {
+                $end = Carbon::parse($doc->expiration_date)->startOfDay();
+
+                // <= 30 días restantes y aún vigente
+                $daysLeft = $today->diffInDays($end, false);
+
+                return $daysLeft >= 0 && $daysLeft <= 30;
+            });
+
+            return $hasToExpire
+                ? BusinessLifecycleStatus::TO_EXPIRE
+                : BusinessLifecycleStatus::IN_FORCE;
+        }
+
+        // Caso 3: si no hay vigentes, revisa si el más reciente es cancelación
+        $latestDoc = $docs
+            ->sortByDesc(function ($doc) {
+                return [
+                    $doc->expiration_date ? Carbon::parse($doc->expiration_date)->timestamp : 0,
+                    $doc->index ?? 0,
+                ];
+            })
+            ->first();
+
+        if ($latestDoc && (int) $latestDoc->operative_doc_type_id === 5) {
+            return BusinessLifecycleStatus::CANCELLED;
+        }
+
+        // Caso 4: hay docs, pero ninguno vigente y no aplica cancelado
+        return BusinessLifecycleStatus::EXPIRED;
+    }
+
+    /* =========================================================
+     |  ✅ INSERTADO: Persistir lifecycle status solo si cambia
+     ========================================================= */
+    public function refreshLifecycleStatus(): void
+    {
+        $newStatus = $this->resolveLifecycleStatus();
+
+        if ($this->business_lifecycle_status !== $newStatus) {
+            $this->forceFill([
+                'business_lifecycle_status' => $newStatus,
+                'business_lifecycle_status_updated_at' => now(),
+            ])->saveQuietly();
+        }
+    }
 
     protected static function booted(): void
     {
+        /* =====================================================
+         |  ✅ INSERTADO: al crear un Business nuevo,
+         |  si no trae status, se asigna On Hold por defecto
+         ===================================================== */
+        static::creating(function (Business $business) {
+            if (blank($business->business_lifecycle_status)) {
+                $business->business_lifecycle_status = BusinessLifecycleStatus::ON_HOLD;
+                $business->business_lifecycle_status_updated_at = now();
+            }
+        });
+
         // Borrado y Restauracion para Liability Structures
         //-------------------------------------------------
-        // Al borrar un Business:
         static::deleting(function (Business $business) {
             if ($business->isForceDeleting()) {
-                // Hard delete en cascada para los hijos
                 $business->liabilityStructures()
                     ->withTrashed()
                     ->forceDelete();
             } else {
-                // Soft delete de los hijos
                 $business->liabilityStructures()
                     ->get()
                     ->each
@@ -172,7 +241,6 @@ Requisitos/prácticas:
             }
         });
 
-        // Al restaurar un Business:
         static::restoring(function (Business $business) {
             $business->liabilityStructures()
                 ->onlyTrashed()
@@ -183,10 +251,8 @@ Requisitos/prácticas:
         //------------------------------------------------
         static::deleting(function (Business $business) {
             if ($business->isForceDeleting()) {
-                // Hard delete en cascada
                 $business->operativeDocs()->withTrashed()->each->forceDelete();
             } else {
-                // Soft delete de hijos
                 $business->operativeDocs()->get()->each->delete();
             }
         });
@@ -194,12 +260,5 @@ Requisitos/prácticas:
         static::restoring(function (Business $business) {
             $business->operativeDocs()->onlyTrashed()->restore();
         });
-
-
     }
-    
 }
-
-
-
-

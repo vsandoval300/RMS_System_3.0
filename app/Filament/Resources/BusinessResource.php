@@ -119,14 +119,21 @@ class BusinessResource extends Resource
 
 
 
-                                        Select::make('reinsurer_id')
+                                       Select::make('reinsurer_id')
                                             ->label('Reinsurer')
-                                            ->relationship('reinsurer', 'name')
-                                            ->required()
+                                            ->options(function () {
+                                                return \App\Models\Reinsurer::orderBy('name')
+                                                    ->get()
+                                                    ->mapWithKeys(fn ($reinsurer) => [
+                                                        $reinsurer->id => "{$reinsurer->short_name} - {$reinsurer->name}"
+                                                    ]);
+                                            })
                                             ->searchable()
                                             ->preload()
+                                            ->optionsLimit(300)
                                             ->native(false)
                                             ->placeholder('Select a reinsurer')
+                                            ->required()
                                             ->helperText(fn ($record) => $record ? 'Edit the value if necessary.' : '')
                                             ->columnSpan(2),
 
@@ -1005,14 +1012,19 @@ class BusinessResource extends Resource
                 TextColumn::make('business_lifecycle_status')
                     ->label('Lifecycle')
                     ->badge()
-                    ->color(fn ($state) => match ($state->value) {
-                        'On Hold'   => 'gray',
-                        'Pending'   => 'warning',
-                        'In Force'  => 'success',
-                        'To Expire' => 'info',
-                        'Expired'   => 'danger',
-                        'Cancelled' => 'gray',
-                        default     => 'secondary',
+                    ->formatStateUsing(fn ($state) => $state?->value ?? $state)
+                    ->color(function ($state) {
+                        $value = $state?->value ?? $state;
+
+                        return match ($value) {
+                            'On Hold'   => 'gray',
+                            'Pending'   => 'warning',
+                            'In Force'  => 'success',
+                            'To Expire' => 'info',
+                            'Expired'   => 'danger',
+                            'Cancelled' => 'gray',
+                            default     => 'secondary',
+                        };
                     })
                     ->searchable()
                     ->sortable(),
