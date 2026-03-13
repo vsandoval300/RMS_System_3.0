@@ -51,6 +51,7 @@ use Illuminate\Support\Str;
 use App\Models\Coverage;
 use App\Models\Business;
 use Filament\Tables\Actions\Action as TableAction;
+use App\Enums\BusinessLifecycleStatus;
 use Filament\Actions\StaticAction; 
 use Filament\Forms\Components\Alert;
 use App\Models\OperativeDoc;
@@ -1646,17 +1647,24 @@ class OperativeDocsRelationManager extends RelationManager
             TextColumn::make('status')
                 ->label('Status')
                 ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
+                ->verticalAlignment(VerticalAlignment::Start)
                 ->badge()
-                ->state(fn ($record) => match (true) {
-                    now()->lt($record->inception_date)           => 'Pending',
-                    now()->lte($record->expiration_date)         => 'In Force',
-                    default                                      => 'Expired',
+                ->state(function ($record) {
+                    if ($record->business?->business_lifecycle_status === BusinessLifecycleStatus::CANCELLED) {
+                        return 'Cancelled';
+                    }
+
+                    return match (true) {
+                        now()->lt($record->inception_date)   => 'Pending',
+                        now()->lte($record->expiration_date) => 'In Force',
+                        default                              => 'Expired',
+                    };
                 })
                 ->color(fn (string $state): string => match ($state) {
-                    'Pending'  => 'gray',
-                    'In Force' => 'success',
-                    'Expired'  => 'danger',
+                    'Pending'   => 'gray',
+                    'In Force'  => 'success',
+                    'Expired'   => 'danger',
+                    'Cancelled' => 'warning',
                 }),
 
             IconColumn::make('document_path')

@@ -146,14 +146,36 @@ class Business extends Model
                 'operative_doc_type_id',
                 'inception_date',
                 'expiration_date',
+                'created_at',
             ]);
 
-        // Caso 1: sin documentos
+        // 1) Sin documentos
         if ($docs->isEmpty()) {
             return BusinessLifecycleStatus::ON_HOLD;
         }
 
-        // Caso 2: documentos vigentes
+        // 2) Último documento relevante del negocio
+        $latestDoc = $docs
+            ->sortByDesc(function ($doc) {
+                return [
+                    $doc->index ?? 0,
+                    $doc->inception_date ? Carbon::parse($doc->inception_date)->timestamp : 0,
+                    $doc->created_at ? Carbon::parse($doc->created_at)->timestamp : 0,
+                ];
+            })
+            ->first();
+
+        // 3) Si el último doc es cancelación y ya aplica, domina el lifecycle
+        if (
+            $latestDoc
+            && (int) $latestDoc->operative_doc_type_id === 5
+            && $latestDoc->inception_date
+            && $today->gte(Carbon::parse($latestDoc->inception_date)->startOfDay())
+        ) {
+            return BusinessLifecycleStatus::CANCELLED;
+        }
+
+        // 4) Documentos vigentes (solo si no quedó cancelado)
         $activeDocs = $docs->filter(function ($doc) use ($today) {
             if (empty($doc->inception_date) || empty($doc->expiration_date)) {
                 return false;
@@ -168,8 +190,6 @@ class Business extends Model
         if ($activeDocs->isNotEmpty()) {
             $hasToExpire = $activeDocs->contains(function ($doc) use ($today) {
                 $end = Carbon::parse($doc->expiration_date)->startOfDay();
-
-                // <= 30 días restantes y aún vigente
                 $daysLeft = $today->diffInDays($end, false);
 
                 return $daysLeft >= 0 && $daysLeft <= 30;
@@ -180,23 +200,14 @@ class Business extends Model
                 : BusinessLifecycleStatus::IN_FORCE;
         }
 
-        // Caso 3: si no hay vigentes, revisa si el más reciente es cancelación
-        $latestDoc = $docs
-            ->sortByDesc(function ($doc) {
-                return [
-                    $doc->expiration_date ? Carbon::parse($doc->expiration_date)->timestamp : 0,
-                    $doc->index ?? 0,
-                ];
-            })
-            ->first();
-
-        if ($latestDoc && (int) $latestDoc->operative_doc_type_id === 5) {
-            return BusinessLifecycleStatus::CANCELLED;
-        }
-
-        // Caso 4: hay docs, pero ninguno vigente y no aplica cancelado
+        // 5) Si no hay vigentes y el último no fue cancelación
         return BusinessLifecycleStatus::EXPIRED;
     }
+
+
+
+
+
 
     /* =========================================================
      |  ✅ INSERTADO: Persistir lifecycle status solo si cambia

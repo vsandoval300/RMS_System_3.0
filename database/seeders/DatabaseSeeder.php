@@ -301,6 +301,25 @@ class DatabaseSeeder extends Seeder
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
+
+            //=============================================
+            //FILES FOR ZAMA 2025
+            //=============================================
+               BusinessesZamaSeeder2025::class, //1
+               LiabilityStructureZamaSeeder2025::class, //2
+            //Files for Placement Schemes==================
+               CschemeZamaSeeder2025::class, //6
+               CostNodesxZamaSeeder2025::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsZamaSeeder2025::class, //Details
+               BusinessDocInsuredsZamaSeeder2025::class, //Insureds
+               BusinessDocsSchemesZamaSeeder2025::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
             
             
             /*
