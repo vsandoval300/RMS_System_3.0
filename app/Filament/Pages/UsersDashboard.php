@@ -4,15 +4,15 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use App\Filament\Resources\StaticsDashboardResource\Widgets\UserStatistics;
-use App\Filament\Resources\StatsOverviewResource\Widgets\UserStatistics as WidgetsUserStatistics;
+use App\Filament\User\Widgets\UserStatistics;
+use Filament\Pages\Dashboard;
 
-class UserDashboard extends Page
+class UsersDashboard extends Page
 {
     use HasPageShield;
 
     protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
-    protected static ?int    $navigationSort  = -122;
+    protected static ?int    $navigationSort  = 40;
     protected static ?string $navigationGroup = 'Security';
 
     protected static string $view = 'filament.pages.users-dashboard';
@@ -23,5 +23,10 @@ class UserDashboard extends Page
         return [
             UserStatistics::class,
         ];
+    }
+
+    public function getHeaderWidgetsColumns(): int | array
+    {
+        return 1;
     }
 }
