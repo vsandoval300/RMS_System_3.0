@@ -1664,7 +1664,7 @@ class OperativeDocsRelationManager extends RelationManager
                     'Pending'   => 'gray',
                     'In Force'  => 'success',
                     'Expired'   => 'danger',
-                    'Cancelled' => 'warning',
+                    'Cancelled' => 'gray',
                 }),
 
             IconColumn::make('document_path')

@@ -1020,7 +1020,7 @@ class BusinessResource extends Resource
                             'On Hold'   => 'gray',
                             'Pending'   => 'warning',
                             'In Force'  => 'success',
-                            'To Expire' => 'info',
+                            'To Expire' => 'warning',
                             'Expired'   => 'danger',
                             'Cancelled' => 'gray',
                             default     => 'secondary',
