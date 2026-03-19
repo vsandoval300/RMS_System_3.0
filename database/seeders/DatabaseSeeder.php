@@ -320,6 +320,66 @@ class DatabaseSeeder extends Seeder
             //ReferralsCellMayabSeeder::class, //5
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
+
+
+            //=============================================
+            //FILES FOR OMEGA 2025
+            //=============================================
+               BusinessesOmegaSeeder2025::class, //1
+               LiabilityStructureOmegaSeeder2025::class, //2
+            //Files for Placement Schemes==================
+               CschemeOmegaSeeder2025::class, //6
+               CostNodesxOmegaSeeder2025::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsOmegaSeeder2025::class, //Details
+               BusinessDocInsuredsOmegaSeeder2025::class, //Insureds
+               BusinessDocsSchemesOmegaSeeder2025::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+
+
+            //=============================================
+            //FILES FOR PETRO 2025
+            //=============================================
+               BusinessesPetroSeeder2025::class, //1
+               LiabilityStructurePetroSeeder2025::class, //2
+            //Files for Placement Schemes==================
+               CschemePetroSeeder2025::class, //6
+               CostNodesxPetroSeeder2025::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsPetroSeeder2025::class, //Details
+               BusinessDocInsuredsPetroSeeder2025::class, //Insureds
+               BusinessDocsSchemesPetroSeeder2025::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+
+
+            //=============================================
+            //FILES FOR HORUS 2025
+            //=============================================
+               BusinessesHorusSeeder2025::class, //1
+               LiabilityStructureHorusSeeder2025::class, //2
+            //Files for Placement Schemes==================
+               CschemeHorusSeeder2025::class, //6
+               CostNodesxHorusSeeder2025::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsHorusSeeder2025::class, //Details
+               BusinessDocInsuredsHorusSeeder2025::class, //Insureds
+               BusinessDocsSchemesHorusSeeder2025::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
             
             
             /*
