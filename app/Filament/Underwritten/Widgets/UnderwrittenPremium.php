@@ -26,7 +26,7 @@ class UnderwrittenPremium extends ChartWidget
     protected function getData(): array
     {
         $data = app(PremiumForPeriodService::class)
-            ->monthlyFTSByYear($this->reinsurer, $this->years);
+            ->monthlyFTS($this->reinsurer, $this->years);
 
         return [
             'datasets' => $data['datasets'],
