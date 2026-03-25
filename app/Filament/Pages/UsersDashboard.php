@@ -2,6 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\User\Widgets\LoginActivityChart;
+use App\Filament\User\Widgets\TopActiveUsers;
+use App\Filament\User\Widgets\UsersLoginsChart;
 use Filament\Pages\Page;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use App\Filament\User\Widgets\UserStatistics;
@@ -22,6 +25,9 @@ class UsersDashboard extends Page
     {
         return [
             UserStatistics::class,
+            LoginActivityChart::class,
+            TopActiveUsers::class,
+            UsersLoginsChart::class
         ];
     }
 
