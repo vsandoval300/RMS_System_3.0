@@ -2,8 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\User\Widgets\AtRiskUsers;
 use App\Filament\User\Widgets\LoginActivityChart;
 use App\Filament\User\Widgets\TopActiveUsers;
+use App\Filament\User\Widgets\UsersByDepartmentChart;
 use App\Filament\User\Widgets\UsersLoginsChart;
 use Filament\Pages\Page;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -26,13 +28,17 @@ class UsersDashboard extends Page
         return [
             UserStatistics::class,
             LoginActivityChart::class,
+            UsersByDepartmentChart::class,
             TopActiveUsers::class,
-            UsersLoginsChart::class
+            AtRiskUsers::class
         ];
     }
 
     public function getHeaderWidgetsColumns(): int | array
     {
-        return 1;
+        return [
+            'md' => 2,
+            'xl' => 2,
+        ];
     }
 }
