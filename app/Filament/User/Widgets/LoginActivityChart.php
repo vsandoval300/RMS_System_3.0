@@ -7,16 +7,16 @@ use Illuminate\Support\Facades\DB;
 
 class LoginActivityChart extends ChartWidget
 {
-    protected static ?string $heading = 'Actividad de Logins';
+    protected static ?string $heading = 'Login Activity';
 
     public ?string $filter = '30d';
 
     protected function getFilters(): ?array
     {
         return [
-            '7d' => '7 días',
-            '30d' => '30 días',
-            '90d' => '90 días',
+            '7d' => '7 days',
+            '30d' => '30 days',
+            '90d' => '90 days',
         ];
     }
 
@@ -71,7 +71,7 @@ class LoginActivityChart extends ChartWidget
                     'pointRadius' => 0,
                 ],
                 [
-                    'label' => 'Usuarios únicos',
+                    'label' => 'Unique users',
                     'data' => array_column($rows, 'users'),
                     'borderColor' => '#10B981', // verde
                     'backgroundColor' => 'rgba(16,185,129,0.2)',
@@ -80,7 +80,7 @@ class LoginActivityChart extends ChartWidget
                     'pointRadius' => 0,
                 ],
                 [
-                    'label' => 'Tendencia (7d)',
+                    'label' => 'Tendency (7d)',
                     'data' => array_map(fn($v) => round($v, 2), array_column($rows, 'moving_avg')),
                     'borderColor' => '#F59E0B', // amarillo
                     'borderWidth' => 3,
@@ -88,7 +88,7 @@ class LoginActivityChart extends ChartWidget
                     'pointRadius' => 0,
                 ],
                 [
-                    'label' => 'Promedio',
+                    'label' => 'Average',
                     'data' => array_fill(0, count($rows), round($rows[0]->global_avg ?? 0, 2)),
                     'borderColor' => '#6B7280',
                     'borderDash' => [2, 2],

@@ -34,7 +34,7 @@ class AtRiskUsers extends TableWidget
     {
         return [
             TextColumn::make('name')
-                ->label('Nombre')
+                ->label('Name')
                 ->searchable()
                 ->weight('medium'),
 
@@ -43,16 +43,16 @@ class AtRiskUsers extends TableWidget
                 ->copyable(),
 
             TextColumn::make('last_login')
-                ->label('Último login')
+                ->label('Last login')
                 ->dateTime('d M Y H:i')
-                ->placeholder('Nunca'),
+                ->placeholder('Never'),
 
             // 🔥 Columna clave
             TextColumn::make('days_since_last_login')
-                ->label('Días sin login')
+                ->label('Days of inactivity')
                 ->getStateUsing(function ($record) {
                     if (!$record->last_login) {
-                        return 'Nunca';
+                        return 'Never';
                     }
 
                     return Carbon::parse($record->last_login)
@@ -60,7 +60,7 @@ class AtRiskUsers extends TableWidget
                 })
                 ->badge()
                 ->color(function ($state) {
-                    if ($state === 'Nunca') return 'danger';
+                    if ($state === 'Never') return 'danger';
 
                     return match (true) {
                         $state <= 7 => 'success',

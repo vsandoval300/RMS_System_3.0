@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class UsersByDepartmentChart extends ChartWidget
 {
-    protected static ?string $heading = 'Penetración por departamento (%)';
+    protected static ?string $heading = 'Departmental Adoption Rate (%)';
     protected ?int $height = 300;
 
     protected function getData(): array
@@ -76,7 +76,7 @@ class UsersByDepartmentChart extends ChartWidget
             'labels' => $labels,
             'datasets' => [
                 [
-                    'label' => 'Penetración (%)',
+                    'label' => 'Penetration (%)',
                     'data' => $data,
                     'backgroundColor' => $colors,
                 ],
