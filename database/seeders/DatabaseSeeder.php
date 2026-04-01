@@ -381,7 +381,27 @@ class DatabaseSeeder extends Seeder
             //InvoicesCellMayabSeeder::class, //11
             //InvoiceTransactionsCellMayabSeeder::class, //12
             
-            
+            //=============================================
+            //FILES FOR MAYAB 2016 - 2025
+            //=============================================
+               BusinessesMayabSeeder2016_2025::class, //1
+               LiabilityStructureMayabSeeder2016_2025::class, //2
+            //Files for Placement Schemes==================
+               CschemeMayabSeeder2016_2025::class, //6
+               CostNodesxMayabSeeder2016_2025::class, //4
+            //CschemeCnodesCellMayabSeeder::class, //7
+            //Files for Business Documents=================
+               BusinessesDocsMayabSeeder2016_2025::class, //Details
+               BusinessDocInsuredsMayabSeeder2016_2025::class, //Insureds
+               BusinessDocsSchemesMayabSeeder2016_2025::class, //Placement Schemes
+               //TransactionsCellMayabSeeder::class, //Transactions
+               //TransactionsLogCellMayabSeeder::class, //TransactionLogs             
+            //ReferralsCellMayabSeeder::class, //5
+            //InvoicesCellMayabSeeder::class, //11
+            //InvoiceTransactionsCellMayabSeeder::class, //12
+
+
+
             /*
             //=============================================
             //FILES FOR YELMO
