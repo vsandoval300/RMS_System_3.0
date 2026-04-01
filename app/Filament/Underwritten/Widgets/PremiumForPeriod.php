@@ -22,6 +22,7 @@ class PremiumForPeriod extends ChartWidget
             [
                 'label' => 'FTS',
                 'data' => $data['fts'],
+                'pointRadius' => 3,
             ],
         ],
         'labels' => $data['labels'],

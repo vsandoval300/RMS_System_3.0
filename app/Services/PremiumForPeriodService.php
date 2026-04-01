@@ -200,7 +200,7 @@ class PremiumForPeriodService
                 'borderColor' => $color,
                 //'backgroundColor' => $color . '80', // 50% opacidad
                 'fill' => false,
-                //'tension' => 0.3, // para líneas suavizadas (opcional)
+                'tension' => 0.3, // para líneas suavizadas (opcional)
                 'pointRadius' => 3,
                 'pointHoverRadius' => 6,
             ];
