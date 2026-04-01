@@ -20,8 +20,7 @@ class PremiumForPeriodService
                 'schemes.costScheme.costNodexes.partnerSource',
                 'schemes.costScheme.costNodexes.deduction',
                 'insureds.company.country',
-                'insureds.coverage',
-                'transactions.logs.toPartner',
+                'insureds.coverage'
             ])
 
              // filtra solo si $reinsurerId tiene valor

@@ -33,6 +33,8 @@ class UnderwrittenBusinessAnual extends ChartWidget
                 [
                     'label' => 'Businesses',
                     'data'  => $rows->pluck('total'),
+                    'fill' => false,
+                    'tension' => 0.3,
                 ],
             ],
             'labels' => $rows->pluck('year'),
