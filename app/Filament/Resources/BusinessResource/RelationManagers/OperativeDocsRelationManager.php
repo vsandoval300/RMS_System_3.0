@@ -53,6 +53,9 @@ use App\Models\Business;
 use Filament\Tables\Actions\Action as TableAction;
 use Filament\Actions\StaticAction; 
 use Filament\Forms\Components\Alert;
+use App\Models\OperativeDoc;
+
+
 
 
 
@@ -274,10 +277,21 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 return ! $slipExists; // primer doc => slip bloqueado
                                                             }), 
                                                                 
-                                                        Placeholder::make('gap1')
+                                                        /* Placeholder::make('gap1')
                                                             ->hiddenLabel()
-                                                            ->columnSpan(3),
+                                                            ->columnSpan(3), */
 
+                                                        DatePicker::make('rep_date')
+                                                            ->label('Underwriting Month')
+                                                            ->required()
+                                                            ->dehydratedWhenHidden()
+                                                            ->displayFormat('F Y')     // lo que ve el usuario
+                                                            ->format('Y-m-01')          // lo que se guarda (string)
+                                                            ->seconds(false)                 // solo hora:minuto
+                                                            ->native(false)
+                                                            ->closeOnDateSelection()
+                                                            ->live()
+                                                            ->columnSpan(3),
                                                         
                                                         TextInput::make('roe_fs')
                                                             ->label('Exchange rate')
@@ -589,55 +603,35 @@ class OperativeDocsRelationManager extends RelationManager
                                     Section::make('File Upload')
                                         ->schema([
 
+                                            
                                             FileUpload::make('document_path')
-                                                ->label('File')
-                                                ->disk('s3')
-                                                ->directory('reinsurers/OperativeDocuments')
-                                                ->visibility('public')
-                                                ->acceptedFileTypes(['application/pdf'])
-                                                ->preserveFilenames(false)
+                                            ->label('File')
+                                            ->disk('s3')
+                                            ->directory('reinsurers/OperativeDocuments')
+                                            ->acceptedFileTypes(['application/pdf', 'application/x-pdf'])
+                                            ->visibility('private')
+                                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, Get $get, $record) {
 
-                                                // 1) Subida con nombre estable (basado en id) y limpieza del anterior si cambia
-                                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, $record, Get $get) {
-                                                    $base = (string) ($get('id') ?: $record?->id);
-                                                    $name = $base . '.' . ($file->getClientOriginalExtension() ?: 'pdf');
-                                                    $dir  = 'reinsurers/OperativeDocuments';
-                                                    Storage::disk('s3')->putFileAs($dir, $file, $name, ['visibility' => 'public']);
-                                                    return "{$dir}/{$name}"; // <- esto se guarda en document_path
-                                                })
-                                                
-                                                // 2) Borrado físico cuando Filament elimina el archivo subido
-                                                ->deleteUploadedFileUsing(function (?string $file) {
-                                                    if ($file && Storage::disk('s3')->exists($file)) {
-                                                        Storage::disk('s3')->delete($file);
-                                                    }
-                                                })
+                                                // ✅ 1) PRIORIDAD: Id generado en el FORM (Create)
+                                                $formId = $get('id'); // <- el campo "Id Document" que muestras en tu screenshot
 
-                                                // 3) Si el usuario hace "clear" (icono de bote), borra en S3 y fuerza que BD quede en NULL
-                                                ->afterStateUpdated(function ($state, \Filament\Forms\Set $set, \Filament\Forms\Get $get, $record) {
-                                                    // Cuando se limpia el campo, $state viene como null/''.
-                                                    if (blank($state) && $record?->document_path) {
-                                                        if (Storage::disk('s3')->exists($record->document_path)) {
-                                                            Storage::disk('s3')->delete($record->document_path);
-                                                        }
-                                                        // Asegura que el form state sea null para persistirlo
-                                                        $set('document_path', null);
-                                                    }
-                                                })
+                                                // ✅ 2) Si ya existe record (Edit), usa el id del record
+                                                $base = $formId ?: ($record?->id ?: (string) Str::uuid());
 
-                                                // 4) SIEMPRE deshidratar; y mutar '' -> null para que se escriba en BD
-                                                ->dehydrated() // (sin callback) siempre escribe el estado
-                                                ->mutateDehydratedStateUsing(fn ($state) => blank($state) ? null : $state)
+                                                // ✅ normaliza un poco por si trae espacios raros
+                                                $base = trim((string) $base);
 
-                                                ->downloadable()
-                                                ->openable()
-                                                ->previewable(true)
-                                                ->hint(fn ($record) => $record?->document_path
-                                                    ? 'Existing file: ' . basename($record->document_path)
-                                                    : 'No file uploaded yet.'
-                                                )
-                                                //->dehydrated(fn ($state) => filled($state))
-                                                ->helperText('Only PDF files are allowed.'),
+                                                return "{$base}.pdf";
+                                            })
+                                            ->deletable()
+                                            ->downloadable()
+                                            ->openable()
+                                            ->previewable(true)
+                                            ->hint(fn ($record) => $record?->document_path
+                                                ? 'Existing file: ' . basename($record->document_path)
+                                                : 'No file uploaded yet.'
+                                            )
+                                            ->helperText('Only PDF files are allowed.'),
 
 
                                             /* FileUpload::make('document_path')
@@ -1318,6 +1312,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalDeductionOrig = 0;
                                 $totalDeductionUsd  = 0;
 
+
                                 $groupedCostNodes = $costNodes
                                     ->groupBy('cscheme_id')
                                     ->map(function ($nodes, $schemeId) use (
@@ -1327,6 +1322,93 @@ class OperativeDocsRelationManager extends RelationManager
                                         $convertedFtsByScheme
                                     ) {
                                         /** @var \App\Models\CostNodex $first */
+                                        $first      = $nodes->first();
+                                        $shareFloat = (float) ($first->scheme_share ?? 0); // solo display
+
+                                        // Base por scheme (orig y usd)
+                                        $schemeBaseOrig = (float) ($premiumFtsByScheme[$schemeId] ?? 0);
+                                        $schemeBaseUsd  = (float) ($convertedFtsByScheme[$schemeId] ?? 0);
+
+                                        // ✅ running base (gross - deducciones previas)
+                                        $runningBaseOrig = $schemeBaseOrig;
+                                        $runningBaseUsd  = $schemeBaseUsd;
+
+                                        // ✅ asegurar orden por index
+                                        $sortedNodes = $nodes->sortBy(fn ($n) => (int) ($n->index ?? 0))->values();
+
+                                        $nodeList = collect();
+
+                                        foreach ($sortedNodes as $node) {
+                                            /** @var \App\Models\CostNodex $node */
+                                            $rate = (float) ($node->value ?? 0); // ej 0.02
+
+                                            $applyToGross = (bool) ($node->apply_to_gross ?? false);
+
+                                            // ✅ NUEVA REGLA:
+                                            // - FALSE => base = schemeBase (gross)
+                                            // - TRUE  => base = runningBase (gross - prev deductions)
+                                            $baseOrigForNode = $applyToGross ? $runningBaseOrig : $schemeBaseOrig;
+                                            $baseUsdForNode  = $applyToGross ? $runningBaseUsd  : $schemeBaseUsd;
+
+                                            $deductionOrig = $baseOrigForNode * $rate;
+                                            $deductionUsd  = $baseUsdForNode  * $rate;
+
+                                            // ✅ actualizar running base SIEMPRE (para que TRUE posteriores tomen neto acumulado)
+                                            $runningBaseOrig -= $deductionOrig;
+                                            $runningBaseUsd  -= $deductionUsd;
+
+                                            $nodeList->push([
+                                                'index'            => $node->index,
+                                                'partner'          => $node->partnerSource?->name ?? '-',
+                                                'partner_short'    => $node->partnerSource?->short_name
+                                                                    ?? $node->partnerSource?->name
+                                                                    ?? '-',
+                                                'deduction'        => $node->deduction?->concept ?? '-',
+                                                'value'            => $rate,
+
+                                                // ✅ NUEVO: flag para debug / display si lo quieres
+                                                'apply_to_gross'   => $applyToGross,
+
+                                                'share'            => $shareFloat, // solo display
+
+                                                // ✅ base usada por nodo (para fórmula / auditoría)
+                                                'scheme_base_orig' => $schemeBaseOrig,     // gross base
+                                                'scheme_base_usd'  => $schemeBaseUsd,      // gross base
+                                                'node_base_orig'   => $baseOrigForNode,    // base real del cálculo
+                                                'node_base_usd'    => $baseUsdForNode,     // base real del cálculo
+
+                                                'deduction_amount' => $deductionOrig,
+                                                'deduction_usd'    => $deductionUsd,
+                                            ]);
+                                        }
+
+                                        $subtotalOrig = $nodeList->sum('deduction_amount');
+                                        $subtotalUsd  = $nodeList->sum('deduction_usd');
+
+                                        $totalDeductionOrig += $subtotalOrig;
+                                        $totalDeductionUsd  += $subtotalUsd;
+
+                                        return [
+                                            'scheme_id'        => $schemeId,
+                                            'share'            => $shareFloat,
+                                            'scheme_base_orig' => $schemeBaseOrig,
+                                            'scheme_base_usd'  => $schemeBaseUsd,
+                                            'nodes'            => $nodeList->values(),
+                                            'subtotal_orig'    => $subtotalOrig,
+                                            'subtotal_usd'     => $subtotalUsd,
+                                        ];
+                                    })
+                                    ->values()
+                                    ->toArray();
+                                /* $groupedCostNodes = $costNodes
+                                    ->groupBy('cscheme_id')
+                                    ->map(function ($nodes, $schemeId) use (
+                                        &$totalDeductionOrig,
+                                        &$totalDeductionUsd,
+                                        $premiumFtsByScheme,
+                                        $convertedFtsByScheme
+                                    ) {
+                                        // @var \App\Models\CostNodex $first
                                         $first      = $nodes->first();
                                         $shareFloat = (float) ($first->scheme_share ?? 0); // ✅ MOD [CB-3] solo display
 
@@ -1374,7 +1456,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ];
                                     })
                                     ->values()
-                                    ->toArray();
+                                    ->toArray(); */
 
                                 // ✅✅✅ CHANGE [NET-1]: netos consistentes (no depender de recalculo en Blade)
                                 $netUnderwrittenOrig = $totalPremiumFts - $totalDeductionOrig;

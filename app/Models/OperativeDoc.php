@@ -32,6 +32,7 @@ class OperativeDoc extends Model
         'expiration_date',
         'af_mf',
         'roe_fs',
+        'rep_date',
         'document_path',
         //'client_payment_tracking',
         'business_code',          // FK hacia businesses
@@ -41,6 +42,7 @@ class OperativeDoc extends Model
     protected $casts = [
         'inception_date'  => 'datetime',
         'expiration_date' => 'datetime',
+        'rep_date' => 'date', // o 'datetime' si incluye hora
     ];
 
     /* --------------------------------------------------

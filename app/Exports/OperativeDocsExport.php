@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Concerns\{
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+
 class OperativeDocsExport implements
     FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles
 {
@@ -47,265 +48,303 @@ class OperativeDocsExport implements
             'Premium Type', 'Claims Type', 'Placement Type',
             'Max Limit Liab', 'Insured Name', 'Country', 'Coverage',
 
+            // ✅ verde primero (como lo quieres)
             'Cost_Scheme_ID',
         ];
 
-        // ✅ Bloque dinámico 1: columnas del nodo (3 por nodo)
+        // ✅ Bloque Node_* (Deduction/Source/Value)
         for ($i = 1; $i <= $this->maxNodes; $i++) {
             $base[] = "Node_{$i}_Deduction_Type";
             $base[] = "Node_{$i}_Source";
             $base[] = "Node_{$i}_Value";
         }
 
-        // ✅ GWP (Original Currency) ANTES del bloque Amount
+        // ✅✅✅ CHANGE [ORDER-1]: agregar correctamente las 3 amarillas AQUÍ
         $base[] = 'GWP_Annualised_oc';
         $base[] = 'GWP_ftp_oc';
         $base[] = 'GWP_fts_oc';
 
-        // ✅ Bloque dinámico 2: Amount OC (1 por nodo)
+        // ✅ Bloque Node_* Amount_oc
         for ($i = 1; $i <= $this->maxNodes; $i++) {
-            $base[] = "Node_{$i}_Amount_oc"; // = GWP_fts_oc * Node_i_Value
+            $base[] = "Node_{$i}_Amount_oc";
         }
 
         $base[] = 'Total_Discounts_oc';
         $base[] = 'Net_GWP_oc';
 
-        // ✅ Bloque USD (dividir entre roe_fs)
         $base[] = 'GWP_Annualised_usd';
         $base[] = 'GWP_ftp_usd';
         $base[] = 'GWP_fts_usd';
 
         for ($i = 1; $i <= $this->maxNodes; $i++) {
-            $base[] = "Node_{$i}_Amount_usd"; // = GWP_fts_usd * Node_i_Value
+            $base[] = "Node_{$i}_Amount_usd";
         }
 
         $base[] = 'Total_Discounts_usd';
         $base[] = 'Net_GWP_usd';
+        $base[] = 'Rep_Date';
 
         return $base;
     }
 
-    public function map($doc): array
-    {
-        $created    = optional($doc->created_at)?->format('Y-m-d');
-        $inception  = optional($doc->inception_date)?->format('Y-m-d');
-        $expiration = optional($doc->expiration_date)?->format('Y-m-d');
 
-        $coverageDays = ($doc->inception_date && $doc->expiration_date)
-            ? Carbon::parse($doc->inception_date)->diffInDays(Carbon::parse($doc->expiration_date))
-            : null;
+    
+   public function map($doc): array
+{
+    $created    = optional($doc->created_at)?->format('Y-m-d');
+    $inception  = optional($doc->inception_date)?->format('Y-m-d');
+    $expiration = optional($doc->expiration_date)?->format('Y-m-d');
+    $repDate = optional($doc->rep_date)?->format('Y-m-d');
 
-        $maxLimitLiab = 0.0;
-        foreach ($doc->business?->liabilityStructures ?? [] as $ls) {
-            $limit = (float) ($ls->limit ?? 0);
-            $cls   = (float) ($ls->cls ?? 0);
-            if ($cls > 1) $cls /= 100;
-            $maxLimitLiab += $limit * $cls;
-        }
+    $coverageDays = ($doc->inception_date && $doc->expiration_date)
+        ? Carbon::parse($doc->inception_date)->diffInDays(Carbon::parse($doc->expiration_date))
+        : null;
 
-        $placementType = ($doc->business?->renewed_from_id) ? 'Renewal' : 'New';
+    $maxLimitLiab = 0.0;
 
-        // ----------------------------
-        // GWP base (Original Currency)
-        // ----------------------------
-        $premiumOc = is_null($doc->insured_premium) ? null : (float) $doc->insured_premium;
+    foreach ($doc->business?->liabilityStructures ?? [] as $ls) {
+        $limit = (float) ($ls->limit ?? 0);
 
-        $premiumFtpOc = (!is_null($premiumOc) && !is_null($coverageDays))
-            ? ($premiumOc / 365) * (float) $coverageDays
-            : null;
-
-        $share = is_null($doc->share) ? null : (float) $doc->share;
-
-        $premiumFtsOc = (!is_null($premiumFtpOc) && !is_null($share))
-            ? $premiumFtpOc * $share
-            : null;
-
-        // ----------------------------
-        // Roe (para USD)
-        // ----------------------------
-        $roe = is_null($doc->roe_fs) ? null : (float) $doc->roe_fs;
-        $roeOk = (!is_null($roe) && $roe > 0);
-
-        $premiumUsd = !is_null($premiumOc)
-            ? ($roeOk ? ($premiumOc / $roe) : 0.0)
-            : null;
-
-        $premiumFtpUsd = !is_null($premiumFtpOc)
-            ? ($roeOk ? ($premiumFtpOc / $roe) : 0.0)
-            : null;
-
-        $premiumFtsUsd = !is_null($premiumFtsOc)
-            ? ($roeOk ? ($premiumFtsOc / $roe) : 0.0)
-            : null;
-
-        // Reinsurer Id rule: CNS if exists else id
-        $reinsurer   = $doc->business?->reinsurer;
-        $idReinsurer = null;
-
-        if ($reinsurer) {
-            $cns = $reinsurer->cns_reinsurer ?? null;
-            $idReinsurer = (!is_null($cns) && trim((string) $cns) !== '')
-                ? $cns
-                : ($reinsurer->id ?? null);
-        }
-
-        // ----------------------------
-        // Base fijo (hasta Coverage)
-        // ----------------------------
-        $row = [
-            ++$this->rowIndex,
-            $this->reportDate,
-
-            $doc->business?->business_code ?? '-',
-            $doc->id,
-            $doc->docType?->name ?? '-',
-
-            $idReinsurer,
-            $reinsurer?->name ?? '-',
-            $reinsurer?->short_name ?? '-',
-
-            $doc->business?->currency?->acronym ?? '-',
-            $doc->roe_fs ?? null,
-
-            $share,
-            $created,
-            $inception,
-            $expiration,
-            $coverageDays,
-
-            $doc->business?->premium_type ?? '-',
-            $doc->business?->claims_type ?? '-',
-            $placementType,
-
-            $maxLimitLiab,
-            $doc->insured_name ?? '-',
-            $doc->country_name ?? '-',
-            $doc->coverage_name ?? '-',
-
-            $doc->insured_cscheme_id ?? '-',
-        ];
-
-        // ----------------------------
-        // Nodos (3 columnas por nodo)
-        // ----------------------------
-        $nodes = is_array($doc->nodes_list ?? null) ? $doc->nodes_list : [];
-
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $n = $nodes[$i] ?? null;
-
-            $row[] = is_array($n) ? ($n['deduction_type'] ?? null) : null;
-            $row[] = is_array($n) ? ($n['source'] ?? null) : null;
-            $row[] = (is_array($n) && array_key_exists('value', $n)) ? $n['value'] : null;
-        }
-
-        // ----------------------------
-        // GWP OC (renombrado)
-        // ----------------------------
-        $row[] = $premiumOc;
-        $row[] = $premiumFtpOc;
-        $row[] = $premiumFtsOc;
-
-        // ----------------------------
-        // Amounts OC + Totales OC
-        // ----------------------------
-        $totalDiscountsOc = 0.0;
-
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $n = $nodes[$i] ?? null;
-
-            $rateRaw = (is_array($n) && array_key_exists('value', $n)) ? $n['value'] : null;
-            $rate    = is_null($rateRaw) ? null : $this->normalizeRate((float) $rateRaw);
-
-            $amountOc = (!is_null($premiumFtsOc) && !is_null($rate))
-                ? ((float) $premiumFtsOc * (float) $rate)
-                : null;
-
-            $row[] = $amountOc;
-
-            if (!is_null($amountOc)) {
-                $totalDiscountsOc += (float) $amountOc;
-            }
-        }
-
-        $row[] = $totalDiscountsOc; // ✅ siempre número (cero si no hay)
-        $row[] = !is_null($premiumFtsOc)
-            ? ((float) $premiumFtsOc - (float) $totalDiscountsOc)
-            : null;
-
-        // ----------------------------
-        // GWP USD
-        // ----------------------------
-        $row[] = $premiumUsd;
-        $row[] = $premiumFtpUsd;
-        $row[] = $premiumFtsUsd;
-
-        // ----------------------------
-        // Amounts USD + Totales USD
-        // ----------------------------
-        $totalDiscountsUsd = 0.0;
-
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $n = $nodes[$i] ?? null;
-
-            $rateRaw = (is_array($n) && array_key_exists('value', $n)) ? $n['value'] : null;
-            $rate    = is_null($rateRaw) ? null : $this->normalizeRate((float) $rateRaw);
-
-            $amountUsd = (!is_null($premiumFtsUsd) && !is_null($rate))
-                ? ((float) $premiumFtsUsd * (float) $rate)
-                : null;
-
-            $row[] = $amountUsd;
-
-            if (!is_null($amountUsd)) {
-                $totalDiscountsUsd += (float) $amountUsd;
-            }
-        }
-
-        $row[] = $totalDiscountsUsd; // ✅ siempre número
-        $row[] = !is_null($premiumFtsUsd)
-            ? ((float) $premiumFtsUsd - (float) $totalDiscountsUsd)
-            : null;
-
-        return $row;
+        // 🔵 ignorar completamente el campo cls
+        $maxLimitLiab += $limit;
     }
+
+    $placementType = ($doc->business?->renewed_from_id) ? 'Renewal' : 'New';
+
+    // ==========================
+    // ✅ GWP OC
+    // ==========================
+    $premiumOc = (float) ($doc->insured_premium ?? 0);
+
+    $premiumFtpOc = (!is_null($coverageDays) && $coverageDays > 0)
+        ? ($premiumOc / 365) * (float) $coverageDays
+        : 0.0;
+
+    $share = (float) ($doc->share ?? 0);
+    $share = $this->normalizeRate($share);
+
+    $premiumFtsOc = $premiumFtpOc * $share;
+
+    // roe_fs
+    $roe      = (float) ($doc->roe_fs ?? 0);
+    $roeValid = ($roe > 0);
+
+    // USD
+    $premiumUsd    = $roeValid ? ($premiumOc / $roe) : 0.0;
+    $premiumFtpUsd = $roeValid ? ($premiumFtpOc / $roe) : 0.0;
+    $premiumFtsUsd = $roeValid ? ($premiumFtsOc / $roe) : 0.0;
+
+    // Reinsurer Id rule: CNS if exists else id
+    $reinsurer   = $doc->business?->reinsurer;
+    $idReinsurer = null;
+
+    if ($reinsurer) {
+        $cns = $reinsurer->cns_reinsurer ?? null;
+        $idReinsurer = (!is_null($cns) && trim((string) $cns) !== '')
+            ? $cns
+            : ($reinsurer->id ?? null);
+    }
+
+    // Nodos base (3 cols por nodo)
+    $nodes = is_array($doc->nodes_list ?? null) ? $doc->nodes_list : [];
+
+    // =========================================================
+    // ✅✅✅ CHANGE [MAP-ORDER-1]: Aquí reordenamos para que empate con headings()
+    // Orden: base -> (verde) Cost_Scheme_ID -> Nodes (3 cols) -> (amarillas) 3 GWP OC -> Amounts...
+    // =========================================================
+    $row = [
+        ++$this->rowIndex,
+        $this->reportDate,
+
+        $doc->business?->business_code ?? '-',
+        $doc->id,
+        $doc->docType?->name ?? '-',
+
+        $idReinsurer,
+        $reinsurer?->name ?? '-',
+        $reinsurer?->short_name ?? '-',
+
+        $doc->business?->currency?->acronym ?? '-',
+        $doc->roe_fs ?? null,
+
+        $share,
+        $created,
+        $inception,
+        $expiration,
+        $coverageDays,
+
+        $doc->business?->premium_type ?? '-',
+        $doc->business?->claims_type ?? '-',
+        $placementType,
+
+        $maxLimitLiab,
+        $doc->insured_name ?? '-',
+        $doc->country_name ?? '-',
+        $doc->coverage_name ?? '-',
+
+        // ✅ (verde) va AQUÍ (tal como está en headings)
+        $doc->insured_cscheme_id ?? '-',
+    ];
+
+    // =========================================================
+    // ✅✅✅ CHANGE [MAP-ORDER-2]: Primero van los Node_* (Deduction/Source/Value)
+    // =========================================================
+    for ($i = 0; $i < $this->maxNodes; $i++) {
+        $n = $nodes[$i] ?? null;
+
+        $row[] = is_array($n) ? ($n['deduction_type'] ?? null) : null;
+        $row[] = is_array($n) ? ($n['source'] ?? null) : null;
+
+        $value = (is_array($n) && array_key_exists('value', $n))
+            ? (float) $n['value']
+            : 0.0;
+
+        $row[] = $value;
+    }
+
+    // =========================================================
+    // ✅✅✅ CHANGE [MAP-ORDER-3]: Ahora van las 3 amarillas (GWP OC)
+    // =========================================================
+    $row[] = $premiumOc;
+    $row[] = $premiumFtpOc;
+    $row[] = $premiumFtsOc;
+
+    // =========================================================
+    // ✅ OC Amounts (usa amount_oc ya calculado en $wide)
+    // =========================================================
+    $totalDiscountsOc = 0.0;
+
+    for ($i = 0; $i < $this->maxNodes; $i++) {
+        $n = $nodes[$i] ?? null;
+
+        $amountOc = (is_array($n) && array_key_exists('amount_oc', $n))
+            ? round((float) $n['amount_oc'], 2)
+            : 0.0;
+
+        $row[] = $amountOc;
+        $totalDiscountsOc += $amountOc;
+    }
+
+    $totalDiscountsOc = round($totalDiscountsOc, 2);
+    $netGwpOc         = round((float) $premiumFtsOc - (float) $totalDiscountsOc, 2);
+
+    $row[] = $totalDiscountsOc;
+    $row[] = $netGwpOc;
+
+    // =========================================================
+    // ✅ USD Amounts (amount_oc / roe_fs)
+    // =========================================================
+    $row[] = $premiumUsd;
+    $row[] = $premiumFtpUsd;
+    $row[] = $premiumFtsUsd;
+
+    $totalDiscountsUsd = 0.0;
+
+    for ($i = 0; $i < $this->maxNodes; $i++) {
+        $n = $nodes[$i] ?? null;
+
+        $amountOc = (is_array($n) && array_key_exists('amount_oc', $n))
+            ? round((float) $n['amount_oc'], 2)
+            : 0.0;
+
+        $amountUsd = ($roeValid && $roe > 0)
+            ? round($amountOc / $roe, 2)
+            : 0.0;
+
+        $row[] = $amountUsd;
+        $totalDiscountsUsd += $amountUsd;
+    }
+
+    $totalDiscountsUsd = round($totalDiscountsUsd, 2);
+    $netGwpUsd         = round((float) $premiumFtsUsd - (float) $totalDiscountsUsd, 2);
+
+    $row[] = $totalDiscountsUsd;
+    $row[] = $netGwpUsd;
+    $row[] = $repDate;
+
+    return $row;
+    }
+
 
     public function columnFormats(): array
     {
-        $formats = [];
+        $formats = [
+            'K' => NumberFormat::FORMAT_PERCENTAGE_00, // Share (%)
+            'L' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Created
+            'M' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Inception
+            'N' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Expiration
+            'S' => '#,##0.00',                         // Max Limit Liab
+        ];
 
-        // Construimos un map label => letra para no depender de posiciones fijas.
-        $labels = $this->headings();
-        foreach ($labels as $i => $label) {
-            $colLetter = $this->indexToExcelCol($i + 1);
+        // =========================================================
+        // ✅ Robusto: ubicar columnas por NOMBRE (headings)
+        // Esto evita desfaces cuando maxNodes = 0 o cambia el orden
+        // =========================================================
+        $headings = $this->headings();
 
-            // % Share
-            if ($label === 'Share (%)') {
-                $formats[$colLetter] = NumberFormat::FORMAT_PERCENTAGE_00;
-                continue;
+        // helper: heading -> Excel Col (A, B, C...)
+        $colOf = function (string $label) use ($headings) {
+            $pos = array_search($label, $headings, true);
+            return $pos === false ? null : $this->indexToExcelCol($pos + 1); // +1 porque Excel es 1-based
+        };
+
+        // =========================================================
+        // ✅ Node_*_Value en porcentaje con decimales dinámicos
+        // =========================================================
+        for ($i = 1; $i <= $this->maxNodes; $i++) {
+            if ($col = $colOf("Node_{$i}_Value")) {
+                $formats[$col] = '0.################%';
             }
+        }
 
-            // Fechas
-            if (in_array($label, ['Created Date', 'Inception Date', 'Expiration Date'], true)) {
-                $formats[$colLetter] = NumberFormat::FORMAT_DATE_YYYYMMDD;
-                continue;
+        // =========================================================
+        // ✅ Node_* Amount_oc y Amount_usd como montos
+        // =========================================================
+        for ($i = 1; $i <= $this->maxNodes; $i++) {
+            if ($col = $colOf("Node_{$i}_Amount_oc")) {
+                $formats[$col] = '#,##0.00';
             }
-
-            // Números (montos)
-            $isMoney =
-                $label === 'roe_fs' ||
-                $label === 'Max Limit Liab' ||
-                str_starts_with($label, 'GWP_') ||
-                str_starts_with($label, 'Node_') && (
-                    str_contains($label, '_Value') ||
-                    str_contains($label, '_Amount_')
-                ) ||
-                str_contains($label, 'Total_Discounts_') ||
-                str_contains($label, 'Net_GWP_');
-
-            if ($isMoney) {
-                $formats[$colLetter] = '#,##0.00';
-                continue;
+            if ($col = $colOf("Node_{$i}_Amount_usd")) {
+                $formats[$col] = '#,##0.00';
             }
+        }
+
+        // =========================================================
+        // ✅ Montos OC (incluye las 3 amarillas + totals)
+        // =========================================================
+        foreach ([
+            'GWP_Annualised_oc',
+            'GWP_ftp_oc',
+            'GWP_fts_oc',
+            'Total_Discounts_oc',
+            'Net_GWP_oc',
+        ] as $h) {
+            if ($col = $colOf($h)) {
+                $formats[$col] = '#,##0.00';
+            }
+        }
+
+        // =========================================================
+        // ✅ Montos USD (incluye las 3 que te faltaban al final)
+        // =========================================================
+        foreach ([
+            'GWP_Annualised_usd',
+            'GWP_ftp_usd',
+            'GWP_fts_usd',
+            'Total_Discounts_usd',
+            'Net_GWP_usd',
+        ] as $h) {
+            if ($col = $colOf($h)) {
+                $formats[$col] = '#,##0.00';
+            }
+        }
+
+        // =========================================================
+        // ✅ NEW: Rep_Date al final como fecha
+        // (asegúrate de agregar 'Rep_Date' en headings() y map())
+        // =========================================================
+        if ($col = $colOf('Rep_Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
         }
 
         return $formats;
@@ -322,14 +361,22 @@ class OperativeDocsExport implements
         ];
     }
 
-    /**
-     * Normaliza un valor de nodo:
-     * - si viene como 4.5 => 0.045
-     * - si viene como 0.045 => 0.045
-     */
     private function normalizeRate(float $value): float
     {
         return ($value > 1) ? ($value / 100) : $value;
+    }
+
+    private function excelColToIndex(string $col): int
+    {
+        $col = strtoupper($col);
+        $len = strlen($col);
+        $num = 0;
+
+        for ($i = 0; $i < $len; $i++) {
+            $num = $num * 26 + (ord($col[$i]) - 64);
+        }
+
+        return $num;
     }
 
     private function indexToExcelCol(int $index): string
