@@ -34,21 +34,29 @@ class UnderwrittenBusiness extends ChartWidget
             7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'
         ];
 
-        $query = Business::query();
+        $query = Business::query()
+            ->withoutGlobalScopes()
+            ->from('businesses as b')
+            ->join('operative_docs as od', 'od.business_code', '=', 'b.business_code');
 
         if ($this->reinsurer) {
-            $query->where('reinsurer_id', $this->reinsurer);
+            $query->where('b.reinsurer_id', $this->reinsurer);
         }
 
-        $query
-            ->selectRaw("
-                EXTRACT(YEAR FROM created_at) as year,
-                EXTRACT(MONTH FROM created_at) as month,
-                COUNT(*) as total
-            ")
-            ->whereIn(DB::raw("EXTRACT(YEAR FROM created_at)"), $this->years)
-            ->groupByRaw('year, month')
-            ->orderByRaw('year, month');
+        $query->selectRaw('
+                EXTRACT(YEAR FROM od.rep_date) as year,
+                EXTRACT(MONTH FROM od.rep_date) as month,
+                COUNT(DISTINCT od.business_code) as total
+            ')
+            ->where('od.operative_doc_type_id', '1') 
+            ->whereNull('b.deleted_at')
+            ->whereIn(DB::raw('EXTRACT(YEAR FROM od.rep_date)'), $this->years)
+            ->groupByRaw('
+                EXTRACT(YEAR FROM od.rep_date),
+                EXTRACT(MONTH FROM od.rep_date)
+            ')
+            ->orderBy('year')
+            ->orderBy('month');
 
         $rows = $query->get();
 

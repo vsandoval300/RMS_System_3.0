@@ -5,6 +5,7 @@ namespace App\Filament\Underwritten\Widgets;
 use App\Models\Business;
 use App\Models\Reinsurer;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class UnderwrittenBusinessAnual extends ChartWidget
 {
@@ -15,15 +16,18 @@ class UnderwrittenBusinessAnual extends ChartWidget
 
     protected function getData(): array
     {
-        $query = Business::query();
+        $query = Business::query()
+            ->withoutGlobalScopes()
+            ->from('businesses as b')
+            ->join('operative_docs as od', 'od.business_code', '=', 'b.business_code');
 
         // 👇 si el filtro NO es "all", filtramos por reinsurer_id
         if ($this->reinsurer) {
             $query->where('reinsurer_id', $this->reinsurer);
         }
-
         $rows = $query
-            ->selectRaw("DATE_PART('year', created_at) AS year, COUNT(*) AS total")
+            ->selectRaw("DATE_PART('year', od.rep_date) AS year, COUNT(*) AS total")
+            ->where('od.operative_doc_type_id', '1') 
             ->groupBy('year')
             ->orderBy('year')
             ->get();
@@ -33,6 +37,8 @@ class UnderwrittenBusinessAnual extends ChartWidget
                 [
                     'label' => 'Businesses',
                     'data'  => $rows->pluck('total'),
+                    'fill' => false,
+                    'tension' => 0.3,
                 ],
             ],
             'labels' => $rows->pluck('year'),

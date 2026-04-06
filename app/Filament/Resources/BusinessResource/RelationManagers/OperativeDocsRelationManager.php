@@ -51,6 +51,7 @@ use Illuminate\Support\Str;
 use App\Models\Coverage;
 use App\Models\Business;
 use Filament\Tables\Actions\Action as TableAction;
+use App\Enums\BusinessLifecycleStatus;
 use Filament\Actions\StaticAction; 
 use Filament\Forms\Components\Alert;
 use App\Models\OperativeDoc;
@@ -226,6 +227,77 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 modifyQueryUsing: function (Builder $query) {
                                                                     $query->orderBy('id');
 
+                                                                    // CREATE solamente
+                                                                    $record = $this->getMountedTableActionRecord();
+                                                                    if ($record) {
+                                                                        return;
+                                                                    }
+
+                                                                    $business = $this->getOwnerRecord();
+
+                                                                    $slipExists = $business?->operativeDocs()
+                                                                        ->where('operative_doc_type_id', 1)
+                                                                        ->exists() ?? false;
+
+                                                                    if ($slipExists) {
+                                                                        $query->where('id', '!=', 1);
+                                                                    }
+                                                                }
+                                                            )
+                                                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->id} - {$record->name}")
+                                                            ->required()
+                                                            ->dehydrated()
+                                                            ->live()
+                                                            ->preload()
+                                                            ->placeholder('Select a document type')
+                                                            ->native(false)
+                                                            ->columnSpan(3)
+                                                            ->default(function () {
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                return $slipExists ? null : 1;
+                                                            })
+                                                            ->afterStateHydrated(function (Set $set, $record, $state) {
+                                                                if ($record) {
+                                                                    return; // Edit: no tocar
+                                                                }
+
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                // Solo forzar Slip cuando NO existe uno previo
+                                                                if (! $slipExists && blank($state)) {
+                                                                    $set('operative_doc_type_id', 1);
+                                                                }
+                                                            })
+                                                            ->disabled(function ($record) {
+                                                                if ($record) {
+                                                                    return true;
+                                                                }
+
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                return ! $slipExists; // primer doc => Slip bloqueado/autoseleccionado
+                                                            }),
+                                                        /* Select::make('operative_doc_type_id')
+                                                            ->label('Document Type')
+                                                            ->relationship(
+                                                                name: 'docType',
+                                                                titleAttribute: 'name',
+                                                                modifyQueryUsing: function (Builder $query) {
+                                                                    $query->orderBy('id');
+
                                                                     // ✅ CAMBIO: si Slip ya existe, ocultar opción 1 del selector (solo en CREATE)
                                                                     $record = $this->getMountedTableActionRecord(); // null = create, no-null = edit
                                                                     if ($record) {
@@ -275,7 +347,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                                     ->exists() ?? false;
 
                                                                 return ! $slipExists; // primer doc => slip bloqueado
-                                                            }), 
+                                                            }),  */
                                                                 
                                                         /* Placeholder::make('gap1')
                                                             ->hiddenLabel()
@@ -1606,28 +1678,17 @@ class OperativeDocsRelationManager extends RelationManager
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)
                 ->dateTime('d/m/Y H:i'),
-            /* TextColumn::make('inception_date')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start)   
-                ->date(),
-
-            TextColumn::make('expiration_date')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
-                ->date(), */
-
-            /* TextColumn::make('status')
+            
+            TextColumn::make('status')
                 ->label('Status')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)
                 ->badge()
                 ->state(function ($record) {
-                    // ✅ PRIORIDAD 1: Cancelled si el business tiene endorsement cancelación (tipo 5)
-                    if (($record->business_has_cancellation ?? false) === true) {
+                    if ($record->business?->business_lifecycle_status === BusinessLifecycleStatus::CANCELLED) {
                         return 'Cancelled';
                     }
 
-                    // ✅ Si no está cancelado, aplica tu lógica normal por fechas
                     return match (true) {
                         now()->lt($record->inception_date)   => 'Pending',
                         now()->lte($record->expiration_date) => 'In Force',
@@ -1635,28 +1696,10 @@ class OperativeDocsRelationManager extends RelationManager
                     };
                 })
                 ->color(fn (string $state): string => match ($state) {
-                    'Cancelled' => 'danger',
                     'Pending'   => 'gray',
                     'In Force'  => 'success',
                     'Expired'   => 'danger',
-                    default     => 'gray',
-                }), */
-    
-            
-            TextColumn::make('status')
-                ->label('Status')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
-                ->badge()
-                ->state(fn ($record) => match (true) {
-                    now()->lt($record->inception_date)           => 'Pending',
-                    now()->lte($record->expiration_date)         => 'In Force',
-                    default                                      => 'Expired',
-                })
-                ->color(fn (string $state): string => match ($state) {
-                    'Pending'  => 'gray',
-                    'In Force' => 'success',
-                    'Expired'  => 'danger',
+                    'Cancelled' => 'gray',
                 }),
 
             IconColumn::make('document_path')
@@ -1694,38 +1737,7 @@ class OperativeDocsRelationManager extends RelationManager
                             ]);
                         })
                 ),
-            /* Tables\Columns\IconColumn::make('document_path')
-                ->label('File')                         // sin encabezado
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
-                ->getStateUsing(fn ($record) => true) // ← fuerza que siempre se pinte
-                ->icon(fn ($record) =>
-                        $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
-                    )
-
-
-
-                ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
-                ->url(function ($record) {
-                    if (! $record->document_path) {
-                        return null; // 👈 evita error si es null
-                    }
-
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $s3
-                    $s3 = Storage::disk('s3');
-
-                    return Str::startsWith(
-                        $record->document_path,
-                        ['http://', 'https://']
-                    )
-                        ? $record->document_path
-                        : $s3->url($record->document_path);
-                    
-                })
-                ->openUrlInNewTab()
-                ->tooltip(fn ($record) =>
-                    $record->document_path ? 'View PDF' : 'No document available'
-                ), */
+            
 
         ])
 
@@ -2117,6 +2129,8 @@ class OperativeDocsRelationManager extends RelationManager
         
         ->bulkActions([
             //Tables\Actions\DeleteBulkAction::make(),
-        ]);
+        ])
+        ->defaultSort('index', 'asc');
     }
+    
 }

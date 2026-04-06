@@ -1,0 +1,22 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\LiabilityStructure;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class LiabilityStructureZamaSeeder2025 extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $LiabilityStructure=new LiabilityStructure();        $LiabilityStructure->index =  '1' ;                    $LiabilityStructure->coverage_id =  '2' ;                            $LiabilityStructure->cls =  'FALSE' ;                      $LiabilityStructure->limit =  '5000000' ;                             $LiabilityStructure->limit_desc =  'Per principal or economic group, in excess of USD 5,000,000, with two full reinstatements at an additional premium of 300%.' ;                             $LiabilityStructure->sublimit = null;                       $LiabilityStructure->sublimit_desc = null;                       $LiabilityStructure->deductible = null;                     $LiabilityStructure->deductible_desc = null;                       $LiabilityStructure->business_code =  '2025-ZMA056-001' ;              $LiabilityStructure->created_at = date('Y-m-d',strtotime('2025-08-01'));   $LiabilityStructure->updated_at = date('Y-m-d',strtotime('2025-08-01'));      $LiabilityStructure->save(); 
+        $LiabilityStructure=new LiabilityStructure();        $LiabilityStructure->index =  '1' ;                    $LiabilityStructure->coverage_id =  '56' ;                            $LiabilityStructure->cls =  'FALSE' ;                      $LiabilityStructure->limit =  '12000000' ;                             $LiabilityStructure->limit_desc =  'Up to a maximum insured sum of USD 2,000,000 per person.' ;                             $LiabilityStructure->sublimit = null;                       $LiabilityStructure->sublimit_desc = null;                       $LiabilityStructure->deductible = null;                     $LiabilityStructure->deductible_desc = null;                       $LiabilityStructure->business_code =  '2025-ZMA056-002' ;              $LiabilityStructure->created_at = date('Y-m-d',strtotime('2025-12-01'));   $LiabilityStructure->updated_at = date('Y-m-d',strtotime('2025-12-01'));      $LiabilityStructure->save(); 
+        $LiabilityStructure=new LiabilityStructure();        $LiabilityStructure->index =  '1' ;                    $LiabilityStructure->coverage_id =  '84' ;                            $LiabilityStructure->cls =  'FALSE' ;                      $LiabilityStructure->limit =  '250000' ;                             $LiabilityStructure->limit_desc =  'Each and every loss and in the annual aggregate. The payment of defence costs is included within the limit of liability.' ;                             $LiabilityStructure->sublimit = null;                       $LiabilityStructure->sublimit_desc = null;                       $LiabilityStructure->deductible = null;                     $LiabilityStructure->deductible_desc = null;                       $LiabilityStructure->business_code =  '2025-ZMA056-003' ;              $LiabilityStructure->created_at = date('Y-m-d',strtotime('2025-12-01'));   $LiabilityStructure->updated_at = date('Y-m-d',strtotime('2025-12-01'));      $LiabilityStructure->save(); 
+        $LiabilityStructure=new LiabilityStructure();        $LiabilityStructure->index =  '1' ;                    $LiabilityStructure->coverage_id =  '26' ;                            $LiabilityStructure->cls =  'FALSE' ;                      $LiabilityStructure->limit =  '10000000' ;                             $LiabilityStructure->limit_desc =  'Per event or series of events as a single and combined limit in excess of deductibles.' ;                             $LiabilityStructure->sublimit = null;                       $LiabilityStructure->sublimit_desc = null;                       $LiabilityStructure->deductible = null;                     $LiabilityStructure->deductible_desc = null;                       $LiabilityStructure->business_code =  '2025-ZMA056-004' ;              $LiabilityStructure->created_at = date('Y-m-d',strtotime('2026-01-01'));   $LiabilityStructure->updated_at = date('Y-m-d',strtotime('2026-01-01'));      $LiabilityStructure->save();  
+    }
+}
