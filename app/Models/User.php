@@ -73,4 +73,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Position::class);
     }
+
+    public function loginLogs()
+    {
+        return $this->hasMany(\App\Models\LoginLog::class);
+    }
 }
