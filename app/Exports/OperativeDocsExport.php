@@ -21,14 +21,13 @@ class OperativeDocsExport implements
 {
     protected Collection $rows;
     protected int $rowIndex = 0;
-    protected string $reportDate;
     protected int $maxNodes = 0;
 
     public function __construct(Collection $rows, int $maxNodes = 0)
     {
         $this->rows       = $rows->values();
         $this->maxNodes   = max(0, (int) $maxNodes);
-        $this->reportDate = Carbon::now()->format('Y-m-d');
+       
     }
 
     public function collection(): Collection
@@ -40,9 +39,10 @@ class OperativeDocsExport implements
     {
         $base = [
             'Reg_Num',
-            'Report_Date',
+            'Rep_Date',
 
             'Business Code', 'OperativeDoc ID', 'Document Type',
+            'Source Code', 'Producer', 'Parent', 'Renewed from',
             'Id_Reinsurer', 'Reinsurer_name', 'Short name', 'Currency', 'roe_fs',
             'Share (%)', 'Created Date', 'Inception Date', 'Expiration Date', 'Coverage Days',
             'Premium Type', 'Claims Type', 'Placement Type',
@@ -82,7 +82,7 @@ class OperativeDocsExport implements
 
         $base[] = 'Total_Discounts_usd';
         $base[] = 'Net_GWP_usd';
-        $base[] = 'Rep_Date';
+        
 
         return $base;
     }
@@ -154,11 +154,16 @@ class OperativeDocsExport implements
     // =========================================================
     $row = [
         ++$this->rowIndex,
-        $this->reportDate,
+        $repDate,
 
         $doc->business?->business_code ?? '-',
         $doc->id,
         $doc->docType?->name ?? '-',
+
+        $doc->business_source_code ?? '-',
+        $doc->producer_name ?? '-',
+        $doc->business_parent_id ?? '-',
+        $doc->business_renewed_from_id ?? '-',
 
         $idReinsurer,
         $reinsurer?->name ?? '-',
@@ -260,7 +265,7 @@ class OperativeDocsExport implements
 
     $row[] = $totalDiscountsUsd;
     $row[] = $netGwpUsd;
-    $row[] = $repDate;
+    
 
     return $row;
     }
@@ -268,13 +273,7 @@ class OperativeDocsExport implements
 
     public function columnFormats(): array
     {
-        $formats = [
-            'K' => NumberFormat::FORMAT_PERCENTAGE_00, // Share (%)
-            'L' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Created
-            'M' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Inception
-            'N' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Expiration
-            'S' => '#,##0.00',                         // Max Limit Liab
-        ];
+        $formats = [];
 
         // =========================================================
         // ✅ Robusto: ubicar columnas por NOMBRE (headings)
@@ -288,6 +287,26 @@ class OperativeDocsExport implements
             return $pos === false ? null : $this->indexToExcelCol($pos + 1); // +1 porque Excel es 1-based
         };
 
+        if ($col = $colOf('Share (%)')) {
+        $formats[$col] = NumberFormat::FORMAT_PERCENTAGE_00;
+        }
+
+        if ($col = $colOf('Created Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
+        }
+
+        if ($col = $colOf('Inception Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
+        }
+
+        if ($col = $colOf('Expiration Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
+        }
+
+        if ($col = $colOf('Max Limit Liab')) {
+            $formats[$col] = '#,##0.00';
+        }
+        
         // =========================================================
         // ✅ Node_*_Value en porcentaje con decimales dinámicos
         // =========================================================
