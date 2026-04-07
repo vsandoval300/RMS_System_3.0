@@ -191,14 +191,14 @@ class ListBusinesses extends ListRecords
 
                 if ($report === 'underwritten_report') {
                     $filename = sprintf(
-                        'UW-ReportingMonth_(between_%s_to_%s)_(%s).xlsx',
+                        'UW-ByUnderwritingMonth_(between_%s_to_%s)_(%s).xlsx',
                         $rangeLabelFrom,
                         $rangeLabelTo,
                         $timestamp
                     );
                 } else {
                     $filename = sprintf(
-                        'UW-CoveragePeriod_(between_%s_to_%s)_(%s).xlsx',
+                        'UW-ByInceptionDate_(between_%s_to_%s)_(%s).xlsx',
                         $rangeLabelFrom,
                         $rangeLabelTo,
                         $timestamp
@@ -217,6 +217,7 @@ class ListBusinesses extends ListRecords
                         'docType',
                     ])
                     ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
+                    ->leftJoin('users', 'users.id', '=', 'operative_docs.created_by_user')
                     ->leftJoin('partners as producer_partner', 'producer_partner.id', '=', 'businesses.producer_id')
                     ->when($reinsurerIds->isNotEmpty(), fn ($q) =>
                         $q->whereIn('businesses.reinsurer_id', $reinsurerIds)
@@ -231,14 +232,8 @@ class ListBusinesses extends ListRecords
 
                     // scheme del insured
                     ->leftJoin('cost_schemes as insured_scheme', 'insured_scheme.id', '=', 'businessdoc_insureds.cscheme_id')
-
-                    // nodes
                     ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'insured_scheme.id')
-
-                    // deductions label
                     ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
-
-                    // partner source
                     ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
 
                     ->orderBy('businesses.business_code')
@@ -250,6 +245,7 @@ class ListBusinesses extends ListRecords
 
                         // ✅ NEW: fuerza a que rep_date venga como atributo accesible en el modelo
                         'operative_docs.rep_date as rep_date',
+                        'users.initials as created_by_initials',
 
                         'businesses.source_code as business_source_code',
                         'businesses.producer_id as business_producer_id',
