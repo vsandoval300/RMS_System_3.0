@@ -1703,41 +1703,65 @@ class OperativeDocsRelationManager extends RelationManager
                 }),
 
             IconColumn::make('document_path')
-                ->label('File')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start)
-                ->getStateUsing(fn ($record) => true)
-                ->icon(fn ($record) =>
-                    $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
-                )
-                ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
-                ->tooltip(fn ($record) =>
-                    $record->document_path ? 'View PDF' : 'No document available'
-                )
-                ->action(
-                    Action::make('viewPdf')
-                        ->label('View PDF')
-                        ->icon('heroicon-o-document-text')
-                        ->hidden(fn ($record) => blank($record->document_path))
-                        ->modalHeading(fn ($record) => "PDF – {$record->id}")
-                        ->modalWidth('7xl')
-                        ->modalSubmitAction(false)
-                        ->modalContent(function ($record) {
-                            if (blank($record->document_path)) {
-                                return new HtmlString('<p>No document available.</p>');
-                            }
+            ->label('File')
+            ->sortable()
+            ->verticalAlignment(VerticalAlignment::Start)
+            ->getStateUsing(fn ($record) => true)
+            ->icon(fn ($record) =>
+                $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
+            )
+            ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
+            ->tooltip(fn ($record) =>
+                $record->document_path ? 'View PDF' : 'No document available'
+            )
+            ->action(
+                Action::make('viewPdf')
+                    ->label('View PDF')
+                    ->icon('heroicon-o-document-text')
+                    ->hidden(fn ($record) => blank($record->document_path))
+                    ->modalHeading(fn ($record) => "PDF – {$record->id}")
+                    ->modalWidth('7xl')
+                    ->modalSubmitAction(false)
+                    ->modalContent(function ($record) {
+                        $path = $record->document_path;
 
-                            // Usa la ruta interna
-                            $url = route('pdf.viewer', [
-                                'operativeDoc' => $record->getKey(),
-                            ]);
+                        if (blank($path)) {
+                            return new HtmlString('<p>No document available.</p>');
+                        }
 
-                            return view('filament.components.pdf-viewer', [
-                                'url' => $url,
-                            ]);
-                        })
-                ),
-            
+                        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                        $disk = Storage::disk('s3');
+
+                        // Si viene una URL completa, extraemos únicamente la key del archivo
+                        if (filter_var($path, FILTER_VALIDATE_URL)) {
+                            $parsed = parse_url($path);
+                            $key = ltrim($parsed['path'] ?? '', '/');
+                        } else {
+                            $key = $path;
+                        }
+
+                        if (! $disk->exists($key)) {
+                            return new HtmlString(
+                                '<p>The PDF file does not exist in S3.</p>'
+                                . '<p><code>' . e($key) . '</code></p>'
+                            );
+                        }
+
+                        $url = $disk->temporaryUrl(
+                            $key,
+                            now()->addMinutes(10),
+                            [
+                                'ResponseContentType' => 'application/pdf',
+                                'ResponseContentDisposition' => 'inline; filename="' . basename($key) . '"',
+                            ]
+                        );
+
+                        return view('filament.components.pdf-viewer', [
+                            'url' => $url,
+                        ]);
+                    })
+            ),
+                        
 
         ])
 
