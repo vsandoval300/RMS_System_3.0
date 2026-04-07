@@ -37,16 +37,16 @@ class ListBusinesses extends ListRecords
                 Select::make('report_type')
                     ->label('Report Type')
                     ->options([
-                        'operative_docs'      => 'Underwritten – Coverage Period',
-                        'underwritten_report' => 'Underwritten – Reporting Month',
+                        'operative_docs'      => 'Underwritten – By Inception Date',
+                        'underwritten_report' => 'Underwritten – By Underwriting Month',
                     ])
                     ->default('operative_docs')
                     ->required()
                     ->live()
                     ->helperText(function ($get) {
                         return match ($get('report_type')) {
-                            'operative_docs' => '📅 Retrieves information for businesses whose operative documents have a coverage period within the selected date range.',
-                            'underwritten_report' => '📊 Retrieves information for businesses whose operative documents have a reporting date within the selected date range.',
+                            'operative_docs' => '📅 Retrieves information for businesses whose operative documents fall within the selected date range based on their Inception Date.',
+                            'underwritten_report' => '📊 Retrieves information for businesses whose operative documents fall within the selected date range based on their Underwriting Month.',
                             default => null,
                         };
                     }),
