@@ -1320,7 +1320,8 @@ class OperativeDocsRelationManager extends RelationManager
                                 $end   = $expiration ? \Carbon\Carbon::parse($expiration)->startOfDay() : null;
 
                                 // ✅ MOD [LEAP-1]: define días del año (según el año del start)
-                                $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
+                                //$daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
+                                $daysInYear   = 365;
                                 // ✅ MOD [LEAP-2]: calcula coverageDays normal
                                 $coverageDays = ($start && $end) ? (int) $start->diffInDays($end) : 0;
                                 // ✅ MOD [LEAP-3]: regla anti-distorsión (tu caso 31/12/2011 -> 31/12/2012)
