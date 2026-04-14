@@ -1324,9 +1324,9 @@ class OperativeDocsRelationManager extends RelationManager
                                 // ✅ MOD [LEAP-2]: calcula coverageDays normal
                                 $coverageDays = ($start && $end) ? (int) $start->diffInDays($end) : 0;
                                 // ✅ MOD [LEAP-3]: regla anti-distorsión (tu caso 31/12/2011 -> 31/12/2012)
-                                if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
+                                /* if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
                                     $coverageDays = $daysInYear;
-                                }
+                                } */
 
                                 $totalPremium = collect($insureds)->sum('premium');
 
