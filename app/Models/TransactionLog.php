@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use App\Models\Traits\HasAuditLogs;
+use App\Models\Transaction;
 
 class TransactionLog extends Model
 {
@@ -68,6 +69,23 @@ class TransactionLog extends Model
         static::creating(function (self $model) {
             if (blank($model->id)) {
                 $model->id = (string) Str::uuid();
+            }
+        });
+
+        //Aqui va la funcion para mandar a llamar al lifecyclesStatus
+        static::saved(function (self $model) {
+            $transaction = $model->transaction;
+
+            if (!$transaction) {
+                return;
+            }
+
+            $newStatus = $transaction->resolveTransactionStatus();
+
+            if ($transaction->transaction_status_id !== $newStatus) {
+                $transaction->update([
+                    'transaction_status_id' => $newStatus
+                ]);
             }
         });
     }
