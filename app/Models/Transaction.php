@@ -232,25 +232,25 @@ class Transaction extends Model
 
     public function resolveTransactionStatus(?Carbon $today = null): TransactionLifecycleStatus
     {
-        $baseQuery = $this->logs()->withoutTrashed();
+        $statuses = $this->logs()
+            ->withoutTrashed()
+            ->select('status')
+            ->distinct()
+            ->pluck('status');
 
-        $firstLog = (clone $baseQuery)
-            ->orderBy('index')
-            ->first(['received_date']);
-
-        if (!$firstLog) {
+        if ($statuses->isEmpty()) {
             return TransactionLifecycleStatus::PENDING;
         }
 
-        $lastLog = (clone $baseQuery)
-            ->orderByDesc('index')
-            ->first(['received_date']);
+        if ($statuses->contains('In process')) {
+            return TransactionLifecycleStatus::IN_PROCESS;
+        }
 
-        if (!empty($lastLog->received_date)) {
+        if ($statuses->count() === 1 && $statuses->contains('Completed')) {
             return TransactionLifecycleStatus::COMPLETED;
         }
 
-        if (!empty($firstLog->received_date)) {
+        if ($statuses->contains('Completed')) {
             return TransactionLifecycleStatus::IN_PROCESS;
         }
 

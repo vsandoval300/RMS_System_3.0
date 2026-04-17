@@ -130,16 +130,25 @@ class AdminPanelProvider extends PanelProvider
 
            
             
-            //Configuraión para Shield en el recurso permisos
-            // otras configuraciones del panel...
-                
-           
-
-
-
-
-
-
+            
+            //Manejo de session y redirection
+        return $panel
+        ->renderHook(
+            'panels::body.end',
+            fn () => <<<'HTML'
+            <script>
+            document.addEventListener('livewire:init', () => {
+                Livewire.hook('request', ({ fail }) => {
+                    fail(({ status }) => {
+                        if (status === 419) {
+                            window.location.reload();
+                        }
+                    });
+                });
+            });
+            </script>
+            HTML
+        );     
 
     }
 }
