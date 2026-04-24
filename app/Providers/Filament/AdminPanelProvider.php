@@ -64,7 +64,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
 
             ->authGuard('web')   // o 'filament' si decidiste usar ese guard
-           
+           ->databaseNotifications()
+
             ->login()
             /* ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),

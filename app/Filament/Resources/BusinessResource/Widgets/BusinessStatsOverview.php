@@ -29,6 +29,11 @@ class BusinessStatsOverview extends BaseWidget
                 ->icon('heroicon-o-shield-check')
                 ->color('success'),
 
+            Stat::make('Treaty', Business::where('reinsurance_type', 'Treaty')->count())
+                ->description('Treaty Cession Business')
+                ->icon('heroicon-o-shield-check')
+                ->color('info'),
+
             Stat::make('In Force', Business::where('business_lifecycle_status', 'In Force')->count())
                 ->description('Currently in force')
                 ->icon('heroicon-o-clock')
