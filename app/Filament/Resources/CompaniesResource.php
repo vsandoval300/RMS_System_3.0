@@ -57,7 +57,7 @@ class CompaniesResource extends Resource
                         modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
                     )
                     ->maxLength(255)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                    //->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
                     ->helperText('First letter of each word will be capitalised.'),
                     //->extraAttributes(['class' => 'w-1/2']),
 
@@ -70,7 +70,7 @@ class CompaniesResource extends Resource
                     )
                     //->live(onBlur: false)
                     ->maxLength(255)
-                    ->rule('regex:/^[A-Z_]+$/')
+                    ->rule('regex:/^[A-Z0-9_]+$/')
                     ->afterStateUpdated(fn ($state, callable $set) => $set('acronym', strtoupper($state)))
                     ->helperText('Only uppercase letters allowed.'),
                     //->extraAttributes(['class' => 'w-1/2']),
