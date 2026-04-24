@@ -352,8 +352,9 @@ class BusinessResource extends Resource
                                 //->inlineLabel()
                                 ->placeholder('Select a premium type.') // 👈 Aquí cambias el texto
                                 ->options([
-                                    'Fixed' => 'Fixed',
+                                    'Fixed'     => 'Fixed',
                                     'Estimated' => 'Estimated',
+                                    'Declared'  => 'Declared'
                                 ])
                                 ->default('Fixed')
                                 ->helperText(fn ($record) =>
