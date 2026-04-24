@@ -135,16 +135,15 @@ class GenerateOperativeDocsReport implements ShouldQueue
         }
 
         $maxNodes = collect($result)->max(fn ($r) => count($r->nodes_list ?? [])) ?? 0;
+        $path = 'uw-reports/' . $this->filename;
 
         Excel::store(
             new OperativeDocsExport(collect($result), $maxNodes),
-            $this->filename,
-            'public'
+            $path   
         );
 
         NotifyReportReady::dispatch(
             $this->userId,
-            //$this->path,
             $this->filename
         );
     }

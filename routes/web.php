@@ -47,5 +47,5 @@ Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
 })->name('pdf.viewer');
 
 Route::get('/reports/download/{file}', function ($file) {
-    return Storage::disk('public')->download('reports/' . $file);
+    return Storage::disk('s3')->download('uw-reports/' . $file);
 });
