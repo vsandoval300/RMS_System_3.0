@@ -20,7 +20,7 @@ class DeductionsSeeder extends Seeder
         $deduction->save();
 
         $deduction = new deduction();
-        $deduction->concept = 'retention';
+        $deduction->concept = '';
         $deduction->description = '';
         $deduction->save();
 

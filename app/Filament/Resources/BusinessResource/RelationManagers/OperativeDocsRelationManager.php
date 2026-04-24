@@ -51,8 +51,12 @@ use Illuminate\Support\Str;
 use App\Models\Coverage;
 use App\Models\Business;
 use Filament\Tables\Actions\Action as TableAction;
+use App\Enums\BusinessLifecycleStatus;
 use Filament\Actions\StaticAction; 
 use Filament\Forms\Components\Alert;
+use App\Models\OperativeDoc;
+
+
 
 
 
@@ -223,6 +227,77 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 modifyQueryUsing: function (Builder $query) {
                                                                     $query->orderBy('id');
 
+                                                                    // CREATE solamente
+                                                                    $record = $this->getMountedTableActionRecord();
+                                                                    if ($record) {
+                                                                        return;
+                                                                    }
+
+                                                                    $business = $this->getOwnerRecord();
+
+                                                                    $slipExists = $business?->operativeDocs()
+                                                                        ->where('operative_doc_type_id', 1)
+                                                                        ->exists() ?? false;
+
+                                                                    if ($slipExists) {
+                                                                        $query->where('id', '!=', 1);
+                                                                    }
+                                                                }
+                                                            )
+                                                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->id} - {$record->name}")
+                                                            ->required()
+                                                            ->dehydrated()
+                                                            ->live()
+                                                            ->preload()
+                                                            ->placeholder('Select a document type')
+                                                            ->native(false)
+                                                            ->columnSpan(3)
+                                                            ->default(function () {
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                return $slipExists ? null : 1;
+                                                            })
+                                                            ->afterStateHydrated(function (Set $set, $record, $state) {
+                                                                if ($record) {
+                                                                    return; // Edit: no tocar
+                                                                }
+
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                // Solo forzar Slip cuando NO existe uno previo
+                                                                if (! $slipExists && blank($state)) {
+                                                                    $set('operative_doc_type_id', 1);
+                                                                }
+                                                            })
+                                                            ->disabled(function ($record) {
+                                                                if ($record) {
+                                                                    return true;
+                                                                }
+
+                                                                $business = $this->getOwnerRecord();
+
+                                                                $slipExists = $business?->operativeDocs()
+                                                                    ->where('operative_doc_type_id', 1)
+                                                                    ->exists() ?? false;
+
+                                                                return ! $slipExists; // primer doc => Slip bloqueado/autoseleccionado
+                                                            }),
+                                                        /* Select::make('operative_doc_type_id')
+                                                            ->label('Document Type')
+                                                            ->relationship(
+                                                                name: 'docType',
+                                                                titleAttribute: 'name',
+                                                                modifyQueryUsing: function (Builder $query) {
+                                                                    $query->orderBy('id');
+
                                                                     // ✅ CAMBIO: si Slip ya existe, ocultar opción 1 del selector (solo en CREATE)
                                                                     $record = $this->getMountedTableActionRecord(); // null = create, no-null = edit
                                                                     if ($record) {
@@ -272,7 +347,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                                     ->exists() ?? false;
 
                                                                 return ! $slipExists; // primer doc => slip bloqueado
-                                                            }), 
+                                                            }),  */
                                                                 
                                                         /* Placeholder::make('gap1')
                                                             ->hiddenLabel()
@@ -600,55 +675,35 @@ class OperativeDocsRelationManager extends RelationManager
                                     Section::make('File Upload')
                                         ->schema([
 
+                                            
                                             FileUpload::make('document_path')
-                                                ->label('File')
-                                                ->disk('s3')
-                                                ->directory('reinsurers/OperativeDocuments')
-                                                ->visibility('public')
-                                                ->acceptedFileTypes(['application/pdf'])
-                                                ->preserveFilenames(false)
+                                            ->label('File')
+                                            ->disk('s3')
+                                            ->directory('reinsurers/OperativeDocuments')
+                                            ->acceptedFileTypes(['application/pdf', 'application/x-pdf'])
+                                            ->visibility('private')
+                                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, Get $get, $record) {
 
-                                                // 1) Subida con nombre estable (basado en id) y limpieza del anterior si cambia
-                                                ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, $record, Get $get) {
-                                                    $base = (string) ($get('id') ?: $record?->id);
-                                                    $name = $base . '.' . ($file->getClientOriginalExtension() ?: 'pdf');
-                                                    $dir  = 'reinsurers/OperativeDocuments';
-                                                    Storage::disk('s3')->putFileAs($dir, $file, $name, ['visibility' => 'public']);
-                                                    return "{$dir}/{$name}"; // <- esto se guarda en document_path
-                                                })
-                                                
-                                                // 2) Borrado físico cuando Filament elimina el archivo subido
-                                                ->deleteUploadedFileUsing(function (?string $file) {
-                                                    if ($file && Storage::disk('s3')->exists($file)) {
-                                                        Storage::disk('s3')->delete($file);
-                                                    }
-                                                })
+                                                // ✅ 1) PRIORIDAD: Id generado en el FORM (Create)
+                                                $formId = $get('id'); // <- el campo "Id Document" que muestras en tu screenshot
 
-                                                // 3) Si el usuario hace "clear" (icono de bote), borra en S3 y fuerza que BD quede en NULL
-                                                ->afterStateUpdated(function ($state, \Filament\Forms\Set $set, \Filament\Forms\Get $get, $record) {
-                                                    // Cuando se limpia el campo, $state viene como null/''.
-                                                    if (blank($state) && $record?->document_path) {
-                                                        if (Storage::disk('s3')->exists($record->document_path)) {
-                                                            Storage::disk('s3')->delete($record->document_path);
-                                                        }
-                                                        // Asegura que el form state sea null para persistirlo
-                                                        $set('document_path', null);
-                                                    }
-                                                })
+                                                // ✅ 2) Si ya existe record (Edit), usa el id del record
+                                                $base = $formId ?: ($record?->id ?: (string) Str::uuid());
 
-                                                // 4) SIEMPRE deshidratar; y mutar '' -> null para que se escriba en BD
-                                                ->dehydrated() // (sin callback) siempre escribe el estado
-                                                ->mutateDehydratedStateUsing(fn ($state) => blank($state) ? null : $state)
+                                                // ✅ normaliza un poco por si trae espacios raros
+                                                $base = trim((string) $base);
 
-                                                ->downloadable()
-                                                ->openable()
-                                                ->previewable(true)
-                                                ->hint(fn ($record) => $record?->document_path
-                                                    ? 'Existing file: ' . basename($record->document_path)
-                                                    : 'No file uploaded yet.'
-                                                )
-                                                //->dehydrated(fn ($state) => filled($state))
-                                                ->helperText('Only PDF files are allowed.'),
+                                                return "{$base}.pdf";
+                                            })
+                                            ->deletable()
+                                            ->downloadable()
+                                            ->openable()
+                                            ->previewable(true)
+                                            ->hint(fn ($record) => $record?->document_path
+                                                ? 'Existing file: ' . basename($record->document_path)
+                                                : 'No file uploaded yet.'
+                                            )
+                                            ->helperText('Only PDF files are allowed.'),
 
 
                                             /* FileUpload::make('document_path')
@@ -1265,13 +1320,14 @@ class OperativeDocsRelationManager extends RelationManager
                                 $end   = $expiration ? \Carbon\Carbon::parse($expiration)->startOfDay() : null;
 
                                 // ✅ MOD [LEAP-1]: define días del año (según el año del start)
-                                $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
+                                //$daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
+                                $daysInYear   = 365;
                                 // ✅ MOD [LEAP-2]: calcula coverageDays normal
                                 $coverageDays = ($start && $end) ? (int) $start->diffInDays($end) : 0;
                                 // ✅ MOD [LEAP-3]: regla anti-distorsión (tu caso 31/12/2011 -> 31/12/2012)
-                                if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
+                                /* if ($start && $end && $start->isSameDay($end->copy()->subYear())) {
                                     $coverageDays = $daysInYear;
-                                }
+                                } */
 
                                 $totalPremium = collect($insureds)->sum('premium');
 
@@ -1329,6 +1385,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 $totalDeductionOrig = 0;
                                 $totalDeductionUsd  = 0;
 
+
                                 $groupedCostNodes = $costNodes
                                     ->groupBy('cscheme_id')
                                     ->map(function ($nodes, $schemeId) use (
@@ -1338,6 +1395,93 @@ class OperativeDocsRelationManager extends RelationManager
                                         $convertedFtsByScheme
                                     ) {
                                         /** @var \App\Models\CostNodex $first */
+                                        $first      = $nodes->first();
+                                        $shareFloat = (float) ($first->scheme_share ?? 0); // solo display
+
+                                        // Base por scheme (orig y usd)
+                                        $schemeBaseOrig = (float) ($premiumFtsByScheme[$schemeId] ?? 0);
+                                        $schemeBaseUsd  = (float) ($convertedFtsByScheme[$schemeId] ?? 0);
+
+                                        // ✅ running base (gross - deducciones previas)
+                                        $runningBaseOrig = $schemeBaseOrig;
+                                        $runningBaseUsd  = $schemeBaseUsd;
+
+                                        // ✅ asegurar orden por index
+                                        $sortedNodes = $nodes->sortBy(fn ($n) => (int) ($n->index ?? 0))->values();
+
+                                        $nodeList = collect();
+
+                                        foreach ($sortedNodes as $node) {
+                                            /** @var \App\Models\CostNodex $node */
+                                            $rate = (float) ($node->value ?? 0); // ej 0.02
+
+                                            $applyToGross = (bool) ($node->apply_to_gross ?? false);
+
+                                            // ✅ NUEVA REGLA:
+                                            // - FALSE => base = schemeBase (gross)
+                                            // - TRUE  => base = runningBase (gross - prev deductions)
+                                            $baseOrigForNode = $applyToGross ? $runningBaseOrig : $schemeBaseOrig;
+                                            $baseUsdForNode  = $applyToGross ? $runningBaseUsd  : $schemeBaseUsd;
+
+                                            $deductionOrig = $baseOrigForNode * $rate;
+                                            $deductionUsd  = $baseUsdForNode  * $rate;
+
+                                            // ✅ actualizar running base SIEMPRE (para que TRUE posteriores tomen neto acumulado)
+                                            $runningBaseOrig -= $deductionOrig;
+                                            $runningBaseUsd  -= $deductionUsd;
+
+                                            $nodeList->push([
+                                                'index'            => $node->index,
+                                                'partner'          => $node->partnerSource?->name ?? '-',
+                                                'partner_short'    => $node->partnerSource?->short_name
+                                                                    ?? $node->partnerSource?->name
+                                                                    ?? '-',
+                                                'deduction'        => $node->deduction?->concept ?? '-',
+                                                'value'            => $rate,
+
+                                                // ✅ NUEVO: flag para debug / display si lo quieres
+                                                'apply_to_gross'   => $applyToGross,
+
+                                                'share'            => $shareFloat, // solo display
+
+                                                // ✅ base usada por nodo (para fórmula / auditoría)
+                                                'scheme_base_orig' => $schemeBaseOrig,     // gross base
+                                                'scheme_base_usd'  => $schemeBaseUsd,      // gross base
+                                                'node_base_orig'   => $baseOrigForNode,    // base real del cálculo
+                                                'node_base_usd'    => $baseUsdForNode,     // base real del cálculo
+
+                                                'deduction_amount' => $deductionOrig,
+                                                'deduction_usd'    => $deductionUsd,
+                                            ]);
+                                        }
+
+                                        $subtotalOrig = $nodeList->sum('deduction_amount');
+                                        $subtotalUsd  = $nodeList->sum('deduction_usd');
+
+                                        $totalDeductionOrig += $subtotalOrig;
+                                        $totalDeductionUsd  += $subtotalUsd;
+
+                                        return [
+                                            'scheme_id'        => $schemeId,
+                                            'share'            => $shareFloat,
+                                            'scheme_base_orig' => $schemeBaseOrig,
+                                            'scheme_base_usd'  => $schemeBaseUsd,
+                                            'nodes'            => $nodeList->values(),
+                                            'subtotal_orig'    => $subtotalOrig,
+                                            'subtotal_usd'     => $subtotalUsd,
+                                        ];
+                                    })
+                                    ->values()
+                                    ->toArray();
+                                /* $groupedCostNodes = $costNodes
+                                    ->groupBy('cscheme_id')
+                                    ->map(function ($nodes, $schemeId) use (
+                                        &$totalDeductionOrig,
+                                        &$totalDeductionUsd,
+                                        $premiumFtsByScheme,
+                                        $convertedFtsByScheme
+                                    ) {
+                                        // @var \App\Models\CostNodex $first
                                         $first      = $nodes->first();
                                         $shareFloat = (float) ($first->scheme_share ?? 0); // ✅ MOD [CB-3] solo display
 
@@ -1385,7 +1529,7 @@ class OperativeDocsRelationManager extends RelationManager
                                         ];
                                     })
                                     ->values()
-                                    ->toArray();
+                                    ->toArray(); */
 
                                 // ✅✅✅ CHANGE [NET-1]: netos consistentes (no depender de recalculo en Blade)
                                 $netUnderwrittenOrig = $totalPremiumFts - $totalDeductionOrig;
@@ -1535,28 +1679,17 @@ class OperativeDocsRelationManager extends RelationManager
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)
                 ->dateTime('d/m/Y H:i'),
-            /* TextColumn::make('inception_date')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start)   
-                ->date(),
-
-            TextColumn::make('expiration_date')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
-                ->date(), */
-
-            /* TextColumn::make('status')
+            
+            TextColumn::make('status')
                 ->label('Status')
                 ->sortable()
                 ->verticalAlignment(VerticalAlignment::Start)
                 ->badge()
                 ->state(function ($record) {
-                    // ✅ PRIORIDAD 1: Cancelled si el business tiene endorsement cancelación (tipo 5)
-                    if (($record->business_has_cancellation ?? false) === true) {
+                    if ($record->business?->business_lifecycle_status === BusinessLifecycleStatus::CANCELLED) {
                         return 'Cancelled';
                     }
 
-                    // ✅ Si no está cancelado, aplica tu lógica normal por fechas
                     return match (true) {
                         now()->lt($record->inception_date)   => 'Pending',
                         now()->lte($record->expiration_date) => 'In Force',
@@ -1564,97 +1697,72 @@ class OperativeDocsRelationManager extends RelationManager
                     };
                 })
                 ->color(fn (string $state): string => match ($state) {
-                    'Cancelled' => 'danger',
                     'Pending'   => 'gray',
                     'In Force'  => 'success',
                     'Expired'   => 'danger',
-                    default     => 'gray',
-                }), */
-    
-            
-            TextColumn::make('status')
-                ->label('Status')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
-                ->badge()
-                ->state(fn ($record) => match (true) {
-                    now()->lt($record->inception_date)           => 'Pending',
-                    now()->lte($record->expiration_date)         => 'In Force',
-                    default                                      => 'Expired',
-                })
-                ->color(fn (string $state): string => match ($state) {
-                    'Pending'  => 'gray',
-                    'In Force' => 'success',
-                    'Expired'  => 'danger',
+                    'Cancelled' => 'gray',
                 }),
 
             IconColumn::make('document_path')
-                ->label('File')
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start)
-                ->getStateUsing(fn ($record) => true)
-                ->icon(fn ($record) =>
-                    $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
-                )
-                ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
-                ->tooltip(fn ($record) =>
-                    $record->document_path ? 'View PDF' : 'No document available'
-                )
-                ->action(
-                    Action::make('viewPdf')
-                        ->label('View PDF')
-                        ->icon('heroicon-o-document-text')
-                        ->hidden(fn ($record) => blank($record->document_path))
-                        ->modalHeading(fn ($record) => "PDF – {$record->id}")
-                        ->modalWidth('7xl')
-                        ->modalSubmitAction(false)
-                        ->modalContent(function ($record) {
-                            if (blank($record->document_path)) {
-                                return new HtmlString('<p>No document available.</p>');
-                            }
+            ->label('File')
+            ->sortable()
+            ->verticalAlignment(VerticalAlignment::Start)
+            ->getStateUsing(fn ($record) => true)
+            ->icon(fn ($record) =>
+                $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
+            )
+            ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
+            ->tooltip(fn ($record) =>
+                $record->document_path ? 'View PDF' : 'No document available'
+            )
+            ->action(
+                Action::make('viewPdf')
+                    ->label('View PDF')
+                    ->icon('heroicon-o-document-text')
+                    ->hidden(fn ($record) => blank($record->document_path))
+                    ->modalHeading(fn ($record) => "PDF – {$record->id}")
+                    ->modalWidth('7xl')
+                    ->modalSubmitAction(false)
+                    ->modalContent(function ($record) {
+                        $path = $record->document_path;
 
-                            // Usa la ruta interna
-                            $url = route('pdf.viewer', [
-                                'operativeDoc' => $record->getKey(),
-                            ]);
+                        if (blank($path)) {
+                            return new HtmlString('<p>No document available.</p>');
+                        }
 
-                            return view('filament.components.pdf-viewer', [
-                                'url' => $url,
-                            ]);
-                        })
-                ),
-            /* Tables\Columns\IconColumn::make('document_path')
-                ->label('File')                         // sin encabezado
-                ->sortable()
-                ->verticalAlignment(VerticalAlignment::Start) 
-                ->getStateUsing(fn ($record) => true) // ← fuerza que siempre se pinte
-                ->icon(fn ($record) =>
-                        $record->document_path ? 'heroicon-o-document' : 'heroicon-o-x-circle'
-                    )
+                        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                        $disk = Storage::disk('s3');
 
+                        // Si viene una URL completa, extraemos únicamente la key del archivo
+                        if (filter_var($path, FILTER_VALIDATE_URL)) {
+                            $parsed = parse_url($path);
+                            $key = ltrim($parsed['path'] ?? '', '/');
+                        } else {
+                            $key = $path;
+                        }
 
+                        if (! $disk->exists($key)) {
+                            return new HtmlString(
+                                '<p>The PDF file does not exist in S3.</p>'
+                                . '<p><code>' . e($key) . '</code></p>'
+                            );
+                        }
 
-                ->color(fn ($record) => $record->document_path ? 'primary' : 'danger')
-                ->url(function ($record) {
-                    if (! $record->document_path) {
-                        return null; // 👈 evita error si es null
-                    }
+                        $url = $disk->temporaryUrl(
+                            $key,
+                            now()->addMinutes(10),
+                            [
+                                'ResponseContentType' => 'application/pdf',
+                                'ResponseContentDisposition' => 'inline; filename="' . basename($key) . '"',
+                            ]
+                        );
 
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $s3
-                    $s3 = Storage::disk('s3');
-
-                    return Str::startsWith(
-                        $record->document_path,
-                        ['http://', 'https://']
-                    )
-                        ? $record->document_path
-                        : $s3->url($record->document_path);
-                    
-                })
-                ->openUrlInNewTab()
-                ->tooltip(fn ($record) =>
-                    $record->document_path ? 'View PDF' : 'No document available'
-                ), */
+                        return view('filament.components.pdf-viewer', [
+                            'url' => $url,
+                        ]);
+                    })
+            ),
+                        
 
         ])
 
@@ -2046,6 +2154,8 @@ class OperativeDocsRelationManager extends RelationManager
         
         ->bulkActions([
             //Tables\Actions\DeleteBulkAction::make(),
-        ]);
+        ])
+        ->defaultSort('index', 'asc');
     }
+    
 }

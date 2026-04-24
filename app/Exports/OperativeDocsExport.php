@@ -15,19 +15,19 @@ use Maatwebsite\Excel\Concerns\{
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+
 class OperativeDocsExport implements
     FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles
 {
     protected Collection $rows;
     protected int $rowIndex = 0;
-    protected string $reportDate;
     protected int $maxNodes = 0;
 
     public function __construct(Collection $rows, int $maxNodes = 0)
     {
         $this->rows       = $rows->values();
         $this->maxNodes   = max(0, (int) $maxNodes);
-        $this->reportDate = Carbon::now()->format('Y-m-d');
+       
     }
 
     public function collection(): Collection
@@ -39,35 +39,40 @@ class OperativeDocsExport implements
     {
         $base = [
             'Reg_Num',
-            'Report_Date',
+            'Created By',
+            'Rep_Date',
 
             'Business Code', 'OperativeDoc ID', 'Document Type',
+            'Source Code', 'Producer', 'Parent', 'Renewed from',
             'Id_Reinsurer', 'Reinsurer_name', 'Short name', 'Currency', 'roe_fs',
             'Share (%)', 'Created Date', 'Inception Date', 'Expiration Date', 'Coverage Days',
             'Premium Type', 'Claims Type', 'Placement Type',
             'Max Limit Liab', 'Insured Name', 'Country', 'Coverage',
 
-            // ✅ OC renombrado
-            'GWP_Annualised_oc', 'GWP_ftp_oc', 'GWP_fts_oc',
-
+            // ✅ verde primero (como lo quieres)
             'Cost_Scheme_ID',
         ];
 
-        // ✅ Bloque dinámico 1: columnas del nodo (3 por nodo)
+        // ✅ Bloque Node_* (Deduction/Source/Value)
         for ($i = 1; $i <= $this->maxNodes; $i++) {
             $base[] = "Node_{$i}_Deduction_Type";
             $base[] = "Node_{$i}_Source";
             $base[] = "Node_{$i}_Value";
         }
 
-        // ✅ Bloque OC: Amount por nodo
+        // ✅✅✅ CHANGE [ORDER-1]: agregar correctamente las 3 amarillas AQUÍ
+        $base[] = 'GWP_Annualised_oc';
+        $base[] = 'GWP_ftp_oc';
+        $base[] = 'GWP_fts_oc';
+
+        // ✅ Bloque Node_* Amount_oc
         for ($i = 1; $i <= $this->maxNodes; $i++) {
             $base[] = "Node_{$i}_Amount_oc";
         }
+
         $base[] = 'Total_Discounts_oc';
         $base[] = 'Net_GWP_oc';
 
-        // ✅ Bloque USD: GWP + Amounts divididos por roe_fs
         $base[] = 'GWP_Annualised_usd';
         $base[] = 'GWP_ftp_usd';
         $base[] = 'GWP_fts_usd';
@@ -75,36 +80,40 @@ class OperativeDocsExport implements
         for ($i = 1; $i <= $this->maxNodes; $i++) {
             $base[] = "Node_{$i}_Amount_usd";
         }
+
         $base[] = 'Total_Discounts_usd';
         $base[] = 'Net_GWP_usd';
+        
 
         return $base;
     }
 
-    public function map($doc): array
+
+    
+   public function map($doc): array
     {
         $created    = optional($doc->created_at)?->format('Y-m-d');
         $inception  = optional($doc->inception_date)?->format('Y-m-d');
         $expiration = optional($doc->expiration_date)?->format('Y-m-d');
+        $repDate = optional($doc->rep_date)?->format('Y-m-d');
 
         $coverageDays = ($doc->inception_date && $doc->expiration_date)
             ? Carbon::parse($doc->inception_date)->diffInDays(Carbon::parse($doc->expiration_date))
             : null;
 
         $maxLimitLiab = 0.0;
+
         foreach ($doc->business?->liabilityStructures ?? [] as $ls) {
             $limit = (float) ($ls->limit ?? 0);
-            $cls   = (float) ($ls->cls ?? 0);
-            if ($cls > 1) {
-                $cls /= 100;
-            }
-            $maxLimitLiab += $limit * $cls;
+
+            // 🔵 ignorar completamente el campo cls
+            $maxLimitLiab += $limit;
         }
 
         $placementType = ($doc->business?->renewed_from_id) ? 'Renewal' : 'New';
 
         // ==========================
-        // ✅ GWP OC (siempre numérico)
+        // ✅ GWP OC
         // ==========================
         $premiumOc = (float) ($doc->insured_premium ?? 0);
 
@@ -113,19 +122,15 @@ class OperativeDocsExport implements
             : 0.0;
 
         $share = (float) ($doc->share ?? 0);
-
-        // Nota: si share viene 12 en vez de 0.12, normalizamos
         $share = $this->normalizeRate($share);
 
         $premiumFtsOc = $premiumFtpOc * $share;
 
         // roe_fs
-        $roe = (float) ($doc->roe_fs ?? 0);
+        $roe      = (float) ($doc->roe_fs ?? 0);
         $roeValid = ($roe > 0);
 
-        // ==========================
-        // ✅ GWP USD (si roe inválido => 0)
-        // ==========================
+        // USD
         $premiumUsd    = $roeValid ? ($premiumOc / $roe) : 0.0;
         $premiumFtpUsd = $roeValid ? ($premiumFtpOc / $roe) : 0.0;
         $premiumFtsUsd = $roeValid ? ($premiumFtsOc / $roe) : 0.0;
@@ -141,13 +146,26 @@ class OperativeDocsExport implements
                 : ($reinsurer->id ?? null);
         }
 
+        // Nodos base (3 cols por nodo)
+        $nodes = is_array($doc->nodes_list ?? null) ? $doc->nodes_list : [];
+
+        // =========================================================
+        // ✅✅✅ CHANGE [MAP-ORDER-1]: Aquí reordenamos para que empate con headings()
+        // Orden: base -> (verde) Cost_Scheme_ID -> Nodes (3 cols) -> (amarillas) 3 GWP OC -> Amounts...
+        // =========================================================
         $row = [
             ++$this->rowIndex,
-            $this->reportDate,
+            $doc->created_by_initials ?? '-',
+            $repDate,
 
             $doc->business?->business_code ?? '-',
             $doc->id,
             $doc->docType?->name ?? '-',
+
+            $doc->business_source_code ?? '-',
+            $doc->producer_name ?? '-',
+            $doc->business_parent_id ?? '-',
+            $doc->business_renewed_from_id ?? '-',
 
             $idReinsurer,
             $reinsurer?->name ?? '-',
@@ -156,7 +174,7 @@ class OperativeDocsExport implements
             $doc->business?->currency?->acronym ?? '-',
             $doc->roe_fs ?? null,
 
-            $share, // ya normalizado
+            $share,
             $created,
             $inception,
             $expiration,
@@ -171,24 +189,19 @@ class OperativeDocsExport implements
             $doc->country_name ?? '-',
             $doc->coverage_name ?? '-',
 
-            // ✅ OC (siempre número)
-            $premiumOc,
-            $premiumFtpOc,
-            $premiumFtsOc,
-
+            // ✅ (verde) va AQUÍ (tal como está en headings)
             $doc->insured_cscheme_id ?? '-',
         ];
 
-        // ✅ Nodos (3 columnas por nodo)
-        $nodes = is_array($doc->nodes_list ?? null) ? $doc->nodes_list : [];
-
+        // =========================================================
+        // ✅✅✅ CHANGE [MAP-ORDER-2]: Primero van los Node_* (Deduction/Source/Value)
+        // =========================================================
         for ($i = 0; $i < $this->maxNodes; $i++) {
             $n = $nodes[$i] ?? null;
 
             $row[] = is_array($n) ? ($n['deduction_type'] ?? null) : null;
             $row[] = is_array($n) ? ($n['source'] ?? null) : null;
 
-            // ✅ Value siempre numérico (cero si no hay nodo)
             $value = (is_array($n) && array_key_exists('value', $n))
                 ? (float) $n['value']
                 : 0.0;
@@ -197,32 +210,36 @@ class OperativeDocsExport implements
         }
 
         // =========================================================
-        // ✅ BLOQUE OC: Amounts + Totales (cero si no hay nodo)
+        // ✅✅✅ CHANGE [MAP-ORDER-3]: Ahora van las 3 amarillas (GWP OC)
+        // =========================================================
+        $row[] = $premiumOc;
+        $row[] = $premiumFtpOc;
+        $row[] = $premiumFtsOc;
+
+        // =========================================================
+        // ✅ OC Amounts (usa amount_oc ya calculado en $wide)
         // =========================================================
         $totalDiscountsOc = 0.0;
 
         for ($i = 0; $i < $this->maxNodes; $i++) {
             $n = $nodes[$i] ?? null;
 
-            $rateRaw = (is_array($n) && array_key_exists('value', $n))
-                ? (float) $n['value']
+            $amountOc = (is_array($n) && array_key_exists('amount_oc', $n))
+                ? round((float) $n['amount_oc'], 2)
                 : 0.0;
-
-            $rate = $this->normalizeRate($rateRaw);
-
-            $amountOc = (float) $premiumFtsOc * (float) $rate;
 
             $row[] = $amountOc;
             $totalDiscountsOc += $amountOc;
         }
 
-        $netGwpOc = (float) $premiumFtsOc - (float) $totalDiscountsOc;
+        $totalDiscountsOc = round($totalDiscountsOc, 2);
+        $netGwpOc         = round((float) $premiumFtsOc - (float) $totalDiscountsOc, 2);
 
         $row[] = $totalDiscountsOc;
         $row[] = $netGwpOc;
 
         // =========================================================
-        // ✅ BLOQUE USD: GWP + Amounts + Totales
+        // ✅ USD Amounts (amount_oc / roe_fs)
         // =========================================================
         $row[] = $premiumUsd;
         $row[] = $premiumFtpUsd;
@@ -233,75 +250,123 @@ class OperativeDocsExport implements
         for ($i = 0; $i < $this->maxNodes; $i++) {
             $n = $nodes[$i] ?? null;
 
-            $rateRaw = (is_array($n) && array_key_exists('value', $n))
-                ? (float) $n['value']
+            $amountOc = (is_array($n) && array_key_exists('amount_oc', $n))
+                ? round((float) $n['amount_oc'], 2)
                 : 0.0;
 
-            $rate = $this->normalizeRate($rateRaw);
-
-            $amountUsd = (float) $premiumFtsUsd * (float) $rate;
+            $amountUsd = ($roeValid && $roe > 0)
+                ? round($amountOc / $roe, 2)
+                : 0.0;
 
             $row[] = $amountUsd;
             $totalDiscountsUsd += $amountUsd;
         }
 
-        $netGwpUsd = (float) $premiumFtsUsd - (float) $totalDiscountsUsd;
+        $totalDiscountsUsd = round($totalDiscountsUsd, 2);
+        $netGwpUsd         = round((float) $premiumFtsUsd - (float) $totalDiscountsUsd, 2);
 
         $row[] = $totalDiscountsUsd;
         $row[] = $netGwpUsd;
+        
 
-        return $row;
+    return $row;
     }
+
 
     public function columnFormats(): array
     {
-        $formats = [
-            'K' => NumberFormat::FORMAT_PERCENTAGE_00, // Share (%)
-            'L' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Created
-            'M' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Inception
-            'N' => NumberFormat::FORMAT_DATE_YYYYMMDD, // Expiration
-            'S' => '#,##0.00',                         // Max Limit Liab
-        ];
+        $formats = [];
 
-        // Cost_Scheme_ID está en Z (según tu layout base)
-        $costSchemeColLetter = 'Z';
-        $firstNodeColIndex   = $this->excelColToIndex($costSchemeColLetter) + 1; // AA
+        // =========================================================
+        // ✅ Robusto: ubicar columnas por NOMBRE (headings)
+        // Esto evita desfaces cuando maxNodes = 0 o cambia el orden
+        // =========================================================
+        $headings = $this->headings();
 
-        // Node_*_Value (tercera col por nodo)
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $valueColIndex = $firstNodeColIndex + ($i * 3) + 2;
-            $formats[$this->indexToExcelCol($valueColIndex)] = '#,##0.00';
+        // helper: heading -> Excel Col (A, B, C...)
+        $colOf = function (string $label) use ($headings) {
+            $pos = array_search($label, $headings, true);
+            return $pos === false ? null : $this->indexToExcelCol($pos + 1); // +1 porque Excel es 1-based
+        };
+
+        if ($col = $colOf('Share (%)')) {
+        $formats[$col] = NumberFormat::FORMAT_PERCENTAGE_00;
         }
 
-        // Amount_oc block
-        $firstAmountOcIndex = $firstNodeColIndex + ($this->maxNodes * 3);
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $formats[$this->indexToExcelCol($firstAmountOcIndex + $i)] = '#,##0.00';
+        if ($col = $colOf('Created Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
         }
 
-        $totalDiscountsOcIndex = $firstAmountOcIndex + $this->maxNodes;
-        $netGwpOcIndex         = $totalDiscountsOcIndex + 1;
-
-        $formats[$this->indexToExcelCol($totalDiscountsOcIndex)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($netGwpOcIndex)]         = '#,##0.00';
-
-        // USD GWP (3 cols)
-        $gwpUsdStartIndex = $netGwpOcIndex + 1;
-        $formats[$this->indexToExcelCol($gwpUsdStartIndex + 0)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($gwpUsdStartIndex + 1)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($gwpUsdStartIndex + 2)] = '#,##0.00';
-
-        // Amount_usd
-        $firstAmountUsdIndex = $gwpUsdStartIndex + 3;
-        for ($i = 0; $i < $this->maxNodes; $i++) {
-            $formats[$this->indexToExcelCol($firstAmountUsdIndex + $i)] = '#,##0.00';
+        if ($col = $colOf('Inception Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
         }
 
-        $totalDiscountsUsdIndex = $firstAmountUsdIndex + $this->maxNodes;
-        $netGwpUsdIndex         = $totalDiscountsUsdIndex + 1;
+        if ($col = $colOf('Expiration Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
+        }
 
-        $formats[$this->indexToExcelCol($totalDiscountsUsdIndex)] = '#,##0.00';
-        $formats[$this->indexToExcelCol($netGwpUsdIndex)]         = '#,##0.00';
+        if ($col = $colOf('Max Limit Liab')) {
+            $formats[$col] = '#,##0.00';
+        }
+        
+        // =========================================================
+        // ✅ Node_*_Value en porcentaje con decimales dinámicos
+        // =========================================================
+        for ($i = 1; $i <= $this->maxNodes; $i++) {
+            if ($col = $colOf("Node_{$i}_Value")) {
+                $formats[$col] = '0.################%';
+            }
+        }
+
+        // =========================================================
+        // ✅ Node_* Amount_oc y Amount_usd como montos
+        // =========================================================
+        for ($i = 1; $i <= $this->maxNodes; $i++) {
+            if ($col = $colOf("Node_{$i}_Amount_oc")) {
+                $formats[$col] = '#,##0.00';
+            }
+            if ($col = $colOf("Node_{$i}_Amount_usd")) {
+                $formats[$col] = '#,##0.00';
+            }
+        }
+
+        // =========================================================
+        // ✅ Montos OC (incluye las 3 amarillas + totals)
+        // =========================================================
+        foreach ([
+            'GWP_Annualised_oc',
+            'GWP_ftp_oc',
+            'GWP_fts_oc',
+            'Total_Discounts_oc',
+            'Net_GWP_oc',
+        ] as $h) {
+            if ($col = $colOf($h)) {
+                $formats[$col] = '#,##0.00';
+            }
+        }
+
+        // =========================================================
+        // ✅ Montos USD (incluye las 3 que te faltaban al final)
+        // =========================================================
+        foreach ([
+            'GWP_Annualised_usd',
+            'GWP_ftp_usd',
+            'GWP_fts_usd',
+            'Total_Discounts_usd',
+            'Net_GWP_usd',
+        ] as $h) {
+            if ($col = $colOf($h)) {
+                $formats[$col] = '#,##0.00';
+            }
+        }
+
+        // =========================================================
+        // ✅ NEW: Rep_Date al final como fecha
+        // (asegúrate de agregar 'Rep_Date' en headings() y map())
+        // =========================================================
+        if ($col = $colOf('Rep_Date')) {
+            $formats[$col] = NumberFormat::FORMAT_DATE_YYYYMMDD;
+        }
 
         return $formats;
     }
@@ -317,11 +382,6 @@ class OperativeDocsExport implements
         ];
     }
 
-    /**
-     * Normaliza valores tipo porcentaje:
-     * - 4.5  => 0.045
-     * - 0.045 => 0.045
-     */
     private function normalizeRate(float $value): float
     {
         return ($value > 1) ? ($value / 100) : $value;

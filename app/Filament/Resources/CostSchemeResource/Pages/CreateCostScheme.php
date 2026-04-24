@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\CostScheme;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class CreateCostScheme extends CreateRecord
 {
@@ -65,6 +66,9 @@ class CreateCostScheme extends CreateRecord
 
             $data['index'] = $nextIndex;
             $data['id']    = $nextId;
+
+            // ✅ NUEVO: usuario que crea el registro
+            $data['created_by_user'] = Auth::id();
 
             return $data;
         }, 3);
@@ -124,6 +128,8 @@ class CreateCostScheme extends CreateRecord
             ->action(fn () => $this->create())
             ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
     }
+
+    
 
    
     protected function getFormActions(): array

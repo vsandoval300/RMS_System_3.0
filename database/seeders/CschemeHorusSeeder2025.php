@@ -1,0 +1,30 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\CostScheme;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class CschemeHorusSeeder2025 extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20250601-0001';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-06-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-06-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20250801-0002';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-08-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-08-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20250801-0001';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-08-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-08-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20250801-0003';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-08-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-08-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20251101-0001';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-11-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-11-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20251101-0002';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-11-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-11-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20251101-0003';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-11-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-11-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20251101-0004';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-11-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-11-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20251101-0005';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2025-11-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2025-11-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20260101-0006';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2026-01-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2026-01-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save(); 
+        $CostScheme=new CostScheme();          $CostScheme->id = 'SCHE-20251101-0007';        $CostScheme->index = '1';          $CostScheme->share = '1';            $CostScheme->agreement_type = 'Quota Share';         $CostScheme->description = 'Each and every loss, subject to the applicable annual aggregate.';         $CostScheme->created_at = date('Y-m-d',strtotime('2026-01-01'));         $CostScheme->updated_at = date('Y-m-d',strtotime('2026-01-01'));     $CostScheme->created_by_user = '14';      $CostScheme->save();             
+
+    }
+}

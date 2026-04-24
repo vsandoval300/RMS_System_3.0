@@ -13,6 +13,8 @@ use App\Models\OperativeDoc;
 use App\Models\TransactionLog;
 use App\Services\TransactionLogsPreviewService;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Enums\TransactionLifecycleStatus;
+use Illuminate\Support\Carbon;
 
 class Transaction extends Model
 {
@@ -225,5 +227,33 @@ class Transaction extends Model
                     $record->saveQuietly();
                 });
         });
+    }
+
+
+    public function resolveTransactionStatus(?Carbon $today = null): TransactionLifecycleStatus
+    {
+        $statuses = $this->logs()
+            ->withoutTrashed()
+            ->select('status')
+            ->distinct()
+            ->pluck('status');
+
+        if ($statuses->isEmpty()) {
+            return TransactionLifecycleStatus::PENDING;
+        }
+
+        if ($statuses->contains('In process')) {
+            return TransactionLifecycleStatus::IN_PROCESS;
+        }
+
+        if ($statuses->count() === 1 && $statuses->contains('Completed')) {
+            return TransactionLifecycleStatus::COMPLETED;
+        }
+
+        if ($statuses->contains('Completed')) {
+            return TransactionLifecycleStatus::IN_PROCESS;
+        }
+
+        return TransactionLifecycleStatus::PENDING;
     }
 }

@@ -1,0 +1,27 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\CostNodex;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class CostNodesxKoperSeeder2025 extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0001DZe6X6F0V1ADNHxZMP3iMS8Kx2';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '94';        $CostNodex->partner_destination_id =  '30 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0001';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0001F6taGvbjrgewhD2HLKqmhuQF7x';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.035';         $CostNodex->partner_source_id = '30';        $CostNodex->partner_destination_id =  '23 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0001';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0001CGtnewKeFujKNtYywW5SECAckF';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.0175';         $CostNodex->partner_source_id = '23';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0001';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0002J6mUxNb6EA1qMY4UxF99iHC28r';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '94';        $CostNodex->partner_destination_id =  '30 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0002';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0002NaRAg8hHCquM2hxcNYdCd7nPwm';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.035';         $CostNodex->partner_source_id = '30';        $CostNodex->partner_destination_id =  '23 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0002';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0002Ty0XDBDXTZqEcfiCqcXCxFbtxv';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_source_id = '23';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0002';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0003nnQiZGJ7fzDyhm8pJDCrwLAngG';       $CostNodex->index = '1';        $CostNodex->concept = '8';        $CostNodex->value = '0';         $CostNodex->partner_source_id = '94';        $CostNodex->partner_destination_id =  '33 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0003';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0003EQyvQnabw49Eg3mkdjvRCXKv2v';       $CostNodex->index = '2';        $CostNodex->concept = '1';        $CostNodex->value = '0.03';         $CostNodex->partner_source_id = '33';        $CostNodex->partner_destination_id =  '23 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0003';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+        $CostNodex=new CostNodex();          $CostNodex->id = 'SCHE-20251231-0003TpMWiDuQEN1c2Ch0KgUtTm7U8D';       $CostNodex->index = '3';        $CostNodex->concept = '1';        $CostNodex->value = '0.02';         $CostNodex->partner_source_id = '23';        $CostNodex->partner_destination_id =  '103 ' ;              $CostNodex->cscheme_id = 'SCHE-20251231-0003';       $CostNodex->created_at = date('Y-m-d',strtotime('2025-12-01'));         $CostNodex->updated_at = date('Y-m-d',strtotime('2025-12-01'));     $CostNodex->apply_to_gross = 'FALSE';      $CostNodex->save(); 
+    }
+}

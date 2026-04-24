@@ -102,8 +102,13 @@ class AdminPanelProvider extends PanelProvider
             //->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters') // ✅ ESTA ES LA NUEVA LÍNEA
             ->pages([
                 Pages\Dashboard::class,
+                \App\Filament\Pages\UsersDashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            // ->discoverWidgets(
+            //     in: app_path('Filament/User/Widgets'),
+            //     for: 'App\\Filament\\User\\Widgets'
+            // )
             ->widgets([
                 Widgets\AccountWidget::class,
                 //Widgets\FilamentInfoWidget::class,
@@ -125,16 +130,25 @@ class AdminPanelProvider extends PanelProvider
 
            
             
-            //Configuraión para Shield en el recurso permisos
-            // otras configuraciones del panel...
-                
-           
-
-
-
-
-
-
+            
+            //Manejo de session y redirection
+        return $panel
+        ->renderHook(
+            'panels::body.end',
+            fn () => <<<'HTML'
+            <script>
+            document.addEventListener('livewire:init', () => {
+                Livewire.hook('request', ({ fail }) => {
+                    fail(({ status }) => {
+                        if (status === 419) {
+                            window.location.reload();
+                        }
+                    });
+                });
+            });
+            </script>
+            HTML
+        );     
 
     }
 }

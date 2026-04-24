@@ -1,0 +1,22 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Business;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class BusinessesLogSeeder2025 extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $business=new business();           $business->business_code = '2025-LOG042-001';          $business->index = '1';             $business->description = 'Facultative Reinsurance Contract for Business Interruption';         $business->reinsurance_type = 'Facultative';         $business->risk_covered = 'Non-Life';               $business->business_type = 'Own';                $business->premium_type = 'Fixed';               $business->purpose = 'Strategic';                  $business->claims_type = 'Claims occurrence';              $business->reinsurer_id = '45';                 $business->parent_id = null;             $business->renewed_from_id = null;             $business->producer_id = '96';              $business->currency_id = '157';                $business->region_id = '2';              $business->approval_status = 'APR';            $business->approval_status_updated_at= date('Y-m-d',strtotime('2025-12-31'));           $business->business_lifecycle_status = 'In Force';         $business->business_lifecycle_status_updated_at= date('Y-m-d',strtotime('2025-12-31'));            $business->source_code = null;             $business->created_by_user =  '19 ' ;              $business->created_at = date('Y-m-d',strtotime('2025-12-31'));   $business->updated_at = date('Y-m-d',strtotime('2025-12-31'));       $business->save(); 
+        $business=new business();           $business->business_code = '2025-LOG042-002';          $business->index = '2';             $business->description = 'Proportional Facultative Reinsurance Contract for Key Person Insurance';         $business->reinsurance_type = 'Facultative';         $business->risk_covered = 'Life';               $business->business_type = 'Own';                $business->premium_type = 'Fixed';               $business->purpose = 'Strategic';                  $business->claims_type = 'Claims occurrence';              $business->reinsurer_id = '45';                 $business->parent_id = null;             $business->renewed_from_id = null;             $business->producer_id = '96';              $business->currency_id = '157';                $business->region_id = '2';              $business->approval_status = 'APR';            $business->approval_status_updated_at= date('Y-m-d',strtotime('2025-12-31'));           $business->business_lifecycle_status = 'In Force';         $business->business_lifecycle_status_updated_at= date('Y-m-d',strtotime('2025-12-31'));            $business->source_code = null;             $business->created_by_user =  '19 ' ;              $business->created_at = date('Y-m-d',strtotime('2025-12-31'));   $business->updated_at = date('Y-m-d',strtotime('2025-12-31'));       $business->save(); 
+        $business=new business();           $business->business_code = '2025-LOG042-003';          $business->index = '3';             $business->description = 'Facultative Reinsurance Contract for Surety Bond';         $business->reinsurance_type = 'Facultative';         $business->risk_covered = 'Non-Life';               $business->business_type = 'Own';                $business->premium_type = 'Fixed';               $business->purpose = 'Strategic';                  $business->claims_type = 'Claims occurrence';              $business->reinsurer_id = '45';                 $business->parent_id = null;             $business->renewed_from_id = null;             $business->producer_id = '96';              $business->currency_id = '157';                $business->region_id = '2';              $business->approval_status = 'APR';            $business->approval_status_updated_at= date('Y-m-d',strtotime('2025-12-31'));           $business->business_lifecycle_status = 'In Force';         $business->business_lifecycle_status_updated_at= date('Y-m-d',strtotime('2025-12-31'));            $business->source_code = null;             $business->created_by_user =  '19 ' ;              $business->created_at = date('Y-m-d',strtotime('2025-12-31'));   $business->updated_at = date('Y-m-d',strtotime('2025-12-31'));       $business->save();        
+
+    }
+}

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('cost_nodesx', function (Blueprint $table) {
             $table->engine('InnoDB');
 
-            // Definir 'business_code' como la clave primaria
             $table->string('id', 50)->primary();
             $table->integer('index'); 
 
@@ -22,6 +21,10 @@ return new class extends Migration
             $table->foreign('concept')->references('id')->on('deductions');
 
             $table->float('value');
+
+            // ✅ NUEVO CAMPO
+            $table->boolean('apply_to_gross')->default(false);
+
             $table->foreignId('partner_source_id')->constrained('partners');
             $table->foreignId('partner_destination_id')->constrained('partners');
             
