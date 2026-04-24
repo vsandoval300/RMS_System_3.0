@@ -7,6 +7,7 @@ use App\Services\PremiumForPeriodService;
 
 class PremiumForPeriod extends ChartWidget
 {
+    protected static string $view = 'filament.widgets.premium-for-period';
     protected static ?string $heading = 'Underwritten Premium';
 
     public ?int $reinsurer = null;
@@ -20,8 +21,10 @@ class PremiumForPeriod extends ChartWidget
         return [
             'datasets' => [
             [
-                'label' => 'FTS',
+                'label' => 'Premium.',
                 'data' => $data['fts'],
+                'fill' => false,
+                'tension' => 0.3,
                 'pointRadius' => 3,
             ],
         ],
@@ -56,5 +59,10 @@ class PremiumForPeriod extends ChartWidget
                 ],
             ],
         ];
+    }
+    
+    protected function hasFooter(): bool
+    {
+        return true;
     }
 }

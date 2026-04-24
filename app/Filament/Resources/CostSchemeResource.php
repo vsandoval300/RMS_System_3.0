@@ -231,6 +231,7 @@ class CostSchemeResource extends Resource
                                     TextInput::make('value')
                                         ->label('Value')
                                         ->suffix('%')
+                                        ->numeric()
                                         ->inputMode('decimal')
                                         ->live(onBlur: true)
                                         ->default(0) 

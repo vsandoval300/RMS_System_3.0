@@ -45,3 +45,7 @@ Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
         'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
     ]);
 })->name('pdf.viewer');
+
+Route::get('/reports/download/{file}', function ($file) {
+    return Storage::disk('public')->download('reports/' . $file);
+});

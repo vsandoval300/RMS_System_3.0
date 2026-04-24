@@ -14,1508 +14,321 @@ class CompaniesSeeder extends Seeder
     public function run(): void
     {
         //
-        $company = new Company();
-        $company->name = 'Abastos Y Distribuciones Institucionales, S.A. de C.V.';
-        $company->acronym = 'ABADI';
-        $company->activity = 'Distribución mayorista de una amplia gama de productos de abarrotes a minoristas y establecimientos de servicios de alimentos.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
+        
+        $company=new company();         $company->name = 'Secretaría De Hacienda Y Crédito Público';        $company->acronym = 'SHCP';        $company->activity = 'It is responsible for executing, under the terms of the applicable provisions, administrative support services in the areas of planning, accounting, and archives, under the terms determined by the Federal Executive. It establishes, through general provisions, the organizational and operational model of the Administration and Finance units of the Centralized sector, through its Chief Officer\'s Office.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'AGROASEMEX, S.A.';        $company->acronym = 'AGROASEMEX';        $company->activity = 'To contribute to the constitution of a national risk management system for the comprehensive protection of the rural sector.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Banco Nacional De Comercio Exterior S.N.C.';        $company->acronym = 'BANCOMEXT';        $company->activity = 'To grant financing to meet the short, medium and long-term requirements of companies participating in Mexican foreign trade, including exporters and their suppliers, importers, importers, importers and foreign exchange generators.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Banco Nacional De Obras Y Servicios Públicos, S.N.C.';        $company->acronym = 'BANOBRAS';        $company->activity = 'Public banking and credit service, financing or refinancing projects directly or indirectly related to public or private investment in infrastructure and public services, as well as with the same operations contribute to the institutional strengthening of the Federal, state and municipal governments, with the purpose of contributing to the sustainable development of the country.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional Bancaria Y De Valores';        $company->acronym = 'CNBV';        $company->activity = 'To supervise and regulate, within the scope of its competence, the entities that make up the Mexican financial system referred to in this Law, in order to ensure their stability and proper functioning, as well as to maintain and promote the healthy and balanced development of said system as a whole, in order to protect the interests of the public.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Seguros Y Fianzas';        $company->acronym = 'CNSF';        $company->activity = 'Supervise that the operation of the insurance and surety sectors adheres to the regulatory framework, preserving the solvency and financial stability of Insurance and Bonding institutions, in order to guarantee the interests of the user public, as well as promote the healthy development of these sectors in order to extend the coverage of their services to the largest possible part of the population.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional Del Sistema De Ahorro Para El Retiro';        $company->acronym = 'CONSAR';        $company->activity = 'Regulate and supervise the Retirement Savings System (SAR), composed of individual worker accounts managed by AFOREs, by establishing rules to ensure its proper functioning, safeguarding workers’ resources, overseeing investment compliance under the established regime, ensuring the provision of required information and services to workers, and enforcing regulatory measures, including sanctions and fines, in cases of non-compliance.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional Para La Protección Y Defensa De Los Usuarios De Servicios Financieros';        $company->acronym = 'CONDUSEF';        $company->activity = 'To promote, advise, protect and defend the rights and interests of users vis-à-vis financial institutions, to arbitrate their differences in an impartial manner and to provide for equity in the relations between them, as well as to supervise and regulate financial institutions in accordance with the provisions of the laws relating to the financial system, in order to ensure the protection of the interests of users.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fondo De Capitalización E Inversión Del Sector Rural';        $company->acronym = 'FOCIR';        $company->activity = 'To promote and facilitate investments aimed at increasing production and competitiveness in the Mexican rural sector, supporting viable and profitable projects through financial resources, technical assistance and the participation of public, private and social entities; encouraging national and international investment flows aligned with the National Development Plan; fostering agro-associations and a strong business culture; and designing mechanisms that integrate and disseminate investment opportunities to strengthen sustainable rural development.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Para Devolver Al Pueblo Lo Robado';        $company->acronym = 'INDEP';        $company->activity = 'Those that indicate the legal systems that may be applicable, such as: enunciative but not limited to administering, alienating, appointing liquidating depositaries or administrators of all types of goods, companies and semovants, that is, insured goods, confiscated, received in dation in payment, goods that are not claimed by the original owner (abandoned), those that are subject to one of the procedures established in customs legislation, federal tax or in other legal systems such as mandates and companies in liquidation, those that become the property of the federal treasury, securities, assets and other rights that are susceptible to alienation, when so provided by the component authorities and any assets that are transferred to it in accordance with the applicable legal provisions, everything that remains under its responsibility.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Para El Desarrollo Técnico De Las Haciendas Públicas';        $company->acronym = 'INDETEC';        $company->activity = 'To carry out studies related to the National System of Fiscal Coordination.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Para La Protección Al Ahorro Bancario';        $company->acronym = 'IPAB';        $company->activity = 'Guarantee bank deposits, mainly of small and medium-sized savers, solve banks with solvency problems at the lowest possible cost, contributing to the stability of the banking system and the safeguarding of the national payment system.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Lotería Nacional';        $company->acronym = 'LOT_NACIONAL';        $company->activity = 'The National Lottery’s main purpose is to financially support public and social assistance activities of the Federal Executive by organizing and participating in national and international contests, raffles and authorized gaming mechanisms, generating resources through prizes, advertising, sponsorships and service charges, as well as complementary activities such as payment services, marketing agreements and the management or leasing of assets, all in accordance with the applicable legal framework to promote social welfare initiatives.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Nacional Financiera, S.N.C.';        $company->acronym = 'NAFIN';        $company->activity = 'To contribute to the economic development of the country by facilitating the access of micro, small and medium-sized enterprises (MSMEs), entrepreneurs and priority investment projects, to financing and other business development services, as well as to contribute to the formation of financial markets and to act as a trustee and financial agent of the Federal Government, which allows promoting innovation, improve productivity, competitiveness, job creation and regional growth.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sociedad Hipotecaria Federal, S.N.C.';        $company->acronym = 'SHF';        $company->activity = 'Promote the development of the housing market under a social, economic and sustainable approach, offering financial solutions that facilitate its access and availability.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Gobernación';        $company->acronym = 'SEGOB';        $company->activity = 'It attends to the political development of the country and contributes to the conduct of the relations of the Federal Executive Branch with the other powers of the Union and the other levels of government to promote harmonious coexistence, social peace, development and well-being of Mexicans in a State of Law. Its mission is to promote democratic governance, strengthen the rule of law, establish a culture of respect and protection of human rights, prioritizing the construction and participation of citizens, with the aim of rebuilding the social fabric and thereby taking firm steps in the social and political stability of the country, through relations with the various figures that make up the Mexican State and the powers of the Union.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro De Producción De Programas Informativos y Especiales';        $company->acronym = 'CEPROPIE';        $company->activity = 'It documents the public activities of the President with video and audio material, for dissemination in the electronic media. In the same way, it meets the demands of television production and production of informative and special programs that are requested by the Presidency and the Federal Public Administration. Its mission is to carry out and transmit informative programs on the activities of the Federal Executive, for their dissemination, in accordance with the principles set by the National Development Plan in the field of social communication, through the electronic media, to keep citizens informed of compliance with public policies and help strengthen the legitimacy of institutions.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Búsqueda De Personas';        $company->acronym = 'CNB';        $company->activity = 'Carry out and/or coordinate, together with the various federal and state authorities, search actions (of all kinds) in order to find the fate or whereabouts of the disappeared persons.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional Para El Federalismo Y El Desarrollo Municipal';        $company->acronym = 'INAFED';        $company->activity = 'Its purpose is to formulate, promote and link the policies and actions of the Federal Public Administration in the field of federalism, decentralization and municipal development, as well as to contribute to the professionalization of municipal public servants and the institutional development of local governments. Its mission is to strengthen the institutional capacities of municipal governments based on the current legal framework, through an offer of solutions relevant to their needs, promoting their role as actors in their own development with full respect for their autonomy.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría Técnica Del Consejo Nacional De Población';        $company->acronym = 'CONAPO';        $company->activity = 'Its mission is to propose, execute, coordinate, follow-up, evaluate, study, advise and support the actions carried out by the National Population Council with respect to the country\'s demographic planning, in order to include the population in economic and social development programmes formulated within the government sector and to link their objectives to the needs posed by demographic phenomena.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Coordinación General De La Comisión Mexicana De Ayuda A Refugiados';        $company->acronym = 'COMAR';        $company->activity = 'It is responsible for conducting policy on refugees and complementary protection, as well as managing assistance actions from the beginning of the procedure with full respect for human rights.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Coordinación Para La Atención Integral De La Migración En La Frontera Sur';        $company->acronym = 'CAIMFS';        $company->activity = 'Support the Mexican Commission for Refugee Assistance (COMAR) and humanitarian assistance on the country\'s southern border.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría Ejecutiva Del Sistema Nacional De Protección Integral De Niñas, Niños Y Adolescentes';        $company->acronym = 'SESIPINNA';        $company->activity = 'o support the National System of Comprehensive Protection by executing and monitoring its agreements and resolutions, coordinating and establishing collaboration with public and private national and international entities, administering the national information system on children and adolescents, advising federal and state authorities in the exercise of their powers, and articulating national policy through coordination and information exchange with the Executive Secretariats of the Entity Systems.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Tribunal Federal De Conciliación Y Arbitraje';        $company->acronym = 'TFCA';        $company->activity = 'Labor justice body competent to resolve individual and collective labor disputes that arise between the agencies of the Federal Public Administration, the Government of the Federal District, its workers and its trade union organizations.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Consejo Nacional Para Prevenir La Discriminación';        $company->acronym = 'CONAPRED';        $company->activity = 'It is the leading institution responsible for promoting policies and measures that foster cultural and social development, social inclusion and the guarantee of equality rights, as well as receiving and resolving complaints related to alleged discriminatory acts by individuals or federal authorities, implementing actions to protect citizens from discrimination based on origin, gender, age, disability, social or economic condition, health status, religion, opinions or any other factor that limits equal rights and opportunities.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional De Migración';        $company->acronym = 'INAMI';        $company->activity = 'Implement migration policy under the principles of respect and security for national and foreign migrants regardless of their migratory status during their entry, transit and departure from the national territory, recognizing them as subjects of law, through the efficiency and effectiveness of migration procedures and procedures, in order to contribute to orderly international mobility and migration.  safe and regular based on the legal framework and with full respect for human rights.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría Particular Del Presidente';        $company->acronym = 'PRESIDENCIA';        $company->activity = 'To support the Head of the Federal Executive Power, in accordance with his constitutional powers, in the responsible, democratic and participatory conduct, in the transformation towards a more just, peaceful, democratic and sovereign nation, as well as in the generation of an increasingly competitive economy, through the various areas of advice, technical support and dispatch of the matters entrusted by the Head of the Federal Executive.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Las Zonas Áridas';        $company->acronym = 'CONAZA';        $company->activity = 'It promotes soil and water conservation through sustainable natural resource management programmes aimed at supporting rural communities with comprehensive projects focused on land restoration, rainwater management and vegetation improvement, while implementing strategic initiatives for the development of arid zones by strengthening productive and organisational capacities, encouraging sustainable resource practices and fostering the integration of producers into value chains to support rural development.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fideicomiso De Riesgo Compartido';        $company->acronym = 'FIRCO';        $company->activity = 'To promote and encourage competitive and sustainable agribusiness in rural areas, through development programs, facilitating the population\'s access to public and private resources with the conjunction of specialized services of excellence.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional Para El Desarrollo De Capacidades Del Sector Rural, A.C.';        $company->acronym = 'INCA RURAL';        $company->activity = 'It proposes care alternatives that incorporate actions to strengthen human capacities in rural society; To this end, it promotes the development of participatory training methods with a territorial approach, based on a precise diagnosis where society itself identifies its opportunities and defines its priorities for attention.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Infraestructura, Comunicaciones Y Transportes';        $company->acronym = 'SICT';        $company->activity = 'To promote safe, efficient and competitive transport and communications systems, through the strengthening of the legal framework, the definition of public policies and the design of strategies that contribute to the sustained growth of the economy and the balanced social development of the country; expanding the coverage and accessibility of services, achieving the integration of Mexicans and respecting the environment.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Caminos Y Puentes Federales De Ingresos Y Servicios Conexos';        $company->acronym = 'CAPUFE';        $company->activity = 'Recover the level of service on the roads, which allows the transfer of people and goods with a modern, safe and quality road infrastructure, which contributes to the road sector and national economic development.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Organismo Promotor De Inversiones En Telecomunicaciones';        $company->acronym = 'PROMTEL';        $company->activity = 'To promote the population\'s access to telecommunications and broadband services, by supervising the deployment of the Red Compartida, addressing investments and promoting projects that facilitate the development of infrastructure.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Servicio Postal Mexicano';        $company->acronym = 'SEPOMEX';        $company->activity = 'To keep the population in touch by offering accessible, reliable and quality correspondence, courier and parcel services, with the mission of being a factor of inclusion of the population, a facilitator of economic activity and a guarantor of interpersonal communications.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Economía';        $company->acronym = 'SE';        $company->activity = 'Develop and implement comprehensive policies for innovation, diversification and productive and commercial inclusion, as well as to stimulate national and foreign investment, promoting the use of mineral resources and boosting the productivity and competitiveness of industrial sectors, which allow their integration into regional and global value chains, in order to contribute to generating well-being for Mexicans.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fideicomiso De Fomento Minero';        $company->acronym = 'FIFOMI';        $company->activity = 'Entity specialized in the mining sector that promotes the development of national mining by providing financing, training and technical assistance services to create, strengthen and consolidate mining projects and operations in the country. Its spectrum of activity ranges from ore producers and mineral processors, to service providers to the mining industry, to mineral consumers, distributors and traders.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Mexicano De La Propiedad Industrial';        $company->acronym = 'IMPI';        $company->activity = 'Administers the country’s industrial property system.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Procuraduría Federal Del Consumidor';        $company->acronym = 'PROFECO';        $company->activity = 'Empower consumers through the effective protection of the exercise of their rights and public trust, promoting reasoned, informed, sustainable, safe and healthy consumption, in order to correct market injustices, strengthen the internal market and the well-being of the population.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional Antimonopolio';        $company->acronym = 'CNA';        $company->activity = 'Its purpose is to guarantee free competition and economic competition in all the country\'s markets, as well as to prevent, investigate and combat monopolies, monopolistic practices, concentrations and other restrictions on the efficient functioning of markets, for which it must perform in a professional and impartial manner in its actions.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión De Operación Y Fomento De Actividades Académicas Del Instituto Politécnico Nacional';        $company->acronym = 'COFAA IPN';        $company->activity = 'To manage the effective, efficient and transparent use of resources through the collection of donations from the public and private sectors, which contributes to the educational function of the National Polytechnic Institute, providing it with specialized and cutting-edge equipment, as well as maintenance services to its workshops and laboratories, contributing to the specialization and professionalization of teachers,  researchers and students through the granting of scholarships and economic support; promoting innovation and supporting the technological, economic and cultural development of the country.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Cultura Física Y Deporte';        $company->acronym = 'CONADE';        $company->activity = 'Develop and implement State policies that encourage the massive incorporation of the population into physical, recreational and sports activities that strengthen their social and human development, that promote the integration of a solid physical culture, that guide the use of budgetary resources not as an expense but as an investment and that promote equal opportunities to achieve participation and excellence in sports.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fideicomiso De Los Sistemas Normalizado De Competencia Laboral Y De Certificación De Competencia Laboral';        $company->acronym = 'CONOCER';        $company->activity = 'To develop the productive potential of human capital for Mexico\'s competitiveness, through a National Skills System.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fondo De Cultura Económica';        $company->acronym = 'FCE';        $company->activity = 'To encourage the approach of readers through a significant reduction in prices and the expansion of the editorial offer.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Coordinación Nacional De Becas Para El Bienestar Benito Juárez';        $company->acronym = 'CNBBBJ';        $company->activity = 'To promote the right to education and human development by reducing school dropout rates through educational scholarships for children and young people in vulnerable situations enrolled in public schools, providing support through programmes such as the Welfare Scholarship for Basic Education Families, the Benito Juárez Universal Scholarship for High School Students, the Youth Writing the Future Scholarship and the Elisa Acuña Scholarships.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Trabajo Y Previsión Social';        $company->acronym = 'STPS';        $company->activity = 'It oversees compliance with labour rights to improve the quality of life of workers and their families, while promoting social dialogue and democratic relations between employers and employees to strengthen social justice and support equitable national development.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Federal De Conciliación Y Registro Laboral';        $company->acronym = 'CFCRL';        $company->activity = 'In charge of the management of the registers of unions and collective agreements at the national level. It monitors that trade union rights and the collective interests of workers are respected, through free and democratic processes.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Los Salarios Mínimos';        $company->acronym = 'CONASAMI';        $company->activity = 'Establish the bases and elements for the setting of general and professional minimum wages to raise the standard of living of the workers who receive them and their families, so that the factors of production validate the worker\'s right to a dignified life.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Del Fondo Nacional Para El Consumo De Los Trabajadores';        $company->acronym = 'INFONACOT';        $company->activity = 'It encourages the comprehensive development of workers and the growth of their family wealth, promoting access to the best credit in the market and other financial services, in order to obtain high-quality goods and services at competitive prices.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Procuraduría Federal De La Defensa Del Trabajo';        $company->acronym = 'PROFEDET';        $company->activity = 'To represent and advise workers and their unions before authorities on labour law matters, file the appropriate legal remedies for their defence, and promote amicable dispute resolution by proposing settlements and recording agreements in authorised minutes.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Desarrollo Agrario, Territorial Y Urbano';        $company->acronym = 'SEDATU';        $company->activity = 'To promote the sustainable and inclusive territorial development of the country through the design, coordination and implementation of policies for land use, agrarian development and urban development and adequate housing, with a cross-cutting approach and articulated with the National Development Plan, in order to contribute to the improvement of the well-being of the population living or transiting in the national territory.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fideicomiso Fondo Nacional De Fomento Ejidal';        $company->acronym = 'FIFONAFE';        $company->activity = 'To administer ejido and communal funds, manage the reversion of expropriated assets when applicable, and promote the integration of resources into the Trust to support productive activities and rural development; providing free advisory services to ejidos, communities and peasants to strengthen community life and improve production conditions, while offering financial support to agricultural, industrial and service activities for the benefit of rural populations.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Procuraduría Agraria';        $company->acronym = 'PA';        $company->activity = 'Dedicated to the defense of the rights of agrarian subjects, it provides legal advisory services, agrarian arbitration and legal representation, promotes the conciliation of interests, the regularization of rural property and the strengthening of legal security in the countryside. It promotes basic agrarian organization for the production and better use of its lands and natural resources, through actions that contribute to sustainable rural development and social welfare.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Registro Agrario Nacional';        $company->acronym = 'RAN';        $company->activity = 'It has the mission of being guardian of the territorial heritage in the hands of ejidos and communities; to provide legal certainty to social property through the registration of legal acts, documentary safeguarding and technical and cadastral assistance, in order to contribute to territorial planning and social justice with gender equality.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional Del Suelo Sustentable';        $company->acronym = 'INSUS';        $company->activity = 'To plan, design, direct, promote, agree and execute programs, projects, strategies, actions, works and investments related to the management and regularization of the land, with criteria of territorial, planned and sustainable development in accordance with the substantive axes that arise from the programs, documents and normative instruments that contain and regulate the policy of the sector.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Bienestar';        $company->acronym = 'BIENESTAR';        $company->activity = 'Contribute to the establishment of the welfare state where people as subjects of rights, particularly historically vulnerable groups, improve their levels of well-being, inclusion and equity during their life course, considering cultural, social and territorial diversity, through the consolidation of comprehensive public policies, with sustainable development and productive inclusion.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Consejo Nacional Para El Desarrollo Y La Inclusión De Las Personas Con Discapacidad';        $company->acronym = 'CONADIS';        $company->activity = 'Coordinate and promote actions to ensure the exercise and enjoyment of the rights of persons with disabilities, as well as contribute to their comprehensive development and full inclusion.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Mexicano De La Juventud';        $company->acronym = 'IMJUVE';        $company->activity = 'To encourage and promote the integral development of young people; through the design, coordination, articulation and monitoring of the national youth policy.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional De La Economía Social';        $company->acronym = 'INAES';        $company->activity = 'Promote the Social Sector of the Economy by developing and strengthening the technical, administrative, financial, and management capacities, as well as the formation of capital and marketing of the Organizations of the Social Sector of the Economy, to contribute to consolidating and making visible the sector as a viable option for productive, labor, and financial inclusion.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Medio Ambiente Y Recursos Naturales';        $company->acronym = 'SEMARNAT';        $company->activity = 'To promote a comprehensive and inclusive environmental policy that ensures the protection, conservation and sustainable use of natural resources, focusing on ecosystem and biodiversity conservation, pollution prevention and control, integrated water resource management and actions to combat climate change in support of sustainable development.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Agencia Nacional De Seguridad Industrial Y De Protección Al Medio Ambiente Del Sector Hidrocarburos';        $company->acronym = 'ASEA';        $company->activity = 'To regulate and supervise hydrocarbons sector facilities and activities, ensuring industrial and operational safety, environmental protection and waste management, including the dismantling and abandonment of facilities, as well as the control of emissions and polluting waste through design, regulation and oversight measures.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Procuraduría Federal De Protección Al Ambiente';        $company->acronym = 'PROFEPA';        $company->activity = 'To strengthen compliance with environmental regulations and promote sustainable development by enforcing federal environmental laws through inspection, verification and public complaints, ensuring environmental justice, protecting natural resources and natural capital, and encouraging preventive actions, transparency and social participation.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Energía';        $company->acronym = 'SENER';        $company->activity = 'Conduct the country\'s energy policy, within the current constitutional framework, to guarantee the competitive, sufficient, high-quality, economically viable and environmentally sustainable supply of energy that the development of national life requires.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Seguridad Nuclear Y Salvaguardias';        $company->acronym = 'CNSNS';        $company->activity = 'Regulate nuclear, radiological, physical safety and safeguards for the peaceful use of nuclear energy to protect the health of the population and the environment.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional Para El Uso Eficiente De La Energía';        $company->acronym = 'CONUEE';        $company->activity = 'To promote energy efficiency and act as a technical authority on the sustainable use of energy by establishing goals, methodologies and procedures to optimise energy consumption, issuing and verifying administrative provisions and Official Mexican Standards on energy efficiency, proposing regulatory improvements, and implementing and maintaining systems that support the efficient management and monitoring of energy use.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Energía';        $company->acronym = 'CNE';        $company->activity = 'The CNE will be in charge of granting permits, supervising and regulating production, and verifying and sanctioning irregularities in the sector, calculating tariffs and considerations, among other functions, aligned with binding planning, with technical and operational independence.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Ejecutiva De Atención A Víctimas';        $company->acronym = 'CEAV';        $company->activity = 'The purpose of the Executive Commission for Attention to Victims (CEAV) is to guarantee, promote and protect the rights of victims of crime and human rights violations, especially the rights to assistance, protection, attention, truth, justice, comprehensive reparation and due diligence.  in terms of Article 2 of the General Law of Victims (LGV); as well as to act as the operational body of the National System of Attention to Victims (SNAV) and the others that the aforementioned Law indicates.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Corredor Interoceánico Del Istmo De Tehuantepec';        $company->acronym = 'CIIT';        $company->activity = 'To develop a logistics platform integrating port administration services in Coatzacoalcos and Salina Cruz through rail interconnection, promoting sustainable and inclusive economic growth in the Isthmus of Tehuantepec by strengthening infrastructure through public and private investment, modernising productive capacity, coordinating security and development actions, fostering collaboration with indigenous institutions to protect cultural identity and natural resources, and supporting the implementation of regional planning mechanisms.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Las Mujeres';        $company->acronym = 'MUJERES';        $company->activity = 'To promote non-discrimination, gender equality and equal opportunities by fostering conditions that guarantee the full exercise of women’s rights and their participation in political, cultural, economic and social life, while coordinating national policies on substantive equality and contributing to the prevention and eradication of violence against women.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Turismo';        $company->acronym = 'SECTUR';        $company->activity = 'To lead the design and implementation of public policies aimed at strengthening the development of tourism activity, promoting innovation in the sector, improving the quality of tourism services and the competitiveness of national tourism, promoting cross-cutting strategies that articulate governmental, private and social sector actions, contributing to the sustainable and inclusive growth of tourism.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Seguridad Y Protección Ciudadana';        $company->acronym = 'SSPC';        $company->activity = 'To formulate and execute policies, programs, and actions aimed at guaranteeing the public security of the Nation and its inhabitants; to propose to the Federal Executive the criminal policy and the measures that guarantee its congruence among the dependencies of the Federal Public Administration; contribute to the prevention of crime; to exercise command over the security forces to protect the population from all types of threats and risks, in full compliance with human rights and fundamental freedoms; to safeguard the integrity and rights of individuals; as well as to preserve public freedoms, order and peace.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional De Prevención De Desastres';        $company->acronym = 'CENAPRED';        $company->activity = 'Safeguard at all times the life, property and infrastructure of Mexicans through the continuous management of public policies for the prevention and reduction of disaster risks, through the investigation and monitoring of disturbing phenomena; as well as educational training and the dissemination of the culture of civil protection, in order to achieve a more resilient society.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Coordinación Nacional Antisecuestro Y Delitos De Alto Impacto';        $company->acronym = 'CONASE';        $company->activity = 'Coordinate, link, manage, evaluate, and follow up on the actions of the country\'s various public security agencies aimed at combating and eradicating the crime of illegal deprivation of liberty, in accordance with the National Anti-Kidnapping Strategy.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretariado Ejecutivo Del Sistema Nacional De Seguridad Pública';        $company->acronym = 'SESNSP';        $company->activity = 'To execute and follow up on the agreements of the National Council of Public Security, the highest body for the coordination and definition of public policies in the field of public security; therefore, it is the operational body, the axis of coordination between the federal, state and municipal bodies responsible for the function of safeguarding the integrity of people, citizen security, as well as preserving public order and peace.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría Anticorrupción Y Buen Gobierno';        $company->acronym = 'SABG';        $company->activity = 'Ensure that the public sector functions effectively and with probity, with a focus on risk prevention and management for results, so that public problems are addressed to achieve citizen satisfaction.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Tribunal Superior Agrario';        $company->acronym = 'TRIB_AGRARIOS';        $company->activity = 'Impart agrarian justice to guarantee legal security in the tenure of ejido land, communal land and small property and the rights of peasants through the issuance of sentences.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Consejería Jurídica Del Ejecutivo Federal';        $company->acronym = 'CJEF';        $company->activity = 'To review and validate decrees, agreements and legislative proposals submitted to the President, ensuring their compliance with the Constitution and applicable laws, and to represent the Head of the Federal Executive in constitutional actions, controversies and legal proceedings when authorised.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría De Ciencia, Humanidades, Tecnología E Innovación';        $company->acronym = 'SECIHTI';        $company->activity = 'To establish public policies in humanities, science, technology and innovation that strengthen Mexico’s scientific sovereignty and technological independence, coordinating national research and development capacities, promoting basic and frontier science, and defining strategic agendas aimed at addressing key national challenges in areas such as health, energy, water, environment, food security, housing, education and culture.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro De Investigación Científica Y De Educación Superior De Ensenada, Baja California';        $company->acronym = 'CICESE';        $company->activity = 'Public Research Center of the CONACYT System focused on conducting basic and applied research in the area of biology, materials and related disciplines; oriented towards the solution of national, regional and local problems. In addition to conducting scientific research, it is responsible for the training of human resources, dissemination and development of technology.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro De Investigación Y Docencia Económicas, A.C.';        $company->acronym = 'CIDE';        $company->activity = 'Research and higher education center specialized in social sciences that seeks to contribute to the development of the country through the generation of rigorous and relevant knowledge, as well as the training of a new generation of leaders capable of performing with creativity and responsibility in an open and competitive world';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro De Investigación Científica De Yucatán, A.C.';        $company->acronym = 'CICY';        $company->activity = 'Public Research Center of the CONACYT System focused on conducting basic and applied research in the area of biology, materials and related disciplines; oriented towards the solution of national, regional and local problems. In addition to conducting scientific research, it is responsible for the training of human resources, dissemination and development of technology';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro De Investigación En Materiales Avanzados, S.C.';        $company->acronym = 'CIMAV';        $company->activity = 'To generate high-quality scientific and technological knowledge for the benefit of productive, academic and social sectors, while training highly specialised human resources through postgraduate programmes focused on materials, energy and environmental development.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional De Salud Pública';        $company->acronym = 'INSP';        $company->activity = 'To contribute to social equity and the full realization of the right to health protection through the generation and dissemination of knowledge, the training of human resources of excellence and innovation in multidisciplinary research for the development of evidence-based policies.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional De Medicina Genómica';        $company->acronym = 'INMEGEN';        $company->activity = 'Contribute to the health of the population of Mexico, through research, training of human resources, as well as linkage with the productive sector to accelerate access to innovative goods and services that raise the levels of quality of life of Mexicans and promote a culture of prevention that helps reduce health costs.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional De Vivienda';        $company->acronym = 'CONAVI';        $company->activity = 'The National Housing Commission or Conavi, is an institution of the Government of Mexico that grants housing support and subsidies aimed at people who need it most';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Agencia Nacional De Aduanas De México';        $company->acronym = 'ANAM';        $company->activity = 'Its purpose is to organize and direct customs and inspection services, to apply and ensure compliance with the legal norms that regulate the entry and exit of goods from the national territory. ';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Agencia Federal De Aviación Civil';        $company->acronym = 'AFAC';        $company->activity = 'It is the aeronautical authority of the Government of Mexico, seeking to ensure that air transport participates in the process of sustained, sustainable and safe growth to contribute to social welfare with safe, effective and efficient air transport. ';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Procuraduría De La Defensa Del Contribuyente';        $company->acronym = 'PRODECON';        $company->activity = 'Decentralized public body that provides guidance, advice, consultation, legal representation and defense, investigation, reception and processing of complaints and claims against acts or omissions of the federal tax authorities that violate the rights of taxpayers, as well as conclusive agreements as an alternative means to resolve in advance and by consensus the disputes that arise during the exercise of the powers of verification between the tax authorities the taxpayers, or to regularize the tax situation of the latter.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro de Enseñanza Técnica Industrial';        $company->acronym = 'CETI';        $company->activity = 'Institution with a regional character, which offers educational services at the upper secondary and higher levels in 3 campuses, dedicated to the training of professional technologists and engineers who have achieved wide recognition in the social and productive fields.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Colegio de Bachilleres';        $company->acronym = 'COLBACH';        $company->activity = 'To train competent citizens to carry out activities appropriate to their moment and scientific, technological, historical, social, economic, political and philosophical condition, with a level of mastery that allows them to mobilize and use, in a comprehensive and satisfactory manner, knowledge, skills, abilities and attitudes belonging to the natural sciences, social sciences and humanities.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Consejo Nacional de Fomento Educativo';        $company->acronym = 'CONAFE';        $company->activity = 'To provide quality basic community education, with equity and social inclusion to children, young people and adolescents who live in marginalized and socially disadvantaged areas in our country, promoting their educational continuity.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de la Infraestructura Física Educativa';        $company->acronym = 'INIFED';        $company->activity = 'It leads the continuous improvement of the Educational Physical Infrastructure, through applied research and the execution of specific programs, in a federalist framework, with a sense of transcendence, increasing the performance of resources.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional para la Educación de los Adultos';        $company->acronym = 'INEA';        $company->activity = 'It proposes and develops educational models, conducts research on the subject, prepares and distributes teaching materials, applies systems for the evaluation of adult learning, as well as accredits and certifies basic education for adults and young people aged 15 and over who have not completed or completed such studies under the terms of article 43 of the General Education Law. The purpose of the INEA is to preserve the national educational unity so that the basic education of young people and adults is accredited and certified with validity throughout the Republic.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Politécnico Nacional';        $company->acronym = 'IPN';        $company->activity = 'State educational institution that comprehensively trains technicians, professionals and researchers through relevant programs in various areas of knowledge, which carries out scientific and technological research; it promotes innovation and fosters links and extension with the productive and social sectors, to contribute to the technological, economic, political, social and cultural development of the country.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Patronato de Obras e Instalaciones del IPN';        $company->acronym = 'POI IPN';        $company->activity = 'To develop responsibly and effectively the physical infrastructure of the National Polytechnic Institute, contributing to the promotion of education.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Universidad Pedagógica Nacional';        $company->acronym = 'UPN';        $company->activity = 'It is a public institution of higher education with a national vocation and full academic autonomy; It is aimed at the training and development of education professionals and the generation of knowledge in accordance with the needs of the country, considering sociocultural diversity. Based on its substantive functions, it is linked to the education sector, with social organizations and national and international institutions, in order to address educational problems and the promotion of culture.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'El Colegio de la Frontera Norte, A.C.';        $company->acronym = 'COLEF';        $company->activity = 'To generate scientific knowledge on the regional phenomena of the border between Mexico and the United States with a comprehensive and multidisciplinary perspective; to train high-level scientific and professional cadres through postgraduate courses and continuing education programs; and to link up with the social and governmental spheres for the dissemination of knowledge and the promotion of development initiatives for the region and the country.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'El Colegio de la Frontera Sur';        $company->acronym = 'ECOSUR';        $company->activity = 'To address socio-environmental challenges in Mexico’s southern border through interdisciplinary research, human resource development and knowledge dissemination, fostering collaboration between academic institutions and society to generate innovation, public policies and sustainable solutions, while promoting organisational cohesion, ethical leadership and scientific development for the benefit of the region.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'El Colegio de Michoacán, A.C.';        $company->acronym = 'COLMICH';        $company->activity = 'To research, generate and disseminate historical, social and humanistic knowledge through critical and methodological analysis of Mexican society and its regions, while training specialised human resources to support the ongoing development and transmission of this knowledge.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'El Colegio de San Luis, A.C.';        $company->acronym = 'COLSAN';        $company->activity = 'Public Research Centre. member of the System of Public Research Centers of the National Council of Science and Technology, in Mexico, which carries out research and training of researchers of high academic level, specializes in the Social Sciences and Humanities.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto de Investigaciones Dr. José María Luis Mora';        $company->acronym = 'INSTITUTO_MORA';        $company->activity = 'To carry out and promote scientific research activities and specialized training of human capital in the field of history, social sciences and international cooperation, as well as to disseminate the results of their research.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro de Capacitación Cinematográfica, A.C.';        $company->acronym = 'CCC';        $company->activity = 'To train filmmakers of high professional level in the technical and artistic areas of cinematography. It is a school in which its academic activity and production work, as well as cultural dissemination, have a multidirectional impact.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Lenguas Indígenas';        $company->acronym = 'INALI';        $company->activity = 'Based on the multicultural and multilingual nature of the Mexican nation, it contributes to the consolidation of an equitable, inclusive, plural society that favors intercultural dialogue, through the advice provided to the three levels of government to articulate public policies on national indigenous languages, with which multilingualism is promoted, the full exercise of linguistic rights,  the development of national indigenous languages and the promotion of their use in all areas of social, economic, labour, political, cultural and religious life, mainly in those in which indigenous peoples participate; it favors the knowledge and enjoyment of linguistic richness by recognizing cultural diversity through coordinated work with indigenous communities, with different government agencies and with private initiative.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Colegio Superior Agropecuario del Estado de Guerrero';        $company->acronym = 'CSAEGRO';        $company->activity = 'To provide educational services in the agricultural branch, at the higher and upper secondary levels, to train professionals and technicians who contribute to the development, production and productivity for the benefit of the country\'s agricultural producers, through the application of scientific and technological methods.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fideicomiso Universidad Marítima y Portuaria de México';        $company->acronym = 'FUMPM';        $company->activity = 'To provide specialized educational services, competency evaluation and certification services, and inspection services, under standards of excellence, which comply with the applicable legal framework and respond in a timely manner to the diverse needs of the National and International Maritime and Port Sector.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Universidad Nacional Rosario Castellanos';        $company->acronym = 'UNRC';        $company->activity = 'The purpose of the UNRC is to provide and promote free higher education in Mexico, as well as to carry out teaching, research, extension and the dissemination of knowledge, culture and social ties with an ethical, scientific and humanistic vocation, through Academic Units in the states. ';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado';        $company->acronym = 'ISSSTE';        $company->activity = 'To provide comprehensive protection and social security benefits to federal public administration workers, pensioners and their families through insurance, services and institutional asset protection; administer housing loans, manage pension funds and individual retirement accounts under strict transparency regulations, and operate a socially oriented commercial structure that strengthens beneficiaries’ purchasing power through the supply of basic goods, durable products and medicines at accessible conditions.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centros de Integración Juvenil, A.C.';        $company->acronym = 'CIJ';        $company->activity = 'To provide equitable and non-discriminatory prevention, treatment, research and training services in addictions, based on scientific knowledge and specialised professional development, addressing drug use through gender-sensitive approaches and responding to national and international epidemiological trends.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hospital Infantil de México Federico Gómez';        $company->acronym = 'HIMFG';        $company->activity = 'To provide highly specialised paediatric medical care to vulnerable children, conduct basic and clinical research aligned with national health priorities, and promote education and training in paediatrics while addressing the medical and social challenges affecting children in Mexico.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Ciencias Médicas y Nutrición Salvador Zubirán';        $company->acronym = 'INCMNSZ';        $company->activity = 'To provide specialised third-level medical care for adults, focusing on nutrition and internal medicine, promoting patient-centred healthcare through high standards of quality, safety and excellence, while addressing the population’s health needs with a scientific, technical and human-centred approach.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Perinatología';        $company->acronym = 'INPER';        $company->activity = 'Institution of medical care, teaching and scientific research belonging to the Ministry of Health of Mexico whose specialty is gynecology and obstetrics.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Rehabilitación';        $company->acronym = 'INR';        $company->activity = 'We are a Health Institution dedicated to the prevention, diagnosis, treatment and rehabilitation of disability through scientific research, the training of human resources and specialized medical care of excellence with a humanistic approach.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sistema Nacional para el Desarrollo Integral de la Familia';        $company->acronym = 'SNDIF';        $company->activity = 'The National DIF System is the decentralized public body in charge of coordinating the National System of Public and Private Social Assistance; promoter of the comprehensive protection of the rights of children and adolescents, under the constitutional imperative of the best interests of the child, as well as the integral development of the individual, the family and the community, mainly of those who, due to their physical, mental or social condition, face a situation of vulnerability, until they are incorporated into a full and productive life.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de las Personas Adultas Mayores';        $company->acronym = 'INAPAM';        $company->activity = 'To lead and coordinate national policy for older persons by promoting programmes and public actions that support their integral human development, social inclusion and well-being, ensuring access to opportunities, fair conditions and quality of life while reducing inequalities and strengthening their participation in an inclusive social environment.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hospital Juárez de México';        $company->acronym = 'HJM';        $company->activity = 'To offer medical and surgical care with quality, safety, ethics and humanism; train human resources of excellence and generate scientific research aligned with national and international health priorities.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Geriatría';        $company->acronym = 'INGER';        $company->activity = 'Promote healthy ageing through the production, dissemination and use of new knowledge; the development of human resources and the promotion of the necessary transformation of the National Health System.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Cancerología';        $company->acronym = 'INCAN';        $company->activity = 'Develop medical care, teaching and cancer research of excellence in Mexico.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Pediatría';        $company->acronym = 'INP';        $company->activity = 'Development of models of care for children and adolescents through basic, clinical and epidemiological scientific research, applied to the prioritized needs of the population, through the training and development of human resources of excellence, for health, as well as high-specialty health care with high quality and constituting the world-class care model.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hospital General de México Dr. Eduardo Liceaga';        $company->acronym = 'HGM';        $company->activity = 'Regional Hospital in the central area of the country that provides highly specialized health services with great quality and warmth, in medical, surgical specialties and support for diagnosis and treatment, for which it has the recognition of Mexican society. A hospital that trains human resources of excellence for the health of the country and internationally. It carries out high-level research whose results are disseminated in scientific publications of international impact, it is concerned with its human resources by training them, forming teams as a necessity of human activities.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Cardiología Ignacio Chávez';        $company->acronym = 'INCARD';        $company->activity = 'To provide high-quality cardiovascular care to the population, preferably those who lack social security; It also develops cutting-edge research and trains specialists in cardiology and related branches.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Enfermedades Respiratorias Ismael Cosío Villegas';        $company->acronym = 'INER';        $company->activity = 'Its main purpose in the field of respiratory diseases, is scientific research, the education and training of qualified human resources and the provision of highly specialized medical care services, whose scope of competence is the entire national territory.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Neurología y Neurocirugía Manuel Velasco Suárez';        $company->acronym = 'INNN';        $company->activity = 'To contribute to well-being and social equity in compliance with the right to health protection through scientific innovation, academic excellence and the quality and safety of health services in the field of neurosciences.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional de Psiquiatría Ramón de la Fuente Muñiz';        $company->acronym = 'INPRF';        $company->activity = 'To improve the mental health of the Mexican population through multidisciplinary research of excellence, specialized medical care and the training of human resources in the principles of quality and warmth.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hospital General Dr. Manuel Gea González';        $company->acronym = 'HG GEA';        $company->activity = 'To provide patient-centered health services, developing medical-surgical programs focused on prevention, treatment and rehabilitation, with ethics, equity, quality and safety, training human talent of excellence and innovating with applied research and strengthening inter-institutional networks in a framework of efficiency and effectiveness.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría de Salud';        $company->acronym = 'SSA';        $company->activity = 'The Ministry of Health is the agency of the Executive Branch that is primarily responsible for the prevention of diseases and the promotion of the health of the population.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Administración del Patrimonio de la Beneficencia Pública';        $company->acronym = 'APBP';        $company->activity = 'To manage assets to contribute to the well-being of people in situations of health vulnerability, as well as to provide functional support to people from vulnerable groups and who do not have specific social security in the field of health, changing their quality of life and improving social assistance.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional de la Transfusión Sanguínea';        $company->acronym = 'CNTS';        $company->activity = 'Establish the national policy on self-sufficiency, quality, and safety of blood, blood components, and stem cells to ensure universal, safe, and equitable access under the principles of social participation, technical competence, quality of medical care, cultural relevance, and non-discriminatory treatment.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional Para la Prevención y El Control del Vih/Sida y Hepatitis';        $company->acronym = 'CENSIDA';        $company->activity = 'Governing and coordinating body of the national response to HIV and STIs based on scientific evidence and in accordance with regulations with respect for human rights, diversity and the gender perspective.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional de Equidad de Género, Salud Sexual y Reproductiva';        $company->acronym = 'CNEGSSR';        $company->activity = 'Governing body that contributes to incorporating the gender perspective in health and improving the sexual and reproductive health of the population through programs and actions based on scientific evidence, best practices and the health needs of the population, with a humanitarian sense and social commitment, within a framework of social participation and respect for human rights.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional de Arbitraje Médico';        $company->acronym = 'CONAMED';        $company->activity = 'Specialized body that has technical autonomy and has the power to receive complaints, investigate alleged irregularities in the provision of medical services and issue its opinions, agreements and awards, which allow conflicts to be resolved acting with impartiality, confidentiality and respect, through alternative procedures for the resolution of conflicts such as: guidance, immediate management, conciliation and arbitration (Mexican Model of Medical Arbitration).';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional de Programas Preventivos y Control de Enfermedades';        $company->acronym = 'CENAPRECE';        $company->activity = 'Implement public policies on prevention and health protection to address communicable and non-communicable diseases and health emergencies, through effective actions in accordance with scientific, technical and operational evidence, with the purpose of reducing health risks and contributing to the well-being of the country\'s population.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional de Trasplantes';        $company->acronym = 'CENATRA';        $company->activity = 'The National Transplant Center is the body responsible for promoting and coordinating the processes from donation to transplantation of organs, tissues and cells, developing the regulatory framework to favor the performance of the members of the National Subsystem of Donation and Transplants, granting patients who require it a greater opportunity, with legality and security.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Nacional para la Salud de la Infancia y la Adolescencia';        $company->acronym = 'CENSIA';        $company->activity = 'Establish, implement, and supervise guiding public policies on the comprehensive health of children, adolescents, and vaccination, which promote health equity among all Mexicans.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Federal para la Protección contra Riesgos Sanitarios';        $company->acronym = 'COFEPRIS';        $company->activity = 'Establishment and implementation of policies, programs and projects at the level of international best practice, in effective coordination with the different actors in the public, private and social spheres, to prevent and address health risks, thus contributing to the health of the population.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Dirección General de Modernización del Sector Salud';        $company->acronym = 'DGMoSS';        $company->activity = 'Provides information based on the best available evidence for adequate decision-making in the field of Health Technologies in health services in Mexico.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional de Bioética';        $company->acronym = 'CONBIOÉTICA';        $company->activity = 'To promote the knowledge and application of Bioethics in the scientific, technological and health fields with a social and global perspective.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comisión Nacional de Salud Mental y Adicciones';        $company->acronym = 'CONASAMA';        $company->activity = 'To make effective the right to prevention, control and care of mental health and addictions to the Mexican population, through a community model with a focus on comprehensive primary health care with respect for human rights, interculturality and the gender perspective.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Estudios Churubusco Azteca, S.A.';        $company->acronym = 'ESTUDIOS_CHUR';        $company->activity = 'To provide professional quality audiovisual production and post-production services to promote the development of Mexican cinema and high-level audiovisual culture.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Mexicano de Cinematografía';        $company->acronym = 'IMCINE';        $company->activity = 'To promote the production, distribution and exhibition of Mexican cinema, fostering national integration and cultural decentralisation, establishing cooperation and co-production agreements with national and international institutions, and developing studies and training activities in the cinematographic field.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Radio Educación';        $company->acronym = 'E RADIO';        $company->activity = 'Public service radio station, with a cultural and educational character. It produces, transmits and promotes quality programming that contributes to the construction of citizenship and to promoting intercultural dialogue. It is based on the values of cultural diversity, inclusion, democratic coexistence, freedom of expression, responsibility and information ethics for an open world.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Televisión Metropolitana S.A. De C.V.';        $company->acronym = 'CANAL_22';        $company->activity = 'Public television station that broadcasts and promotes the best artistic and cultural expressions of Mexico and the world, based on the promotion of values such as inclusion, plurality and critical vision.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Servicios A La Navegación En El Espacio Aéreo Mexicano';        $company->acronym = 'SENEAM';        $company->activity = 'It provides air navigation aid services with safety, fluidity and order in Mexican airspace, guaranteeing quality and efficiency in accordance with applicable national and international regulations.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Financiera Para El Bienestar';        $company->acronym = 'FINABIEN';        $company->activity = 'To provide modern, secure and affordable telecommunications and financial services within the Communications and Transport sector, supporting individuals, private entities and government institutions through technological innovation and quality processes, with a focus on vulnerable populations to help reduce digital and financial inclusion gaps.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Mexicano de la Radio';        $company->acronym = 'IMER';        $company->activity = 'Guarantee the effective enjoyment of the right of access to plural and diverse information and freedom of expression through public service broadcasting that provides expressions and content of public interest, under rigorous editorial independence, inclusion and political, social, geographical, cultural, age, linguistic, ethnic and gender pluralism of society,  as well as mechanisms for citizen participation, transparency and accountability.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sistema Público de Radiodifusión del Estado Mexicano';        $company->acronym = 'SPR';        $company->activity = 'A non-sectorized decentralized public body responsible for providing the digital public broadcasting service at the national level, to ensure access for more people to a greater offer of plural and diverse digital radio and television content.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'XE-IPN Canal 11';        $company->acronym = 'CANAL_11';        $company->activity = 'Mexican network for the transmission of educational television in its capacity as a support body of the National Polytechnic Institute.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Agencia de Transformación Digital y de Telecomunicaciones';        $company->acronym = 'ATDT';        $company->activity = 'Unify government capacities and develop public technology that allows us to offer simple, secure and agile procedures and services, and we promote affordable and quality connectivity to guarantee the exercise of rights for all people, no matter where they are.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Guardia Nacional';        $company->acronym = 'GN';        $company->activity = 'The objective of the National Guard is to carry out the public security function in charge of the Federation and, where appropriate, to collaborate temporarily in the public security tasks that correspond to the states or municipalities.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Servicio de Protección Federal';        $company->acronym = 'SPF';        $company->activity = 'The SPF is a decentralized administrative body of the Ministry of Security and Citizen Protection that is responsible for providing protection, custody, surveillance and security services for persons, property and facilities to the agencies and entities of the Federal Public Administration, as well as to the federal bodies of the Legislative and Judicial Branches.  constitutionally autonomous bodies and other public institutions that request it.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto de Seguridad Social para las Fuerzas Armadas Mexicanas';        $company->acronym = 'ISSFAM';        $company->activity = 'Provide social and economic benefits to members of the Mexican Armed Forces and their beneficiaries, as well as health benefits to retired military personnel, pensioners, and beneficiaries, to contribute to their social well-being, through human capital with an institutional identity and vocation for service, technological tools, and efficient processes in accordance with the law.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fondo Nacional de Fomento al Turismo';        $company->acronym = 'FONATUR';        $company->activity = 'Identify, concretize and trigger sustainable investment projects in the tourism sector, aimed at regional development, job creation, foreign exchange earnings, economic development and social welfare, to improve the quality of life of the population.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'FONATUR Infraestructura, S.A. De C.V.';        $company->acronym = 'FONATUR INFRA';        $company->activity = 'It is a company with majority state participation of the Federal Public Administration (a subsidiary of the National Fund for the Promotion of Tourism), in terms of the provisions of Articles 3, section II, and 46 of the Organic Law of the Federal Public Administration; whose main objective is to provide services related to the conservation, construction, demolition, maintenance, cleaning, operation, surveillance and supervision of facilities, infrastructure of any kind, as well as movable and immovable property of the National Fund for the Promotion of Tourism (FONATUR) and other subsidiary companies.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Servicios de Salud del IMSS Bienestar';        $company->acronym = 'IMSS-BIENESTAR';        $company->activity = 'To provide medical care, medicines and other associated supplies to the population without social security in a free, timely, effective, accessible and quality manner, promoting the active participation of the population in self-care of their health; likewise, it has the vision of being an institution that guarantees the right to health, recognized for the quality, timeliness and effectiveness of its health services and for its model of care, focused on people without social security with individual, family and community co-responsibility, for which it will rely on its Administrative Units for the dispatch of its affairs.  State Health and Hospital Services including Regional High Specialty Services.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = '3PL Services, S.A. de C.V.';        $company->acronym = '3PL';        $company->activity = '3PL Services, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Acerías Nacionales del Ecuador S.A.';        $company->acronym = 'ANDEC';        $company->activity = 'Acerías Nacionales del Ecuador S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '65';         $company->save(); 
+        $company=new company();         $company->name = 'Active Leasing, S.A. de C.V.';        $company->acronym = 'ACTIVEL';        $company->activity = 'Active Leasing, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Aduana Nacional de Bolivia';        $company->acronym = 'ANB';        $company->activity = 'Aduana Nacional de Bolivia operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Aguas de San Pedro';        $company->acronym = 'ASP';        $company->activity = 'Aguas de San Pedro operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Alas Doradas, S.A. de C.V.';        $company->acronym = 'AD';        $company->activity = 'Alas Doradas, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Almacenes Siman S.A. de C.V.';        $company->acronym = 'SIMAN';        $company->activity = 'Almacenes Siman S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Ayuntamiento Del Municipio De Puebla, S.A. de C.V.';        $company->acronym = 'AMP';        $company->activity = 'Ayuntamiento Del Municipio De Puebla, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Azucarera Choluteca S.A. De C.V.';        $company->acronym = 'CHOLUTECA';        $company->activity = 'Azucarera Choluteca S.A. De C.V. operates within the agriculture & forestry sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '2';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Azucarera del Norte S.A.';        $company->acronym = 'AZUNOSA';        $company->activity = 'Azucarera del Norte S.A. operates within the agriculture & forestry sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '2';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Banco Azteca, S.A., Institución de Banca Múltiple';        $company->acronym = 'BANCO_AZTECA';        $company->activity = 'Banco Azteca, S.A., Institución de Banca Múltiple operates within the financial services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '12';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Banco del Bienestar S.N.C., Institución de Banca de Desarrollo';        $company->acronym = 'B_BIENESTAR';        $company->activity = 'Banco del Bienestar S.N.C., Institución de Banca de Desarrollo operates within the financial services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '12';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'BBG, S.A. de C.V.';        $company->acronym = 'BBG';        $company->activity = 'BBG, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Bio Pappel S.A.B. de C.V.';        $company->acronym = 'BIOPAPEL';        $company->activity = 'Bio Pappel S.A.B. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Caracol Knits, S.A. de C.V';        $company->acronym = 'CKNITS';        $company->activity = 'Caracol Knits, S.A. de C.V operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Cementos del Norte S.A.';        $company->acronym = 'CENOSA';        $company->activity = 'Cementos del Norte S.A. operates within the industrial goods & machinery sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '16';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Centro Cuesta Nacional, S.A.';        $company->acronym = 'CENTROCN';        $company->activity = 'Centro Cuesta Nacional, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Choloma Electric Power Company S.A.';        $company->acronym = 'CEPCO';        $company->activity = 'Choloma Electric Power Company S.A. operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '100';         $company->save(); 
+        $company=new company();         $company->name = 'Club Hemingway';        $company->acronym = 'CHEMINGWAY';        $company->activity = 'Club Hemingway operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'COBOCE Cemento S.A.';        $company->acronym = 'COBOCE';        $company->activity = 'COBOCE Cemento S.A. operates within the industrial goods & machinery sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '16';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Cogeneración Green Power, S.A.';        $company->acronym = 'GREENPOWER';        $company->activity = 'Cogeneración Green Power, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Comercial Laeisz Honduras S.A.';        $company->acronym = 'CLAEISZ';        $company->activity = 'Comercial Laeisz Honduras S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '100';         $company->save(); 
+        $company=new company();         $company->name = 'Compañía Azucarera Hondureña S. A. ';        $company->acronym = 'CAHSA';        $company->activity = 'Compañía Azucarera Hondureña S. A.  operates within the agriculture & forestry sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '2';          $company->country_id = '100';         $company->save(); 
+        $company=new company();         $company->name = 'Compañía Hotelera de Nicaragua S.A.';        $company->acronym = 'CHN';        $company->activity = 'Compañía Hotelera de Nicaragua S.A. operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Concesionaria Trasvase Olmos S.A.';        $company->acronym = 'CTO';        $company->activity = 'Concesionaria Trasvase Olmos S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Construcción de Proyectos Turísticos Hermes S.A. de C.V.';        $company->acronym = 'DREAMS';        $company->activity = 'Construcción de Proyectos Turísticos Hermes S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Consur, S.A. de C.V.';        $company->acronym = 'CONSUR';        $company->activity = 'Consur, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Cooeban, S.A. de C.V.';        $company->acronym = 'COOEBAN';        $company->activity = 'Cooeban, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Corporación Electrica Del Ecuador ';        $company->acronym = 'CELEC';        $company->activity = 'Corporación Electrica Del Ecuador  operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '65';         $company->save(); 
+        $company=new company();         $company->name = 'Corporación Zona Franca Santiago';        $company->acronym = 'CORZONFRANC';        $company->activity = 'Corporación Zona Franca Santiago operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Corrugados del Atlántico S.A.';        $company->acronym = 'CORRATL';        $company->activity = 'Corrugados del Atlántico S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Corte Suprema De Justicia';        $company->acronym = 'COSUJU';        $company->activity = 'Corte Suprema De Justicia operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Crédito Hipotecario Nacional';        $company->acronym = 'CHN';        $company->activity = 'Crédito Hipotecario Nacional operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Cultura, S.A. de C.V.';        $company->acronym = 'CULTURA';        $company->activity = 'Cultura, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Denmar, S.A. de C.V.';        $company->acronym = 'DENMAR';        $company->activity = 'Denmar, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Desarrolladora Hotelera Acueducto, S.A. de C.V.';        $company->acronym = 'DHA';        $company->activity = 'Desarrolladora Hotelera Acueducto, S.A. de C.V. operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Desarrolladora Mexicana de Inmuebles, S.A. de C.V.';        $company->acronym = 'DMI';        $company->activity = 'Desarrolladora Mexicana de Inmuebles, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Dimagraf, S.A. de C.V.';        $company->acronym = 'DIMAGRAF';        $company->activity = 'Dimagraf, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Diseño e Impresión Jimc, S.A. de C.V.';        $company->acronym = 'JIMC';        $company->activity = 'Diseño e Impresión Jimc, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Dr. Mexico, S.A. de C.V.';        $company->acronym = 'DRMEX';        $company->activity = 'Dr. Mexico, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Dreams Resorts & Spas';        $company->acronym = 'DRS';        $company->activity = 'Dreams Resorts & Spas operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'El Pedregal, S.A. ';        $company->acronym = 'PEDREGAL';        $company->activity = 'El Pedregal, S.A.  operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Elcatex S.A.';        $company->acronym = 'ELCATEX';        $company->activity = 'Elcatex S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Empaques Santa Ana S.A.';        $company->acronym = 'EMPSTANA';        $company->activity = 'Empaques Santa Ana S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Empresa de Energía del Casanare S.A. E.S.P.';        $company->acronym = 'ENERCA';        $company->activity = 'Empresa de Energía del Casanare S.A. E.S.P. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '49';         $company->save(); 
+        $company=new company();         $company->name = 'Empresa Eléctrica Regional Del Sur De Loja';        $company->acronym = 'EERSA';        $company->activity = 'Empresa Eléctrica Regional Del Sur De Loja operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Empresa Nicaragüense De Electricidad y/o Planta Hidroeléctrica Larreynaga';        $company->acronym = 'ENEL';        $company->activity = 'Empresa Nicaragüense De Electricidad y/o Planta Hidroeléctrica Larreynaga operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Empresa Pública de Hidrocarburos del Ecuador EP Petroecuador';        $company->acronym = 'PETROECUADOR';        $company->activity = 'Empresa Pública de Hidrocarburos del Ecuador EP Petroecuador operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '65';         $company->save(); 
+        $company=new company();         $company->name = 'Empresas Municipales de Cali E.I.C.E. E.S.P.';        $company->acronym = 'EMCALI';        $company->activity = 'Empresas Municipales de Cali E.I.C.E. E.S.P. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'ENDE Andina S.A.M.';        $company->acronym = 'ENDE_ANDINA';        $company->activity = 'ENDE Andina S.A.M. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'ENDE Corani S.A.';        $company->acronym = 'ENDE_CORANI';        $company->activity = 'ENDE Corani S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'ENDE Misicuni S.A.';        $company->acronym = 'ENDE_MISICUNI';        $company->activity = 'ENDE Misicuni S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Energía Hidroeléctrica de San Antonio S.A.';        $company->acronym = 'EHISA';        $company->activity = 'Energía Hidroeléctrica de San Antonio S.A. operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Energía para el Amazonas S.A.';        $company->acronym = 'ENAM';        $company->activity = 'Energía para el Amazonas S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Energías San José S.A.';        $company->acronym = 'ENESAJO';        $company->activity = 'Energías San José S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Energon Re S.A.';        $company->acronym = 'ENERGON';        $company->activity = 'Energon Re S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Envases Comeca S.A.';        $company->acronym = 'COMESA';        $company->activity = 'Envases Comeca S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'EPS Sedacusco S.A.';        $company->acronym = 'SEDACUSCO';        $company->activity = 'EPS Sedacusco S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Establishment Labs Holdings Inc.';        $company->acronym = 'EST_LABS';        $company->activity = 'Establishment Labs Holdings Inc. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Eureka-Re';        $company->acronym = 'EUREKA';        $company->activity = 'Eureka-Re operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fábrica de Jabón La Corona S.A. de C.V.';        $company->acronym = 'LA_CORONA';        $company->activity = 'Fábrica de Jabón La Corona S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fiscalía General de La República';        $company->acronym = 'FGR';        $company->activity = 'Fiscalía General de La República operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fonden Federal, S.A. de C.V.';        $company->acronym = 'FONDEN';        $company->activity = 'Fonden Federal, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Fondo Nacional del Ahorro, S.A. de C.V.';        $company->acronym = 'FNA';        $company->activity = 'Fondo Nacional del Ahorro, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Freund S.A. de C.V.';        $company->acronym = 'FREUND';        $company->activity = 'Freund S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Ganzi, S. de R.L. de C.V.';        $company->acronym = 'GANZI';        $company->activity = 'Ganzi, S. de R.L. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Generadora de Electricidad San Fernando S.A.';        $company->acronym = 'GEN_SANFER';        $company->activity = 'Generadora de Electricidad San Fernando S.A. operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Generadora y Comercializadora de Energía del Caribe';        $company->acronym = 'GECELCA';        $company->activity = 'Generadora y Comercializadora de Energía del Caribe operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Gestión Energetica S.A. ';        $company->acronym = 'GENSA';        $company->activity = 'Gestión Energetica S.A.  operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Gobierno del Estado de México';        $company->acronym = 'GEM';        $company->activity = 'Gobierno del Estado de México operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Aeroportuario, Ferroviario y de Servicios Auxiliares Olmeca-Maya-Mexica';        $company->acronym = 'GAFSACOMM';        $company->activity = 'Grupo Aeroportuario, Ferroviario y de Servicios Auxiliares Olmeca-Maya-Mexica operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo BBG, S.A. de C.V.';        $company->acronym = 'GRUPO_BBG';        $company->activity = 'Grupo BBG, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo CASA';        $company->acronym = 'GRUPO_CASA';        $company->activity = 'Grupo CASA operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Dokka';        $company->acronym = 'GRUPO_DOKKA';        $company->activity = 'Grupo Dokka operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Elektra, S.A.B. de C.V.';        $company->acronym = 'GRUPO_ELEKTRA';        $company->activity = 'Grupo Elektra, S.A.B. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Empresarial S.J., S.A. de C.V.';        $company->acronym = 'GRUPO_EMP_SJ';        $company->activity = 'Grupo Empresarial S.J., S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo IPS, S.A. de C.V.';        $company->acronym = 'GRUPO_IPS';        $company->activity = 'Grupo IPS, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Pueblo Bonito, S.A. de C.V.';        $company->acronym = 'PUEBLO_BONITO';        $company->activity = 'Grupo Pueblo Bonito, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Salinas';        $company->acronym = 'GRUPO_SALINAS';        $company->activity = 'Grupo Salinas operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Grupo Terra';        $company->acronym = 'GRUPO_TERRA';        $company->activity = 'Grupo Terra operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hazesa, S.A. de C.V.';        $company->acronym = 'HAZESA';        $company->activity = 'Hazesa, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hidralpor, S.A. de C.V.';        $company->acronym = 'HIDRALPOR';        $company->activity = 'Hidralpor, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Hidroeléctrica Huanchor, S.A.C.';        $company->acronym = 'HUANCHOR';        $company->activity = 'Hidroeléctrica Huanchor, S.A.C. operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '175';         $company->save(); 
+        $company=new company();         $company->name = 'Hospitality Services Maya, S.A. de C.V.';        $company->acronym = 'HILTON_CANCUN';        $company->activity = 'Hospitality Services Maya, S.A. de C.V. operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Industria Nacional del Cemento, S.A.';        $company->acronym = 'INC';        $company->activity = 'Industria Nacional del Cemento, S.A. operates within the industrial goods & machinery sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '16';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Ingenio Palo Gordo S.A.';        $company->acronym = 'PALO_GORDO';        $company->activity = 'Ingenio Palo Gordo S.A. operates within the agriculture & forestry sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '2';          $company->country_id = '92';         $company->save(); 
+        $company=new company();         $company->name = 'Inmobiliaria Canopo, S. de R.L. de C.V.';        $company->acronym = 'CANOPO';        $company->activity = 'Inmobiliaria Canopo, S. de R.L. de C.V. operates within the real state sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '25';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto de Previsión Militar';        $company->acronym = 'IPM';        $company->activity = 'Instituto de Previsión Militar operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Ecuatoriano de Seguridad Social';        $company->acronym = 'IESS';        $company->activity = 'Instituto Ecuatoriano de Seguridad Social operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Guatemalteco de Seguridad Social';        $company->acronym = 'IGSS';        $company->activity = 'Instituto Guatemalteco de Seguridad Social operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '92';         $company->save(); 
+        $company=new company();         $company->name = 'Instituto Nacional Penitenciario y Carcelario';        $company->acronym = 'INPEC';        $company->activity = 'Instituto Nacional Penitenciario y Carcelario operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Inversiones de Guatemala, S.A.';        $company->acronym = 'INV_GUATEMALA';        $company->activity = 'Inversiones de Guatemala, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '92';         $company->save(); 
+        $company=new company();         $company->name = 'Inversiones Pasabien, S.A.';        $company->acronym = 'PASABIEN';        $company->activity = 'Inversiones Pasabien, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Islas de Mayakoba, S.A. de C.V.';        $company->acronym = 'MAYAKOBA';        $company->activity = 'Islas de Mayakoba, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Jaguar Energy, S.A. de C.V.';        $company->acronym = 'JAGUAR_ENERGY';        $company->activity = 'Jaguar Energy, S.A. de C.V. operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Jaremar, S.A. de C.V.';        $company->acronym = 'JAREMAR';        $company->activity = 'Jaremar, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Kenergreen S.A. de C.V.';        $company->acronym = 'KENERGREEN';        $company->activity = 'Kenergreen S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Kinich Energía Holding S.A. de C.V.';        $company->acronym = 'KINICH';        $company->activity = 'Kinich Energía Holding S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'La Compañía Cervecera de Nicaragua, S.A.';        $company->acronym = 'CCN';        $company->activity = 'La Compañía Cervecera de Nicaragua, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'La Fabril S.A.';        $company->acronym = 'FABRIL';        $company->activity = 'La Fabril S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Lactosa Centroamericana S.A.';        $company->acronym = 'LACTOSA';        $company->activity = 'Lactosa Centroamericana S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Lámina y Placa Comercial S.A. de C.V.';        $company->acronym = 'LyPC';        $company->activity = 'Lámina y Placa Comercial S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Mexsolar, S.A. de C.V.';        $company->acronym = 'MEXSOLAR';        $company->activity = 'Mexsolar, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Milady Associates, S.A. de C.V.';        $company->acronym = 'MILADY';        $company->activity = 'Milady Associates, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Minera Frisco, S.A.B. de C.V.';        $company->acronym = 'FRISCO';        $company->activity = 'Minera Frisco, S.A.B. de C.V. operates within the mining sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '20';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Minera Las Lomas Doradas, S.A. de C.V.';        $company->acronym = 'LOMAS_DORADAS';        $company->activity = 'Minera Las Lomas Doradas, S.A. de C.V. operates within the mining sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '20';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Ministerio de Defensa Nacional';        $company->acronym = 'MDN';        $company->activity = 'Ministerio de Defensa Nacional operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Modas Selectas de León, S.A. de C.V.';        $company->acronym = 'MSLE';        $company->activity = 'Modas Selectas de León, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Modas Selectas de Noroccidente, S.A. de C.V.';        $company->acronym = 'MSNO';        $company->activity = 'Modas Selectas de Noroccidente, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Modas Selectas de Puebla, S.A. de C.V.';        $company->acronym = 'MSPU';        $company->activity = 'Modas Selectas de Puebla, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Modas Selectas del Sureste, S.A. de C.V.';        $company->acronym = 'MSSU';        $company->activity = 'Modas Selectas del Sureste, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Negocios Industriales Real S.A. de C.V.';        $company->acronym = 'NIRSA';        $company->activity = 'Negocios Industriales Real S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Nicaragua Sugar Estates Limited';        $company->acronym = 'NSE';        $company->activity = 'Nicaragua Sugar Estates Limited operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Omni Printer, S.A. de C.V.';        $company->acronym = 'OMNI_PRINTER';        $company->activity = 'Omni Printer, S.A. de C.V. operates within the media and entertainment sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '18';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Operadora Hotelera GI, S.A. de C.V.';        $company->acronym = 'OPER_HOTEL';        $company->activity = 'Operadora Hotelera GI, S.A. de C.V. operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Opex Perforadora, S.A. de C.V.';        $company->acronym = 'OPEX_PERF';        $company->activity = 'Opex Perforadora, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Orazul Energy Limited';        $company->acronym = 'ORAZUL';        $company->activity = 'Orazul Energy Limited operates within the power & utilities sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '24';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Orion, S.A. de C.V.';        $company->acronym = 'ORION';        $company->activity = 'Orion, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Oxec, S.A.';        $company->acronym = 'OXEC';        $company->activity = 'Oxec, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '92';         $company->save(); 
+        $company=new company();         $company->name = 'PC Turquesa, S. de R.L. de C.V.';        $company->acronym = 'PC_TURQUESA';        $company->activity = 'PC Turquesa, S. de R.L. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Perforadora Integral de Oriente Ixachi, S.A. de C.V.';        $company->acronym = 'IXACHI';        $company->activity = 'Perforadora Integral de Oriente Ixachi, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Perforadora Profesional Akal I S.A. de C.V.';        $company->acronym = 'AKAI';        $company->activity = 'Perforadora Profesional Akal I S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Price Services & Trade, S.A. de C.V.';        $company->acronym = 'PRICE_SERVICES';        $company->activity = 'Price Services & Trade, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Prish Made Confirma, S.A. de C.V.';        $company->acronym = 'PRISH';        $company->activity = 'Prish Made Confirma, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Producciones La Esperanza, S.A. de C.V.';        $company->acronym = 'LA_ESPERANZA';        $company->activity = 'Producciones La Esperanza, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Productos Alimenticios Diana S.A. de C.V.';        $company->acronym = 'DIANA';        $company->activity = 'Productos Alimenticios Diana S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Promotora Cabo Real, S.A. de C.V.';        $company->acronym = 'CABO_REAL';        $company->activity = 'Promotora Cabo Real, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Promotora Industrial Azucarera S.A.';        $company->acronym = 'PIA';        $company->activity = 'Promotora Industrial Azucarera S.A. operates within the agriculture & forestry sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '2';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Proquinal Costa Rica S.A.';        $company->acronym = 'PROQUINAL';        $company->activity = 'Proquinal Costa Rica S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Proyectos Energéticos ECUAGESA S.A.';        $company->acronym = 'ECUAGESA';        $company->activity = 'Proyectos Energéticos ECUAGESA S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Puerto Aventuras 2020, S. de R.L. de C.V.';        $company->acronym = 'PUERTO_AVENT';        $company->activity = 'Puerto Aventuras 2020, S. de R.L. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Punta Bandera GM, S. de R.L. de C.V.';        $company->acronym = 'PUNTA_BANDERA';        $company->activity = 'Punta Bandera GM, S. de R.L. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '65';         $company->save(); 
+        $company=new company();         $company->name = 'Quinta del Golfo de Cortez, S.A. de C.V.';        $company->acronym = 'QUINTA_GOLFO';        $company->activity = 'Quinta del Golfo de Cortez, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Renace S.A.';        $company->acronym = 'RENACE';        $company->activity = 'Renace S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Río Siete-Huaquillas';        $company->acronym = 'RIOSIETE';        $company->activity = 'Río Siete-Huaquillas operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Samvardhana Motherson International Limited';        $company->acronym = 'SAMVARDHANA';        $company->activity = 'Samvardhana Motherson International Limited operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sancor Cooperativa De Seguros Limitada';        $company->acronym = 'SANCOR_SEG';        $company->activity = 'Sancor Cooperativa De Seguros Limitada operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaria de Agricultura y Desarrollo Rural';        $company->acronym = 'SADER';        $company->activity = 'Secretaria de Agricultura y Desarrollo Rural operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secretaría de Agricultura y Desarrollo Rural';        $company->acronym = 'SADER';        $company->activity = 'Secretaría de Agricultura y Desarrollo Rural operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secrets Isla Mujeres S. de R.L. de C.V.';        $company->acronym = 'SECRETS_ISLA';        $company->activity = 'Secrets Isla Mujeres S. de R.L. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Secrets Resorts & Spas';        $company->acronym = 'SRS';        $company->activity = 'Secrets Resorts & Spas operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Servicios de Agua y Drenaje de Monterrey, I.P.D.';        $company->acronym = 'SADM';        $company->activity = 'Servicios de Agua y Drenaje de Monterrey, I.P.D. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sherwin-Williams de Centroamérica, S.A.';        $company->acronym = 'SHERWIN_WILLIAMS';        $company->activity = 'Sherwin-Williams de Centroamérica, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sindicato Nacional de Trabajadores del Seguro Social';        $company->acronym = 'SNTSS';        $company->activity = 'Sindicato Nacional de Trabajadores del Seguro Social operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sistema de Transporte Colectivo Metrorrey';        $company->acronym = 'METROMONTERREY';        $company->activity = 'Sistema de Transporte Colectivo Metrorrey operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Sociedad Portuaria Regional de Buenaventura S.A.';        $company->acronym = 'SPRBUN';        $company->activity = 'Sociedad Portuaria Regional de Buenaventura S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '49';         $company->save(); 
+        $company=new company();         $company->name = 'Soluciones de Imagen Aplik, S.A. de C.V.';        $company->acronym = 'APLIK';        $company->activity = 'Soluciones de Imagen Aplik, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Starcon, S.A. de C.V.';        $company->acronym = 'STARCON';        $company->activity = 'Starcon, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Tecnomyl, S.A.';        $company->acronym = 'TECMOMYL';        $company->activity = 'Tecnomyl, S.A. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Telesites S.A.B. de C.V.';        $company->acronym = 'TELESITES';        $company->activity = 'Telesites S.A.B. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Termoencogibles, S.A. de C.V.';        $company->acronym = 'TERMOENCOGIBLES';        $company->activity = 'Termoencogibles, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Total Play Telecomunicaciones, S.A.P.I. de C.V.';        $company->acronym = 'TOTAL_PLAY';        $company->activity = 'Total Play Telecomunicaciones, S.A.P.I. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Tren Interurbano México - Toluca';        $company->acronym = 'INSURGENTE';        $company->activity = 'Tren Interurbano México - Toluca operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'TST Nikkei Metal S.A. de C.V.';        $company->acronym = 'TST_NIKKEI';        $company->activity = 'TST Nikkei Metal S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Tulkan Hospitality Services, S.A. De C.V.';        $company->acronym = 'TULKAN';        $company->activity = 'Tulkan Hospitality Services, S.A. De C.V. operates within the travel and tourism sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '30';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Universidad Autonoma Metropolitana';        $company->acronym = 'UAM';        $company->activity = 'Universidad Autonoma Metropolitana operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Universidad De Puerto Rico ';        $company->acronym = 'UPR';        $company->activity = 'Universidad De Puerto Rico  operates within the government and non-profit organisations sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '14';          $company->country_id = '180';         $company->save(); 
+        $company=new company();         $company->name = 'UNO Corp Inc.';        $company->acronym = 'UNO_CORP';        $company->activity = 'UNO Corp Inc. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Vemarcorp, S.A. de C.V.';        $company->acronym = 'VERMACORP';        $company->activity = 'Vemarcorp, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'Vicentin S.A.I.C.';        $company->acronym = 'VICENTIN';        $company->activity = 'Vicentin S.A.I.C. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
+        $company=new company();         $company->name = 'VIP Ingeniería, S.A. de C.V.';        $company->acronym = 'VIP_ING';        $company->activity = 'VIP Ingeniería, S.A. de C.V. operates within the business and costumer services sector. The organization is typically engaged in activities such as developing, operating, or providing services and infrastructure related to this industry. Companies in this sector usually support regional economic activity by managing facilities, production processes, or specialized services that contribute to the supply chain and commercial operations of their market.';          $company->industry_id = '6';          $company->country_id = '144';         $company->save(); 
 
-        $company = new Company();
-        $company->name = 'Aceites Especiales, S.A. de C.V.';
-        $company->acronym = 'ACE_ESPE';
-        $company->activity = 'Manufacturing of Vegetable Oil: Involves the extraction and refining of natural vegetable oils, including avocado, sunflower, canola, and safflower oils, through advanced processing techniques.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
 
-        $company = new Company();
-        $company->name = 'Aceites y Proteínas, S.A. de C.V.';
-        $company->acronym = 'ACE_PROT';
-        $company->activity = 'Manufacturing and Distribution of Vegetable Oils and Fats: Specializes in the production and distribution of a variety of vegetable oils and fats for both culinary and industrial use.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Adelante Distribuciones, S.A. de C.V.';
-        $company->acronym = 'ADELANTE';
-        $company->activity = 'Company Dedicated to Retail Trade and Distribution: Focuses on the retail trade and distribution of cleaning supplies, wholesale pharmaceutical products, milk, fabric, and the manufacturing of carpets and rugs.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Administración Del Gobierno de La Ciudad de México';
-        $company->acronym = 'ADM_GOB_CDMX';
-        $company->activity = 'Public Administration: Manages government operations, policy implementation, and public service provision at various levels of government.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Sistema de Transporte Colectivo Metro';
-        $company->acronym = 'STC_METRO';
-        $company->activity = 'Collective Transport: Provides public transportation services, including buses, trains, and other forms of mass transit to facilitate urban and regional travel.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Agencia Comercializadora Industrial Del Sureste, S.A. de C.V.';
-        $company->acronym = 'AG_COM_ISUR';
-        $company->activity = 'Distributor of Automotive Parts and Oils: Specializes in the wholesale distribution of automotive parts, oils, additives, and lubricants to repair shops and automotive service centers.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Agencias Mercantiles, S.A. de C.V.';
-        $company->acronym = 'AGE_MERC';
-        $company->activity = 'International Brand Diesel Truck Distributor: The largest distributor in the country for international diesel truck brands, with service coverage across multiple states including Yucatán, Campeche, Quintana Roo, Tabasco, Chiapas, Puebla, and Tlaxcala.';
-        $company->industry_id = '16';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Agrícola Amajac, S.A. de C.V.';
-        $company->acronym = 'AGR_AMAJ';
-        $company->activity = 'Fruit & Vegetable Store: Operates retail locations focused on the sale of fresh fruits and vegetables, providing quality produce to local customers.';
-        $company->industry_id = '3';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Alimentos Envasados Nutriland, S.A. de C.V.';
-        $company->acronym = 'NUTRILAND';
-        $company->activity = 'Wholesale Trade Intermediaries: Acts as a bridge in the wholesale trade process, facilitating transactions between manufacturers and retailers to streamline supply chains.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Alimentos y Servicios Integrales Alservi, S.A. de C.V.';
-        $company->acronym = 'ALSERVI';
-        $company->activity = 'Food Services Provider: Supplies and distributes products specifically for food service operations, ensuring a steady supply of necessary food items to service providers.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Alimentos y Servicios Integrales Alservi, S.A. de C.V.';
-        $company->acronym = 'ALSERVI';
-        $company->activity = 'Food Services Provider: Supplies and distributes products specifically for food service operations, ensuring a steady supply of necessary food items to service providers.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Almacenes y Frigoríficos Ameriben, S.A. de C.V.';
-        $company->acronym = 'AMERIBEN';
-        $company->activity = 'Refrigerated Storage Services: Offers storage solutions in refrigerated cold rooms, providing temperature-controlled environments for perishable goods with added services for transportation, loading, and unloading.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Almacenes y Frigoríficos Sterling, S.A. de C.V.';
-        $company->acronym = 'STERLING';
-        $company->activity = 'Public Storage Services in Refrigerators: Provides public storage facilities in refrigerated chambers with independent temperature and humidity controls, including logistics support for transportation, loading, and unloading.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Asv Argentina Salud, Vida y Patrimoniales Compañía de Seguros, S.A.';
-        $company->acronym = 'ASV_ARG';
-        $company->activity = 'Insurance Carrier: Provides a range of insurance products including life, health, property, and casualty coverage to protect individuals and businesses.';
-        $company->industry_id = '17';
-        $company->country_id = '11';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Automotores Seúl, S.A. de C.V.';
-        $company->acronym = 'AUTO_SEUL';
-        $company->activity = 'Car Storage and Mechanical Workshops: Specializes in the storage and sale of new and used cars, alongside offering mechanical repair and maintenance services through workshops.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Azucarera la Grecia, S.A. de C.V.';
-        $company->acronym = 'AZUC_GREC';
-        $company->activity = 'Sugar and Alcohol Production: Engages in the production of various types of sugar, honey, and alcohols, as well as generating electrical energy as a byproduct.';
-        $company->industry_id = '2';
-        $company->country_id = '100';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bachoco';
-        $company->acronym = 'BACHOCO';
-        $company->activity = 'Largest Egg Producer in Mexico: Recognized as the largest producer of eggs in Mexico, involved in egg production and distribution.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Banco Nacional de Obras y Servicios Publicos, S.N.C Institución de Banca de Desarrollo.';
-        $company->acronym = 'BANOBRAS';
-        $company->activity = 'Development Banking in Mexico: Focuses on creating high-impact infrastructure projects with significant social benefits, supported by innovative financing methods promoted by the Federal Government.';
-        $company->industry_id = '12';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Banco Nacional de Obras y Servicios Públicos, S.N.C. Fondo de Desastres Naturales';
-        $company->acronym = 'FONDE_NAT';
-        $company->activity = 'Worker Credit Services: Provides credit solutions to workers for purchasing goods and services, facilitating financial access for personal and professional needs.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bardahl de México, S.A. de C.V.';
-        $company->acronym = 'BARDAHL';
-        $company->activity = 'Leading Lubricants Manufacturer: Known for producing high-quality lubricants, greases, fluids, and additives, serving key industries such as agriculture, transportation, mining, and construction.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bebidas Internacionales Bepensa, S.A. de C.V.';
-        $company->acronym = 'BEB_INTERN';
-        $company->activity = 'Alcoholic Beverages Company: Engages in the comprehensive process of purchasing, manufacturing, bottling, aging, distributing, importing, exporting, and retailing a wide range of alcoholic beverages.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Beneficiadora La Paz, S.A. de C.V.';
-        $company->acronym = 'BENE_LPAZ';
-        $company->activity = 'Crude Ore Purchase: Specializes in the acquisition and trading of crude ore for various industrial and commercial applications.';
-        $company->industry_id = '16';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bepensa Bebidas, S.A. de C.V.';
-        $company->acronym = 'BEPENSA';
-        $company->activity = 'Bottled Water and Beverage Production: Handles the manufacturing, storage, transportation, and marketing of purified bottled water, juices, concentrates, dairy products, and cleaning supplies.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bepensa Motriz, S.A. de C.V.';
-        $company->acronym = 'BEP_MOTRIZ';
-        $company->activity = 'Automobile Leasing and Service: Leads in the leasing, servicing, and commercialization of automobiles, trucks, engines, generation plants, and industrial equipment, including spare parts distribution.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bimbo';
-        $company->acronym = 'BIMBO';
-        $company->activity = 'Largest Baking Company in the World: The world\'s largest company specializing in baking products and services.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Bio Etanol, S.A.';
-        $company->acronym = 'BIO_ETAN';
-        $company->activity = 'Chemical Sector Company in Guatemala: Based in Guatemala City, operates within the chemicals sector focusing on petrochemicals, plastics, and perfumes.';
-        $company->industry_id = '24';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Carburantes de Yucatán, S.A. de C.V.';
-        $company->acronym = 'CARB_YUC';
-        $company->activity = 'Authorized PEMEX Marketer: Serves as an authorized marketer and distributor of PEMEX products, including fuels and lubricants.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Carburantes del Caribe, S.A. de C.V.';
-        $company->acronym = 'CARB_CAR';
-        $company->activity = 'Authorized PEMEX Marketer: Serves as an authorized marketer and distributor of PEMEX products, including fuels and lubricants.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'CBC Peruana S.A.C.';
-        $company->acronym = 'CBC_PERU';
-        $company->activity = 'Beverage Producer: Specializes in the production and distribution of a variety of beverages for consumer markets.';
-        $company->industry_id = '13';
-        $company->country_id = '175';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ceda Foods, S.A. de C.V.';
-        $company->acronym = 'CEDA_FOODS';
-        $company->activity = 'Industry, Production, and Manufacturing: Engages in diverse manufacturing processes across various industry sectors.';
-        $company->industry_id = '16';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Centro de Promociones Los Cabos San Lucas, S.A. de C.V.';
-        $company->acronym = 'CEN_PROM';
-        $company->activity = 'Holiday Centers and Construction of Tourist Complexes: Engages in the development and management of holiday centers and tourist complexes, aiming to create appealing destinations for leisure and tourism activities.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Cinepolis de México, S.A. de C.V.';
-        $company->acronym = 'CINEPOLIS';
-        $company->activity = 'Entertainment Services: Offers a wide range of entertainment options, including cinemas, video games, food and beverage services, confectionery, internet content rental, and operates shopping malls. Also involved in altruistic activities and real estate management.';
-        $company->industry_id = '18';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Combustibles de Yucatán, S.A. de C.V.';
-        $company->acronym = 'COMB_YUC';
-        $company->activity = 'Fuel Service Station: Operates stations providing gasoline, diesel, and other fuel-related services to customers.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Combustibles Del Caribe, S.A. de C.V.';
-        $company->acronym = 'COMB_CAR';
-        $company->activity = 'Petroleum Derivatives Group: Consists of companies involved in the transportation, storage, distribution, and commercialization of petroleum derivatives.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Combustibles del Sureste, S.A. de C.V.';
-        $company->acronym = 'COMB_SUR';
-        $company->activity = 'Authorized PEMEX Marketer and Distributor: An official distributor of PEMEX products, including fuels and lubricants, ensuring their availability and distribution.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comercializadora de Productos Panor Ltda.';
-        $company->acronym = 'PANOR_LTD';
-        $company->activity = 'Sugar Production Company: Specializes in the production of various types of sugar, serving both culinary and industrial sectors.';
-        $company->industry_id = '6';
-        $company->country_id = '45';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comercializadora Agrícola y de Bienes Landsmark, S.A. de C.V.';
-        $company->acronym = 'LANDSMARK';
-        $company->activity = 'Real Estate Management Services: Provides comprehensive services for managing real estate, including property administration, leasing, and development.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comercializadora Milenio, S.A. de C.V.';
-        $company->acronym = 'COMM_MILEN';
-        $company->activity = 'Electronic Audio and Video Products Distributor: Distributes and sells electronic audio and video products. Diamond Electronics is a manufacturer and distributor of multimedia products for brands such as Mitsui, Lexus, and Polaroid.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comercializadora Publicitaria Tik S.A. de C.V.';
-        $company->acronym = 'COMM_TIK';
-        $company->activity = 'Advertising, Public Relations, and Related Services: Operates in the advertising, public relations, and related services industry, with 165 companies under the Comercializadora Publicitaria Tik, S.A. de C.V. corporate family.';
-        $company->industry_id = '18';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comisión Federal de Electricidad';
-        $company->acronym = 'CFE';
-        $company->activity = 'Federal Electricity Commission: A non-profit public company providing electric power services, crucial for national development and public welfare.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Compañía de Jarabes y Bebidas Gaseosas La Mariposa, S.A';
-        $company->acronym = 'GAS_MARIP';
-        $company->activity = 'Beverage Producer: Involved in the production and distribution of a diverse range of beverages for various markets.';
-        $company->industry_id = '13';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comunicación Segura, S.A. de C.V.';
-        $company->acronym = 'COM_SEC';
-        $company->activity = 'Engineering Services: Provides evaluation, development, and implementation of projects in telecommunications, security, macro measurement, and telemetry.';
-        $company->industry_id = '10';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Comisión Nacional del Agua';
-        $company->acronym = 'CONAGUA';
-        $company->activity = 'Decentralized Administrative Body of the Ministry of Environment and Natural Resources: A governmental organization managing environmental and natural resource policies.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Control Integral de Combustibles, S.A. de C.V.';
-        $company->acronym = 'CTRL_COMB';
-        $company->activity = 'Electronic Purse for Fleet Fuel Control: Offers electronic solutions for managing and controlling fleet fuel purchases and consumption.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Corporación Nacional de Telecomunicaciones, CNT EP';
-        $company->acronym = 'CNT_TELE';
-        $company->activity = 'National Telecommunications Corporation (CNT EP): An Ecuadorian state-owned telecommunications company offering a range of telecom services since its establishment in 2008.';
-        $company->industry_id = '28';
-        $company->country_id = '65';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Corporativo Gasolinero Del Caribe, S.A. de C.V.';
-        $company->acronym = 'CORP_GAS_CAR';
-        $company->activity = 'Fuel Service Station Operator: Manages and operates fuel service stations providing gasoline, diesel, and related products.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Cosmopolita de Polanco, S.A. de C.V.';
-        $company->acronym = 'COSMOPOL';
-        $company->activity = 'Technical, Professional, and Administrative Services: Provides a variety of technical, professional, and administrative support services to commercial and industrial sectors.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Dalton Automotores, S. de R.L. de C.V.';
-        $company->acronym = 'DAL_AUTM';
-        $company->activity = 'Administrative Services to Car and Real Estate Agencies: Specializes in providing administrative support to car dealerships and real estate agencies.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Dalton Automotriz, S. de R.L. de C.V.';
-        $company->acronym = 'DAL_AUTZ';
-        $company->activity = 'Administrative Services to Car and Real Estate Agencies: Specializes in providing administrative support to car dealerships and real estate agencies.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Dalton Efectivo Seguro Gdl, S.A. de C.V.';
-        $company->acronym = 'DAL_EF_SEC';
-        $company->activity = 'Car Rental Company: Offers vehicle rental services for short-term and long-term needs, catering to both individual and business clients.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Dalton Servicios, S.A. de C.V.';
-        $company->acronym = 'DAL_SERV';
-        $company->activity = 'Administrative Services to Car and Real Estate Agencies: Provides comprehensive administrative support to car dealerships and real estate agencies, including management and operational services.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Daosa, S.A. de C.V.';
-        $company->acronym = 'DAOSA';
-        $company->activity = 'Automotive Parts Manufacturing: Specializes in the production of various automotive parts, catering to both domestic and international markets.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Diesel Cancún, S.A. de C.V.';
-        $company->acronym = 'DIESEL_CAN';
-        $company->activity = 'Fuel and Diesel Distributor: Engages in the distribution of fuel and diesel products, serving a range of industrial, commercial, and consumer needs.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Dieselera de Mérida, S.A. de C.V.';
-        $company->acronym = 'DIESEL_MER';
-        $company->activity = 'Fuel Service Station Operator: Manages and operates stations providing gasoline, diesel, and other fuel-related services.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Dinant Holding Corporation, S.A.';
-        $company->acronym = 'DINANT';
-        $company->activity = 'Honduran-Origin Consumer Goods Company: A company with origins in Honduras, with a presence across Central America, the Caribbean, and the United States. Known for offering high-quality products for mass consumption at competitive prices. Main divisions include snacks, fats and oils, foods, housekeeping, and agricultural business.';
-        $company->industry_id = '21';
-        $company->country_id = '172';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Distribuidora Megamak, S.A. de C.V.';
-        $company->acronym = 'MEGAMAK';
-        $company->activity = 'Machinery for Construction and Agriculture: Sells innovative and specialized machinery designed for construction and agricultural applications.';
-        $company->industry_id = '16';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'E-Transports, S.A. de C.V.';
-        $company->acronym = 'E_TRANSP';
-        $company->activity = 'Logistics, Customs, and Foreign Trade Services: Offers a range of services related to logistics, customs, foreign trade consulting, and the transportation of goods by various routes and means.';
-        $company->industry_id = '29';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'El Carmen, S.A.';
-        $company->acronym = 'EL_CARMEN';
-        $company->activity = 'Beverage Producer: Engaged in the production and distribution of a variety of beverages for different markets.';
-        $company->industry_id = '13';
-        $company->country_id = '11';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'El Sol Seguros S.A.';
-        $company->acronym = 'SOL_SEGU';
-        $company->activity = 'Insurance Carrier: Provides various insurance products and services, including coverage for personal, commercial, and industrial needs.';
-        $company->industry_id = '17';
-        $company->country_id = '174';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Embotelladora La Mariposa, S.A.';
-        $company->acronym = 'EMB_MARIP';
-        $company->activity = 'Beverage Producer: Involved in producing and distributing beverages across multiple segments.';
-        $company->industry_id = '13';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Embotelladora La Reyna, S.A. de C.V.';
-        $company->acronym = 'EMB_REYNA';
-        $company->activity = 'Beverage Producer: Specializes in the production and distribution of a diverse range of beverages.';
-        $company->industry_id = '13';
-        $company->country_id = '100';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Embotelladora Nacional, S.A.';
-        $company->acronym = 'EMB_NAC';
-        $company->activity = 'Beverage Producer: Focuses on producing and distributing a wide assortment of beverage products.';
-        $company->industry_id = '13';
-        $company->country_id = '160';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Embotelladoras Bepensa, S.A. de C.V.';
-        $company->acronym = 'EMB_BEPEN';
-        $company->activity = 'Coca-Cola Brand Distributor: Produces, markets, and distributes a portfolio of 35 Coca-Cola Company brands.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Empresas Matic, S.A. de C.V.';
-        $company->acronym = 'EMP_MATIC';
-        $company->activity = 'Administrative Services for Service Station Personnel: Manages administrative functions related to personnel at fuel service stations.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Caribe Real S.A. de C.V.';
-        $company->acronym = 'EST_CAR_REAL';
-        $company->activity = 'Fuel Service Station: Operates a station that provides gasoline, diesel, and other fuel-related services to customers.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Circuito Colonias, S.A. de C.V.';
-        $company->acronym = 'EST_CIR_COL';
-        $company->activity = 'Gasoline and Diesel Retail Trade: Involves the retail trade of gasoline and diesel products.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios del Caribe, S.A. de C.V.';
-        $company->acronym = 'EST_SERV_CAR';
-        $company->activity = 'Fuel Service Station: Manages a facility offering gasoline and diesel fuel to consumers.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Las Palmas, S.A. de C.V.';
-        $company->acronym = 'EST_SERV_PAL';
-        $company->activity = 'Fuel Service Station: Manages a facility offering gasoline and diesel fuel to consumers.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Maraveg, S.A. de C.V.';
-        $company->acronym = 'EST_SERV_MAR';
-        $company->activity = 'Retail of Gasoline and Diesel: Focuses on the retail sale of gasoline and diesel fuel products.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Mericam, S.A. de C.V.';
-        $company->acronym = 'EST_SERV_MERI';
-        $company->activity = 'Authorized PEMEX Marketer and Distributor: Officially authorized distributor of PEMEX products, including fuels and lubricants.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Palmas Cancún, S.A. de C.V.';
-        $company->acronym = 'EST_SERV_PAL_CAN';
-        $company->activity = 'Retail of Gasoline and Diesel: Engages in the retail sale of gasoline and diesel fuels.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Estación de Servicios Palmas Caribe, S.A. de C.V.';
-        $company->acronym = 'EST_SERV_PAL_CAR';
-        $company->activity = 'Retail of Gasoline and Diesel: Provides gasoline and diesel fuels through retail outlets.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Fármacos Darovi, S.A. de C.V.';
-        $company->acronym = 'FAR_DAROVI';
-        $company->activity = 'Comprehensive Supply and Administration of Medicines: Offers complete supply and administrative services for medicines and healing materials to both public and private institutions.';
-        $company->industry_id = '23';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'FB Distribuciones, S de R.L. de C.V.';
-        $company->acronym = 'FB_DIST';
-        $company->activity = 'Wholesale Trade and Distribution: Specializes in the wholesale trade and distribution of products including perfumery items, toys, pharmaceutical products, snacks, and fried foods via mass media channels such as mail and the internet.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Fly Services, S.A. de C.V.';
-        $company->acronym = 'FLY_SERV';
-        $company->activity = 'Air Transport Services by Helicopter: Provides specialized air transport services using helicopters.';
-        $company->industry_id = '29';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Fomento CC, S de R.L de C.V.';
-        $company->acronym = 'FOMENTO_CC';
-        $company->activity = 'Grupo Hotel Shops Payroll Management: A subsidiary responsible for handling part of Grupo Hotel Shops\' payroll, which focuses on hotel retail, including the commercialization of jewelry, tobacco, boutique items, photography, and artisan markets, with over 100 branches in Cancun, Riviera Maya, Mazatlán, Cabos, and Jamaica.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Fomento Gasolinero, S.A. de C.V.';
-        $company->acronym = 'FOM_GAS';
-        $company->activity = 'Fuel Service Station Operator: Operates fuel service stations providing gasoline, diesel, and other fuel products.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Fondo de Ahorro Capitalizable';
-        $company->acronym = 'FON_ACAP';
-        $company->activity = 'Capitalizable Savings Fund for Public Service Workers: Offers a financial stimulus program for public service workers in Mexico, providing benefits through the Capitalizable Savings Fund for Workers in the Service of the State (Fonac) for the 2023 cycle.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Fotur Jamaica Limited';
-        $company->acronym = 'FOTUR_JAM';
-        $company->activity = 'Other Personal Services (FOTUR LIMITED): Involved in various personal services sectors including automotive repair and maintenance, business services, professional and labor organizations, commercial and industrial machinery repair, and dry cleaning and laundry services.';
-        $company->industry_id = '6';
-        $company->country_id = '112';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Garpa Arrenda, S.A. de C.V.';
-        $company->acronym = 'GARPA';
-        $company->activity = 'Passenger Car Rental: Provides rental services for passenger cars, catering to various short-term and long-term transportation needs.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'GDSConnections, S.A. de C.V.';
-        $company->acronym = 'GDS_CONN';
-        $company->activity = 'Crane, loading and maneuvering service throughout the republic: Exceptional nationwide crane services ensuring efficient and safe loading and maneuvering.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'GF Bepensa, S.A. de C.V.';
-        $company->acronym = 'GF_BEPEN';
-        $company->activity = 'Loans for cars, machinery and trucks that are distributed by the company: Reliable and flexible financial solutions for acquiring cars, machinery, and trucks.';
-        $company->industry_id = '5';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'GF Servicios Corporativos, S de R.L. de C.V.';
-        $company->acronym = 'GF_SERV_CORP';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Prominent hotel retail chain offering an exquisite range of products including jewelry, boutique items, and artisan crafts, with extensive coverage across popular vacation destinations.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Gobierno de La Ciudad de México';
-        $company->acronym = 'GOB_CDMX';
-        $company->activity = 'Public administration.: Dedicated to efficient and transparent management of public services and resources.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'GPF Servicios Corporativos S de R.L. de C.V.';
-        $company->acronym = 'GPF_SERV';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Renowned for its extensive network of branches, offering premium products and services in top tourist destinations.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Gran Armee Del Cabo, S.A. de C.V. And/Or Operadora de Campos de Golf Pueblo Bonito, S.A. de C.V.';
-        $company->acronym = 'GRAN_ARME';
-        $company->activity = 'Offers workers in the country credits for the acquisition of goods and services.: Supports workers with accessible credit options to enhance their purchasing power for various goods and services.';
-        $company->industry_id = '12';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Agroindustrial Numar, S.A.';
-        $company->acronym = 'GRUPO_NUMAR';
-        $company->activity = 'Is a conglomerate that produces and markets its own brands in the category of butters, margarines, vegetable oils and coffee.: Leading producer and marketer of high-quality butters, margarines, vegetable oils, and coffee brands.';
-        $company->industry_id = '16';
-        $company->country_id = '54';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Ideal';
-        $company->acronym = 'GRUPO_IDEAL';
-        $company->activity = 'Development of infrastructure projects.: Expertise in the planning and execution of impactful infrastructure projects.';
-        $company->industry_id = '8';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Inmobiliario Tervia, S.C.';
-        $company->acronym = 'GRUPO_TERVIA';
-        $company->activity = 'Purchase and sale of all kinds of real estate, leasing and subleasing of all kinds of movable and immovable property, building and construction of houses, office and residential buildings, the construction of all kinds of commercial complexes.: Comprehensive real estate services including transactions, leasing, construction, and development.';
-        $company->industry_id = '25';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Jaremar';
-        $company->acronym = 'GRUPO_JARE';
-        $company->activity = 'Jaremar Group, agroindustrial sector, works with national independent producers and surrounding communities, for the development of their oil palm plantations. It also manufactures home care products, flour, cookies and culinary products.: Agroindustrial leader supporting local producers and communities while offering a diverse range of products.';
-        $company->industry_id = '2';
-        $company->country_id = '100';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo México S.A. de C.V.';
-        $company->acronym = 'GR_MEXICO';
-        $company->activity = 'Is a Mexican conglomerate that operates three divisions (Minera México, Grupo México Transportes and Grupo México infraestructura) and Fundación Grupo México.: Major Mexican conglomerate with diversified operations in mining, transportation, infrastructure, and social impact through its foundation.';
-        $company->industry_id = '20';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Profesional de Administración y Consultoría, S.C';
-        $company->acronym = 'GRUPO_GP_AC';
-        $company->activity = 'Providing technical, professional and administrative services to commercial and industrial companies.: Offers comprehensive technical and administrative support to enhance commercial and industrial operations.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Seguritech Privada, S.A.P.I. de C.V.';
-        $company->acronym = 'GR_SEGUR';
-        $company->activity = 'Serving private, corporate and government clients in the American continent, they contribute to the achievement of National Security projects.: Dedicated to supporting national security and achieving key projects across the American continent.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Televisa, S.A.B. de C.V.';
-        $company->acronym = 'GR_TELEVISA';
-        $company->activity = 'Mexican media company. This company is involved in the production and transmission of television programs.: Prominent media company specializing in the production and broadcasting of engaging television content.';
-        $company->industry_id = '28';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Grupo Vical';
-        $company->acronym = 'GR_VICAL';
-        $company->activity = 'VICAL is the Central American Glass group mainly focused in manufacturing and marketing glass containers. Its operation starts in 1964; satisfying the Central American and Export markets needs.: Established Central American leader in glass container manufacturing, serving both regional and international markets.';
-        $company->industry_id = '8';
-        $company->country_id = '54';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Hidrocarburos Del Sureste, S.A. de C.V.';
-        $company->acronym = 'HIDRO_SURE';
-        $company->activity = 'Receipt, storage and delivery of gasoline, diesel and jet fuel.: Expert services in the receipt, storage, and distribution of fuel products.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Hspro, S de R.L. de C.V.';
-        $company->acronym = 'HSPRO';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: A well-established retail chain with extensive branches in top tourist destinations, offering a variety of premium products.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Industrial La Fama, S.A. de C.V.';
-        $company->acronym = 'IND_LA_FAMA';
-        $company->activity = 'Manufacturing of laundry soaps, glycerin, bleaches and detergents.: Specializes in the production of high-quality laundry soaps, glycerin, bleaches, and detergents.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio Concepción, S.A.';
-        $company->acronym = 'ING_CONCEP';
-        $company->activity = 'Is an Argentine company that is located in the city of Banda del Rio Sali in the province of Tucuman. The company operates in the sugar cane growing industry.: Argentine leader in the sugar cane industry, contributing significantly to regional agriculture.';
-        $company->industry_id = '2';
-        $company->country_id = '11';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio el Mante, S.A. de C.V.';
-        $company->acronym = 'ING_MANTE';
-        $company->activity = 'Company dedicated to the planting of sugar cane and its use for sugar refining.: Focused on cultivating sugar cane and refining it into high-quality sugar products.';
-        $company->industry_id = '2';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio La Cabaña, S.A. de C.V.';
-        $company->acronym = 'ING_CABANA';
-        $company->activity = 'Company in the sugar sector.: Significant player in the sugar industry with a commitment to quality and sustainability.';
-        $company->industry_id = '2';
-        $company->country_id = '49';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio La Unión, S.A.';
-        $company->acronym = 'ING_UNION';
-        $company->activity = 'Develop energy based on cane, sugar.: Innovative company utilizing sugar cane for energy production.';
-        $company->industry_id = '2';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio Magdalena';
-        $company->acronym = 'ING_MAGDAL';
-        $company->activity = 'Food, agricultural and energy products, committed to business sustainability, social and environmental development.: Diverse company dedicated to sustainable practices in food, agriculture, and energy.';
-        $company->industry_id = '2';
-        $company->country_id = '67';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio Monte Rosa, S.A.';
-        $company->acronym = 'ING_MONTE';
-        $company->activity = 'Sugar Mill, Sugar Refinery, Cogeneration, Electricity Generation, Distillery.: Comprehensive operations in sugar milling, refining, cogeneration, electricity production, and distillation.';
-        $company->industry_id = '2';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio Pantaleon, S.A.';
-        $company->acronym = 'ING_PANTA';
-        $company->activity = 'Sugar Mill, Sugar Refinery, Cogeneration, Electricity Generation, Distillery.: Leading facility in the integrated processing of sugar and energy production.';
-        $company->industry_id = '2';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio Panuco S.A.P.I. de C.V.';
-        $company->acronym = 'ING_PANUCO';
-        $company->activity = 'Sugar Mill, Sugar Refinery, Cogeneration, Electricity Generation, Distillery.: Renowned for its extensive capabilities in sugar milling, refining, and energy generation.';
-        $company->industry_id = '2';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ingenio San Diego';
-        $company->acronym = 'ING_S_DIEGO';
-        $company->activity = 'Is a leading company in the production of sugar and energy based in Guatemala and with more than 130 years of operation.: Historic Guatemalan company with over 130 years of leadership in sugar production and energy.';
-        $company->industry_id = '2';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Inmobiliaria Del Zazil Ha, S.A. de C.V.';
-        $company->acronym = 'INMO_ZAZIL';
-        $company->activity = 'Fuel service station.: Reliable fuel service station providing quality fuel solutions.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Inmobiliaria Jadica, S.A. de C.V.';
-        $company->acronym = 'INMO_JADICA';
-        $company->activity = 'Real estate selling.: Expert in real estate sales with a strong market presence.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Instituto Costarricense de Electrificación';
-        $company->acronym = 'INST_COST';
-        $company->activity = 'The Costa Rican Electricity Institute (ICE) is a state company that provides electricity and telecommunications services in Costa Rica.: Central institution in Costa Rica for electricity and telecommunications services, ensuring comprehensive coverage.';
-        $company->industry_id = '24';
-        $company->country_id = '54';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Instituto de Seguridad Social Al Servicio de Los Trabajadores Del Estado';
-        $company->acronym = 'ISSSTE';
-        $company->activity = 'Health and social security administration.: Focused on managing and delivering essential health and social security services.';
-        $company->industry_id = '14';
-        $company->country_id = '155';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Instituto Mexicano del Seguro Social';
-        $company->acronym = 'IMSS';
-        $company->activity = 'Its mission is to be the basic instrument of social security, established as a national public service, for all workers and their families.: Dedicated to providing fundamental social security services to workers and their families.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Instituto Nacional de Electrificación';
-        $company->acronym = 'INST_ELECT';
-        $company->activity = 'Promoting the rational, efficient and sustainable use of natural resources, promoting the productive and domestic use of electricity generated from native energy sources.: Advocating for sustainable and efficient use of natural resources and native energy sources.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Interprotección';
-        $company->acronym = 'INTERPRO';
-        $company->activity = 'Insurance, surety and reinsurance broker.: Specializes in providing comprehensive insurance, surety, and reinsurance services.';
-        $company->industry_id = '17';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Invest Port, S. de R.L. de C.V.';
-        $company->acronym = 'INVEST_PORT';
-        $company->activity = 'Investments.: Focused on strategic investment opportunities and financial growth.';
-        $company->industry_id = '9';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Investigación Farmacéutica, S.A. de C.V.';
-        $company->acronym = 'INV_FAR';
-        $company->activity = 'Manufacturing, distribution and sale of various lines of medicine with their different divisions and medical devices.: Extensive operations in manufacturing, distributing, and selling pharmaceuticals and medical devices.';
-        $company->industry_id = '23';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Isla 17 S de R.L. de C.V.';
-        $company->acronym = 'ISLA_17';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Highly regarded hotel retail company with an extensive network offering premium products across top destinations.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Ivresse Internacional, S.A. de C.V.';
-        $company->acronym = 'IVRESSE';
-        $company->activity = 'Purchase, sale, commission, consignment, import, export, distribution, manufacturing, elaboration, processing, preparation, packaging, maquila and in general.: Comprehensive services covering all aspects of trade, manufacturing, and distribution.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Kol Tov, S.A. de C.V.';
-        $company->acronym = 'KOL_TOV';
-        $company->activity = 'Trade in raw materials, finished or semi-finished products.: Expert in the trade of raw materials and various stages of finished products.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'La Cosmopolitana, S.A. de C.V.';
-        $company->acronym = 'COSMOPOL';
-        $company->activity = 'Purchase, sale, import, export and distribution of all kinds of meat, sausages, dairy products, groceries, fruits and vegetables, as well as the provision of comprehensive food and general services, among others.: Versatile supplier specializing in a broad range of food products and comprehensive services.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Livsmart Americas, S.A. de C.V.';
-        $company->acronym = 'LIVSMART';
-        $company->activity = 'Beverage producer.: Innovative company dedicated to crafting high-quality beverages.';
-        $company->industry_id = '13';
-        $company->country_id = '67';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Lodemo y Asociados, S.C.P.';
-        $company->acronym = 'LODEMO_ASOC';
-        $company->activity = 'Payroll administrative services, technical and financial advisory and consulting services.: Expert provider of payroll administration and comprehensive advisory services.';
-        $company->industry_id = '12';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Luma Gasolinerias, S.A. de C.V.';
-        $company->acronym = 'LUMA_GAS';
-        $company->activity = 'Retail of gasoline and diesel.: Reliable retailer offering high-quality gasoline and diesel.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Mariposa El Salvador, S.A. de C.V.';
-        $company->acronym = 'MARIPOSA_SAL';
-        $company->activity = 'Beverage producer.: Renowned producer known for a diverse range of exceptional beverages.';
-        $company->industry_id = '13';
-        $company->country_id = '67';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Megaempack, S.A. de C.V.';
-        $company->acronym = 'MEGA_EMP';
-        $company->activity = 'Manufacturing of rigid plastic packaging, with high quality processes and technology.: Leading manufacturer of durable and high-quality rigid plastic packaging.';
-        $company->industry_id = '16';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Mexarrend';
-        $company->acronym = 'MEXARREND';
-        $company->activity = 'Its main activity is the leasing and financing of equipment for companies or individuals with business activity. It is also engaged in leasing.: Specializes in leasing and financing equipment for businesses and individuals.';
-        $company->industry_id = '12';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Minera Santa María de La Paz y Anexas';
-        $company->acronym = 'MIN_SANTA_MAR';
-        $company->activity = 'Exploitation of mining estates and sale of crude minerals, mainly copper.: Focused on mining and trading of crude minerals with a specialization in copper.';
-        $company->industry_id = '20';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Multiservcios Petrolíferos de Quintana Roo, S.A. de C.V.';
-        $company->acronym = 'MULT_PET_QR';
-        $company->activity = 'Marketer and distributor authorized by PEMEX.: Authorized marketer and distributor of PEMEX products.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Multiservicios Peninsular, S.A. de C.V.';
-        $company->acronym = 'MULT_PEN';
-        $company->activity = 'Marketer and distributor authorized by PEMEX.: Trusted distributor of PEMEX products with extensive market reach.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Multiservicios Petrolíferos de Cancún, S.A. de C.V.';
-        $company->acronym = 'MULT_PET_CAN';
-        $company->activity = 'Marketer and distributor authorized by PEMEX.: Reliable PEMEX distributor ensuring high-quality fuel products.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Negocios Alternos CPL, S.A. de C.V.';
-        $company->acronym = 'NEG_ALTERN';
-        $company->activity = 'Entertainment services, consisting of but not limited to cinemas, video games, preparation and sale of beverages, food, confectionery, internet content rental service, altruistic activities and real estate operator of shopping malls.: Diverse entertainment provider offering cinemas, video games, and various food and beverage options, along with real estate services for shopping malls.';
-        $company->industry_id = '18';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Novaforest';
-        $company->acronym = 'NOVAFOREST';
-        $company->activity = 'Integrated and sustainable agroforestry company based in Guatemala that fosters innovation and offers certified products made from owned renewable resources that protect biodiversity.: Pioneering agroforestry company in Guatemala focused on sustainability and innovation.';
-        $company->industry_id = '2';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'OHS Limited';
-        $company->acronym = 'OHS';
-        $company->activity = 'OHS Limited is a market leading independent health and safety consultancy, delivering legal compliance to organisations throughout the UK.: Leading health and safety consultancy in the UK, ensuring legal compliance and organizational safety.';
-        $company->industry_id = '15';
-        $company->country_id = '235';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Operadora Comercial Liverpool, S.A.B. de C.V.';
-        $company->acronym = 'OP_C_LIVER';
-        $company->activity = 'Marketing of products for commission owned by third parties.: Specialized in marketing third-party products on a commission basis.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Operadora de Comedores Saludables, S.A. de C.V.';
-        $company->acronym = 'OP_COM_SAL';
-        $company->activity = 'Specialized in canteen services for companies and institutions. It was created and founded in 2019-04, currently 51 to 100 people work in this company or business.: Focused provider of canteen services with a growing team and expertise in institutional food services.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Palo Blanco, S.A.';
-        $company->acronym = 'PAL_BLANCO';
-        $company->activity = 'Sowing, cultivation, packaging, marketing and distribution of agricultural products. Food processing.: Comprehensive agricultural company managing everything from cultivation to food processing and distribution.';
-        $company->industry_id = '13';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Pan Filler, S.A. de C.V.';
-        $company->acronym = 'PAN_FILLER';
-        $company->activity = 'Preparation of other foods (biscuits, pasta for soup and premixed flours).: Expert in the production of various food items including biscuits, pasta, and premixed flours.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Pantaleon Chile Spa.';
-        $company->acronym = 'PANTA_CHIL';
-        $company->activity = 'Sugar Mill, Sugar Refinery, Cogeneration, Electricity Generation, Distillery.: Integrated operations in sugar milling, refining, cogeneration, and energy production.';
-        $company->industry_id = '2';
-        $company->country_id = '45';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Pasaje Electrónica El Salvador, S.A. de C.V.';
-        $company->acronym = 'PAS_ELECTRO';
-        $company->activity = 'Dedicated to leasing, subleasing, acquisition in trust, sale, usufruct, administration, construction, subdivision, transformation, remodeling, repair, restoration, preservation of all types of rights and real estate.: Comprehensive real estate services including leasing, acquisition, and property management.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Peltur Jamaica Limited';
-        $company->acronym = 'PELTUR_JAM';
-        $company->activity = 'Buyer and Importer of Boxes with sandals, T-shirts, Photo in USA.: Engaged in importing and purchasing of various goods including sandals and T-shirts.';
-        $company->industry_id = '26';
-        $company->country_id = '112';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Peninsula 7 S de R.L. de C.V.';
-        $company->acronym = 'PENINS_7';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Well-established retail chain with extensive offerings and numerous branches in prime tourist locations.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Pepsi Cola Jamaica Bottling Company Limited';
-        $company->acronym = 'PEPSI_JAM';
-        $company->activity = 'Beverage producer.: Leading producer specializing in a wide range of beverages.';
-        $company->industry_id = '13';
-        $company->country_id = '112';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Pepsi Cola Puerto Rico Distributing, LLC';
-        $company->acronym = 'PEPSI_PR';
-        $company->activity = 'Beverage producer.: Renowned for its diverse and high-quality beverage products.';
-        $company->industry_id = '13';
-        $company->country_id = '180';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Photopro S de R.L. de C.V.';
-        $company->acronym = 'PHOTOPRO';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Extensive hotel retail network offering a variety of premium products across multiple locations.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Photur S de R.L. de C.V.';
-        $company->acronym = 'PHOTUR';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Popular retail chain with a wide array of products and a strong presence in key tourist destinations.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Picorp de México, S.A. de C.V.';
-        $company->acronym = 'PICORP';
-        $company->activity = 'Development of public security infrastructure construction projects.: Expert in the development of critical public security infrastructure projects.';
-        $company->industry_id = '10';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Playagas, S.A. de C.V.';
-        $company->acronym = 'PLAYAGAS';
-        $company->activity = 'Retail of gasoline and diesel.: Consistent retailer of high-quality gasoline and diesel fuels.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Plaza López Cotilla, S.A. de C.V.';
-        $company->acronym = 'PLAZA_LC';
-        $company->activity = 'Purchase and sale of all kinds of real estate, leasing and subleasing of all kinds of movable and immovable property, building and construction of houses, office and residential buildings, the construction of all kinds of commercial complexes.: Comprehensive real estate services including transactions, leasing, and construction.';
-        $company->industry_id = '25';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Prestige Motors Certificados, S.A. de C.V.';
-        $company->acronym = 'PRESTIGE';
-        $company->activity = 'Provision of administrative services to Mercedez-Benz car agencies and real estate agencies.: Provides specialized administrative support to Mercedez-Benz and real estate agencies.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Prevención y Readaptación Social';
-        $company->acronym = 'PREV_READ';
-        $company->activity = 'Public administration.: Focused on effective and transparent public management and service delivery.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Productos Serel, S.A. de C.V.';
-        $company->acronym = 'PROD_SEREL';
-        $company->activity = 'Manufacturing, industrialization, process, purchase, sale, import, export and distribution of all kinds of food and beverages, comprehensive food services, mainly employee canteen service.: A comprehensive provider involved in all stages of the food and beverage supply chain, with a focus on employee canteen services.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Promotora Afa, S.A. de C.V.';
-        $company->acronym = 'PROMO_AFA';
-        $company->activity = 'Real estate rental services.: Specializes in offering diverse rental solutions for various real estate needs.';
-        $company->industry_id = '25';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Proveedora de Quimicos y Medicamentos Care Lab, S.A. de C.V.';
-        $company->acronym = 'PROV_QUIM';
-        $company->activity = 'Integral Logistics Operator in the Pharmaceutical Industry: Expert in managing complex logistics operations specifically for the pharmaceutical industry.';
-        $company->industry_id = '23';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Puerto 85 S de R.L. de C.V.';
-        $company->acronym = 'PUERTO_85';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: A prominent hotel retail chain offering a wide range of products including jewelry, tobacco, and artisan goods across numerous locations.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Puerto Arenas S de R.L. de C.V.';
-        $company->acronym = 'PUERTO_ARE';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: A well-established hotel retail network specializing in luxury and artisan products, with extensive coverage in popular tourist areas.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Puerto HS S de R.L. de C.V.';
-        $company->acronym = 'PUERTO_HS';
-        $company->activity = 'Hotel retail company, which is dedicated to the commercialization of jewelry, tobacco, boutique, photography, artisan markets, among others with more than 100 branches throughout Cancun, Riviera Maya, Mazatlán, Los Cabos and Jamaica.: Leading hotel retail company known for its diverse product range and significant presence in major travel destinations.';
-        $company->industry_id = '30';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Rechtien International Trucks, Inc.';
-        $company->acronym = 'RECHTIEN';
-        $company->activity = 'Commercial truck dealership Company.: Focused on the sale and service of commercial trucks, providing both new and used vehicles.';
-        $company->industry_id = '16';
-        $company->country_id = '236';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Recursos y Soluciones Especializadas Land, S.A. de C.V.';
-        $company->acronym = 'REC_SOL_LAND';
-        $company->activity = 'Providing technical, professional and administrative services to commercial and industrial companies.: Offers a broad range of technical, professional, and administrative services to support commercial and industrial operations.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'RH Land, S.A. de C.V.';
-        $company->acronym = 'RH_LAND';
-        $company->activity = 'Providing technical, professional and administrative services to commercial and industrial companies.: Delivers specialized services to businesses, ensuring operational efficiency and expertise.';
-        $company->industry_id = '6';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Secretaría de Administración y Finanzas de la Ciudad de México';
-        $company->acronym = 'SEC_ADM_CDMX';
-        $company->activity = 'Is the administrative unit of the government of Mexico City in charge of the dispatch of matters related to the development of income policies and tax administration, programming, budgeting and evaluation of public spending in Mexico City.: Key governmental unit responsible for financial management and public budgeting in Mexico City.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Secretaría de La Defensa Nacional';
-        $company->acronym = 'SEDENA';
-        $company->activity = 'Organization and training of the armed forces, the defense of the country and to help civil society.: Dedicated to the organization, training, and support of the armed forces, focusing on national defense and community assistance.';
-        $company->industry_id = '10';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Seguritech Privada, S.A. de C.V.';
-        $company->acronym = 'SEGURITECH';
-        $company->activity = 'Provides the general public with all kinds of private, industrial and commercial security services.: Comprehensive security service provider for private, industrial, and commercial needs.';
-        $company->industry_id = '10';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Servicio Acoro, S.A. de C.V.';
-        $company->acronym = 'SERV_ACORO';
-        $company->activity = 'Fuel service station.: Reliable fuel station offering quality gasoline and diesel.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Servicio Chit, S.A. de C.V.';
-        $company->acronym = 'SERV_CHIT';
-        $company->activity = 'Fuel service station.: Consistent provider of fuel with reliable service.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Servicio de Administración Tributaria';
-        $company->acronym = 'SAT';
-        $company->activity = 'Entertainment services, consisting of but not limited to cinemas, video games, preparation and sale of beverages, food, confectionery, internet content rental service, altruistic activities and real estate operator of shopping malls.: Diverse entertainment provider including cinemas, video games, and various food and beverage services.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Servicios de Consultoría Integrados, S.A.';
-        $company->acronym = 'SERV_CONS';
-        $company->activity = 'Entertainment services, consisting of but not limited to cinemas, video games, preparation and sale of beverages, food, confectionery, internet content rental service, altruistic activities and real estate operator of shopping malls.: Broad range of entertainment services with a focus on comprehensive customer experiences.';
-        $company->industry_id = '6';
-        $company->country_id = '92';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Servicios de Personal Cinemas, S.A. de C.V.';
-        $company->acronym = 'SERV_CINEMA';
-        $company->activity = '';
-        $company->industry_id = '18';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Servicios de Personal Novaduo, S.A. de C.V.';
-        $company->acronym = 'SERV_NOVAD';
-        $company->activity = '';
-        $company->industry_id = '18';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'STAR Patria, S.A. de C.V.';
-        $company->acronym = 'STAR_PATRIA';
-        $company->activity = 'Marketing of new units, spare parts, accessories, maintenance and repair of Mercedes-Benz vehicles.: Specializes in the sales, maintenance, and repair of Mercedes-Benz vehicles.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Super Mayoreo Naturista, S.A. de C.V.';
-        $company->acronym = 'SUP_MAYO';
-        $company->activity = 'Sale of packaged naturist foods, imports and exports, manufacturing, processing and trade.: Dedicated to naturist foods with expertise in manufacturing, trade, and international transactions.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Tampico Renewable Energy, S.A.P.I. de C.V.';
-        $company->acronym = 'TAMP_RENEW';
-        $company->activity = 'Company dedicated to the generation of electrical energy under the cogeneration modality.: Expert in generating electrical energy through cogeneration.';
-        $company->industry_id = '24';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Tas Tevel, S.A. de C.V.';
-        $company->acronym = 'TAS_TEVEL';
-        $company->activity = 'Ground transportation services to companies and individuals.: Provides efficient ground transportation solutions for both companies and individuals.';
-        $company->industry_id = '29';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Tenedora de Cines, S.A. de C.V.';
-        $company->acronym = 'TEN_CINES';
-        $company->activity = 'Entertainment services, consisting of but not limited to cinemas, video games, preparation and sale of beverages, food, confectionery, internet content rental service, altruistic activities and real estate operator of shopping malls.: Comprehensive entertainment services including cinemas, food, and real estate management.';
-        $company->industry_id = '18';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'The Central America Bottling Corporation';
-        $company->acronym = 'CENT_AMER_BOTT';
-        $company->activity = 'Beverage bottling company with the largest portfolio in the region, made up of global brands and with a presence in more than 35 countries.: Leading beverage bottler with an extensive portfolio and international reach.';
-        $company->industry_id = '11';
-        $company->country_id = '251';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'The Tesalia Springs Company S.A.';
-        $company->acronym = 'TESALIA_SPR';
-        $company->activity = 'Beverage producer.: Renowned producer specializing in high-quality beverages.';
-        $company->industry_id = '13';
-        $company->country_id = '65';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Transportes Camecam, S.A. de C.V.';
-        $company->acronym = 'TRANSP_CAME';
-        $company->activity = 'Company dedicated to the establishment and operation of the public motor transport service of cargo, including specialized cargo such as fuel.: Provides public motor transport services with a focus on specialized cargo, including fuel.';
-        $company->industry_id = '29';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Transportes Yucarro, S.A. de C.V.';
-        $company->acronym = 'TRANSP_YUC';
-        $company->activity = 'Transportation of fuels and diesel.: Specializes in the transportation of fuel and diesel products.';
-        $company->industry_id = '29';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Tres10, S.A. de C.V.';
-        $company->acronym = 'TRES10';
-        $company->activity = 'Development of public security infrastructure construction projects.: Focused on developing infrastructure for public security projects.';
-        $company->industry_id = '10';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Tron Hermanos, S.A. de C.V.';
-        $company->acronym = 'TRON_HERM';
-        $company->activity = 'Extraction of pure safflower and canola oils.: Expert in extracting high-quality safflower and canola oils.';
-        $company->industry_id = '13';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Typhoon Offshore S.A.P.I de C.V.';
-        $company->acronym = 'TYPHOON_OFF';
-        $company->activity = 'Third-party contracting activities for well interventions and structure maintenance.: Handles contracting for well interventions and structural maintenance services.';
-        $company->industry_id = '21';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'UNIFIN Financiera';
-        $company->acronym = 'UNIFIN';
-        $company->activity = 'Offer specialized financing to companies such as pure leasing, financial factoring and automotive credit.: Provides specialized financing options including leasing, factoring, and automotive credit.';
-        $company->industry_id = '12';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Vamsa Niños Héroes, S.A. de C.V.';
-        $company->acronym = 'VAMSA_NIÑOS';
-        $company->activity = 'Car dealership.: Offers a wide range of vehicles for sale and related services.';
-        $company->industry_id = '4';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Vertice Servicios Integrados, S.A. de C.V.';
-        $company->acronym = 'VERTICE';
-        $company->activity = 'Commerce.: Engaged in a variety of commercial activities.';
-        $company->industry_id = '9';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Vitro, S.A.B. de C.V.';
-        $company->acronym = 'VITRO';
-        $company->activity = 'Multinational company specialized in glass based in Mexico, which has positioned itself as the largest glass manufacturer in Mexico.: Leading glass manufacturer in Mexico with a strong multinational presence.';
-        $company->industry_id = '16';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Promotora Saludanat S.A. De C.V.';
-        $company->acronym = 'SALUDANAT';
-        $company->activity = 'Mexican company associated with “Súper Naturista,” focused on the commercialization of natural products and healthy lifestyle solutions. It operates mainly in Mexico City (CDMX) and the State of Mexico, offering sales positions, customer service roles, and supervisory opportunities, with statutory benefits and direct hiring.';
-        $company->industry_id = '26';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Consolidated Government Dependencies and Entities of Mexico';
-        $company->acronym = 'CGDEM';
-        $company->activity = 'To consolidate and organise information related to Mexican Government dependencies and entities into a unified framework that facilitates identification, analysis, coordination and reference of public institutions, supporting transparency, administrative efficiency and structured management within the system.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
-
-        $company = new Company();
-        $company->name = 'Tren Maya, S.A. de C.V.';
-        $company->acronym = 'TREN_MAYA';
-        $company->activity = 'To develop, operate and manage the Tren Maya as a key rail infrastructure project that promotes economic and tourism growth in southeastern Mexico, providing railway, complementary and commercial services while obtaining and administering the concessions, permits and authorisations required to fulfil its operational and development objectives.';
-        $company->industry_id = '14';
-        $company->country_id = '144';
-        $company->save();
     }
 }

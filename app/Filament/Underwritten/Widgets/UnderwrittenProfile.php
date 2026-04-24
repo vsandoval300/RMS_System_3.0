@@ -32,7 +32,7 @@ class UnderwrittenProfile extends Widget implements HasForms
             Grid::make(2)->schema([
                 Select::make('reinsurer')
                     ->label('Reinsurer')
-                    ->options(Reinsurer::pluck('name', 'id'))
+                    ->options(Reinsurer::orderBy('name')->pluck('name', 'id'))
                     ->searchable()
                     ->live(),
 
