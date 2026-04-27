@@ -73,7 +73,8 @@ class GenerateOperativeDocsReport implements ShouldQueue
             ->leftJoin('cost_nodesx', 'cost_nodesx.cscheme_id', '=', 'insured_scheme.id')
             ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
             ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
-
+            
+            ->orderBy('operative_docs.rep_date', 'desc')
             ->orderBy('businessdoc_insureds.id')
             ->orderBy('cost_nodesx.index')
 
@@ -97,6 +98,7 @@ class GenerateOperativeDocsReport implements ShouldQueue
                 'businessdoc_insureds.id as insured_row_id',
                 'businessdoc_insureds.cscheme_id as insured_cscheme_id',
 
+                'cost_nodesx.cscheme_id as node_cscheme_id',
                 'cost_nodesx.id as node_id',
                 'cost_nodesx.index as node_index',
                 'cost_nodesx.value as node_value',
@@ -124,10 +126,10 @@ class GenerateOperativeDocsReport implements ShouldQueue
             $grouped[$key][] = $row;
 
             // 🔥 flush para no crecer infinito
-            if (count($grouped[$key]) > 50) {
+            /*{
                 $result[] = $this->buildRow(collect($grouped[$key]));
                 unset($grouped[$key]);
-            }
+            }*/
         }
 
         foreach ($grouped as $rowsGroup) {
@@ -152,16 +154,63 @@ class GenerateOperativeDocsReport implements ShouldQueue
     {
         $first = $rows->first();
 
+        $schemeId = $first->insured_cscheme_id;
+
+        $schemeNodes = $rows
+            ->filter(fn ($r) => $schemeId && ($r->insured_cscheme_id ?? null) === $schemeId)
+            ->unique('node_id')
+            ->sortBy(fn ($r) => (int) ($r->node_index ?? 0))
+            ->values();
+
+        // ==========================
+        // BASE CALC (igual que export)
+        // ==========================
+        $inception  = $first->inception_date ?? null;
+        $expiration = $first->expiration_date ?? null;
+
+        $coverageDays = ($inception && $expiration)
+            ? \Carbon\Carbon::parse($inception)->diffInDays(\Carbon\Carbon::parse($expiration))
+            : 0;
+
+        $premiumOc = (float) ($first->insured_premium ?? 0);
+
+        $premiumFtpOc = ($coverageDays > 0)
+            ? ($premiumOc / 365) * (float) $coverageDays
+            : 0.0;
+
+        $share = (float) ($first->share ?? 0);
+        $share = ($share > 1) ? ($share / 100) : $share;
+
+        $gwpFtsOc = round($premiumFtpOc * $share, 2);
+
+        // ==========================
+        // NODES CALC
+        // ==========================
+        $runningBase = $gwpFtsOc;
+
         $nodes = [];
 
-        foreach ($rows as $r) {
-            if (!$r->node_id) continue;
+        foreach ($schemeNodes as $r) {
+
+            if (is_null($r->node_id)) continue;
+
+            $rate = is_null($r->node_value) ? 0.0 : (float) $r->node_value;
+            $rate = ($rate > 1) ? ($rate / 100) : $rate;
+
+            $applyToGross = (bool) ($r->node_apply_to_gross ?? false);
+
+            $baseForNode = $applyToGross ? $runningBase : $gwpFtsOc;
+
+            $amountOc = round($baseForNode * $rate, 2);
+
+            $runningBase = round($runningBase - $amountOc, 2);
 
             $nodes[] = [
-                'deduction_type' => $r->deduction_concept,
-                'source' => $r->node_source_name,
-                'value' => $r->node_value,
-                'amount_oc' => 0, // simplificado
+                'deduction_type' => $r->deduction_concept ?? null,
+                'source' => $r->node_source_name ?? null,
+                'value' => $rate,
+                'apply_to_gross' => $applyToGross,
+                'amount_oc' => $amountOc,
             ];
         }
 
@@ -169,4 +218,5 @@ class GenerateOperativeDocsReport implements ShouldQueue
 
         return $first;
     }
+
 }
