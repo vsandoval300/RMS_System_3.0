@@ -30,8 +30,6 @@ class NotifyReportReady implements ShouldQueue
      */
     public function handle(): void
     {
-        //$url = Storage::disk('public')->url($this->path);
-
         $user = User::find($this->userId);
 
         \Filament\Notifications\Notification::make()
