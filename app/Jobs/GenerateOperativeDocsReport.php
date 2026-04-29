@@ -59,9 +59,10 @@ class GenerateOperativeDocsReport implements ShouldQueue
             ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
             ->leftJoin('users', 'users.id', '=', 'operative_docs.created_by_user')
             ->leftJoin('partners as producer_partner', 'producer_partner.id', '=', 'businesses.producer_id')
-            ->when(!empty($this->reinsurerIds), fn ($q) =>
-                $q->whereIn('businesses.reinsurer_id', $this->reinsurerIds)
-            )
+            ->when(count($this->reinsurerIds) > 0, function ($q) {
+                $q->whereIn('businesses.reinsurer_id', $this->reinsurerIds);
+            })
+            
             ->whereBetween($this->dateColumn, [$this->dateStart, $this->dateEnd])
 
             ->leftJoin('businessdoc_insureds', 'businessdoc_insureds.op_document_id', '=', 'operative_docs.id')
@@ -74,7 +75,8 @@ class GenerateOperativeDocsReport implements ShouldQueue
             ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
             ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
             
-            ->orderBy('operative_docs.rep_date', 'desc')
+            //->orderBy('operative_docs.rep_date','desc')
+            //->orderBy('operative_docs.id','desc')
             ->orderBy('businessdoc_insureds.id')
             ->orderBy('cost_nodesx.index')
 
@@ -109,7 +111,7 @@ class GenerateOperativeDocsReport implements ShouldQueue
                 'p_src.acronym as node_source_acronym',
             ]);
 
-        // 🔥 streaming real sin closures serializados
+       
         $rows = $query->cursor();
 
         $grouped = [];
@@ -125,16 +127,15 @@ class GenerateOperativeDocsReport implements ShouldQueue
 
             $grouped[$key][] = $row;
 
-            // 🔥 flush para no crecer infinito
-            /*{
-                $result[] = $this->buildRow(collect($grouped[$key]));
-                unset($grouped[$key]);
-            }*/
         }
 
         foreach ($grouped as $rowsGroup) {
             $result[] = $this->buildRow(collect($rowsGroup));
         }
+
+        $result = collect($result)
+            ->sortByDesc(fn ($r) => $r->rep_date)
+            ->values();
 
         $maxNodes = collect($result)->max(fn ($r) => count($r->nodes_list ?? [])) ?? 0;
         $path = 'uw-reports/' . $this->filename;

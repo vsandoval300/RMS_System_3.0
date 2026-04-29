@@ -123,11 +123,12 @@ class ListBusinesses extends ListRecords
 
                 $reinsurerIds = collect($data['reinsurer_ids'] ?? [])
                     ->filter()
-                    ->values();
+                    ->values()
+                    ->toArray();
 
-                $scope = $reinsurerIds->isEmpty()
+                $scope = empty($reinsurerIds)
                     ? 'all-reinsurers'
-                    : ('reinsurers-' . $reinsurerIds->implode('-'));
+                    : ('reinsurers-' . implode('-', $reinsurerIds));
 
                 $reportLabels = [
                     'operative_docs'      => 'OperativeDocs_report',
