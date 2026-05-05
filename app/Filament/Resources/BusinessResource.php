@@ -354,6 +354,7 @@ class BusinessResource extends Resource
                                 ->options([
                                     'Fixed' => 'Fixed',
                                     'Estimated' => 'Estimated',
+                                    'Declared' => 'Declared'
                                 ])
                                 ->default('Fixed')
                                 ->helperText(fn ($record) =>
