@@ -2,10 +2,11 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Concerns\{
     FromCollection,
+    FromQuery,
     WithHeadings,
     WithMapping,
     ShouldAutoSize,
@@ -15,24 +16,30 @@ use Maatwebsite\Excel\Concerns\{
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-
 class OperativeDocsExport implements
-    FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles
+    FromCollection,
+    WithHeadings,
+    WithMapping,
+    ShouldAutoSize,
+    WithColumnFormatting,
+    WithStyles
 {
-    protected Collection $rows;
-    protected int $rowIndex = 0;
-    protected int $maxNodes = 0;
+    public $timeout = 1200;
+    public $tries = 3;
 
-    public function __construct(Collection $rows, int $maxNodes = 0)
+    protected $rows;
+    protected int $rowIndex = 0;
+    protected int $maxNodes;
+
+    public function __construct($rows, int $maxNodes)
     {
-        $this->rows       = $rows->values();
-        $this->maxNodes   = max(0, (int) $maxNodes);
-       
+        $this->rows = $rows;
+        $this->maxNodes = $maxNodes;
     }
 
-    public function collection(): Collection
+    public function collection()
     {
-        return $this->rows;
+        return $this->rows; // 👈 LazyCollection soportado
     }
 
     public function headings(): array
