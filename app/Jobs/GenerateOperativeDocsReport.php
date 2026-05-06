@@ -49,6 +49,9 @@ class GenerateOperativeDocsReport implements ShouldQueue
     public function handle()
     {
         $query = OperativeDoc::query()
+            ->whereNull('operative_docs.deleted_at')
+            ->whereNull('businesses.deleted_at')
+            ->whereNull('businessdoc_insureds.deleted_at')
             ->with([
                 'business.reinsurer',
                 'business.currency',
@@ -75,8 +78,8 @@ class GenerateOperativeDocsReport implements ShouldQueue
             ->leftJoin('deductions', 'deductions.id', '=', 'cost_nodesx.concept')
             ->leftJoin('partners as p_src', 'p_src.id', '=', 'cost_nodesx.partner_source_id')
             
-            //->orderBy('operative_docs.rep_date','desc')
-            //->orderBy('operative_docs.id','desc')
+            ->orderBy('businesses.business_code')
+            ->orderBy('operative_docs.id')
             ->orderBy('businessdoc_insureds.id')
             ->orderBy('cost_nodesx.index')
 
