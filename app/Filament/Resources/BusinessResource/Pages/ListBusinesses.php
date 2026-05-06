@@ -56,20 +56,10 @@ class ListBusinesses extends ListRecords
 
                 Select::make('reinsurer_ids')
                     ->label('Reinsurer(s)')
+                    ->placeholder('All reinsurers')
+                    ->options(fn () => \App\Models\Reinsurer::orderBy('name')->pluck('name', 'id'))
                     ->searchable()
-                    ->options(fn () =>
-                        \App\Models\Reinsurer::query()
-                            ->orderBy('name')
-                            ->limit(20)
-                            ->pluck('name', 'id')
-                    )
-                    ->getSearchResultsUsing(fn (string $search) =>
-                        \App\Models\Reinsurer::query()
-                            ->where('name',  'ILIKE', "%{$search}%")
-                            ->limit(50)
-                            ->pluck('name', 'id')
-                    )
-                    ->helperText('Select from the list or search by name')
+                    ->preload()
                     ->multiple(),
 
                 Hidden::make('user_timezone')
