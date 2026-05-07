@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use RuntimeException;
 use App\Models\Deduction;
 use App\Models\OperativeDoc;
 use App\Models\TransactionLog;
@@ -100,7 +101,7 @@ class TransactionLogBuilder
                         ?? Deduction::query()->value('id');
 
                     if (! $deductionId) {
-                        throw new \RuntimeException('No deduction_id available for cost node. Configure a default or ensure nodes carry a deduction.');
+                        throw new RuntimeException('No deduction_id available for cost node. Configure a default or ensure nodes carry a deduction.');
                     }
 
                     // Preserva sent/received/banking_fee/status si ya existe

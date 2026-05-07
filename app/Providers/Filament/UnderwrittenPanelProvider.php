@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -31,12 +34,12 @@ class UnderwrittenPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Underwritten/Resources'), for: 'App\\Filament\\Underwritten\\Resources')
             ->discoverPages(in: app_path('Filament/Underwritten/Pages'), for: 'App\\Filament\\Underwritten\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Underwritten/Widgets'), for: 'App\\Filament\\Underwritten\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                AccountWidget::class,
+                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

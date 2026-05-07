@@ -2,6 +2,7 @@
 
 namespace App\Filament\User\Widgets;
 
+use App\Models\User;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
@@ -15,7 +16,7 @@ class AtRiskUsers extends TableWidget
 
     protected function getTableQuery(): Builder
     {
-        return \App\Models\User::query()
+        return User::query()
             ->leftJoin('login_logs', 'login_logs.user_id', '=', 'users.id')
             ->select('users.*')
             ->selectRaw('MAX(login_logs.created_at) as last_login')

@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-
+use Database\Factories\UserFactory;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +14,7 @@ use Filament\Panel;
 
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles, HasPanelShield;
 
     protected string $guard_name = 'web';   // 👈 o 'filament' si así decidimos
@@ -76,6 +76,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function loginLogs()
     {
-        return $this->hasMany(\App\Models\LoginLog::class);
+        return $this->hasMany(LoginLog::class);
     }
 }

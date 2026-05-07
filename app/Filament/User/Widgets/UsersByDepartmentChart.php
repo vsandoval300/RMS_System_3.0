@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class UsersByDepartmentChart extends ChartWidget
 {
-    protected static ?string $heading = 'Departmental Adoption Rate (%)';
+    protected ?string $heading = 'Departmental Adoption Rate (%)';
     protected ?int $height = 300;
 
     protected function getData(): array

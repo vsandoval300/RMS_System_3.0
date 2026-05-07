@@ -40,10 +40,10 @@ class PremiumForPeriodService
 
         foreach ($docs as $doc) {
 
-            $year = \Carbon\Carbon::parse($doc->rep_date)->year;
+            $year = Carbon::parse($doc->rep_date)->year;
 
-            $inception = \Carbon\Carbon::parse($doc->inception_date);
-            $expiration = \Carbon\Carbon::parse($doc->expiration_date);
+            $inception = Carbon::parse($doc->inception_date);
+            $expiration = Carbon::parse($doc->expiration_date);
 
             $daysInYear = $inception->isLeapYear() ? 366 : 365;
             $coverageDays = $inception->diffInDays($expiration);

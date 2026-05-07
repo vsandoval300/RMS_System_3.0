@@ -2,8 +2,14 @@
 
 namespace App\Models\Traits;
 
-use Filament\Forms\Components\View;
-use Filament\Forms\Get;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Components\Utilities\Get;
+use App\Models\CostScheme;
+use App\Models\Company;
+use App\Models\Coverage;
+use Carbon\Carbon;
+use App\Models\TransactionLog;
+use App\Models\BusinessDocType;
 
 trait HasOperativeDocOverview
 {
@@ -37,7 +43,7 @@ trait HasOperativeDocOverview
                 // 🔸 Schemes con datos relevantes ya cargados
                 $schemes = collect($schemesState)
                     ->map(function ($scheme) {
-                        $model = \App\Models\CostScheme::find($scheme['cscheme_id'] ?? null);
+                        $model = CostScheme::find($scheme['cscheme_id'] ?? null);
                         return $model ? [
                             'id'             => $model->id,
                             'share'          => $model->share,
@@ -52,8 +58,8 @@ trait HasOperativeDocOverview
 
                 // 🔹 Insureds con limpieza de premium
                 $insureds = collect($insuredsState)->map(function ($insured) {
-                    $company  = \App\Models\Company::with('country')->find($insured['company_id'] ?? null);
-                    $coverage = \App\Models\Coverage::find($insured['coverage_id'] ?? null);
+                    $company  = Company::with('country')->find($insured['company_id'] ?? null);
+                    $coverage = Coverage::find($insured['coverage_id'] ?? null);
 
                     $raw   = $insured['premium'] ?? 0;
                     $clean = is_string($raw) ? preg_replace('/[^0-9.]/', '', $raw) : $raw;
@@ -80,7 +86,7 @@ trait HasOperativeDocOverview
                 // 🔹 Cost nodes
                 $costNodes = collect($schemesState)
                     ->map(fn ($scheme) =>
-                        \App\Models\CostScheme::with(
+                        CostScheme::with(
                             'costNodexes.costScheme',
                             'costNodexes.partnerSource',
                             'costNodexes.deduction'
@@ -91,8 +97,8 @@ trait HasOperativeDocOverview
                     ->values();
 
                 // 📊 Cálculos generales
-                $start        = $inception  ? \Carbon\Carbon::parse($inception)  : null;
-                $end          = $expiration ? \Carbon\Carbon::parse($expiration) : null;
+                $start        = $inception  ? Carbon::parse($inception)  : null;
+                $end          = $expiration ? Carbon::parse($expiration) : null;
                 $coverageDays = ($start && $end) ? $start->diffInDays($end) : 0;
                 $daysInYear   = $start && $start->isLeapYear() ? 366 : 365;
 
@@ -196,7 +202,7 @@ trait HasOperativeDocOverview
                 $logsByTxn = [];
 
                 if ($persistedTxIds->isNotEmpty()) {
-                    $logs = \App\Models\TransactionLog::with('toPartner')
+                    $logs = TransactionLog::with('toPartner')
                         ->whereIn('transaction_id', $persistedTxIds)
                         ->get();
 
@@ -226,7 +232,7 @@ trait HasOperativeDocOverview
                     'createdAt'            => $record?->created_at ?? now(),
                     'documentType'         => ($docTypeId = $state['operative_doc_type_id']
                         ?? $get('operative_doc_type_id'))
-                        ? \App\Models\BusinessDocType::find($docTypeId)?->name ?? '-'
+                        ? BusinessDocType::find($docTypeId)?->name ?? '-'
                         : '-',
                     'inceptionDate'        => $inception,
                     'expirationDate'       => $expiration,

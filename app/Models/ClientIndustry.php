@@ -43,7 +43,7 @@ class ClientIndustry extends Pivot
     }
 
     /* ──────────────  Metods for audit registers  ──────────────── */
-    protected function getAuditOwnerModel(): Model
+    protected function getAuditOwnerModel(): EloquentModel
     {
         return $this->client ?? $this;
     }

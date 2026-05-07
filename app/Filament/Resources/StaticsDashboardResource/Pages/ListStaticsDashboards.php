@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StaticsDashboardResource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\StaticsDashboardResource;
 use App\Filament\Resources\StaticsDashboardResource\Widgets\UserStatistics;
 use Filament\Actions;
@@ -14,7 +15,7 @@ class ListStaticsDashboards extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 

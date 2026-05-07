@@ -2,6 +2,8 @@
 
 namespace App\Filament\User\Widgets;
 
+use App\Models\User;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables;
@@ -13,7 +15,7 @@ class TopActiveUsers extends TableWidget
 
     protected function getTableQuery(): Builder
     {
-        return \App\Models\User::query()
+        return User::query()
             ->select('users.*')
             ->selectSub(function ($q) {
                 $q->from('login_logs')
@@ -28,9 +30,9 @@ class TopActiveUsers extends TableWidget
     protected function getTableColumns(): array
     {
         return [
-            Tables\Columns\TextColumn::make('name')->searchable(),
-            Tables\Columns\TextColumn::make('email')->searchable(),
-            Tables\Columns\TextColumn::make('total_logins')
+            TextColumn::make('name')->searchable(),
+            TextColumn::make('email')->searchable(),
+            TextColumn::make('total_logins')
                 ->badge()
                 ->color('success')
         ];

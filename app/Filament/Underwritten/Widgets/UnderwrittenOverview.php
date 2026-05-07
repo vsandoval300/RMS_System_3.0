@@ -2,17 +2,20 @@
 
 namespace App\Filament\Underwritten\Widgets;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Reinsurer;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Widgets\Widget;
 
-class UnderwrittenOverview extends Widget implements HasForms
+class UnderwrittenOverview extends Widget implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
-    protected static string $view = 'filament.widgets.underwritten-overview';
+    protected string $view = 'filament.widgets.underwritten-overview';
     protected int|string|array $columnSpan = 'full';
 
     public ?int $reinsurer = null;

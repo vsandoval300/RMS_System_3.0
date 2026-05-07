@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class UnderwrittenBusinessAnual extends ChartWidget
 {
-    protected static ?string $heading = 'Businesses per year';
+    protected ?string $heading = 'Businesses per year';
 
     public ?int $reinsurer = null;
     protected static bool $isLazy = false;

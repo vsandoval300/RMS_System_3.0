@@ -90,7 +90,7 @@ class CreateRole extends CreateRecord
             // ⬅️ aquí USAMOS el botón definido arriba
             $this->getCreateFormAction(),
 
-            Actions\Action::make('cancel')
+            Action::make('cancel')
                 ->label('Cancel')
                 ->url(static::getResource()::getUrl('index'))
                 ->color('gray')

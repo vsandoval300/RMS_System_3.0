@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class UnderwrittenBusiness extends ChartWidget
 {
-    protected static ?string $heading = 'Underwritten Business';
+    protected ?string $heading = 'Underwritten Business';
 
     public ?int $reinsurer = null;
     public array $years = [];

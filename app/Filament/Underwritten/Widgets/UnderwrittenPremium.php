@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Log;
 
 class UnderwrittenPremium extends ChartWidget
 {
-    protected static ?string $heading = 'Underwritten Premium';
-    protected static string $view = 'filament.widgets.premium-monthly-period';
+    protected ?string $heading = 'Underwritten Premium';
+    protected string $view = 'filament.widgets.premium-monthly-period';
 
     public ?int $reinsurer = null;
     public array $years = [];

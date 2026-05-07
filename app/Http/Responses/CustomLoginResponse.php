@@ -2,10 +2,10 @@
 
 namespace App\Http\Responses;
 
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Facades\Filament;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse as LoginResponseContract;
 
-class CustomLoginResponse implements LoginResponseContract
+class CustomLoginResponse implements LoginResponse
 {
     public function toResponse($request)
     {
@@ -13,6 +13,6 @@ class CustomLoginResponse implements LoginResponseContract
         $request->session()->forget('url.intended');
 
         // Redirige siempre al dashboard del panel actual
-        return redirect()->to(Filament::getCurrentPanel()->getUrl());
+        return redirect()->to(Filament::getCurrentOrDefaultPanel()->getUrl());
     }
 }
