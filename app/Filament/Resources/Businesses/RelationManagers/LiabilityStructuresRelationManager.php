@@ -55,15 +55,10 @@ class LiabilityStructuresRelationManager extends RelationManager
        return $schema
         ->components([
             Section::make('Liability Details')
+            ->columnSpan('full')
                 ->schema([
                     Grid::make(12)
                     ->schema([
-                        /* Forms\Components\TextInput::make('index')
-                            ->label('Index')
-                            ->disabled()
-                            ->dehydrated(false) // 👈 evita que se guarde desde el form
-                            ->columnSpan(2), */
-
                         Select::make('coverage_id')
                             ->label('Coverage')
                             ->options(fn () =>
@@ -75,26 +70,8 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->preload()
                             ->optionsLimit(300)
                             ->required()
-                            ->columnSpan(7),
+                            ->columnSpan(6),
 
-                        /* Select::make('country_id')
-                            ->label('Country')
-                            ->options(function () {
-                                return Country::orderBy('name')
-                                    ->get()
-                                    ->mapWithKeys(fn ($country) => [
-                                        $country->id => "{$country->alpha_3} - {$country->name}"
-                                    ]);
-                            })
-                            ->searchable()
-                            ->preload()
-                            ->optionsLimit(300)
-                            ->required()
-                            ->placeholder('Select a country')
-                            ->helperText('Choose the reinsurer\'s country.'), */
-
-                            
-                        
                         Section::make()
                         ->schema([
                             Radio::make('cls')
@@ -108,7 +85,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->default(false) // "No" preseleccionado
                             ->required()
                         ])
-                        ->columnSpan(5)
+                        ->columnSpan(6)
                         ->compact()
                         ->extraAttributes(['class' => 'h-full flex items-center justify-center bg-gray-800 rounded-lg'])
                     ]),
@@ -118,9 +95,10 @@ class LiabilityStructuresRelationManager extends RelationManager
                 ->collapsible(), // opcional: permite colapsar la sección
 
             Section::make('Liability Scope')
+                ->columnSpan('full')
                 ->schema([
                     Grid::make(12)
-                        
+                        ->columnSpan('full')
                         ->schema([
                             TextInput::make('limit')
                                 ->label('Limit')
@@ -146,6 +124,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                         ]),
 
                         Grid::make(12)
+                            ->columnSpan('full')
                             ->schema([
                                 TextInput::make('sublimit')
                                     ->label('Sublimit')
@@ -168,6 +147,7 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ]),
 
                         Grid::make(12)
+                            ->columnSpan('full')
                             ->schema([
                                 TextInput::make('deductible')
                                     ->label('Deductible')

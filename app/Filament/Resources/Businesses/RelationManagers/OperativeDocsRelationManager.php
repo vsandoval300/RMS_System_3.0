@@ -187,8 +187,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->schema([      
                                                 Grid::make(12)
                                                     ->schema([ 
-                                                        Placeholder::make('')
-                                                            ->columnSpan(12), // deja media fila vacía
+
 
                                                         TextInput::make('id')
                                                             ->label('Id Document')
@@ -219,7 +218,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->columns(12)
                                                     ->schema([ */
 
-                                                        Placeholder::make('')
+                                                        Placeholder::make('spacer')
                                                         ->content('Please select the document type first, then enter the service fee to be charged (Management Fee or Access Fee).')
                                                         ->extraAttributes([
                                                             'class' => 'text-sm text-gray-600 dark:text-gray-400 text-left'
@@ -1091,7 +1090,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                         $set('insureds_total', number_format($total, 2, '.', ','));
                                                     }), */
 
-                                                Placeholder::make('')->columnSpan(9),
+                                                //Placeholder::make('')->columnSpan(9),
 
                                                 /* TextInput::make('insureds_total')
                                                     ->label(new HtmlString(

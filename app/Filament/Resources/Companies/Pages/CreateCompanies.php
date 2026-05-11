@@ -59,4 +59,9 @@ class CreateCompanies extends CreateRecord
                 ->outlined(),
         ];
     }
+
+    public function getMaxContentWidth(): ?string
+    {
+        return '7xl';
+    }
 }

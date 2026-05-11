@@ -6,6 +6,7 @@ use App\Filament\Resources\Businesses\BusinessResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Actions;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Business;
@@ -142,6 +143,11 @@ class CreateBusiness extends CreateRecord
         $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$consecutive}";
+    }
+
+    public function getMaxContentWidth(): ?string
+    {
+        return '7xl';
     }
 
 

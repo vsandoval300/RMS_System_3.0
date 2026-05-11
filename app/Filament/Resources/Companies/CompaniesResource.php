@@ -50,6 +50,7 @@ class CompaniesResource extends Resource
                 //
                 Section::make('Companies Details')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpan('full')
                 ->schema([
                     
 

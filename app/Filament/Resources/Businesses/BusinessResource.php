@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Businesses;
 
-use App\Filament\Resources\Businesses\BusinessResource;
+//use App\Filament\Resources\Businesses\BusinessResource;
+use Filament\Forms\Form;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Actions\ActionGroup;
@@ -21,9 +22,10 @@ use App\Filament\Resources\BusinessResource\Pages;
 use App\Filament\Resources\BusinessResource\RelationManagers;
 use App\Models\Business;
 use App\Models\Reinsurer;
+use Filament\Schemas\Components\Group;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
+use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -51,13 +53,9 @@ use Illuminate\Support\HtmlString;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\Tabs\Tab;
-
-
-
-
+use Filament\Schemas\Components\Group as ComponentsGroup;
 
 class BusinessResource extends Resource
 {
@@ -96,68 +94,57 @@ class BusinessResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-        // Inicio esquema principal (1)
-        ->components([ 
+            ->schema([
 
+                Section::make()
+                    ->columnSpan('full')
+                    ->schema([
 
-            // 🟡 BURBUJA PRINCIPAL
-            Section::make()  // puedes ponerle un título general si quieres
-                ->columns(3) 
-                ->schema([
+                        Grid::make(12)
+                            ->extraAttributes([
+                                'class' => 'w-full items-start gap-6',
+                            ])
+                            
+                            ->schema([
 
-                Section::make('General Details')
-                    ->compact() 
-                    ->columns(4)    // ← aquí defines dos columnas
-                    ->extraAttributes([
-                        'class' => 'h-full',
-                    ])
+                                /*
+                                |--------------------------------------------------------------------------
+                                | GENERAL DETAILS
+                                |--------------------------------------------------------------------------
+                                */
 
-                        ->schema([
+                                Section::make('General Details')
+                                    ->columnSpan(8)
+                                    ->columns(6)
+                                    ->schema([
 
-                            Placeholder::make('')
-                                ->content(''),      // vacío
-
-                            Section::make('')
-                                ->compact()
-                                ->columns(4)
-
-                                    ->schema([ 
-
-
-
-                                       Select::make('reinsurer_id')
+                                        Select::make('reinsurer_id')
                                             ->label('Reinsurer')
-                                            ->options(function () {
-                                                return Reinsurer::orderBy('name')
-                                                    ->get()
-                                                    ->mapWithKeys(fn ($reinsurer) => [
-                                                        $reinsurer->id => "{$reinsurer->short_name} - {$reinsurer->name}"
-                                                    ]);
-                                            })
+                                            ->options(fn () => \App\Models\Reinsurer::query()
+                                                ->orderBy('name')
+                                                ->get()
+                                                ->mapWithKeys(fn ($reinsurer) => [
+                                                    $reinsurer->id =>
+                                                        "{$reinsurer->short_name} - {$reinsurer->name}"
+                                                ]))
                                             ->searchable()
                                             ->preload()
-                                            ->optionsLimit(300)
                                             ->native(false)
-                                            ->placeholder('Select a reinsurer')
                                             ->required()
-                                            ->helperText(fn ($record) => $record ? 'Edit the value if necessary.' : '')
                                             ->columnSpan(2),
 
                                         TextInput::make('index')
-                                            ->label('Index')
-                                            //->inlineLabel()
-                                            //->hiddenLabel()
-                                            ->required()
                                             ->numeric()
-                                            ->default(fn () => Business::max('index') + 1 ?? 1)
+                                            ->required()
+                                            ->default(fn () =>
+                                                (\App\Models\Business::max('index') ?? 0) + 1
+                                            )
                                             ->disabledOn(['create', 'edit'])
                                             ->dehydrated()
                                             ->columnSpan(1),
 
                                         TextInput::make('business_code')
                                             ->label('Business Code')
-                                            //->hiddenLabel()
-                                            ->placeholder('Business code')
                                             ->disabled()
                                             ->dehydrated()
                                             ->required()
@@ -165,335 +152,169 @@ class BusinessResource extends Resource
                                             ->hiddenOn('create')
                                             ->columnSpan(1),
 
+                                        Textarea::make('description')
+                                            ->rows(5)
+                                            ->required()
+                                            ->columnSpanFull(),
 
-                                    ])
-                                    ->columnSpan(4),    
+                                        Select::make('business_type')
+                                            ->options([
+                                                'Own' => 'Own',
+                                                'Third party' => 'Third party',
+                                            ])
+                                            ->searchable()
+                                            ->required()
+                                            ->columnSpan(3),
 
-                            Placeholder::make('')
-                                ->content('')      // vacío
-                                ->columnSpan(4),   // fuerza salto de fila       
-
-
-                            Section::make('')
-                                ->compact()
-                                ->columns(4)
-
-                                ->schema([
-
-                                    Textarea::make('description')
-                                        ->label('Description')
-                                        //->hiddenLabel()
-                                        ->placeholder('Fill in the business description')
-                                        ->helperText(fn ($record) =>
-                                            $record
-                                                ? 'Update the business description if necessary.'
-                                                : ''
-                                        )
-                                        ->required()
-                                        //->columnSpanFull()
-                                        ->rows(5) 
-                                        ->columnSpan(4),
-
-                                    Select::make('business_type')
-                                        ->label('Business Type')
-                                        //->hiddenLabel()
-                                        //->inlineLabel()
-                                        ->placeholder('Select a business type.') // 👈 Aquí cambias el texto
-                                        ->options([
-                                            'Own' => 'Own',
-                                            'Third party' => 'Third party',
-                                        ])
-                                        //->default('Own')
-                                        ->helperText(fn ($record) =>
-                                            $record
-                                                ? 'Edit the value if necessary.'
-                                                : ''
-                                        )
-                                        ->required()
-                                        ->searchable()
-                                        ->columnSpan(2),   
-
-                                    Select::make('purpose')
-                                        ->label('Purpose')
-                                        //->hiddenLabel()
-                                        //->inlineLabel()
-                                        ->placeholder('Select business purpose.') // 👈 Aquí cambias el texto
-                                        ->options([
-                                            'Traditional' => 'Traditional',
-                                            'Strategic' => 'Strategic',
-                                        ])
-                                        //->default('Strategic')
-                                        ->helperText(fn ($record) =>
-                                            $record
-                                                ? 'Edit the value if necessary.'
-                                                : ''
-                                        )
-                                        ->required()
-                                        ->searchable()
-                                        ->columnSpan(2),  
-
-                                    ])
-                                    ->columnSpan(4),    
-
-                            Placeholder::make('')
-                                ->content('')      // vacío
-                                ->columnSpan(4),   // fuerza salto de fila   
-
-
-                            Section::make('')
-                                ->compact()
-                                ->columns(2)
-
-                                    ->schema([ 
+                                        Select::make('purpose')
+                                            ->options([
+                                                'Traditional' => 'Traditional',
+                                                'Strategic' => 'Strategic',
+                                            ])
+                                            ->searchable()
+                                            ->required()
+                                            ->columnSpan(3),
 
                                         Select::make('parent_id')
-                                            ->label('Treaty') // o "Master Contract", lo que prefieras
-                                            ->relationship('treaty', 'treaty_code') // 👈 usa la nueva relación
+                                            ->label('Treaty')
+                                            ->relationship('treaty', 'treaty_code')
                                             ->searchable()
-                                            ->preload()
-                                            ->optionsLimit(180)
-                                            ->helperText(fn ($record) =>
-                                                $record
-                                                    ? 'Edit the value if necessary.'
-                                                    : ''
-                                            )
-                                            ->nullable(),
+                                            ->columnSpan(3)
+                                            ->preload(),
 
                                         Select::make('renewed_from_id')
                                             ->label('Renewed From')
-                                            //->inlineLabel()
                                             ->relationship('renewedFrom', 'business_code')
                                             ->searchable()
-                                            ->preload()
-                                            ->helperText(fn ($record) =>
-                                                $record
-                                                    ? 'Edit the value if necessary.'
-                                                    : ''
-                                            )
-                                            ->nullable(),
-                                    ])
-                                    ->columnSpan(4),
-
-
-
-                                Section::make('')
-                                ->compact()
-                                ->columns(2)
-
-                                    ->schema([ 
+                                            ->columnSpan(3)
+                                            ->preload(),
 
                                         TextInput::make('source_code')
-                                            ->label('Original id')
-                                            ->dehydrated()
+                                            ->label('Original ID')
                                             ->placeholder('Enter original id if necessary.')
-                                            ->columnSpan(1),
+                                            ->columnSpan(3),
+                                    ]),
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | CONTRACT ATTRIBUTES
+                                |--------------------------------------------------------------------------
+                                */
+
+                                Section::make('Contract Attributes')
+                                    ->columnSpan(4)
+                                    ->schema([
+
+                                        Select::make('reinsurance_type')
+                                            ->label('Contract Type')
+                                            ->options([
+                                                'Facultative' => 'Facultative',
+                                                'Treaty' => 'Treaty',
+                                            ])
+                                            ->default('Facultative')
+                                            ->searchable()
+                                            ->required(),
+
+                                        Select::make('risk_covered')
+                                            ->label('Risk Covered')
+                                            ->options([
+                                                'Life' => 'Life',
+                                                'Non-Life' => 'Non-Life',
+                                            ])
+                                            ->default('Non-Life')
+                                            ->searchable()
+                                            ->required(),
+
+                                        Select::make('premium_type')
+                                            ->label('Premium Type')
+                                            ->options([
+                                                'Fixed' => 'Fixed',
+                                                'Estimated' => 'Estimated',
+                                                'Declared' => 'Declared',
+                                            ])
+                                            ->default('Fixed')
+                                            ->searchable()
+                                            ->required(),
+
+                                        Select::make('claims_type')
+                                            ->label('Claims Type')
+                                            ->options([
+                                                'Claims occurrence' => 'Claims occurrence',
+                                                'Claims made' => 'Claims made',
+                                                'Hybrid' => 'Hybrid',
+                                            ])
+                                            ->searchable()
+                                            ->required(),
+
+                                        Select::make('currency_id')
+                                            ->label('Currency')
+                                            ->relationship(
+                                                name: 'currency',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn (Builder $query) =>
+                                                    $query->orderBy('acronym')
+                                            )
+                                            ->getOptionLabelFromRecordUsing(
+                                                fn ($record) =>
+                                                    "{$record->acronym} - {$record->name}"
+                                            )
+                                            ->searchable(['name', 'acronym'])
+                                            ->preload()
+                                            ->default(157)
+                                            ->required(),
+
+                                        Select::make('region_id')
+                                            ->label('Region')
+                                            ->relationship('region', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->required(),
+
+                                        Select::make('producer_id')
+                                            ->label('Producer')
+                                            ->relationship('producer', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->default(96)
+                                            ->required(),
+                                    ]),
+                            ]),
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | STATUS TRACKING
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Section::make('Status Tracking')
+                            ->columns(3)
+                            ->hiddenOn(['create', 'edit'])
+                            ->schema([
+
+                                Select::make('business_lifecycle_status')
+                                    ->label('Lifecycle Status')
+                                    ->options([
+                                        'On Hold' => 'On Hold',
+                                        'In Force' => 'In Force',
+                                        'To Expire' => 'To Expire',
+                                        'Expired' => 'Expired',
+                                        'Cancelled' => 'Cancelled',
                                     ])
-                                    ->columnSpan(4),    
+                                    ->default('On Hold')
+                                    ->native(false)
+                                    ->searchable()
+                                    ->disabled(),
 
-                            Placeholder::make('')
-                                ->content('')      // vacío
-                                ->columnSpan(4),   // fuerza salto de fila   
+                                TextInput::make('approval_status')
+                                    ->disabled()
+                                    ->default('DFT'),
 
-                            Placeholder::make('')
-                                ->content('')      // vacío
-                                ->columnSpan(4),   // fuerza salto de fila     
-
-                        ])
-                        ->columnSpan(2),
-
-
-
-
-                 Section::make('Contract Attributes')
-                    ->compact()
-                    ->columns(1)
-                    ->extraAttributes([
-                        'class' => 'h-full min-h-[520px]', // ajusta 520px a tu caso
-                    ])
-
-                        ->schema([ 
-
-                            Placeholder::make('')
-                                ->content(''),      // vacío
-
-                            Select::make('reinsurance_type')
-                                ->label('Contract Type')
-                                ->placeholder('Select a reinsurer type')
-                                ->options([
-                                    'Facultative' => 'Facultative',
-                                    'Treaty' => 'Treaty',
-                                ])
-                                ->default('Facultative')   // 👈 valor por defecto
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : 'You can keep the default value or choose a different one.'
-                                )
-                                //->disabled()
-                                ->required()
-                                ->searchable(),
-
-
-                            Select::make('risk_covered')
-                                ->label('Risk Covered')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                ->placeholder('Select the risk covered.') // 👈 Aquí cambias el texto
-                                ->options([
-                                    'Life' => 'Life',
-                                    'Non-Life' => 'Non-Life',
-                                ])
-                                ->default('Non-Life')
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : 'You can keep the default value or choose a different one.'
-                                )
-                                ->required()
-                                ->searchable(),   
-
-                            Select::make('premium_type')
-                                ->label('Premium Type')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                ->placeholder('Select a premium type.') // 👈 Aquí cambias el texto
-                                ->options([
-                                    'Fixed' => 'Fixed',
-                                    'Estimated' => 'Estimated',
-                                    'Declared' => 'Declared'
-                                ])
-                                ->default('Fixed')
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : 'You can keep the default value or choose a different one.'
-                                )
-                                ->required()
-                                ->searchable(),   
-
-                            Select::make('claims_type')
-                                ->label('Claims Type')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                ->placeholder('Select claims type.') // 👈 Aquí cambias el texto
-                                ->options([
-                                    'Claims occurrence' => 'Claims occurrence',
-                                    'Claims made' => 'Claims made',
-                                    'Hybrid' => 'Hybrid',
-                                ])
-                                //->default('Claims occurrence')
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : ''
-                                )
-                                ->required()
-                                ->searchable(),   
-
-                            Select::make('currency_id')
-                                ->label('Currency')
-                                ->placeholder('Select currency.')
-                                ->relationship(
-                                    name: 'currency',
-                                    titleAttribute: 'name',
-                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('acronym')
-                                )
-                                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->acronym} - {$record->name}")
-                                ->searchable(['name', 'acronym']) // ✅ ahora "usd" sí encuentra
-                                ->preload()
-                                ->optionsLimit(1800)
-                                ->default(157)
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : 'You can keep the default value or choose a different one.'
-                                ) 
-                                ->required(),    
-
-                            Select::make('region_id')
-                                ->label('Region')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                ->placeholder('Select business region.') // 👈 Aquí cambias el texto
-                                ->relationship('Region', 'name') // usa la relación en tu modelo
-                                ->searchable()
-                                ->preload()
-                                //->default(2) 
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : ''
-                                )
-                                ->required(),  
-
-                            Select::make('producer_id')
-                                ->label('Producer')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                ->placeholder('Select business producer.') // 👈 Aquí cambias el texto
-                                ->relationship('Producer', 'name') // usa la relación en tu modelo
-                                ->searchable()
-                                ->preload()
-                                ->optionsLimit(300)
-                                ->default(96)
-                                ->helperText(fn ($record) =>
-                                    $record
-                                        ? 'Edit the value if necessary.'
-                                        : 'You can keep the default value or choose a different one.'
-                                )
-                                ->required(),
-
-
-                            Placeholder::make('')
-                                ->content(''),      // vacío
-                                //->columnSpan(4),   // fuerza salto de fila 
-
-
-                        ])
-                         ->columnSpan(1),
-
-
-                Section::make('Status Tracking')
-                    ->columns(3)
-                    ->hidden(fn (string $context): bool => in_array($context, ['create', 'edit']))
-                        ->schema([ 
-                             Select::make('business_lifecycle_status')
-                                ->label('Lifecycle Status')
-                                ->options([
-                                    'On Hold'   => 'On Hold',
-                                    'In Force'  => 'In Force',
-                                    'To Expire' => 'To Expire',
-                                    'Expired'   => 'Expired',
-                                    'Cancelled' => 'Cancelled',
-                                ])
-                                ->required()
-                                ->default('On Hold')
-                                ->native(false)   // UI bonita (TomSelect)
-                                ->searchable()    // opcional
-                                ->preload()       // opcional: carga todas las opciones
-                                ->disabledOn(['create', 'edit']) // mismo comportamiento que tenías
-                                ->dehydrated(),
-
-                            TextInput::make('approval_status')
-                                ->label('Approval Status')
-                                //->hiddenLabel()
-                                //->inlineLabel()
-                                ->disabledOn(['create', 'edit'])
-                                ->maxLength(510)
-                                ->default('DFT'),
-
-                            DatePicker::make('approval_status_updated_at')
-                                ->label('Approval date')
-                                //->hiddenLabel() 
-                                ->disabledOn(['create', 'edit'])
-                                //->inlineLabel(),
-
-                        ]),
-
-                 ]),
-
+                                DatePicker::make('approval_status_updated_at')
+                                    ->label('Approval Date')
+                                    ->disabled(),
+                            ]),
+                    ]),
             ]);
-            // Fin esquema principal (1)
     }
 
 
@@ -513,6 +334,7 @@ class BusinessResource extends Resource
         return $schema->components([
 
             Section::make() // o InfoSection::make('Business Details')
+            ->columnSpan('full')
             ->schema([
 
                 /* ─────────────────────────  BUSINESS IDENTITY  ───────────────────────── */
@@ -536,7 +358,7 @@ class BusinessResource extends Resource
                                                 ->schema([
 
                                                 TextEntry::make('underwritten_by')
-                                                    ->label('')
+                                                    ->hiddenLabel()
                                                     ->state(function ($record) {
                                                         $name = $record->reinsurer?->name ?? '—';
 
@@ -544,10 +366,10 @@ class BusinessResource extends Resource
                                                             "<strong>Underwritten by:</strong> {$name}"
                                                         );
                                                     })
-                                                    ->columnSpan(8),
+                                                    ->columnSpan(7),
 
                                                 TextEntry::make('business_code_entry')
-                                                    ->label('')
+                                                    ->hiddenLabel()
                                                     ->state(function ($record) {
                                                         $code = $record->business_code ?: '—';
 
@@ -555,7 +377,7 @@ class BusinessResource extends Resource
                                                             "<strong>Business code:</strong> {$code}"
                                                         );
                                                     })
-                                                    ->columnSpan(4),
+                                                    ->columnSpan(5),
 
 
                                             ]),
@@ -570,7 +392,7 @@ class BusinessResource extends Resource
                                                 ->extraAttributes(['style' => 'gap:1px;padding:1px 0;'])
                                                 ->schema([
                                                     TextEntry::make('gd_desc_value')
-                                                        ->label('')
+                                                        ->hiddenLabel()
                                                         ->state(fn ($record) => $record->description ?: '—')
                                                         ->extraAttributes(['style' => 'line-height:1;'])
                                                         ->columnSpan(12),
@@ -585,7 +407,7 @@ class BusinessResource extends Resource
                                                 ->schema([
 
                                                     TextEntry::make('business_type_entry')
-                                                        ->label('')
+                                                        ->hiddenLabel()
                                                         ->state(function ($record) {
                                                             $value = $record->business_type ?: '—';
 
@@ -596,7 +418,7 @@ class BusinessResource extends Resource
                                                         ->columnSpan(4),
 
                                                     TextEntry::make('purpose_entry')
-                                                        ->label('')
+                                                        ->hiddenLabel()
                                                         ->state(function ($record) {
                                                             $value = $record->purpose ?: '—';
 
@@ -618,7 +440,7 @@ class BusinessResource extends Resource
                                                 ->schema([
 
                                                     TextEntry::make('parent_treaty_entry')
-                                                        ->label('')
+                                                        ->hiddenLabel()
                                                         ->state(function ($record) {
                                                             $value = $record->parent?->treaty_code ?: '—';
 
@@ -629,7 +451,7 @@ class BusinessResource extends Resource
                                                         ->columnSpan(4),
 
                                                     TextEntry::make('renewed_from_entry')
-                                                        ->label('')
+                                                        ->hiddenLabel()
                                                         ->state(function ($record) {
                                                             $value = $record->renewedFrom?->business_code ?: '—';
 
@@ -652,7 +474,7 @@ class BusinessResource extends Resource
                                                 ->schema([
 
                                                     TextEntry::make('source_code')
-                                                        ->label('')
+                                                        ->hiddenLabel()
                                                         ->state(function ($record) {
                                                             $value = $record->source_code ?: '—';
 
@@ -680,7 +502,7 @@ class BusinessResource extends Resource
                             
 
                                 TextEntry::make('reinsurance_type_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->reinsurance_type ?: '—';
 
@@ -694,7 +516,7 @@ class BusinessResource extends Resource
                                     ]),
 
                                 TextEntry::make('risk_covered_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->risk_covered ?: '—';
 
@@ -708,7 +530,7 @@ class BusinessResource extends Resource
                                     ]),
 
                                 TextEntry::make('premium_type_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->premium_type ?: '—';
 
@@ -722,7 +544,7 @@ class BusinessResource extends Resource
                                     ]),
 
                                 TextEntry::make('claims_type_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->claims_type ?: '—';
 
@@ -736,7 +558,7 @@ class BusinessResource extends Resource
                                     ]),
 
                                 TextEntry::make('currency_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->currency
                                             ? ($record->currency->acronym . ' - ' . $record->currency->name)
@@ -752,7 +574,7 @@ class BusinessResource extends Resource
                                     ]),
 
                                 TextEntry::make('region_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->region?->name ?? '—';
 
@@ -766,7 +588,7 @@ class BusinessResource extends Resource
                                     ]),
 
                                 TextEntry::make('producer_entry')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(function ($record) {
                                         $value = $record->producer?->name ?? '—';
 
@@ -800,7 +622,7 @@ class BusinessResource extends Resource
 
         
                            TextEntry::make('approval_status_entry')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(function ($record) {
                                     $status = $record->approval_status;
 
@@ -819,7 +641,7 @@ class BusinessResource extends Resource
                                 ->columnSpan(2),
 
                             TextEntry::make('approval_date_entry')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(function ($record) {
                                     $value = $record->approval_status_updated_at?->format('Y-m-d') ?: '—';
 
@@ -830,7 +652,7 @@ class BusinessResource extends Resource
                                 ->columnSpan(2),
 
                             TextEntry::make('lifecycle_status_entry')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(function ($record) {
                                     $status = $record->business_lifecycle_status;
 
@@ -849,7 +671,7 @@ class BusinessResource extends Resource
                                 ->columnSpan(2),
 
                             TextEntry::make('created_at_entry')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(function ($record) {
                                     $value = $record->created_at?->format('Y-m-d H:i') ?: '—';
 
@@ -860,7 +682,7 @@ class BusinessResource extends Resource
                                 ->columnSpan(3),
 
                             TextEntry::make('created_by_user')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(function ($record) {
                                         $value = $record->user?->name ?? '-';
                                         
