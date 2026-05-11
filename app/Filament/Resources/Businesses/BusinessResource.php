@@ -141,7 +141,7 @@ class BusinessResource extends Resource
                                             )
                                             ->disabledOn(['create', 'edit'])
                                             ->dehydrated()
-                                            ->columnSpan(1),
+                                            ->columnSpan(2),
 
                                         TextInput::make('business_code')
                                             ->label('Business Code')
@@ -150,7 +150,7 @@ class BusinessResource extends Resource
                                             ->required()
                                             ->unique(ignoreRecord: true)
                                             ->hiddenOn('create')
-                                            ->columnSpan(1),
+                                            ->columnSpan(2),
 
                                         Textarea::make('description')
                                             ->rows(5)

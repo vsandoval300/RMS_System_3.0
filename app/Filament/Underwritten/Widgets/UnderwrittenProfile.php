@@ -22,7 +22,7 @@ class UnderwrittenProfile extends Widget implements HasForms, HasActions
     use InteractsWithForms;
 
     protected string $view = 'filament.widgets.underwritten-profile';
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = '7xl';
 
     public ?int $reinsurer = null;
     public array $years = [];

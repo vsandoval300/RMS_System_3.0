@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
                 //'gray' => Color::Zinc,
                 //'gray' => Color::hex('#27272a'),   // zinc-500
                 //'info' => Color::Blue,
-                'primary' => '#41A2C3', 
+                'primary' =>  '#41A2C3'
                 //'success' => Color::Green,
                 //'warning' => Color::Amber,
             ]);

@@ -85,14 +85,16 @@ class ReinsurersResource extends Resource
     {
         return $schema
             ->components([
-
+            
                 // ========== DETAILS ==========
                 Section::make('Details')
-                    ->columns(2)
+                    ->columnSpan('full')        
+                    ->columns(12)
                     ->schema([
 
                         Section::make() // 👈 sin título
                             ->columns(6)
+                            ->columnSpan('full')  
                             ->schema([
                                 TextInput::make('id')
                                     ->label('ID')
@@ -117,6 +119,7 @@ class ReinsurersResource extends Resource
 
                         Section::make('Basic Info')
                             ->columns(6)
+                            ->columnSpan('full')  
                             ->schema([
                                 TextInput::make('name')
                                     ->label('Name')

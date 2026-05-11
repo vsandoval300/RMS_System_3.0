@@ -157,6 +157,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ]) */
                 Section::make('Primary Document Data')
                     ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'tabs')
+                    ->columnSpanFull()
                     ->headerActions([
                         Action::make('goSummary')
                             ->label('Overview')
@@ -194,7 +195,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->disabled()
                                                             ->dehydrated() //CAMBIO
                                                             ->required()
-                                                            ->columnSpan(3),
+                                                            ->columnSpan(8),
                                                      ]),
                                            /* ])
                                             ->compact(), */
@@ -851,41 +852,8 @@ class OperativeDocsRelationManager extends RelationManager
                                         Grid::make(12)
                                             ->schema([
 
-                                                // 🟡 👇 AQUÍ VA LA LEYENDA (antes del Repeater)
-                                                Placeholder::make('insureds_notice')
-                                                    ->content(new HtmlString(
-                                                        '
-                                                        <div class="flex gap-2 items-start">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-5 w-5 mt-0.5 text-warning-600 dark:text-warning-400 flex-shrink-0"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M12 9v2m0 4h.01M10.29 3.86l-8.3 14.38A1 1 0 002.83 20h16.34a1 1 0 00.86-1.76L11.71 3.86a1 1 0 00-1.72 0z" />
-                                                            </svg>
-
-                                                            <div>
-                                                                <strong>Important:</strong>
-                                                                Please register the <em>Annual Gross Reinsurance Premium</em>
-                                                                <strong>per coverage and per insured company</strong>.
-                                                                <br>
-                                                                Placement scheme shares and totals are calculated automatically.
-                                                            </div>
-                                                        </div>
-                                                        '
-                                                    ))
-                                                    ->extraAttributes([
-                                                        'class' => '
-                                                            text-sm text-gray-600 dark:text-gray-400
-                                                            bg-warning-50 dark:bg-gray-800/40
-                                                            border border-warning-100/40 dark:border-gray-700
-                                                            rounded-md p-3
-                                                        ',
-                                                    ])
-                                                    ->columnSpan(12),
-
-
-
-
+                                                View::make('filament.components.insureds-notice')
+                                                    ->columnSpanFull(),
 
                                                 // 🟡 👇 Inicio del Repeater
                                                 Repeater::make('insureds')
@@ -1119,7 +1087,7 @@ class OperativeDocsRelationManager extends RelationManager
                 // ─────────  B) SECTION: (colapsable)  ─────────────────────────────────────────
                 // 🟡 SPACE 
                 // ──────────────────────────────────────────────────────────────────────────────
-                Placeholder::make('')
+                Placeholder::make('spacer')
                     ->content('')
                     ->columnSpanFull()
                     ->extraAttributes(['class' => 'my-1']), // 👈 margen vertical
@@ -1139,7 +1107,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                     Section::make()
                     ->schema([
-                        Placeholder::make('')
+                        Placeholder::make('spacer')
                             ->content(new HtmlString('
                                 <div class="space-y-2">
                                     <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">
