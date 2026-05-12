@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ViewRecord;
 use App\Models\Business;
 use Filament\Actions;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
 use Filament\Forms;
 
 class ViewBusiness extends ViewRecord
@@ -55,18 +56,24 @@ class ViewBusiness extends ViewRecord
             Action::make('auditInfo')
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modalHeading('Audit info')
-                ->modalWidth('7xl')        // 👈 aquí controlas el ancho del modal
-                ->modalSubmitAction(false) // no necesitamos botón de "Save"
-                ->closeModalByClickingAway() // opcional
-                ->schema([
-                    View::make('filament.resources.audit.audit-logs')
-                        ->viewData([
-                            // Pasamos el registro actual a la vista Blade
-                            'record' => $this->getRecord(),
-                        ])
-                        ->columnSpanFull(),
-                ]),   
+                ->modalContent(fn () => view(
+                'filament.resources.audit.audit-logs',
+                [
+                    'record' => $this->getRecord(),
+
+                ],
+            ))
+
+            ->modalSubmitAction(false)
+            ->modalCancelAction(false)
+
+            // 👇 MUY IMPORTANTE
+            ->modalWidth(Width::SevenExtraLarge)
+
+            // 👇 controlamos altura REAL del modal
+            ->extraModalWindowAttributes([
+                'class' => '!p-0 !overflow-hidden !max-h-[80vh]',
+            ]),   
                 
             Action::make('close')
                 ->label('Close')

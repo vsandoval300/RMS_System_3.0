@@ -1,83 +1,98 @@
 @php
-    /** @var \Illuminate\Database\Eloquent\Model|null $record */
-    $record = $getRecord();
     $logs = $record
-        ? $record->auditLogs()->with('user')->latest()->get()
+        ? $record->auditLogs()
+            ->with('user')
+            ->latest()
+            ->get()
         : collect();
 @endphp
 
-{{-- @php
-    /** @var \Illuminate\Database\Eloquent\Model|null $record */
+<div class="flex flex-col h-[80vh]">
 
-    // 1) Preferimos el record que viene por viewData()
-    $resolvedRecord = $record ?? null;
+    {{-- HEADER --}}
+    <div class="px-6 pt-6 pb-4 shrink-0">
 
-    // 2) Fallback: si no vino, intentamos obtenerlo desde el contexto del componente (si existe)
-    if (! $resolvedRecord && isset($this) && method_exists($this, 'getRecord')) {
-        $resolvedRecord = $this->getRecord();
-    }
-
-    $logs = $resolvedRecord
-        ? $resolvedRecord->auditLogs()->with('user')->latest()->get()
-        : collect();
-@endphp --}}
-
-
-<div class="flex flex-col gap-4">
-    {{-- Título general del modal --}}
-    <div class="mt-2">
-        <h3 class="text-lg font-semibold">
+        <h2 class="text-lg font-semibold">
             Audit info
-        </h3>
+        </h2>
+
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            Change history
+        </p>
+
     </div>
 
-    {{-- 🔹 Burbuja de Change history con alto fijo y scroll interno --}}
-    <div class="rounded-xl border border-gray-200/80 bg-white/60 px-4 py-3
-                dark:border-white/10 dark:bg-gray-900/60">
+    {{-- BODY --}}
+    <div class="flex-1 overflow-y-auto min-h-0 px-6 pb-6">
 
-        <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Change history
-        </h4>
+        <div class="space-y-3">
 
-        @if ($logs->isEmpty())
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                No changes registered yet.
-            </p>
-        @else
-            <div
-                class="mt-2 space-y-2 text-xs pr-2 overflow-y-auto"
-                style="max-height: 400px;"  {{-- 🔧 altura de la burbuja (ajusta a gusto) --}}
-            >
-                @foreach ($logs as $log)
-                    <div class="rounded-md border border-gray-200/80 px-3 py-2 space-y-1 shadow-sm
-                                dark:border-white/10">
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium">
+            @foreach ($logs as $log)
+
+                <div class="rounded-xl border border-gray-200
+                            dark:border-white/10
+                            p-4">
+
+                    <div class="flex items-start justify-between gap-4">
+
+                        <div class="min-w-0 flex-1">
+
+                            <div class="text-sm font-medium break-words">
                                 {{ $log->event }}
-                            </span>
+                            </div>
 
-                            <span class="text-gray-500 dark:text-gray-400">
-                                {{ $log->created_at->format('d/m/Y H:i') }}
-                                @if ($log->user)
-                                    · {{ $log->user->name }}
-                                @endif
-                            </span>
                         </div>
 
-                        @if (!empty($log->changes))
-                            <ul class="mt-1 list-disc list-inside space-y-0.5">
-                                @foreach ($log->changes as $field => $values)
-                                    <li>
-                                        <span class="font-medium">{{ $field }}</span>:
-                                        changed from ["{{ $values['old'] ?? '' }}"]
-                                        to ["{{ $values['new'] ?? '' }}"]
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
+                        <div class="shrink-0 text-xs text-gray-500 whitespace-nowrap">
+
+                            {{ $log->created_at->format('d/m/Y H:i') }}
+
+                            @if ($log->user)
+                                · {{ $log->user->name }}
+                            @endif
+
+                        </div>
+
                     </div>
-                @endforeach
-            </div>
-        @endif
+
+                    @if (!empty($log->changes))
+
+                        <ul class="mt-3 space-y-2">
+
+                            @foreach ($log->changes as $field => $values)
+
+                                <li class="text-xs break-words leading-5">
+
+                                    <span class="font-semibold">
+                                        {{ $field }}
+                                    </span>
+
+                                    changed from
+
+                                    <span class="font-mono">
+                                        [{{ $values['old'] ?? '' }}]
+                                    </span>
+
+                                    to
+
+                                    <span class="font-mono">
+                                        [{{ $values['new'] ?? '' }}]
+                                    </span>
+
+                                </li>
+
+                            @endforeach
+
+                        </ul>
+
+                    @endif
+
+                </div>
+
+            @endforeach
+
+        </div>
+
     </div>
+
 </div>

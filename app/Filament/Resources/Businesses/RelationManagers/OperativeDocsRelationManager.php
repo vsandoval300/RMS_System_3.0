@@ -130,7 +130,6 @@ class OperativeDocsRelationManager extends RelationManager
                 Hidden::make('active_panel')
                     ->default('tabs')   // 👈 por defecto Tabs abierto, Summary cerrado
                     ->live()  
-                    ->reactive()
                     ->dehydrated(false), 
                 /* ->afterStateHydrated(function (Forms\Set $set, $state) {
                         if (blank($state)) $set('active_panel', 'tabs');
@@ -138,13 +137,13 @@ class OperativeDocsRelationManager extends RelationManager
                 // 🟢 🔑 VERSIONADOR de Placement Schemes (NO se guarda en BD)
                 Hidden::make('schemes_version')
                     ->default(fn () => (string) Str::uuid())
-                    ->reactive()
+                    ->live()
                     ->dehydrated(false),
 
                 Hidden::make('coverage_helper_tick')
                     ->default((string) Str::uuid())
                     ->dehydrated(false)
-                    ->reactive(),    
+                    ->live(),    
                  
 
                 // ────────  A) SECTION: TABS (colapsable)  ─────────────────────────
@@ -177,7 +176,7 @@ class OperativeDocsRelationManager extends RelationManager
                                 //🔵 1.-Tab for Document Details 
                                 //----------------------------------------------------
                                 Tab::make('Document Details')
-                                    ->icon('document')->icon('heroicon-o-document-text')
+                                    ->icon('heroicon-o-document-text')
                                     ->schema([
 
                                         //Primera burbuja: solo Id Document
@@ -219,13 +218,9 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->columns(12)
                                                     ->schema([ */
 
-                                                        Placeholder::make('spacer')
-                                                        ->content('Please select the document type first, then enter the service fee to be charged (Management Fee or Access Fee).')
-                                                        ->extraAttributes([
-                                                            'class' => 'text-sm text-gray-600 dark:text-gray-400 text-left'
-                                                        ])
-                                                        ->columnSpanFull()
-                                                        ->hiddenOn('view'),
+                                                        View::make('filament.components.help.document-fee-hint')
+                                                            ->columnSpanFull()
+                                                            ->hidden(fn (string $operation) => $operation === 'view'),
 
                                                         Select::make('operative_doc_type_id')
                                                             ->label('Document Type')
@@ -448,10 +443,10 @@ class OperativeDocsRelationManager extends RelationManager
                                                     
 
                                      // ───── Columna 2: Vacía ─────
-                                    Placeholder::make('spacer')
+                                    /* Placeholder::make('spacer')
                                         ->label(' ')
                                         ->content(' ')
-                                        ->columnSpan(3),
+                                        ->columnSpan(3), */
                                         
 
                                     /* ])
@@ -674,10 +669,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                      
                                     
                                      // ───── Columna 2: Vacía ─────
-                                    Placeholder::make('spacer')
-                                        ->label(' ')
-                                        ->content(' ')
-                                        ->columnSpan(3),
+                                    
                                     
                                     //Tercera burbuja: solo el archivo
                                     Section::make('File Upload')
@@ -894,8 +886,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->preload()
                                                             ->required()
                                                             ->live()
-                                                            ->reactive()
-
+                                                            
                                                             // ✅ ESTA ES LA DIFERENCIA: forzar remount si cambian schemes
                                                             ->key(fn (Get $get) => 'insured-cscheme-' . ($get('../../schemes_version') ?? 'v0'))
 
@@ -974,7 +965,6 @@ class OperativeDocsRelationManager extends RelationManager
                                                             })
 
                                                             // ✅ Importante dentro de repeater para que recalculen closures al cambiar
-                                                            ->reactive()
                                                             ->live()
 
                                                             ->searchable()
@@ -1075,8 +1065,10 @@ class OperativeDocsRelationManager extends RelationManager
                                 //--- End Tab ----------------------------------------          
                            
                         ])
-                        ->columnSpanFull(), //─────── END tabs ──────────────────────────────────
-                                                     
+                        ->columnSpanFull() //─────── END tabs ──────────────────────────────────
+                        ->extraAttributes([
+                            'class' => 'space-y-6',
+                        ])                            
                 ]), //──────── END Section ──────────────────────────────────────────────────────────
 
                 
@@ -1087,10 +1079,10 @@ class OperativeDocsRelationManager extends RelationManager
                 // ─────────  B) SECTION: (colapsable)  ─────────────────────────────────────────
                 // 🟡 SPACE 
                 // ──────────────────────────────────────────────────────────────────────────────
-                Placeholder::make('spacer')
+                /* Placeholder::make('spacer')
                     ->content('')
                     ->columnSpanFull()
-                    ->extraAttributes(['class' => 'my-1']), // 👈 margen vertical
+                    ->extraAttributes(['class' => 'my-1']), // 👈 margen vertical */
                 // ─── END Section ──────────────────────────────────────────────────────────────
             
 

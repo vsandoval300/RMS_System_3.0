@@ -59,5 +59,9 @@ class ViewReinsurer extends ViewRecord
         ];
     }
 
+    public function getMaxContentWidth(): ?string
+    {
+        return '7xl';
+    }
 
 }

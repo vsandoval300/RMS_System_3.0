@@ -435,7 +435,9 @@ class ReinsurersResource extends Resource
 public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
-        Section::make('Reinsurer Profile')->schema([
+        Section::make('Reinsurer Profile')
+        ->columnSpan('full')
+        ->schema([
             Grid::make(3)
                 ->extraAttributes(['style' => 'gap: 6px;'])
                 ->schema([
