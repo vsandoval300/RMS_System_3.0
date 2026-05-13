@@ -210,7 +210,9 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Country Profile')->schema([
+        Section::make('Country Profile')
+        ->columnSpanFull()    
+        ->schema([
             \Filament\Schemas\Components\Grid::make(2)
                 ->extraAttributes(['style' => 'gap: 6px;'])
                 ->schema([
@@ -225,56 +227,56 @@ public static function infolist(Schema $schema): Schema
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('name_label')->label('')->state('Name:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('name_value')->label('')->state(fn ($record) => $record->name ?: '—')->columnSpan(9),
+                                    TextEntry::make('name_label')->hiddenLabel()->state('Name:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('name_value')->hiddenLabel()->state(fn ($record) => $record->name ?: '—')->columnSpan(9),
                                 ]),
 
                             // Alpha 2
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('a2_label')->label('')->state('Alpha 2:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('a2_value')->label('')->state(fn ($record) => $record->alpha_2 ?: '—')->columnSpan(9),
+                                    TextEntry::make('a2_label')->hiddenLabel()->state('Alpha 2:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('a2_value')->hiddenLabel()->state(fn ($record) => $record->alpha_2 ?: '—')->columnSpan(9),
                                 ]),
 
                             // Alpha 3
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('a3_label')->label('')->state('Alpha 3:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('a3_value')->label('')->state(fn ($record) => $record->alpha_3 ?: '—')->columnSpan(9),
+                                    TextEntry::make('a3_label')->hiddenLabel()->state('Alpha 3:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('a3_value')->hiddenLabel()->state(fn ($record) => $record->alpha_3 ?: '—')->columnSpan(9),
                                 ]),
 
                             // Country Code
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('cc_label')->label('')->state('Country Code:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('cc_value')->label('')->state(fn ($record) => isset($record->country_code) ? (string) $record->country_code : '—')->columnSpan(9),
+                                    TextEntry::make('cc_label')->hiddenLabel()->state('Country Code:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('cc_value')->hiddenLabel()->state(fn ($record) => isset($record->country_code) ? (string) $record->country_code : '—')->columnSpan(9),
                                 ]),
 
                             // ISO Code
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('iso_label')->label('')->state('ISO Code:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('iso_value')->label('')->state(fn ($record) => $record->iso_code ?: '—')->columnSpan(9),
+                                    TextEntry::make('iso_label')->hiddenLabel()->state('ISO Code:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('iso_value')->hiddenLabel()->state(fn ($record) => $record->iso_code ?: '—')->columnSpan(9),
                                 ]),
 
                             // AM Best Code
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('amb_label')->label('')->state('AM Best Code:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('amb_value')->label('')->state(fn ($record) => $record->am_best_code ?: '—')->columnSpan(9),
+                                    TextEntry::make('amb_label')->hiddenLabel()->state('AM Best Code:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('amb_value')->hiddenLabel()->state(fn ($record) => $record->am_best_code ?: '—')->columnSpan(9),
                                 ]),
 
                             // Latitude
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('lat_label')->label('')->state('Latitude:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('lat_value')->label('')->state(fn ($record) =>
+                                    TextEntry::make('lat_label')->hiddenLabel()->state('Latitude:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('lat_value')->hiddenLabel()->state(fn ($record) =>
                                         is_numeric($record->latitude) ? number_format((float) $record->latitude, 6) : '—'
                                     )->columnSpan(9),
                                 ]),
@@ -283,8 +285,8 @@ public static function infolist(Schema $schema): Schema
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('lng_label')->label('')->state('Longitude:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('lng_value')->label('')->state(fn ($record) =>
+                                    TextEntry::make('lng_label')->hiddenLabel()->state('Longitude:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('lng_value')->hiddenLabel()->state(fn ($record) =>
                                         is_numeric($record->longitude) ? number_format((float) $record->longitude, 6) : '—'
                                     )->columnSpan(9),
                                 ]),
@@ -293,8 +295,8 @@ public static function infolist(Schema $schema): Schema
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('region_label')->label('')->state('Region:')->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('region_value')->label('')->state(fn ($record) => $record->region?->name ?: '—')->columnSpan(9),
+                                    TextEntry::make('region_label')->hiddenLabel()->state('Region:')->weight('bold')->alignment('right')->columnSpan(3),
+                                    TextEntry::make('region_value')->hiddenLabel()->state(fn ($record) => $record->region?->name ?: '—')->columnSpan(9),
                                 ]),
                         ]),
                 ]),
@@ -302,28 +304,6 @@ public static function infolist(Schema $schema): Schema
         ->maxWidth('5xl')
         ->collapsible(),
 
-        /* ─────────────────────────  AUDIT  ───────────────────────── */
-        /* InfoSection::make('Audit Dates')
-            ->schema([
-                InfoGrid::make(2)
-                    ->extraAttributes(['style' => 'gap: 12px;'])
-                    ->schema([
-                        InfoGrid::make(12)
-                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                            ->schema([
-                                TextEntry::make('created_label')->label('')->state('Created At:')->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('created_value')->label('')->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')->columnSpan(9),
-                            ]),
-                        InfoGrid::make(12)
-                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                            ->schema([
-                                TextEntry::make('updated_label')->label('')->state('Updated At:')->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('updated_value')->label('')->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')->columnSpan(9),
-                            ]),
-                    ]),
-            ])
-            ->maxWidth('5xl')
-            ->compact(), */
     ]);
 }
 

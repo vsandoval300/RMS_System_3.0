@@ -97,7 +97,7 @@ class AdminPanelProvider extends PanelProvider
 
 
 
-
+            ->globalSearch(false)
             /*->colors([
                 'primary' => Color::Blue,
             ]) */

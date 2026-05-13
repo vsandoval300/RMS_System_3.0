@@ -52,6 +52,7 @@ class BusinessDocTypesResource extends Resource
                 //
                 Section::make('Business Document Type')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
 
                     TextInput::make('name')
@@ -89,7 +90,9 @@ class BusinessDocTypesResource extends Resource
     {
         return $schema->components([
             /* ─────────────────────────  PROFILE  ───────────────────────── */
-            Section::make('Business Document Type')->schema([
+            Section::make('Business Document Type')
+            ->columnSpanFull()
+            ->schema([
                 \Filament\Schemas\Components\Grid::make(2)
                     ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
@@ -102,9 +105,9 @@ class BusinessDocTypesResource extends Resource
                                 \Filament\Schemas\Components\Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 2px;'])
                                     ->schema([
-                                        TextEntry::make('name_label')->label('')->state('Name:')
+                                        TextEntry::make('name_label')->hiddenLabel()->state('Name:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('name_value')->label('')
+                                        TextEntry::make('name_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->name ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -113,9 +116,9 @@ class BusinessDocTypesResource extends Resource
                                 \Filament\Schemas\Components\Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 2px;'])
                                     ->schema([
-                                        TextEntry::make('desc_label')->label('')->state('Description:')
+                                        TextEntry::make('desc_label')->hiddenLabel()->state('Description:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('desc_value')->label('')
+                                        TextEntry::make('desc_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->description ?: '—')
                                             ->extraAttributes(['style' => 'line-height:1.35;'])
                                             ->columnSpan(9),
@@ -125,36 +128,6 @@ class BusinessDocTypesResource extends Resource
             ])
             ->maxWidth('5xl')
             ->collapsible(),
-
-            /* ─────────────────────────  AUDIT  ───────────────────────── */
-            /* InfoSection::make('Audit Dates')->schema([
-                InfoGrid::make(2)
-                    ->extraAttributes(['style' => 'gap: 12px;'])
-                    ->schema([
-                        // Created at
-                        InfoGrid::make(12)
-                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 2px;'])
-                            ->schema([
-                                TextEntry::make('created_label')->label('')->state('Created At:')
-                                    ->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('created_value')->label('')
-                                    ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                                    ->columnSpan(9),
-                            ]),
-                        // Updated at
-                        InfoGrid::make(12)
-                            ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 2px;'])
-                            ->schema([
-                                TextEntry::make('updated_label')->label('')->state('Updated At:')
-                                    ->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('updated_value')->label('')
-                                    ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                                    ->columnSpan(9),
-                            ]),
-                    ]),
-            ])
-            ->maxWidth('5xl')
-            ->compact(), */
         ]);
     }
 

@@ -52,7 +52,7 @@ class HoldingResource extends Resource
     {
         return $schema->components([
             Section::make('Holding Profile')
-                    ->compact()
+                    ->columnSpanFull()
                     ->schema([
                     Grid::make(2)->schema([            
                         TextInput::make('name')
@@ -106,7 +106,9 @@ class HoldingResource extends Resource
     {
         return $schema->components([
             /* ─────────────────────────  PROFILE  ───────────────────────── */
-            Section::make('Holding Profile')->schema([
+            Section::make('Holding Profile')
+            ->columnSpanFull()
+            ->schema([
                 Grid::make(2)
                     ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
@@ -121,9 +123,9 @@ class HoldingResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('name_label')->label('')->state('Name:')
+                                        TextEntry::make('name_label')->hiddenLabel()->state('Name:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('name_value')->label('')
+                                        TextEntry::make('name_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->name ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -132,9 +134,9 @@ class HoldingResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('short_label')->label('')->state('Short Name:')
+                                        TextEntry::make('short_label')->hiddenLabel()->state('Short Name:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('short_value')->label('')
+                                        TextEntry::make('short_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->short_name ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -143,9 +145,9 @@ class HoldingResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('country_label')->label('')->state('Country:')
+                                        TextEntry::make('country_label')->hiddenLabel()->state('Country:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('country_value')->label('')
+                                        TextEntry::make('country_value')->hiddenLabel()
                                             ->state(fn ($record) =>
                                                 $record->country
                                                     ? "{$record->country->alpha_3} - {$record->country->name}"
@@ -158,9 +160,9 @@ class HoldingResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('client_label')->label('')->state('Client:')
+                                        TextEntry::make('client_label')->hiddenLabel()->state('Client:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('client_value')->label('')
+                                        TextEntry::make('client_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->client?->name ?: '—')
                                             ->columnSpan(9),
                                     ]),

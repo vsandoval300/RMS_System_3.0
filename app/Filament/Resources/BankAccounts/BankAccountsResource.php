@@ -61,6 +61,7 @@ class BankAccountsResource extends Resource
                 //Forms\Components\Group::make() //Grupo 1
                 //->schema([
                     Section::make('Wire Instructions')
+                        ->columnSpanFull()
                         ->schema([
                             
                             Select::make('status_account')
@@ -116,6 +117,7 @@ class BankAccountsResource extends Resource
 
                     
                     Section::make('Beneficiary Details')
+                        ->columnSpanFull()
                         ->schema([
                             TextInput::make('beneficiary_acct_name')
                                 ->label('Beneficiay Name')
@@ -158,6 +160,7 @@ class BankAccountsResource extends Resource
                         ->collapsible(),
 
                     Section::make('For Further Account Details')
+                        ->columnSpanFull()
                         ->schema([
                             TextInput::make('ffc_acct_name')
                                 ->label('For Further Account Name')
@@ -224,7 +227,9 @@ class BankAccountsResource extends Resource
     {
         return $schema->components([
 
-            Section::make('Wire Instructions')->schema([
+            Section::make('Wire Instructions')
+            ->columnSpanFull()
+            ->schema([
                 \Filament\Schemas\Components\Grid::make(1)
                     ->extraAttributes(['style' => 'row-gap: 0;'])
                     ->schema([
@@ -232,12 +237,12 @@ class BankAccountsResource extends Resource
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
                                 TextEntry::make('status_label')
-                                    ->label('')->state('Status Account:')
+                                    ->hiddenLabel()->state('Status Account:')
                                     ->weight('bold')->alignment('right')
                                     ->columnSpan(3),
 
                                 TextEntry::make('status_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     // usa el valor crudo para poder colorear; el “—” lo ponemos en formatState
                                     ->state(fn ($record) => $record->status_account)
                                     ->formatStateUsing(fn ($state) => filled($state) ? $state : '—')
@@ -256,9 +261,9 @@ class BankAccountsResource extends Resource
                         \Filament\Schemas\Components\Grid::make(12)
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
-                                TextEntry::make('currency_label')->label('')->state('Currency:')
+                                TextEntry::make('currency_label')->hiddenLabel()->state('Currency:')
                                     ->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('currency_value')->label('')
+                                TextEntry::make('currency_value')->hiddenLabel()
                                     ->state(function ($record) {
                                         $cur = data_get($record, 'currency');
                                         if ($cur && (data_get($cur, 'acronym') || data_get($cur, 'name'))) {
@@ -274,9 +279,9 @@ class BankAccountsResource extends Resource
                         \Filament\Schemas\Components\Grid::make(12)
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
-                                TextEntry::make('ib_label')->label('')->state('Intermediary Bank:')
+                                TextEntry::make('ib_label')->hiddenLabel()->state('Intermediary Bank:')
                                     ->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('ib_value')->label('')
+                                TextEntry::make('ib_value')->hiddenLabel()
                                     ->state(function ($record) {
                                         return data_get($record, 'intermediaryBank.name')
                                             ?? data_get($record, 'intermediary_bank.name')
@@ -289,9 +294,9 @@ class BankAccountsResource extends Resource
                         \Filament\Schemas\Components\Grid::make(12)
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
-                                TextEntry::make('bank_label')->label('')->state('Bank / For Credit to:')
+                                TextEntry::make('bank_label')->hiddenLabel()->state('Bank / For Credit to:')
                                     ->weight('bold')->alignment('right')->columnSpan(3),
-                                TextEntry::make('bank_value')->label('')
+                                TextEntry::make('bank_value')->hiddenLabel()
                                     ->state(function ($record) {
                                         return data_get($record, 'bank.name')
                                             ?? data_get($record, 'bank_id.name')
@@ -303,34 +308,36 @@ class BankAccountsResource extends Resource
                     ]),
             ])->maxWidth('6xl')->collapsible(),
 
-            Section::make('Beneficiary Details')->schema([
+            Section::make('Beneficiary Details')
+            ->columnSpanFull()
+            ->schema([
                 \Filament\Schemas\Components\Grid::make(1)->extraAttributes(['style' => 'row-gap: 0;'])->schema([
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('bname_label')->label('')->state('Beneficiary Name:')
+                        TextEntry::make('bname_label')->hiddenLabel()->state('Beneficiary Name:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('bname_value')->label('')
+                        TextEntry::make('bname_value')->hiddenLabel()
                             ->state(fn ($record) => $record->beneficiary_acct_name ?: '—')
                             ->columnSpan(9),
                     ]),
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('baddr_label')->label('')->state('Beneficiary Address:')
+                        TextEntry::make('baddr_label')->hiddenLabel()->state('Beneficiary Address:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('baddr_value')->label('')
+                        TextEntry::make('baddr_value')->hiddenLabel()
                             ->state(fn ($record) => $record->beneficiary_address ?: '—')
                             ->columnSpan(9),
                     ]),
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('bswift_label')->label('')->state('Beneficiary SWIFT:')
+                        TextEntry::make('bswift_label')->hiddenLabel()->state('Beneficiary SWIFT:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('bswift_value')->label('')
+                        TextEntry::make('bswift_value')->hiddenLabel()
                             ->state(fn ($record) => $record->beneficiary_swift ? strtoupper($record->beneficiary_swift) : '—')
                             ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:0.5px;'])
                             ->columnSpan(9),
                     ]),
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('bacct_label')->label('')->state('Beneficiary Account No.:')
+                        TextEntry::make('bacct_label')->hiddenLabel()->state('Beneficiary Account No.:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('bacct_value')->label('')
+                        TextEntry::make('bacct_value')->hiddenLabel()
                             ->state(fn ($record) => $record->beneficiary_acct_no ?: '—')
                             ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
                             ->columnSpan(9),
@@ -338,45 +345,49 @@ class BankAccountsResource extends Resource
                 ]),
             ])->maxWidth('6xl')->collapsible(),
 
-            Section::make('For Further Account Details')->schema([
+            Section::make('For Further Account Details')
+            ->columnSpanFull()
+            ->schema([
                 \Filament\Schemas\Components\Grid::make(1)->extraAttributes(['style' => 'row-gap: 0;'])->schema([
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('ffcn_label')->label('')->state('FFC Account Name:')
+                        TextEntry::make('ffcn_label')->hiddenLabel()->state('FFC Account Name:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('ffcn_value')->label('')
+                        TextEntry::make('ffcn_value')->hiddenLabel()
                             ->state(fn ($record) => $record->ffc_acct_name ?: '—')
                             ->columnSpan(9),
                     ]),
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('ffca_label')->label('')->state('FFC Account No.:')
+                        TextEntry::make('ffca_label')->hiddenLabel()->state('FFC Account No.:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('ffca_value')->label('')
+                        TextEntry::make('ffca_value')->hiddenLabel()
                             ->state(fn ($record) => $record->ffc_acct_no ?: '—')
                             ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
                             ->columnSpan(9),
                     ]),
                     \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                        TextEntry::make('ffad_label')->label('')->state('FFC Address:')
+                        TextEntry::make('ffad_label')->hiddenLabel()->state('FFC Address:')
                             ->weight('bold')->alignment('right')->columnSpan(3),
-                        TextEntry::make('ffad_value')->label('')
+                        TextEntry::make('ffad_value')->hiddenLabel()
                             ->state(fn ($record) => $record->ffc_acct_address ?: '—')
                             ->columnSpan(9),
                     ]),
                 ]),
             ])->maxWidth('6xl')->collapsible(),
 
-            Section::make('Audit Dates')->schema([
+            Section::make('Audit Dates')
+            ->columnSpanFull()
+            ->schema([
                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('created_label')->label('')->state('Created At:')->weight('bold')
+                    TextEntry::make('created_label')->hiddenLabel()->state('Created At:')->weight('bold')
                         ->alignment('right')->columnSpan(3),
-                    TextEntry::make('created_value')->label('')
+                    TextEntry::make('created_value')->hiddenLabel()
                         ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
                         ->columnSpan(9),
                 ]),
                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])->schema([
-                    TextEntry::make('updated_label')->label('')->state('Updated At:')->weight('bold')
+                    TextEntry::make('updated_label')->hiddenLabel()->state('Updated At:')->weight('bold')
                         ->alignment('right')->columnSpan(3),
-                    TextEntry::make('updated_value')->label('')
+                    TextEntry::make('updated_value')->hiddenLabel()
                         ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
                         ->columnSpan(9),
                 ]),

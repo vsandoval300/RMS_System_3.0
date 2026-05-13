@@ -57,6 +57,7 @@ class ManagerResource extends Resource
                 //
                 Section::make('Manager Details')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
 
                     TextInput::make('name')
@@ -110,94 +111,68 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Manager Profile')->schema([
+        Section::make('Manager Profile')
+        ->columnSpanFull()
+        ->schema([
             \Filament\Schemas\Components\Grid::make(1)
                 ->extraAttributes(['style' => 'row-gap: 0;'])
                 ->schema([
 
                     // Name
                     \Filament\Schemas\Components\Grid::make(12)
-                        ->extraAttributes([
-                            'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                        ])
+                        ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
-                            \Filament\Schemas\Components\Grid::make(12)
-                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                                    ->schema([
-                                        TextEntry::make('name_label')
-                                            ->label('')
-                                            ->state('Name:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(3),
-                                        TextEntry::make('name_value')
-                                            ->label('')
-                                            ->state(fn ($record) => $record->name ?: '—')
-                                            ->columnSpan(9),
-                                    ]),
+                                TextEntry::make('name_label')
+                                    ->hiddenLabel()
+                                    ->state('Name:')
+                                    ->weight('bold')
+                                    ->alignment('right')
+                                    ->columnSpan(3),
+                                TextEntry::make('name_value')
+                                    ->hiddenLabel()
+                                    ->state(fn ($record) => $record->name ?: '—')
+                                    ->columnSpan(9),
+                            ]),
                             \Filament\Schemas\Components\Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
                                         TextEntry::make('address_label')
-                                            ->label('')
+                                            ->hiddenLabel()
                                             ->state('Address:')
                                             ->weight('bold')
                                             ->alignment('right')
                                             ->columnSpan(3),
                                         TextEntry::make('address_value')
-                                            ->label('')
+                                            ->hiddenLabel()
                                             ->state(fn ($record) => $record->address ?: '—')
                                             ->columnSpan(9),
                                         ]),
+                            \Filament\Schemas\Components\Grid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                    ->schema([
 
-
-                            TextEntry::make('country_label')
-                                ->label('')
-                                ->state('Country:')
-                                ->weight('bold')
-                                ->alignment('right')
-                                ->columnSpan(3),
-                            TextEntry::make('country_value')
-                                ->label('')
-                                ->state(fn ($record) => $record->country
-                                    ? "{$record->country->alpha_3} - {$record->country->name}"
-                                    : '—'
-                                )
-                                ->columnSpan(9),    
+                                        TextEntry::make('country_label')
+                                            ->hiddenLabel()
+                                            ->state('Country:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(3),
+                                        TextEntry::make('country_value')
+                                            ->hiddenLabel()
+                                            ->state(fn ($record) => $record->country
+                                                ? "{$record->country->alpha_3} - {$record->country->name}"
+                                                : '—'
+                                            )
+                                            ->columnSpan(9),
+                                    ]),
 
                         ]),
-                ]),
-        ])
+                ])
+        
         ->maxWidth('5xl')
         ->collapsible(),
 
-        /* ─────────────────────────  AUDIT  ───────────────────────── */
-       /*  InfoSection::make('Audit Dates')->schema([
-            InfoGrid::make(12)
-                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                ->schema([
-                    TextEntry::make('created_label')
-                        ->label('')->state('Created At:')->weight('bold')
-                        ->alignment('right')->columnSpan(3),
-                    TextEntry::make('created_value')
-                        ->label('')
-                        ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                        ->columnSpan(9),
-                ]),
-            InfoGrid::make(12)
-                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                ->schema([
-                    TextEntry::make('updated_label')
-                        ->label('')->state('Updated At:')->weight('bold')
-                        ->alignment('right')->columnSpan(3),
-                    TextEntry::make('updated_value')
-                        ->label('')
-                        ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                        ->columnSpan(9),
-                ]),
-        ])
-        ->maxWidth('5xl')
-        ->compact(), */
+
     ]);
 }
 

@@ -54,6 +54,7 @@ class ReinsurerTypeResource extends Resource
                 //
                 Section::make('Reinsurer Type Details')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
 
 
@@ -90,7 +91,9 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Reinsurer Type Profile')->schema([
+        Section::make('Reinsurer Type Profile')
+        ->columnSpanFull()
+        ->schema([
             \Filament\Schemas\Components\Grid::make(1)
                 ->extraAttributes(['style' => 'row-gap: 0;'])
                 ->schema([
@@ -99,13 +102,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('acr_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Acronym:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('acr_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->type_acronym ? strtoupper($record->type_acronym) : '—')
                                 ->columnSpan(9),
                         ]),
@@ -115,13 +118,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('desc_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Description:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('desc_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->description ?: '—')
                                 ->columnSpan(9),
                         ]),

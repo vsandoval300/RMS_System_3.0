@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Clients;
 
-use App\Filament\Resources\Clients\ClientsResource;
+//use App\Filament\Resources\Clients\ClientsResource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
@@ -64,6 +64,7 @@ class ClientsResource extends Resource
                 //
                 Section::make('Client Details')
                 ->columns(2)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
                     
 
@@ -196,7 +197,9 @@ class ClientsResource extends Resource
 
                 ]),
 
-                Section::make('Images')->schema([
+                Section::make('Images')
+                ->columnSpanFull()
+                ->schema([
                                                 
                     FileUpload::make('logo_path')
                         ->label('Client Logo')
@@ -249,7 +252,9 @@ class ClientsResource extends Resource
 public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
-        Section::make('Client Profile')->schema([
+        Section::make('Client Profile')
+        ->columnSpanFull()
+        ->schema([
             Grid::make(3)
                 ->extraAttributes(['style' => 'gap: 6px;'])
                 ->schema([
@@ -265,13 +270,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('name_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Name:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('name_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -281,13 +286,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('short_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Short Name:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('short_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->short_name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -297,13 +302,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('desc_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Description:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('desc_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->description ?: '—')
                                         ->extraAttributes(['style' => 'line-height:1.35;'])
                                         ->columnSpan(9),
@@ -314,13 +319,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('web_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Web Page:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('web_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->webpage ?: '—')
                                         ->url(fn ($record) => $record->webpage
                                             ? (str_starts_with($record->webpage, 'http://') || str_starts_with($record->webpage, 'https://')
@@ -337,13 +342,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('country_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Country:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('country_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->country
                                             ? "{$record->country->alpha_3} - {$record->country->name}"
                                             : '—'
@@ -356,13 +361,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('industries_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Industries:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('industries_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->html()
                                         ->state(function ($record) {
                                             $names = $record->industries?->pluck('name')->all() ?? [];
@@ -382,11 +387,11 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:6px;height:100%;'])
                         ->schema([
                             TextEntry::make('logo_title')
-                                ->label('')->state('Logo')->weight('bold')
+                                ->hiddenLabel()->state('Logo')->weight('bold')
                                 ->extraAttributes(['style' => 'margin:0 0 4px 2px;']),
 
                             ImageEntry::make('logo_img')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->disk('s3')
                                 ->visibility('public')
                                 ->state(fn ($record) => $record->logo_path ?? $record->logo ?? null)
@@ -406,7 +411,7 @@ public static function infolist(Schema $schema): Schema
                                 ]),
 
                             TextEntry::make('logo_placeholder')
-                                ->label('')->html()
+                                ->hiddenLabel()->html()
                                 ->state('
                                     <div style="
                                         min-height:260px; width:100%;

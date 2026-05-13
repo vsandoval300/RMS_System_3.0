@@ -58,6 +58,7 @@ class BanksResource extends Resource
         return $schema
             ->components([
                 Group::make() //Grupo 1
+                ->columnSpanFull()
                 ->schema([
                     Section::make('Bank Details')
                     ->schema([
@@ -132,7 +133,9 @@ class BanksResource extends Resource
     {
         return $schema->components([
             /* ─────────────────────────  PROFILE  ───────────────────────── */
-            Section::make('Bank Profile')->schema([
+            Section::make('Bank Profile')
+            ->columnSpanFull()
+            ->schema([
                 \Filament\Schemas\Components\Grid::make(1)
                     ->extraAttributes(['style' => 'row-gap: 0;'])
                     ->schema([
@@ -144,13 +147,13 @@ class BanksResource extends Resource
                             ])
                             ->schema([
                                 TextEntry::make('name_label')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state('Name:')
                                     ->weight('bold')
                                     ->alignment('right')
                                     ->columnSpan(3),
                                 TextEntry::make('name_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->name ?: '—')
                                     ->columnSpan(9),
                             ]),
@@ -162,13 +165,13 @@ class BanksResource extends Resource
                             ])
                             ->schema([
                                 TextEntry::make('addr_label')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state('Address:')
                                     ->weight('bold')
                                     ->alignment('right')
                                     ->columnSpan(3),
                                 TextEntry::make('addr_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->address ?: '—')
                                     ->columnSpan(9),
                             ]),
@@ -180,13 +183,13 @@ class BanksResource extends Resource
                             ])
                             ->schema([
                                 TextEntry::make('aba_label')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state('ABA Number:')
                                     ->weight('bold')
                                     ->alignment('right')
                                     ->columnSpan(3),
                                 TextEntry::make('aba_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->aba_number ?: '—')
                                     ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace;'])
                                     ->columnSpan(9),
@@ -199,13 +202,13 @@ class BanksResource extends Resource
                             ])
                             ->schema([
                                 TextEntry::make('swift_label')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state('SWIFT Code:')
                                     ->weight('bold')
                                     ->alignment('right')
                                     ->columnSpan(3),
                                 TextEntry::make('swift_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->swift_code ? strtoupper($record->swift_code) : '—')
                                     ->extraAttributes(['style' => 'font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:0.5px;'])
                                     ->columnSpan(9),
@@ -282,13 +285,6 @@ class BanksResource extends Resource
             ->filters([
                 //
             ])
-
-            ->headerActions([
-                CreateAction::make()
-                    ->closeModalByClickingAway(false)
-                    ->closeModalByEscaping(false),
-            ])
-
 
             ->recordActions([
                 ActionGroup::make([

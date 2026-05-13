@@ -58,6 +58,7 @@ class OperativeStatusesResource extends Resource
                 //
                 Section::make('Operative Status Details')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
 
                     TextInput::make('acronym')
@@ -100,7 +101,9 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Operative Status Profile')->schema([
+        Section::make('Operative Status Profile')
+            ->columnSpanFull()
+            ->schema([
             \Filament\Schemas\Components\Grid::make(1)
                 ->extraAttributes(['style' => 'row-gap: 0;'])
                 ->schema([
@@ -110,13 +113,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('acr_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Acronym:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('acr_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->acronym ? strtoupper($record->acronym) : '—')
                                 ->columnSpan(9),
                         ]),
@@ -126,13 +129,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('desc_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Description:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('desc_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->description ?: '—')
                                 ->columnSpan(9),
                         ]),
@@ -141,40 +144,6 @@ public static function infolist(Schema $schema): Schema
         ->maxWidth('5xl')
         ->collapsible(),
 
-        /* ─────────────────────────  AUDIT  ───────────────────────── */
-        /* InfoSection::make('Audit Dates')
-            ->schema([
-                InfoGrid::make(12)
-                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                    ->schema([
-                        TextEntry::make('created_label')
-                            ->label('')
-                            ->state('Created At:')
-                            ->weight('bold')
-                            ->alignment('right')
-                            ->columnSpan(3),
-                        TextEntry::make('created_value')
-                            ->label('')
-                            ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                            ->columnSpan(9),
-                    ]),
-                InfoGrid::make(12)
-                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                    ->schema([
-                        TextEntry::make('updated_label')
-                            ->label('')
-                            ->state('Updated At:')
-                            ->weight('bold')
-                            ->alignment('right')
-                            ->columnSpan(3),
-                        TextEntry::make('updated_value')
-                            ->label('')
-                            ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                            ->columnSpan(9),
-                    ]),
-            ])
-            ->maxWidth('5xl')
-            ->compact(), */
     ]);
 }
 

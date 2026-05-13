@@ -85,6 +85,7 @@ class CostSchemeResource extends Resource
 
         return $schema->components([
             \Filament\Schemas\Components\Section::make('Structure Details')
+                ->columnSpanFull()
                 ->schema([
                     \Filament\Schemas\Components\Grid::make()
                         ->schema([
@@ -188,6 +189,7 @@ class CostSchemeResource extends Resource
                 
                 \Filament\Schemas\Components\Section::make('Cost Nodes')
                     ->description('Define the cost nodes of this scheme')
+                        ->columnSpanFull()
                         ->schema([
                             Repeater::make('costNodexes')
                                 ->label('')

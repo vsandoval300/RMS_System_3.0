@@ -53,6 +53,7 @@ class RegionsResource extends Resource
                 //
                 Section::make('Region Details')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
 
                     TextInput::make('name')
@@ -94,7 +95,9 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Region Profile')->schema([
+        Section::make('Region Profile')
+            ->columnSpan('full')
+            ->schema([
             \Filament\Schemas\Components\Grid::make(2)
                 ->extraAttributes(['style' => 'gap: 6px;'])
                 ->schema([
@@ -112,13 +115,13 @@ public static function infolist(Schema $schema): Schema
                                 ])
                                 ->schema([
                                     TextEntry::make('name_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Name:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('name_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -130,13 +133,13 @@ public static function infolist(Schema $schema): Schema
                                 ])
                                 ->schema([
                                     TextEntry::make('code_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Region Code:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('code_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->region_code !== null ? (string) $record->region_code : '—')
                                         ->columnSpan(9),
                                 ]),
@@ -147,44 +150,6 @@ public static function infolist(Schema $schema): Schema
         ])
         ->maxWidth('4xl')
         ->collapsible(),
-
-        /* ─────────────────────────  AUDIT  ───────────────────────── */
-       /*  InfoSection::make('Audit Dates')
-            ->schema([
-                InfoGrid::make(2)
-                    ->extraAttributes(['style' => 'gap: 12px;'])
-                    ->schema([
-                        InfoGrid::make(12)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('created_label')
-                                    ->label('')->state('Created At:')->weight('bold')
-                                    ->alignment('right')->columnSpan(3),
-                                TextEntry::make('created_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                                    ->columnSpan(9),
-                            ]),
-
-                        InfoGrid::make(12)
-                            ->extraAttributes([
-                                'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                            ])
-                            ->schema([
-                                TextEntry::make('updated_label')
-                                    ->label('')->state('Updated At:')->weight('bold')
-                                    ->alignment('right')->columnSpan(3),
-                                TextEntry::make('updated_value')
-                                    ->label('')
-                                    ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                                    ->columnSpan(9),
-                            ]),
-                    ]),
-            ])
-            ->maxWidth('4xl')
-            ->compact(), */
     ]);
 }
 

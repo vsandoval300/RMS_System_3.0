@@ -130,7 +130,9 @@ class CompaniesResource extends Resource
     {
         return $schema->components([
             /* ─────────────────────────  PROFILE  ───────────────────────── */
-            Section::make('Company Profile')->schema([
+            Section::make('Company Profile')
+            ->columnSpanFull()
+            ->schema([
                 Grid::make(2)
                     ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
@@ -145,9 +147,9 @@ class CompaniesResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('name_label')->label('')->state('Name:')
+                                        TextEntry::make('name_label')->hiddenLabel()->state('Name:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('name_value')->label('')
+                                        TextEntry::make('name_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->name ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -156,9 +158,9 @@ class CompaniesResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('acr_label')->label('')->state('Acronym:')
+                                        TextEntry::make('acr_label')->hiddenLabel()->state('Acronym:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('acr_value')->label('')
+                                        TextEntry::make('acr_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->acronym ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -167,9 +169,9 @@ class CompaniesResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('act_label')->label('')->state('Activity:')
+                                        TextEntry::make('act_label')->hiddenLabel()->state('Activity:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('act_value')->label('')
+                                        TextEntry::make('act_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->activity ?: '—')
                                             ->extraAttributes(['style' => 'line-height:1.35;'])
                                             ->columnSpan(9),
@@ -179,9 +181,9 @@ class CompaniesResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('country_label')->label('')->state('Country:')
+                                        TextEntry::make('country_label')->hiddenLabel()->state('Country:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('country_value')->label('')
+                                        TextEntry::make('country_value')->hiddenLabel()
                                             ->state(fn ($record) =>
                                                 $record->country
                                                     ? ($record->country->alpha_3 ?? '') . (isset($record->country->alpha_3) ? ' - ' : '') . $record->country->name
@@ -194,9 +196,9 @@ class CompaniesResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('sector_label')->label('')->state('Sector:')
+                                        TextEntry::make('sector_label')->hiddenLabel()->state('Sector:')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('sector_value')->label('')
+                                        TextEntry::make('sector_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->sector?->name ?: '—')
                                             ->columnSpan(9),
                                     ]),

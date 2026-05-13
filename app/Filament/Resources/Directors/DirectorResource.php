@@ -52,7 +52,7 @@ class DirectorResource extends Resource
     {
         return $schema->components([
             Section::make('Member Profile')
-                ->compact()
+                ->columnSpanFull()
                 ->schema([
                     Grid::make(2)->schema([
                         TextInput::make('name')
@@ -134,7 +134,7 @@ class DirectorResource extends Resource
 
                         Section::make('Image')
                             ->columnSpan(2)
-                            ->compact()
+                            ->columnSpanFull()
                             ->schema([
                                 FileUpload::make('image')
                                     ->label('Director photo')
@@ -166,7 +166,9 @@ class DirectorResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Member Profile')->schema([
+            Section::make('Member Profile')
+            ->columnSpanFull()
+            ->schema([
                 Grid::make(3)
                     ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
@@ -182,13 +184,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('name_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Name:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('name_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) =>
                                             trim(($record->name ?? '') . ' ' . ($record->surname ?? '')) ?: '—'
                                         )
@@ -200,13 +202,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('gender_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Gender:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('gender_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->gender ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -216,13 +218,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('email_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Email address:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('email_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->email ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -232,13 +234,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('phone_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Phone:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('phone_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->phone ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -248,13 +250,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('country_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Country:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('country_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) =>
                                             $record->country
                                                 ? "{$record->country->alpha_3} - {$record->country->name}"
@@ -268,13 +270,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('address_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Address:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('address_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->address ?? '—')
                                         ->extraAttributes(['style' => 'line-height:1.2;'])
                                         ->columnSpan(9),
@@ -285,13 +287,13 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('occupation_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Occupation:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('occupation_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->occupation ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -304,11 +306,11 @@ class DirectorResource extends Resource
                                 ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:6px;height:100%;'])
                                 ->schema([
                                     TextEntry::make('photo_title')
-                                        ->label('')->state('Photo')->weight('bold')
+                                        ->hiddenLabel()->state('Photo')->weight('bold')
                                         ->extraAttributes(['style' => 'margin:0 0 4px 2px;']),
 
                                     ImageEntry::make('user_image')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->disk('s3')
                                         ->visibility('public')
                                         ->getStateUsing(fn ($record) => data_get($record, 'image'))
@@ -329,7 +331,7 @@ class DirectorResource extends Resource
                                         ]),
 
                                     TextEntry::make('user_image_placeholder')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->html()
                                         ->state('
                                             <div style="

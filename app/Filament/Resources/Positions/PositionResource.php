@@ -48,6 +48,7 @@ class PositionResource extends Resource
         return $schema
         ->components([
             Section::make('Position Details')
+                ->columnSpan('full')
                 ->schema([
                     TextInput::make('position')
                         ->label('Position')
@@ -70,7 +71,9 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Position Profile')->schema([
+        Section::make('Position Profile')
+        ->columnSpan('full')
+        ->schema([
             Grid::make(1)
                 ->extraAttributes(['style' => 'row-gap: 0;'])
                 ->schema([
@@ -80,13 +83,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('id')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Id:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('id_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->id ?: '—')
                                 ->columnSpan(9),
                         ]),
@@ -96,13 +99,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('position')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Position:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('pos_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->position ? strtoupper($record->position) : '—')
                                 ->columnSpan(9),
                         ]),
@@ -112,13 +115,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('description')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Description:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('desc_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->description ?: '—')
                                 ->columnSpan(9),
                         ]),

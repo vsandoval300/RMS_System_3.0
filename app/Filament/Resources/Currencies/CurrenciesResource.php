@@ -108,7 +108,9 @@ class CurrenciesResource extends Resource
     {
         return $schema->components([
             /* ─────────────────────────  PROFILE  ───────────────────────── */
-            Section::make('Currency Profile')->schema([
+            Section::make('Currency Profile')
+            ->columnSpan('full')
+            ->schema([
                 Grid::make(2)
                     ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
@@ -126,13 +128,13 @@ class CurrenciesResource extends Resource
                                     ])
                                     ->schema([
                                         TextEntry::make('name_label')
-                                            ->label('')
+                                            ->hiddenLabel()
                                             ->state('Name:')
                                             ->weight('bold')
                                             ->alignment('right')
                                             ->columnSpan(3),
                                         TextEntry::make('name_value')
-                                            ->label('')
+                                            ->hiddenLabel()
                                             ->state(fn ($record) => $record->name ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -144,13 +146,13 @@ class CurrenciesResource extends Resource
                                     ])
                                     ->schema([
                                         TextEntry::make('acr_label')
-                                            ->label('')
+                                            ->hiddenLabel()
                                             ->state('Acronym:')
                                             ->weight('bold')
                                             ->alignment('right')
                                             ->columnSpan(3),
                                         TextEntry::make('acr_value')
-                                            ->label('')
+                                            ->hiddenLabel()
                                             ->state(fn ($record) => $record->acronym ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -161,40 +163,6 @@ class CurrenciesResource extends Resource
             ])
             ->maxWidth('5xl')
             ->collapsible(),
-
-            /* ─────────────────────────  AUDIT  ───────────────────────── */
-            /* InfoSection::make('Audit Dates')
-                ->schema([
-                    InfoGrid::make(2)
-                        ->extraAttributes(['style' => 'gap: 12px;'])
-                        ->schema([
-                            InfoGrid::make(12)
-                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                                ->schema([
-                                    TextEntry::make('created_label')
-                                        ->label('')->state('Created At:')->weight('bold')
-                                        ->alignment('right')->columnSpan(3),
-                                    TextEntry::make('created_value')
-                                        ->label('')
-                                        ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
-                                        ->columnSpan(9),
-                                ]),
-
-                            InfoGrid::make(12)
-                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
-                                ->schema([
-                                    TextEntry::make('updated_label')
-                                        ->label('')->state('Updated At:')->weight('bold')
-                                        ->alignment('right')->columnSpan(3),
-                                    TextEntry::make('updated_value')
-                                        ->label('')
-                                        ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
-                                        ->columnSpan(9),
-                                ]),
-                        ]),
-                ])
-                ->maxWidth('4xl')
-                ->compact(), */
         ]);
     }
 

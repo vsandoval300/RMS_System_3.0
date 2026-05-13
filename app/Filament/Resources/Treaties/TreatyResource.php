@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Treaties;
 
-use App\Filament\Resources\Treaties\TreatyResource;
+//use App\Filament\Resources\Treaties\TreatyResource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
@@ -68,7 +68,7 @@ class TreatyResource extends Resource
             ->components([
 
                 Section::make('General Details')
-                    ->compact() 
+                    ->columnSpanFull()
                     ->columns(3)    // ← aquí defines dos columnas
                     
                     ->schema([
@@ -159,6 +159,7 @@ class TreatyResource extends Resource
 
                     Section::make()
                         ->columns(3) // subdivide la columna 3 en 2
+                        ->columnSpanFull()
                         ->schema([
                             Select::make('contract_type')
                                 ->label('Contract Type')
@@ -190,11 +191,9 @@ class TreatyResource extends Resource
                     
                         
                 Section::make()
-                    ->columns(3) // subdivide la columna 3 en 2
+                    ->columns(3) // subdivide la columna 3 en 2l
+                    ->columnSpanFull()
                     ->schema([
-
-                        
-
                         Textarea::make('description')
                             ->label('Description')
                             //->hiddenLabel()
@@ -286,7 +285,9 @@ class TreatyResource extends Resource
     {
         return $schema->components([
             /* ─────────────────────────  PROFILE  ───────────────────────── */
-            Section::make('Treaty Profile')->schema([
+            Section::make('Treaty Profile')
+            ->columnSpanFull()
+            ->schema([
                 Grid::make(2)
                     ->extraAttributes(['style' => 'gap: 6px;'])
                     ->schema([
@@ -301,9 +302,9 @@ class TreatyResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('gd_reinsurer_label')->label('')->state('Underwritten by')
+                                        TextEntry::make('gd_reinsurer_label')->hiddenLabel()->state('Underwritten by')
                                             ->weight('bold')->alignment('right')->columnSpan(3),   
-                                        TextEntry::make('gd_reinsurer_value')->label('')
+                                        TextEntry::make('gd_reinsurer_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->reinsurer?->name ?? '—')
                                             ->columnSpan(9),
                                     ]),
@@ -312,9 +313,9 @@ class TreatyResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('gd_code_label')->label('')->state('  Treaty code')
+                                        TextEntry::make('gd_code_label')->hiddenLabel()->state('  Treaty code')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('gd_code_value')->label('')
+                                        TextEntry::make('gd_code_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->treaty_code ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -334,9 +335,9 @@ class TreatyResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('gd_code_label')->label('')->state('Name')
+                                        TextEntry::make('gd_code_label')->hiddenLabel()->state('Name')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('gd_code_value')->label('')
+                                        TextEntry::make('gd_code_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->name ?: '—')
                                             ->columnSpan(9),
                                     ]),
@@ -345,9 +346,9 @@ class TreatyResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('gd_code_label')->label('')->state('Contract type')
+                                        TextEntry::make('gd_code_label')->hiddenLabel()->state('Contract type')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('gd_code_value')->label('')
+                                        TextEntry::make('gd_code_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->contract_type ?: '—')
                                             ->columnSpan(9),
                                     ]),    
@@ -356,9 +357,9 @@ class TreatyResource extends Resource
                                 Grid::make(12)
                                     ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                     ->schema([
-                                        TextEntry::make('act_label')->label('')->state('Description')
+                                        TextEntry::make('act_label')->hiddenLabel()->state('Description')
                                             ->weight('bold')->alignment('right')->columnSpan(3),
-                                        TextEntry::make('act_value')->label('')
+                                        TextEntry::make('act_value')->hiddenLabel()
                                             ->state(fn ($record) => $record->description ?: '—')
                                             ->extraAttributes(['style' => 'line-height:1.35;'])
                                             ->columnSpan(9),

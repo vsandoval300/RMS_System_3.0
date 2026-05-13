@@ -56,6 +56,7 @@ class UserResource extends Resource
         return $schema
         ->components([
             Section::make('User Information')
+                ->columnSpanFull()
                  ->description("Overview of the user's primary details.")
                 ->schema([
                     TextInput::make('name')
@@ -112,6 +113,7 @@ class UserResource extends Resource
                 ->columns(2),
             
             Section::make('Audit Dates')
+                ->columnSpanFull()
                 ->visible(fn (string $context) => $context === 'view') 
                 ->schema([
                   
@@ -144,6 +146,7 @@ class UserResource extends Resource
 
             Section::make('Roles')
                 ->description('Grant or revoke roles to adjust access level.')
+                ->columnSpanFull()
                 ->schema([
                     Select::make('roles')
                             ->label('Roles')
@@ -168,7 +171,9 @@ public static function infolist(Schema $schema): Schema
     return $schema->components([
 
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('User Profile')->schema([
+        Section::make('User Profile')
+        ->columnSpanFull()
+        ->schema([
             Grid::make(3)
                 ->extraAttributes(['style' => 'gap: 6px;'])
                 ->schema([
@@ -184,13 +189,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('name_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Name:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('name_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => ($record->name ?: '—'))
                                         ->columnSpan(9),
                                 ]),
@@ -200,13 +205,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('email_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Email:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('email_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->email ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -216,13 +221,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('department_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Department:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('department_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->department?->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -232,13 +237,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('position_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Position:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('position_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) => $record->position?->position ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -248,13 +253,13 @@ public static function infolist(Schema $schema): Schema
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
                                     TextEntry::make('roles_label')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Roles:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('roles_value')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->html()
                                         ->state(function ($record) {
                                             $names = $record->roles?->pluck('name')->all() ?? [];
@@ -275,19 +280,19 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'display:flex;flex-direction:column;gap:6px;height:100%;'])
                         ->schema([
                             TextEntry::make('photo_title')
-                                ->label('')->state('Photo')->weight('bold')
+                                ->hiddenLabel()->state('Photo')->weight('bold')
                                 ->extraAttributes(['style' => 'margin:0 0 4px 2px;']),
 
                             ImageEntry::make('user_image')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->disk('s3')
                                 ->visibility('public')
                                 // ✅ usar state() en vez de getStateUsing()
-                                ->state(fn ($record) => data_get($record, 'image'))
+                                ->getStateUsing(fn ($record) => data_get($record, 'image'))
                                 ->hidden(fn ($record) => blank(data_get($record, 'image')))
                                 ->extraAttributes([
                                     'style' => '
-                                        min-height:230px; width:100%;
+                                        min-height:360px; width:100%;
                                         border-radius:14px;
                                         background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
                                         border:1px solid rgba(255,255,255,0.15);
@@ -300,10 +305,10 @@ public static function infolist(Schema $schema): Schema
                                 ]),
 
                             TextEntry::make('user_image_placeholder')
-                                ->label('')->html()
+                                ->hiddenLabel()->html()
                                 ->state('
                                     <div style="
-                                        min-height:230px; width:100%;
+                                        min-height:360px; width:100%;
                                         border-radius:14px;
                                         display:flex; align-items:center; justify-content:center;
                                         margin:0;
@@ -320,6 +325,7 @@ public static function infolist(Schema $schema): Schema
         ->collapsible(),
         /* ─────────────────────────  AUDIT  ───────────────────────── */
         Section::make('Audit Dates')
+            ->columnSpanFull()
             ->schema([
                 Grid::make(2)
                     ->extraAttributes(['style' => 'gap: 12px;'])
@@ -329,11 +335,11 @@ public static function infolist(Schema $schema): Schema
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
                                 TextEntry::make('ev_label')
-                                    ->label('')->state('Email Verified At:')->weight('bold')
+                                    ->hiddenLabel()->state('Email Verified At:')->weight('bold')
                                     ->alignment('right')->grow(false)
                                     ->extraAttributes(['style' => 'width:170px; margin:0;']),
                                 TextEntry::make('email_verified_at')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->email_verified_at?->format('Y-m-d H:i') ?: '—')
                                     ->extraAttributes(['style' => 'margin:0;']),
                             ]),
@@ -343,11 +349,11 @@ public static function infolist(Schema $schema): Schema
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
                                 TextEntry::make('created_label')
-                                    ->label('')->state('Created At:')->weight('bold')
+                                    ->hiddenLabel()->state('Created At:')->weight('bold')
                                     ->alignment('right')->grow(false)
                                     ->extraAttributes(['style' => 'width:170px; margin:0;']),
                                 TextEntry::make('created_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->created_at?->format('Y-m-d H:i') ?: '—')
                                     ->extraAttributes(['style' => 'margin:0;']),
                             ]),
@@ -357,11 +363,11 @@ public static function infolist(Schema $schema): Schema
                             ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                             ->schema([
                                 TextEntry::make('updated_label')
-                                    ->label('')->state('Updated At:')->weight('bold')
+                                    ->hiddenLabel()->state('Updated At:')->weight('bold')
                                     ->alignment('right')->grow(false)
                                     ->extraAttributes(['style' => 'width:170px; margin:0;']),
                                 TextEntry::make('updated_value')
-                                    ->label('')
+                                    ->hiddenLabel()
                                     ->state(fn ($record) => $record->updated_at?->format('Y-m-d H:i') ?: '—')
                                     ->extraAttributes(['style' => 'margin:0;']),
                             ]),
@@ -412,15 +418,13 @@ public static function infolist(Schema $schema): Schema
 
                     $circleBg = '#41a2c3'; // ← tu color
 
-                    return <<<HTML
-                        <span class="flex items-center gap-2">
-                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full text-white text-[10px] font-semibold"
-                                style="background: {$circleBg}">
-                                {$initials}
-                            </span>
-                            <span>{$escName}</span>
-                        </span>
-                    HTML;
+                    return "
+                            <div style='display:flex;align-items:center;gap:8px;'>
+                                <img src=\"{$circleBg}\"
+                                    style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
+                                <span>{$name}</span>
+                            </div>
+                        ";
                 })
                 ->html()
                 ->searchable()

@@ -125,11 +125,13 @@ public static function form(Schema $schema): Schema
                 ->dehydrated(false),
 
             Section::make('Transaction Information')
+                ->columnSpanFull()
                 ->description("Overview of the transaction's primary details.")
                 ->schema([
 
                     Section::make()
                         ->columns(8)
+                        ->columnSpanFull()
                         ->schema([
                             // ───── Columna 1: Document ─────
                             Select::make('op_document_id')
@@ -170,7 +172,7 @@ public static function form(Schema $schema): Schema
 
                             // ───── Columna 2: Vacía ─────
                             Placeholder::make('spacer')
-                                ->label(' ')
+                                ->hiddenLabel()
                                 ->content(' ')
                                 ->columnSpan(3),
 
@@ -209,6 +211,7 @@ public static function form(Schema $schema): Schema
 
                     Section::make()
                         ->columns(4)
+                        ->columnSpanFull()
                         ->schema([
 
                             Select::make('transaction_type_id')
@@ -260,6 +263,7 @@ public static function form(Schema $schema): Schema
 
                     Section::make()
                         ->columns(4)
+                        ->columnSpanFull()
                         ->schema([
 
                             TextInput::make('proportion')
@@ -323,6 +327,7 @@ public static function form(Schema $schema): Schema
 
             // ✅✅✅ [NEW] SECCIÓN CON TABLA PREVIEW (readonly)
             Section::make('Transaction Lifecycle')
+                ->columnSpanFull()
                 ->description('Preview of generated lifecycle records based on current form values.')
                 ->visibleOn('create')
                 ->schema([
@@ -429,6 +434,7 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         Section::make('Transaction Profile')
+            ->columnSpanFull()
             ->schema([
                 // ✅ Grid padre con 2 columnas (en pantallas medianas+)
                 \Filament\Schemas\Components\Grid::make()
@@ -452,10 +458,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('id_label')->label('')
+                                    TextEntry::make('id_label')->hiddenLabel()
                                         ->state('Id transaction:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('id')->label('')
+                                    TextEntry::make('id')->hiddenLabel()
                                         ->state(fn ($record) => $record->id ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -464,10 +470,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('index_label')->label('')
+                                    TextEntry::make('index_label')->hiddenLabel()
                                         ->state('Index:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('index')->label('')
+                                    TextEntry::make('index')->hiddenLabel()
                                         ->state(fn ($record) => $record->index ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -476,10 +482,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('document_label')->label('')
+                                    TextEntry::make('document_label')->hiddenLabel()
                                         ->state('Document:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('op_document_id')->label('')
+                                    TextEntry::make('op_document_id')->hiddenLabel()
                                         ->state(fn ($record) => $record->op_document_id ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -488,10 +494,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('type_label')->label('')
+                                    TextEntry::make('type_label')->hiddenLabel()
                                         ->state('Transaction type:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('type.description')->label('')
+                                    TextEntry::make('type.description')->hiddenLabel()
                                         ->state(fn ($record) => $record->type?->description ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -501,13 +507,13 @@ public static function infolist(Schema $schema): Schema
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
                                     TextEntry::make('amount')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state('Amount:')
                                         ->weight('bold')
                                         ->alignment('right')
                                         ->columnSpan(3),
                                     TextEntry::make('amount')
-                                        ->label('')
+                                        ->hiddenLabel()
                                         ->state(fn ($record) =>
                                             filled($record->amount)
                                                 ? number_format((float) $record->amount, 2, '.', ',')
@@ -530,10 +536,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('status_label')->label('')
+                                    TextEntry::make('status_label')->hiddenLabel()
                                         ->state('Transaction status:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('status.transaction_status')->label('')
+                                    TextEntry::make('status.transaction_status')->hiddenLabel()
                                         ->state(fn ($record) => $record->status?->transaction_status ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -542,10 +548,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('remmitance_label')->label('')
+                                    TextEntry::make('remmitance_label')->hiddenLabel()
                                         ->state('Remittance code:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('remmitanceCode.remmitance_code')->label('')
+                                    TextEntry::make('remmitanceCode.remmitance_code')->hiddenLabel()
                                         ->state(fn ($record) => $record->remmitanceCode?->remmitance_code ?? '—')
                                         ->columnSpan(9),
                                 ]),
@@ -554,10 +560,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('duedate_label')->label('')
+                                    TextEntry::make('duedate_label')->hiddenLabel()
                                         ->state('Due date:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('due_date')->label('')
+                                    TextEntry::make('due_date')->hiddenLabel()
                                         ->state(fn ($record) =>
                                             $record->due_date
                                                 ? $record->due_date->format('M j, Y')
@@ -570,10 +576,10 @@ public static function infolist(Schema $schema): Schema
                                 \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
                                     'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
                                 ])->schema([
-                                    TextEntry::make('proportion_label')->label('')
+                                    TextEntry::make('proportion_label')->hiddenLabel()
                                         ->state('Porportion:')
                                         ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('proportion')->label('')
+                                    TextEntry::make('proportion')->hiddenLabel()
                                         ->state(fn ($record) =>
                                             $record->proportion !== null
                                                 ? number_format(((float) $record->proportion) * 100, 2) . '%'

@@ -58,6 +58,7 @@ class PartnerTypesResource extends Resource
                 //
                 Section::make('Partner Type Details')
                 ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
                 ->schema([
 
                     TextInput::make('name')
@@ -111,7 +112,9 @@ public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
         /* ─────────────────────────  PROFILE  ───────────────────────── */
-        Section::make('Partner Type Profile')->schema([
+        Section::make('Partner Type Profile')
+            ->columnSpanFull()
+            ->schema([
             \Filament\Schemas\Components\Grid::make(1)
                 ->extraAttributes(['style' => 'row-gap: 0;'])
                 ->schema([
@@ -121,13 +124,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('name_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Name:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('name_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->name ?: '—')
                                 ->columnSpan(9),
                         ]),
@@ -137,13 +140,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('acr_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Acronym:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('acr_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->acronym ? strtoupper($record->acronym) : '—')
                                 ->columnSpan(9),
                         ]),
@@ -153,13 +156,13 @@ public static function infolist(Schema $schema): Schema
                         ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                         ->schema([
                             TextEntry::make('desc_label')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state('Description:')
                                 ->weight('bold')
                                 ->alignment('right')
                                 ->columnSpan(3),
                             TextEntry::make('desc_value')
-                                ->label('')
+                                ->hiddenLabel()
                                 ->state(fn ($record) => $record->description ?: '—')
                                 ->columnSpan(9),
                         ]),

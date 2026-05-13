@@ -253,6 +253,7 @@ class ReinsurersResource extends Resource
                                         // ========== ADMIN INFO ==========
                         Section::make('Administrative Info')
                             ->columns(6)
+                            ->columnSpanFull()
                             ->schema([
                                 Select::make('parent_id')
                                     ->label('Parent')
@@ -333,6 +334,7 @@ class ReinsurersResource extends Resource
                 // ========== IMAGES ==========
                 Section::make('Branding')
                     ->columns(2)
+                    ->columnSpanFull()
                     ->schema([
                         Section::make('Logo Upload')
                             ->columnSpan(1)
@@ -452,10 +454,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('name_label')->label('')
+                                    TextEntry::make('name_label')->hiddenLabel()
                                         ->state('Name:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('name_value')->label('')
+                                    TextEntry::make('name_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -464,10 +466,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('short_label')->label('')
+                                    TextEntry::make('short_label')->hiddenLabel()
                                         ->state('Short Name:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('short_value')->label('')
+                                    TextEntry::make('short_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->short_name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -476,10 +478,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('acr_label')->label('')
+                                    TextEntry::make('acr_label')->hiddenLabel()
                                         ->state('Acronym:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('acr_value')->label('')
+                                    TextEntry::make('acr_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->acronym ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -488,10 +490,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('type_label')->label('')
+                                    TextEntry::make('type_label')->hiddenLabel()
                                         ->state('Type:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('type_value')->label('')
+                                    TextEntry::make('type_value')->hiddenLabel()
                                         ->state(fn ($record) =>
                                             $record->reinsurer_type
                                                 ? "{$record->reinsurer_type->type_acronym} - {$record->reinsurer_type->description}"
@@ -504,10 +506,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('class_label')->label('')
+                                    TextEntry::make('class_label')->hiddenLabel()
                                         ->state('Class:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('class_value')->label('')
+                                    TextEntry::make('class_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->class ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -516,10 +518,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('parent_label')->label('')
+                                    TextEntry::make('parent_label')->hiddenLabel()
                                         ->state('Parent:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('parent_value')->label('')
+                                    TextEntry::make('parent_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->parent?->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -528,10 +530,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('est_label')->label('')
+                                    TextEntry::make('est_label')->hiddenLabel()
                                         ->state('Established:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('est_value')->label('')
+                                    TextEntry::make('est_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->established ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -540,10 +542,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('country_label')->label('')
+                                    TextEntry::make('country_label')->hiddenLabel()
                                         ->state('Country:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('country_value')->label('')
+                                    TextEntry::make('country_value')->hiddenLabel()
                                         ->state(fn ($record) =>
                                             $record->country
                                                 ? "{$record->country->alpha_3} - {$record->country->name}"
@@ -556,10 +558,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('manager_label')->label('')
+                                    TextEntry::make('manager_label')->hiddenLabel()
                                         ->state('Manager:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('manager_value')->label('')
+                                    TextEntry::make('manager_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->manager?->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
@@ -568,10 +570,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('op_status_label')->label('')
+                                    TextEntry::make('op_status_label')->hiddenLabel()
                                         ->state('Operative Status:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('op_status_value')->label('')
+                                    TextEntry::make('op_status_value')->hiddenLabel()
                                         ->state(fn ($record) =>
                                             $record->operative_status
                                                 ? "{$record->operative_status->acronym} - {$record->operative_status->description}"
@@ -584,10 +586,10 @@ public static function infolist(Schema $schema): Schema
                             Grid::make(12)
                                 ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
                                 ->schema([
-                                    TextEntry::make('lsk_label')->label('')
+                                    TextEntry::make('lsk_label')->hiddenLabel()
                                         ->state('LSK:')->weight('bold')->alignment('right')
                                         ->columnSpan(3),
-                                    TextEntry::make('lsk_value')->label('')
+                                    TextEntry::make('lsk_value')->hiddenLabel()
                                         ->state(fn ($record) => $record->cns_reinsurer ?: '—')
                                         ->columnSpan(9),
                                 ]),
