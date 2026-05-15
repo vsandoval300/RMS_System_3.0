@@ -1,10 +1,10 @@
 <x-filament::section heading="Underwritten Overview">
 
-<div class="max-w-xs">
+<div class="max-w-2xl">
         {{ $this->form }}
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div class="grid grid-cols-1 gap-6 mt-6">
         @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::class, [
             'reinsurer' => $this->reinsurer
         ], key('business-chart-' . $this->reinsurer))

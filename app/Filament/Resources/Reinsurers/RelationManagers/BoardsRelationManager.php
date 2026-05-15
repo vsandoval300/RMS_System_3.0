@@ -49,7 +49,7 @@ class BoardsRelationManager extends RelationManager
 
             Select::make('directors')
             ->label('Directors')
-            ->relationship('directors', 'id') // relación belongsToMany en Board
+            ->relationship('directors') // relación belongsToMany en Board
             ->getOptionLabelFromRecordUsing(
                 fn (Director $d) => trim($d->name . ' ' . $d->surname)
             )

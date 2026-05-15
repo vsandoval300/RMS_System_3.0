@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Currencies\Pages;
 
 use App\Filament\Resources\Currencies\CurrenciesResource;
-use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
@@ -36,15 +35,23 @@ class CreateCurrencies extends CreateRecord
     protected function getCreateFormAction(): Action
     {
         return Action::make('create')
-            // label por defecto de Filament
-            ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
+            ->label(
+                __('filament-panels::resources/pages/create-record.form.actions.create.label')
+            )
             ->requiresConfirmation()
             ->modalHeading('Create Currency')
             ->modalDescription('Are you sure you want to create this Currency?')
-            ->modalSubmitActionLabel('Create')
-            // qué hacer cuando el usuario confirma en el modal
-            ->action(fn () => $this->create())
-            ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
+
+            ->action(function () {
+
+                // VALIDAR
+                $this->validate();
+
+                // CREAR
+                $this->create();
+            })
+
+            ->keyBindings(['mod+s']);
     }
 
    

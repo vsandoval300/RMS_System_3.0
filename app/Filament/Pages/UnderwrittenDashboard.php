@@ -29,6 +29,9 @@ class UnderwrittenDashboard extends Page
 
     public function getHeaderWidgetsColumns(): int|array
     {
-        return 1;
+        return [
+            'md' => 2,
+            'xl' => 2,
+        ];
     }
 }

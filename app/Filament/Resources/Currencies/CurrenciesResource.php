@@ -62,6 +62,7 @@ class CurrenciesResource extends Resource
                     ->schema([
                     
                         TextInput::make('name')
+                            //->live()
                             ->label('Name')
                             ->placeholder('Please provide name')
                             ->required()
@@ -76,6 +77,7 @@ class CurrenciesResource extends Resource
                                 : null), */
                             
                         TextInput::make('acronym')
+                            //->live()
                             ->label('Acronym')
                             ->placeholder('e.g. ABC')
                             ->required()

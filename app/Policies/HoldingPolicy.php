@@ -1,108 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Holding;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class HoldingPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('view_any_holding');
+        return $authUser->can('view_any_holding');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Holding $holding): bool
+    public function view(AuthUser $authUser, Holding $holding): bool
     {
-        return $user->can('view_holding');
+        return $authUser->can('view_holding');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create_holding');
+        return $authUser->can('create_holding');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Holding $holding): bool
+    public function update(AuthUser $authUser, Holding $holding): bool
     {
-        return $user->can('update_holding');
+        return $authUser->can('update_holding');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Holding $holding): bool
+    public function delete(AuthUser $authUser, Holding $holding): bool
     {
-        return $user->can('delete_holding');
+        return $authUser->can('delete_holding');
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->can('delete_any_holding');
+        return $authUser->can('delete_any_holding');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, Holding $holding): bool
+    public function restore(AuthUser $authUser, Holding $holding): bool
     {
-        return $user->can('force_delete_holding');
+        return $authUser->can('restore_holding');
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Holding $holding): bool
     {
-        return $user->can('force_delete_any_holding');
+        return $authUser->can('force_delete_holding');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
-    public function restore(User $user, Holding $holding): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_holding');
+        return $authUser->can('force_delete_any_holding');
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_any_holding');
+        return $authUser->can('restore_any_holding');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
-    public function replicate(User $user, Holding $holding): bool
+    public function replicate(AuthUser $authUser, Holding $holding): bool
     {
-        return $user->can('replicate_holding');
+        return $authUser->can('replicate_holding');
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder_holding');
+        return $authUser->can('reorder_holding');
     }
+
 }

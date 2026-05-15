@@ -1,4 +1,13 @@
-<div class="overflow-y-auto border border-gray-800 rounded p-4 space-y-4" style="max-height: 1200px; background-color: #f1efea; color: #1f262a;font-family: 'Montserrat', sans-serif;">
+<div
+    class="overflow-auto border border-gray-800 rounded p-4 space-y-4"
+    style="
+        max-height:1200px;
+        background-color:#f1efea;
+        color:#1f262a;
+        font-family:'Montserrat',sans-serif;
+    "
+>
+    <div class="min-w-[1200px]">
 
     <head>
     <!-- Otras etiquetas head dfe0e2-->
@@ -28,7 +37,7 @@
        General Details
     </h4>
 
-    <table class="table-fixed w-full text-sm border-separate border-spacing-y-1">
+    <table class="w-full table-fixed border-collapse text-sm">
         <colgroup>
             {{-- 4 columnas con datos → auto --}}
             <col>
@@ -46,15 +55,15 @@
         </colgroup>
 
         <tbody>
-            <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+            <tr>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     Document type:
                 </td>
-                <td class="px-2 py-1 font-thin">{{ $documentType ?? '-' }}</td>
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 font-thin border-b border-gray-400">{{ $documentType ?? '-' }}</td>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     Creation date:
                 </td>
-                <td class="px-2 py-1">
+                <td class="px-2 py-1 border-b border-gray-400">
                     {{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d/m/Y') : '-' }}
                 </td>
                 {{-- columnas “dummy” --}}
@@ -62,15 +71,15 @@
                 <td></td>
             </tr>
 
-            <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+            <tr>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     Premium type:
                 </td>
-                <td class="px-2 py-1 font-thin">{{ $premiumType ?? '-' }}</td>
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 font-thin border-b border-gray-400">{{ $premiumType ?? '-' }}</td>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     Period:
                 </td>
-                <td class="px-2 py-1 font-thin">
+                <td class="px-2 py-1 font-thin border-b border-gray-400">
                     {{ $inceptionDate ? \Carbon\Carbon::parse($inceptionDate)->format('d/m/Y') : '-' }}
                     to
                     {{ $expirationDate ? \Carbon\Carbon::parse($expirationDate)->format('d/m/Y') : '-' }}
@@ -79,15 +88,15 @@
                 <td></td>
             </tr>
 
-            <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+            <tr>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     Original currency:
                 </td>
-                <td class="px-2 py-1 font-thin">{{ $originalCurrency ?? '-' }}</td>
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+                <td class="px-2 py-1 font-thin border-b border-gray-400">{{ $originalCurrency ?? '-' }}</td>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     Coverage days:
                 </td>
-                <td class="px-2 py-1 font-thin">
+                <td class="px-2 py-1 font-thin border-b border-gray-400">
                     {{ isset($coverageDays) ? (int) $coverageDays : '-' }}
                 </td>
                 
@@ -96,11 +105,11 @@
             </tr>
 
             {{-- ✅✅✅ CHANGE [ROE-VIEW-1]: Nueva fila para mostrar RoE for Reference --}}
-            <tr class="border-b border-gray-600">
-                <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+            <tr>
+                <td class="px-2 py-1 text-left font-semibold border-b border-gray-400" style="color: #100f0d;">
                     RoE for Reference:
                 </td>
-                <td class="px-2 py-1 font-thin">
+                <td class="px-2 py-1 font-thin border-b border-gray-400">
                     {{ isset($roe_fs) ? number_format((float) $roe_fs, 8) : '-' }}
                 </td>
 
@@ -124,7 +133,14 @@
        Placement Schemes
     </h4>
 
-    <table class="w-full text-sm border-separate border-spacing-y-1 mt-2">
+    <table class="w-full table-fixed border-collapse text-sm">
+        <colgroup>
+            <col style="width:5%;">
+            <col style="width:20%;">
+            <col style="width:45%;">
+            <col style="width:15%;">
+            <col style="width:15%;">
+        </colgroup>
         <thead>
              <tr class="border-b text-gray-300 border-gray-600">
                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
@@ -344,7 +360,7 @@
 
 
     
-    <table class="w-full text-sm border-separate border-spacing-y-1 mt-2">
+    <table class="w-full table-fixed border-collapse text-sm">
         <thead>
             
             <tr>
@@ -477,10 +493,10 @@
 
 
 
-<div style="height: 32px;"></div>
+    <div style="height: 32px;"></div>
 
 
 
 
-
+    </div>
 </div>
