@@ -37,7 +37,7 @@ class BusinessStatsOverview extends BaseWidget
             Stat::make('In Force', Business::where('business_lifecycle_status', 'In Force')->count())
                 ->description('Currently in force')
                 ->icon('heroicon-o-clock')
-                ->color('info'),
+                ->color('gray'),
         ];
     }
 }

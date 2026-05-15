@@ -992,6 +992,12 @@ class BusinessResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('premium_type')
+                    ->label('Premium Type')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('source_code')
                     ->label('Source id')
