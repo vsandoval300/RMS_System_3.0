@@ -14,14 +14,7 @@ class ListSubregions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('New Subregion')          // 👈 el texto que tú quieras
-                ->icon('heroicon-m-plus')
-                ->color('primary')
-                ->createAnother(false)
-                ->modalHeading('New Subregion')   // título del modal
-                ->modalSubmitActionLabel('Create')
-                ->modalCancelActionLabel('Cancel'),
+            
         ];
     }
 }

@@ -105,7 +105,7 @@ class TreatyResource extends Resource
                                             $prefix = "TTY-{$year}-{$acronym}{$number}";
 
                                             // Buscar el último código existente que empiece con ese prefijo
-                                            $lastBusiness = Treaty::query()
+                                            $lastTreaty = Treaty::query()
                                                 ->withTrashed() // 👈 incluye borrados (deleted_at no null)
                                                 ->where('treaty_code', 'like', "$prefix-%")
                                                 ->orderByDesc('treaty_code')
@@ -114,15 +114,15 @@ class TreatyResource extends Resource
                                                 // Extraer el consecutivo y sumarle 1
                                                 $lastNumber = 0;
 
-                                                if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->treaty_code, $matches)) {
+                                                if ($lastTreaty && preg_match('/-(\d{3})$/', $lastTreaty->treaty_code, $matches)) {
                                                     $lastNumber = (int)$matches[1];
                                                 }
 
                                                 $consecutive = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
 
-                                                $businessCode = "{$prefix}-{$consecutive}";
+                                                $treatyCode = "{$prefix}-{$consecutive}";
 
-                                                $set('treaty_code', $businessCode);
+                                                $set('treaty_code', $treatyCode);
                                                 
                                             }),
                                            

@@ -2,26 +2,25 @@
 
 <div class="max-w-2xl">
         {{ $this->form }}
-    </div>
-
-    <div
-        class="fi-grid grid gap-6 mt-6"
-        style="
-            --cols-default: repeat(1, minmax(0, 1fr));
-            --cols-lg: repeat(2, minmax(0, 1fr));
-        "
-    >
-
-        <div class="col-span-1 min-w-0">
-            @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::class, [
-                'reinsurer' => $this->reinsurer
-            ], key('business-chart-' . $this->reinsurer))
-        </div>
-        <div class="col-span-1 min-w-0">
-            @livewire(\App\Filament\Underwritten\Widgets\PremiumForPeriod::class, [
-                'reinsurer' => $this->reinsurer
-            ], key('premium-chart-' . $this->reinsurer))
-        </div>
 </div>
+
+    @php
+        $widgets = [    
+            \App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::make([
+                'reinsurer' => $this->reinsurer
+            ]),
+
+            \App\Filament\Underwritten\Widgets\PremiumForPeriod::make([
+                'reinsurer' => $this->reinsurer
+            ]),
+        ];
+    @endphp
+        
+    <div class="mt-6">
+        <x-filament-widgets::widgets
+            :columns="2"
+            :widgets="$widgets"
+        />
+    </div>
     
 </x-filament::section>

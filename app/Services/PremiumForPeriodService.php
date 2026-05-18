@@ -513,7 +513,7 @@ class PremiumForPeriodService
             $datasets[] = [
                 'label' => (string)$year,
                 'data' => array_values($monthsData),
-                'borderColor' => $colors[$i % count($colors)],
+                'borderColor' => "#36A2EB",
                 'fill' => false,
                 'tension' => 0.3,
             ];
