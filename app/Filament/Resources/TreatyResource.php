@@ -106,7 +106,7 @@ class TreatyResource extends Resource
                                                 // Extraer el consecutivo y sumarle 1
                                                 $lastNumber = 0;
 
-                                                if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->business_code, $matches)) {
+                                                if ($lastBusiness && preg_match('/-(\d{3})$/', $lastBusiness->treaty_code, $matches)) {
                                                     $lastNumber = (int)$matches[1];
                                                 }
 
