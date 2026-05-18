@@ -304,20 +304,7 @@ public static function form(Schema $schema): Schema
                                 ->minValue(0)
                                 ->step(0.00001)
                                 ->columnSpan(1),
-
-                            // ───── Columna 2: Vacía ─────
-                            Placeholder::make('spacer')
-                                ->label(' ')
-                                ->content(' ')
-                                ->columnSpan(1),
-
-                            // ───── Columna 2: Vacía ─────
-                            Placeholder::make('spacer')
-                                ->label(' ')
-                                ->content(' ')
-                                ->columnSpan(1),
-
-                           
+       
                         ]),
                 ])
                 ->columns(2),

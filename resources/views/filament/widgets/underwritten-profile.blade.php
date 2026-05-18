@@ -1,16 +1,18 @@
 <x-filament::section heading="Underwritten Profile">
 
-    <div class="max-w-2xl">
+    <div class="max-w-xs">
         {{ $this->form }}
     </div>
 
-    <div class="grid grid-cols-1 gap-6 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+
         @livewire(
-           App\Filament\Underwritten\Widgets\UnderwrittenBusiness::class,
+            App\Filament\Underwritten\Widgets\UnderwrittenBusiness::class,
             [
                 'reinsurer' => $this->reinsurer,
                 'years' => $this->years
-            ], key('businessYear-chart-' . implode('-', $this->years))
+            ],
+            key('businessYear-chart-' . implode('-', $this->years ?? []))
         )
 
         @livewire(
@@ -18,8 +20,10 @@
             [
                 'reinsurer' => $this->reinsurer,
                 'years' => $this->years
-            ], key('premium-chart-' . implode('-', $this->years ?? []))
+            ],
+            key('premium-chart-' . implode('-', $this->years ?? []))
         )
+
     </div>
 
 </x-filament::section>

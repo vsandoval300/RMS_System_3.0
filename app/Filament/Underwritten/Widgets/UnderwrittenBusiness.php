@@ -13,6 +13,7 @@ class UnderwrittenBusiness extends ChartWidget
 
     public ?int $reinsurer = null;
     public array $years = [];
+    protected ?string $maxHeight = '300px';
 
     protected static bool $isLazy = false;
 

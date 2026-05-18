@@ -16,8 +16,8 @@ class UnderwrittenOverview extends Widget implements HasForms, HasActions
     use InteractsWithForms;
 
     protected string $view = 'filament.widgets.underwritten-overview';
-    protected int|string|array $columnSpan = '1';
-    protected static ?string $maxHeight = '320px';
+    protected int|string|array $columnSpan = 'full';
+    protected ?string $maxHeight = '320px';
 
 
     public ?int $reinsurer = null;

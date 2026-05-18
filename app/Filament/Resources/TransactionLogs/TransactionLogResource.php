@@ -35,6 +35,7 @@ class TransactionLogResource extends Resource
     {
         return $schema->components([
             Section::make('Operational fields')
+                ->columnSpanFull()
                 ->schema([
                     DatePicker::make('sent_date')
                         ->label('Sent')
@@ -61,6 +62,7 @@ class TransactionLogResource extends Resource
                 ])->columns(4),
 
             Section::make('Read-only')
+                ->columnSpanFull()
                 ->collapsed()
                 ->schema([
                     TextInput::make('transaction_id')->disabled(),

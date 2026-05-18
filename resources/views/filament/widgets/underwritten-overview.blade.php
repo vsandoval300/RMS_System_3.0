@@ -4,14 +4,24 @@
         {{ $this->form }}
     </div>
 
-    <div class="grid grid-cols-1 gap-6 mt-6">
-        @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::class, [
-            'reinsurer' => $this->reinsurer
-        ], key('business-chart-' . $this->reinsurer))
+    <div
+        class="fi-grid grid gap-6 mt-6"
+        style="
+            --cols-default: repeat(1, minmax(0, 1fr));
+            --cols-lg: repeat(2, minmax(0, 1fr));
+        "
+    >
 
-        @livewire(\App\Filament\Underwritten\Widgets\PremiumForPeriod::class, [
-            'reinsurer' => $this->reinsurer
-        ], key('premium-chart-' . $this->reinsurer))
-    </div>
+        <div class="col-span-1 min-w-0">
+            @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::class, [
+                'reinsurer' => $this->reinsurer
+            ], key('business-chart-' . $this->reinsurer))
+        </div>
+        <div class="col-span-1 min-w-0">
+            @livewire(\App\Filament\Underwritten\Widgets\PremiumForPeriod::class, [
+                'reinsurer' => $this->reinsurer
+            ], key('premium-chart-' . $this->reinsurer))
+        </div>
+</div>
     
 </x-filament::section>

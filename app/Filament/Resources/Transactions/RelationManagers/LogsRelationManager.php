@@ -46,6 +46,7 @@ class LogsRelationManager extends RelationManager
     {
         return $schema->components([
             Section::make()
+                ->columnSpanFull()
                 ->columns(6)
                 ->schema([
                     TextInput::make('index')
@@ -89,6 +90,7 @@ class LogsRelationManager extends RelationManager
                 ]),
 
             Section::make()
+                ->columnSpanFull()
                 ->columns(2)
                 ->schema([
                     DatePicker::make('sent_date'),
@@ -96,6 +98,7 @@ class LogsRelationManager extends RelationManager
                 ]),
 
             Section::make()
+                ->columnSpanFull()
                 ->columns(2)
                 ->schema([
                     TextInput::make('exch_rate')->numeric(),
@@ -106,6 +109,7 @@ class LogsRelationManager extends RelationManager
                 ]),
 
             Section::make()
+                ->columnSpanFull()
                 ->columns(4)
                 ->schema([
                     TextInput::make('gross_amount')
@@ -142,6 +146,7 @@ class LogsRelationManager extends RelationManager
 
             // ✅ NUEVA SECCIÓN: Evidence
             Section::make('Evidence')
+                ->columnSpanFull()
                 ->description('Upload a PDF evidence file for this log row (optional).')
                 ->schema([
                     FileUpload::make('evidence_path')

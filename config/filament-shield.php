@@ -238,6 +238,10 @@ return [
         'Business:AddTransaction' => 'Business Add Transaction',
         'PrintSummaryBusiness' => 'Print Summary Business',
         'Business:ViewTransactions' => 'Business View Transactions',
+        'Widget:UnderwrittenBusiness' => 'Widget Underwritten Business',
+        'View:StaticsDashboard' => 'View Statics Dashboard',
+        'View:AnyStaticsDashboard' => 'View Any Statics Dashboard',
+        'Widget:UserStatics' => 'Widget User Statics'
     ],
 
     /*

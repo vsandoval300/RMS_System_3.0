@@ -47,18 +47,23 @@ class ReinsurerBankAccountsRelationManager extends RelationManager
     {
         return $schema->components([
             Select::make('bank_account_id')
-                ->label('Bank account')
-                ->relationship('bankAccount', 'ffc_acct_no')   // 👈 campo seguro (no NULL)
-                ->getOptionLabelFromRecordUsing(
-                    fn ($record) => $record->ffc_acct_no
-                                . ' - ' . ($record->bank?->name ?? 'No bank')
-                                . ' - (' . ($record->ffc_acct_name ?? 'No FFC name') . ')'
-                )
-                ->searchable()
-                ->preload()
-                ->createOptionForm($this->bankAccountForm())
-                ->required()
-                ->columnSpanFull(), 
+            ->label('Bank account')
+            ->relationship(
+                name: 'bankAccount',
+                titleAttribute: 'ffc_acct_no',
+                modifyQueryUsing: fn ($query) => $query->with('bank')
+            )
+            ->getOptionLabelFromRecordUsing(
+                fn ($record) =>
+                    $record->ffc_acct_no
+                    . ' - ' . ($record->bank?->name ?? 'No bank')
+                    . ' - (' . ($record->ffc_acct_name ?? 'No FFC name') . ')'
+            )
+            ->searchable()
+            ->preload()
+            ->createOptionForm($this->bankAccountForm())
+            ->required()
+            ->columnSpanFull()
         ]);
     }
 

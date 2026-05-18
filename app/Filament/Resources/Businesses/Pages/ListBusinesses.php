@@ -20,6 +20,7 @@ use Filament\Resources\Pages\ListRecords;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\LazyCollection;
 use Filament\Forms\Components\Hidden;
+use Illuminate\Support\Facades\Log;
 
 class ListBusinesses extends ListRecords
 {
@@ -246,6 +247,13 @@ class ListBusinesses extends ListRecords
     {
         return [
             BusinessStatsOverview::class,
+        ];
+    }
+    
+    protected function getHeaderWidgetsData(): array
+    {
+        return [
+            'tableFilters' => $this->tableFilters,
         ];
     }
 }

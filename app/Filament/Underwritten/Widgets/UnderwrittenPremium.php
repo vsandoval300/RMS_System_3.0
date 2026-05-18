@@ -11,6 +11,7 @@ class UnderwrittenPremium extends ChartWidget
 {
     protected ?string $heading = 'Underwritten Premium';
     protected string $view = 'filament.widgets.premium-monthly-period';
+    protected ?string $maxHeight = '300px';
 
     public ?int $reinsurer = null;
     public array $years = [];
