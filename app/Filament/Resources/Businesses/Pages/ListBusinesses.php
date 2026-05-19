@@ -249,4 +249,11 @@ class ListBusinesses extends ListRecords
             BusinessStatsOverview::class,
         ];
     }
+    
+    protected function getHeaderWidgetsData(): array
+    {
+        return [
+            'tableFilters' => $this->tableFilters,
+        ];
+    }
 }

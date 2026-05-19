@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class BusinessStatsOverview extends BaseWidget
 {
-    use InteractsWithPageFilters;
+    #[Reactive]
+    public ?array $tableFilters = null;
         
     protected function getStats(): array
     {
