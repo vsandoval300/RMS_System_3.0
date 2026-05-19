@@ -6,21 +6,20 @@ use App\Filament\Resources\Businesses\BusinessResource;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Business;
-use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Tables\Contracts\HasTable;
 use Livewire\Attributes\Reactive;
 use Illuminate\Support\Facades\Log;
 
 class BusinessStatsOverview extends BaseWidget
 {
-    #[Reactive]
-    public array $tableFilters = [];
+    use InteractsWithPageFilters;
         
     protected function getStats(): array
     {
         $query = Business::query();
 
-        $filters = $this->tablefilters ?? [];
+        $filters = $this->filters ?? [];
 
         //Log::info('Widget filters', $this->tableFilters);
         
