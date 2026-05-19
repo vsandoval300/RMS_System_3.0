@@ -51,11 +51,7 @@ class ViewTransaction extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            /* Actions\Action::make('back')
-                ->label('Back')
-                ->icon('heroicon-o-arrow-left')
-                ->url(static::getResource()::getUrl('index')), */
-
+            
             Action::make('auditInfo')
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
@@ -66,8 +62,11 @@ class ViewTransaction extends ViewRecord
                 ->schema([
                     \Filament\Schemas\Components\View::make('filament.resources.audit.audit-logs')
                         ->viewData([
-                            // Pasamos el registro actual a la vista Blade
-                            'record' => $this->getRecord(),
+                            'logs' => $this->getRecord()
+                                ->auditLogs()
+                                ->with('user')
+                                ->latest()
+                                ->get(),
                         ])
                         ->columnSpanFull(),
                 ]),   

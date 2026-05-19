@@ -48,10 +48,6 @@ class ViewBusiness extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            /* Actions\Action::make('back')
-                ->label('Back')
-                ->icon('heroicon-o-arrow-left')
-                ->url(static::getResource()::getUrl('index')), */
 
             Action::make('auditInfo')
                 ->label('Audit info')
@@ -59,21 +55,17 @@ class ViewBusiness extends ViewRecord
                 ->modalContent(fn () => view(
                 'filament.resources.audit.audit-logs',
                 [
-                    'record' => $this->getRecord(),
-
+                    'logs' => $this->getRecord()
+                        ->auditLogs()
+                        ->with('user')
+                        ->latest()
+                        ->get(),
                 ],
             ))
 
             ->modalSubmitAction(false)
             ->modalCancelAction(false)
-
-            // 👇 MUY IMPORTANTE
-            ->modalWidth('4xl')
-            ->stickyModalHeader(),
-            // 👇 controlamos altura REAL del modal
-            // ->extraModalWindowAttributes([
-            //     'class' => '!p-0 !overflow-hidden !max-h-[80vh]',
-            // ]),   
+            ->modalWidth('4xl'),
                 
             Action::make('close')
                 ->label('Close')

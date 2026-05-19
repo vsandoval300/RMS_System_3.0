@@ -33,14 +33,16 @@ class ViewOperativeStatuses extends ViewRecord
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()
                 ->schema(function () {
-                    $record = $this->getRecord();
-
                     return [
 
                         // ── Change history (vista Blade que ya tienes) ──
                         View::make('filament.resources.audit.audit-logs')
                             ->viewData([
-                                'record' => $record,
+                                'logs' => $this->getRecord()
+                                    ->auditLogs()
+                                    ->with('user')
+                                    ->latest()
+                                    ->get(),
                             ])
                             ->columnSpanFull(),
                     ];

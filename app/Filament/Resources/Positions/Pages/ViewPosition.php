@@ -32,14 +32,16 @@ class ViewPosition extends ViewRecord
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()
                 ->schema(function () {
-                    $record = $this->getRecord();
 
                     return [
-
                         // ── Change history (vista Blade que ya tienes) ──
                         \Filament\Schemas\Components\View::make('filament.resources.audit.audit-logs')
                             ->viewData([
-                                'record' => $record,
+                                'logs' => $this->getRecord()
+                                    ->auditLogs()
+                                    ->with('user')
+                                    ->latest()
+                                    ->get(),
                             ])
                             ->columnSpanFull(),
                     ];
