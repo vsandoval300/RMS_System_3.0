@@ -68,12 +68,12 @@ class ViewBusiness extends ViewRecord
             ->modalCancelAction(false)
 
             // 👇 MUY IMPORTANTE
-            ->modalWidth(Width::SevenExtraLarge)
-
+            ->modalWidth('4xl')
+            ->stickyModalHeader(),
             // 👇 controlamos altura REAL del modal
-            ->extraModalWindowAttributes([
-                'class' => '!p-0 !overflow-hidden !max-h-[80vh]',
-            ]),   
+            // ->extraModalWindowAttributes([
+            //     'class' => '!p-0 !overflow-hidden !max-h-[80vh]',
+            // ]),   
                 
             Action::make('close')
                 ->label('Close')

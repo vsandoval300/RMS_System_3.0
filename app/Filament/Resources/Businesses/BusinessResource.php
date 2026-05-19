@@ -1237,13 +1237,13 @@ class BusinessResource extends Resource
                             /** @var User|null $user */
                             $user = Filament::auth()->user();
 
-                            return ! ($user?->can('business.technical_result') ?? false);
+                            return ! ($user?->can('Business:TechnicalResult') ?? false);
                         })
                         ->tooltip(function (): string {
                             /** @var User|null $user */
                             $user = Filament::auth()->user();
 
-                            return ($user?->can('business.technical_result') ?? false)
+                            return ($user?->can('Business:TechnicalResult') ?? false)
                                 ? 'View technical result'
                                 : 'You do not have permission to access Technical Result';
                         })
@@ -1251,7 +1251,7 @@ class BusinessResource extends Resource
                             /** @var User|null $user */
                             $user = Filament::auth()->user();
 
-                            if (! ($user?->can('business.technical_result') ?? false)) {
+                            if (! ($user?->can('Business:TechnicalResult') ?? false)) {
                                 Notification::make()
                                     ->title('Permission denied')
                                     ->body('You do not have permission to access Technical Result.')
@@ -1277,13 +1277,13 @@ class BusinessResource extends Resource
                             /** @var User|null $user */
                             $user = Filament::auth()->user();
 
-                            return ! ($user?->can('business.renewal') ?? false);
+                            return ! ($user?->can('Business:Renewal') ?? false);
                         })
                         ->tooltip(function (): string {
                             /** @var User|null $user */
                             $user = Filament::auth()->user();
 
-                            return ($user?->can('business.renewal') ?? false)
+                            return ($user?->can('Business:Renewal') ?? false)
                                 ? 'Renew this business'
                                 : 'You do not have permission to renew this business';
                         })
@@ -1291,7 +1291,7 @@ class BusinessResource extends Resource
                             /** @var User|null $user */
                             $user = Filament::auth()->user();
 
-                            if (! ($user?->can('business.renewal') ?? false)) {
+                            if (! ($user?->can('Business:Renewal') ?? false)) {
                                 Notification::make()
                                     ->title('Permission denied')
                                     ->body('You do not have permission to renew this business.')

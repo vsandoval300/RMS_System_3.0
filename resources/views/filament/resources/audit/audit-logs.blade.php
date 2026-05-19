@@ -7,10 +7,10 @@
         : collect();
 @endphp
 
-<div class="flex flex-col h-[80vh]">
+<div class="px-6 py-4">
 
     {{-- HEADER --}}
-    <div class="px-6 pt-6 pb-4 shrink-0">
+    <div class="mb-4">
 
         <h2 class="text-lg font-semibold">
             Audit info
@@ -23,75 +23,103 @@
     </div>
 
     {{-- BODY --}}
-    <div class="flex-1 overflow-y-auto min-h-0 px-6 pb-6">
+    <div class="space-y-4 overflow-y-auto pr-2" style="max-height: 65vh;">
 
-        <div class="space-y-3">
+        @foreach ($logs as $log)
 
-            @foreach ($logs as $log)
+            <div
+                class="rounded-xl border border-gray-200 dark:border-white/10
+                       bg-white dark:bg-gray-900
+                       shadow-sm">
 
-                <div class="rounded-xl border border-gray-200
-                            dark:border-white/10
-                            p-4">
+                {{-- TOP --}}
+                <div
+                    class="flex items-start justify-between gap-4
+                           px-4 py-3 border-b border-gray-100
+                           dark:border-white/5">
 
-                    <div class="flex items-start justify-between gap-4">
+                    <div class="font-semibold text-sm">
 
-                        <div class="min-w-0 flex-1">
-
-                            <div class="text-sm font-medium break-words">
-                                {{ $log->event }}
-                            </div>
-
-                        </div>
-
-                        <div class="shrink-0 text-xs text-gray-500 whitespace-nowrap">
-
-                            {{ $log->created_at->format('d/m/Y H:i') }}
-
-                            @if ($log->user)
-                                · {{ $log->user->name }}
-                            @endif
-
-                        </div>
+                        {{ ucfirst($log->event) }}
 
                     </div>
 
-                    @if (!empty($log->changes))
+                    <div class="text-xs text-gray-500 whitespace-nowrap">
 
-                        <ul class="mt-3 space-y-2">
+                        {{ $log->created_at->format('d/m/Y H:i') }}
 
-                            @foreach ($log->changes as $field => $values)
+                        @if ($log->user)
+                            · {{ $log->user->name }}
+                        @endif
 
-                                <li class="text-xs break-words leading-5">
-
-                                    <span class="font-semibold">
-                                        {{ $field }}
-                                    </span>
-
-                                    changed from
-
-                                    <span class="font-mono">
-                                        [{{ $values['old'] ?? '' }}]
-                                    </span>
-
-                                    to
-
-                                    <span class="font-mono">
-                                        [{{ $values['new'] ?? '' }}]
-                                    </span>
-
-                                </li>
-
-                            @endforeach
-
-                        </ul>
-
-                    @endif
+                    </div>
 
                 </div>
 
-            @endforeach
+                {{-- CHANGES --}}
+                @if (!empty($log->changes))
 
-        </div>
+                    <div class="p-4 space-y-3">
+
+                        @foreach ($log->changes as $field => $values)
+
+                            <div
+                                class="rounded-lg bg-gray-50 dark:bg-white/5
+                                       px-3 py-2">
+
+                                <div
+                                    class="text-xs font-semibold mb-2
+                                           text-gray-700 dark:text-gray-200">
+
+                                    {{ str($field)->headline() }}
+
+                                </div>
+
+                                <div class="space-y-1 text-xs">
+
+                                    <div>
+
+                                        <span class="text-gray-500">
+                                            From:
+                                        </span>
+
+                                        <code
+                                            class="font-mono text-red-600 dark:text-red-400 break-all">
+
+                                            {{ $values['old'] ?? '—' }}
+
+                                        </code>
+
+                                    </div>
+
+                                    <div>
+
+                                        <span class="text-gray-500">
+                                            To:
+                                        </span>
+
+                                        <code
+                                            class="font-mono text-green-600 dark:text-green-400 break-all">
+
+                                            {{ $values['new'] ?? '—' }}
+
+                                        </code>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        @endforeach
+
+                    </div>
+
+                @endif
+
+            </div>
+
+        @endforeach
 
     </div>
 
