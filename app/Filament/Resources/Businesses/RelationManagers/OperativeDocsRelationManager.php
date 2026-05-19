@@ -1913,13 +1913,13 @@ class OperativeDocsRelationManager extends RelationManager
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
 
-                        return ! ($user?->can('printsummarybusiness') ?? false);
+                        return ! ($user?->can('PrintSummaryBusiness') ?? false);
                     })
                     ->tooltip(function (): ?string {
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
 
-                        return ($user?->can('printsummarybusiness') ?? false)
+                        return ($user?->can('PrintSummaryBusiness') ?? false)
                             ? 'Open printable summary'
                             : 'You do not have permission to print the summary.';
                     })
@@ -1931,7 +1931,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ->modalContent(function ($record) {
                         $user = Filament::auth()->user();
                         /** @var User|null $user */
-                        if (! ($user?->can('printsummarybusiness') ?? false)) {
+                        if (! ($user?->can('PrintSummaryBusiness') ?? false)) {
                             return new HtmlString('<div class="p-4 text-sm text-gray-500">Permission denied.</div>');
                         }
 
@@ -2044,13 +2044,13 @@ class OperativeDocsRelationManager extends RelationManager
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
 
-                        return ! ($user?->can('business.view_transactions') ?? false);
+                        return ! ($user?->can('Business:ViewTransactions') ?? false);
                     })
                     ->tooltip(function (): ?string {
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
 
-                        return ($user?->can('business.view_transactions') ?? false)
+                        return ($user?->can('Business:ViewTransactions') ?? false)
                             ? 'Open the transactions list filtered by this document'
                             : 'You do not have permission to view transactions.';
                     })
@@ -2058,7 +2058,7 @@ class OperativeDocsRelationManager extends RelationManager
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
 
-                        if (! ($user?->can('business.view_transactions') ?? false)) {
+                        if (! ($user?->can('Business:ViewTransactions') ?? false)) {
                             Notification::make()
                                 ->title('Permission denied')
                                 ->body('You do not have permission to view transactions.')
