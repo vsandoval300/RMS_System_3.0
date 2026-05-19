@@ -31,7 +31,7 @@ class CreateTransaction extends CreateRecord
         $user = Filament::auth()->user();
 
         abort_unless(
-            $user?->can('business.add_transaction') ?? false,
+            $user?->can('Business:AddTransaction') ?? false,
             403
         );
     }
