@@ -32,8 +32,6 @@ class ViewPartnerTypes extends ViewRecord
                 ->modalSubmitAction(false)
                 ->closeModalByClickingAway()
                 ->schema(function () {
-                    $record = $this->getRecord();
-
                     return [
 
                         // ── Change history (vista Blade que ya tienes) ──

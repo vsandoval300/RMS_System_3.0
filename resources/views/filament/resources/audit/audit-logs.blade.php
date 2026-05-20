@@ -4,21 +4,37 @@
 
         <div
             style="
-                border: 1px solid #e5e7eb;
                 border-radius: 12px;
                 padding: 16px;
                 margin-bottom: 16px;
-                background: #ffffff;
+            "
+
+            class="
+                border border-gray-200
+                bg-white
+                dark:border-gray-700
+                dark:bg-gray-900
+            "
+
+            class="
+                dark:!bg-gray-900
+                dark:!border-gray-700
             "
         >
 
-            <div style="font-weight: 600; margin-bottom: 8px;">
+            <div
+                style="font-weight: 600; margin-bottom: 8px;"
+                class="text-gray-900 dark:text-white"
+            >
 
                 {{ $log->event }}
 
             </div>
 
-            <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">
+            <div
+                style="font-size: 12px; margin-bottom: 12px;"
+                class="text-gray-500 dark:text-gray-400"
+            >
 
                 {{ $log->created_at->format('d/m/Y H:i') }}
 
@@ -34,24 +50,32 @@
 
                     <div
                         style="
-                            background: #f9fafb;
                             border-radius: 8px;
                             padding: 8px;
                             margin-top: 8px;
                             font-size: 12px;
+                            background: #f9fafb;
+                        "
+
+                        class="
+                            dark:!bg-gray-800
                         "
                     >
 
-                        <strong>{{ $field }}</strong>
+                        <strong class="text-gray-900 dark:text-white">
 
-                        <div>
+                            {{ $field }}
+
+                        </strong>
+
+                        <div class="text-gray-700 dark:text-gray-300">
 
                             From:
                             {{ $values['old'] ?? '—' }}
 
                         </div>
 
-                        <div>
+                        <div class="text-gray-700 dark:text-gray-300">
 
                             To:
                             {{ $values['new'] ?? '—' }}
@@ -68,7 +92,7 @@
 
     @empty
 
-        <div style="color: #6b7280;">
+        <div class="text-gray-500 dark:text-gray-400">
 
             No audit logs found.
 
