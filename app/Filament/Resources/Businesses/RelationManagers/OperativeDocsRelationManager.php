@@ -360,53 +360,70 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->label('Underwriting Month')
                                                             ->required()
                                                             ->dehydratedWhenHidden()
-                                                            ->displayFormat('F Y')     // lo que ve el usuario
-                                                            ->format('Y-m-01')          // lo que se guarda (string)
-                                                            ->seconds(false)                 // solo hora:minuto
+                                                            ->displayFormat('F Y')
+                                                            ->format('Y-m-01')
                                                             ->native(false)
                                                             ->closeOnDateSelection()
                                                             ->live()
+                                                            ->afterStateHydrated(function ($component, $state, $record) {
+                                                                if (! $record && blank($state)) {
+                                                                    $component->state(now()->format('Y-m-01'));
+                                                                }
+                                                            })
                                                             ->columnSpan(3),
                                                         
                                                         TextInput::make('roe_fs')
-                                                            ->label('Exchange rate')
-                                                            ->required()
-                                                            ->inputMode('decimal')
-                                                            ->rules(['numeric', 'min:0'])
-                                                            ->extraInputAttributes(['class' => 'text-right tabular-nums'])
+    ->label('Exchange rate')
+    ->required()
+    ->inputMode('decimal')
+    ->rules(['numeric', 'min:0'])
+    ->extraInputAttributes([
+        'class' => 'text-right tabular-nums',
+    ])
 
-                                                            // 🔒 Bloquear edición si moneda del Business es USD (157)
-                                                            ->readOnly(fn ($livewire) =>
-                                                                method_exists($livewire, 'getOwnerRecord')
-                                                                && (int) $livewire->getOwnerRecord()?->currency_id === 157
-                                                            )
+    // 🔒 readonly si Business currency = USD
+    ->readOnly(fn ($livewire) =>
+        method_exists($livewire, 'getOwnerRecord')
+        && (int) $livewire->getOwnerRecord()?->currency_id === 157
+    )
 
-                                                            // ✅ MOSTRAR 1.00000000 si es USD aunque el state sea null
-                                                            ->formatStateUsing(function ($state, $livewire) {
-                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
-                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+    // ✅ Hidratar correctamente
+    ->afterStateHydrated(function ($component, $state, $record, $livewire) {
 
-                                                                if ($state === null || $state === '') {
-                                                                    return $isUsd ? number_format(1, 8, '.', '') : null;
-                                                                }
+        $isUsd = method_exists($livewire, 'getOwnerRecord')
+            && (int) $livewire->getOwnerRecord()?->currency_id === 157;
 
-                                                                return number_format((float) $state, 8, '.', '');
-                                                            })
+        // USD → forzar 1
+        if ($isUsd) {
+            $component->state('1.00000000');
+            return;
+        }
 
-                                                            // ✅ GUARDAR 1 si es USD y viene vacío; si no, null
-                                                            ->dehydrateStateUsing(function ($state, $livewire) {
-                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
-                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+        // No USD → usar roe_fs del modelo actual
+        if ($record?->roe_fs !== null) {
+            $component->state(
+                number_format((float) $record->roe_fs, 8, '.', '')
+            );
+        }
+    })
 
-                                                                if ($state === null || $state === '') {
-                                                                    return $isUsd ? 1 : null;
-                                                                }
+    // ✅ Guardado
+    ->dehydrateStateUsing(function ($state, $livewire) {
 
-                                                                return round((float) str_replace(',', '', $state), 8);
-                                                            })
+        $isUsd = method_exists($livewire, 'getOwnerRecord')
+            && (int) $livewire->getOwnerRecord()?->currency_id === 157;
 
-                                                            ->dehydrated()
-                                                            ->columnSpan(3),
+        if ($isUsd) {
+            return 1;
+        }
+
+        return blank($state)
+            ? null
+            : round((float) str_replace(',', '', $state), 8);
+    })
+
+    ->dehydrated()
+    ->columnSpan(3),
 
                                                         
 

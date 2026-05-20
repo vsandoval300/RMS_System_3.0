@@ -268,6 +268,7 @@ class BusinessResource extends Resource
                                             ->relationship('region', 'name')
                                             ->searchable()
                                             ->preload()
+                                            ->default(2)
                                             ->required(),
 
                                         Select::make('producer_id')

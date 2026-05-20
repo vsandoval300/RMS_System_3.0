@@ -65,7 +65,7 @@ class ViewBusiness extends ViewRecord
 
             ->modalSubmitAction(false)
             ->modalCancelAction(false)
-            ->modalWidth('4xl'),
+            ->modalWidth('7xl'),
                 
             Action::make('close')
                 ->label('Close')

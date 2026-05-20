@@ -32,7 +32,7 @@
             </div>
 
             <div
-                style="font-size: 12px; margin-bottom: 12px;"
+                style="font-size: 12px; margin-bottom: 12px; text-align: end;"
                 class="text-gray-500 dark:text-gray-400"
             >
 
