@@ -357,12 +357,16 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->label('Underwriting Month')
                                                             ->required()
                                                             ->dehydratedWhenHidden()
-                                                            ->displayFormat('F Y')     // lo que ve el usuario
-                                                            ->format('Y-m-01')          // lo que se guarda (string)
-                                                            ->seconds(false)                 // solo hora:minuto
+                                                            ->displayFormat('F Y')
+                                                            ->format('Y-m-01')
                                                             ->native(false)
                                                             ->closeOnDateSelection()
                                                             ->live()
+                                                            ->afterStateHydrated(function ($component, $state, $record) {
+                                                                if (! $record && blank($state)) {
+                                                                    $component->state(now()->format('Y-m-01'));
+                                                                }
+                                                            })
                                                             ->columnSpan(3),
                                                         
                                                         TextInput::make('roe_fs')
