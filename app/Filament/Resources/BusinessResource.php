@@ -412,7 +412,7 @@ class BusinessResource extends Resource
                                 ->relationship('Region', 'name') // usa la relación en tu modelo
                                 ->searchable()
                                 ->preload()
-                                //->default(2) 
+                                ->default(2) 
                                 ->helperText(fn ($record) =>
                                     $record
                                         ? 'Edit the value if necessary.'
