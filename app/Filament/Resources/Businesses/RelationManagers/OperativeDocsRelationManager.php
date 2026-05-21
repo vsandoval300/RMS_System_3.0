@@ -373,57 +373,57 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->columnSpan(3),
                                                         
                                                         TextInput::make('roe_fs')
-    ->label('Exchange rate')
-    ->required()
-    ->inputMode('decimal')
-    ->rules(['numeric', 'min:0'])
-    ->extraInputAttributes([
-        'class' => 'text-right tabular-nums',
-    ])
+                                                            ->label('Exchange rate')
+                                                            ->required()
+                                                            ->inputMode('decimal')
+                                                            ->rules(['numeric', 'min:0'])
+                                                            ->extraInputAttributes([
+                                                                'class' => 'text-right tabular-nums',
+                                                            ])
 
-    // 🔒 readonly si Business currency = USD
-    ->readOnly(fn ($livewire) =>
-        method_exists($livewire, 'getOwnerRecord')
-        && (int) $livewire->getOwnerRecord()?->currency_id === 157
-    )
+                                                            // 🔒 readonly si Business currency = USD
+                                                            ->readOnly(fn ($livewire) =>
+                                                                method_exists($livewire, 'getOwnerRecord')
+                                                                && (int) $livewire->getOwnerRecord()?->currency_id === 157
+                                                            )
 
-    // ✅ Hidratar correctamente
-    ->afterStateHydrated(function ($component, $state, $record, $livewire) {
+                                                            // ✅ Hidratar correctamente
+                                                            ->afterStateHydrated(function ($component, $state, $record, $livewire) {
 
-        $isUsd = method_exists($livewire, 'getOwnerRecord')
-            && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
+                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
 
-        // USD → forzar 1
-        if ($isUsd) {
-            $component->state('1.00000000');
-            return;
-        }
+                                                                // USD → forzar 1
+                                                                if ($isUsd) {
+                                                                    $component->state('1.00000000');
+                                                                    return;
+                                                                }
 
-        // No USD → usar roe_fs del modelo actual
-        if ($record?->roe_fs !== null) {
-            $component->state(
-                number_format((float) $record->roe_fs, 8, '.', '')
-            );
-        }
-    })
+                                                                // No USD → usar roe_fs del modelo actual
+                                                                if ($record?->roe_fs !== null) {
+                                                                    $component->state(
+                                                                        number_format((float) $record->roe_fs, 8, '.', '')
+                                                                    );
+                                                                }
+                                                            })
 
-    // ✅ Guardado
-    ->dehydrateStateUsing(function ($state, $livewire) {
+                                                            // ✅ Guardado
+                                                            ->dehydrateStateUsing(function ($state, $livewire) {
 
-        $isUsd = method_exists($livewire, 'getOwnerRecord')
-            && (int) $livewire->getOwnerRecord()?->currency_id === 157;
+                                                                $isUsd = method_exists($livewire, 'getOwnerRecord')
+                                                                    && (int) $livewire->getOwnerRecord()?->currency_id === 157;
 
-        if ($isUsd) {
-            return 1;
-        }
+                                                                if ($isUsd) {
+                                                                    return 1;
+                                                                }
 
-        return blank($state)
-            ? null
-            : round((float) str_replace(',', '', $state), 8);
-    })
+                                                                return blank($state)
+                                                                    ? null
+                                                                    : round((float) str_replace(',', '', $state), 8);
+                                                            })
 
-    ->dehydrated()
-    ->columnSpan(3),
+                                                            ->dehydrated()
+                                                            ->columnSpan(3),
 
                                                         
 

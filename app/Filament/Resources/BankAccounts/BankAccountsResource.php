@@ -123,7 +123,6 @@ class BankAccountsResource extends Resource
                                 ->label('Beneficiay Name')
                                 ->inlineLabel()
                                 ->placeholder("Please provide the beneficiary's full name")
-                                ->required()
                                 ->maxLength(255)
                                 ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_name', ucwords(strtolower($state)))),
                                 //->helperText('First letter of each word will be capitalised.'),
@@ -132,7 +131,6 @@ class BankAccountsResource extends Resource
                                 ->label('Beneficiary Address')
                                 ->inlineLabel()
                                 ->placeholder("Please provide beneficiary adress")
-                                ->required()
                                 ->columnSpan('full')
                                 ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_address', ucfirst(strtolower($state)))),
 
@@ -152,7 +150,6 @@ class BankAccountsResource extends Resource
                                 ->label('Beneficiary Account Number')
                                 ->inlineLabel()
                                 ->placeholder('Please provide account number.')
-                                ->required()
                                 ->maxLength(255)
                                 ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_no', ucwords(strtolower($state)))),
                         ])
