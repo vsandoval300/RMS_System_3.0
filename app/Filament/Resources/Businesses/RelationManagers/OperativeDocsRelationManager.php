@@ -1164,7 +1164,7 @@ class OperativeDocsRelationManager extends RelationManager
                             ->extraAttributes([
                                 'class' => 'bg-[#dfe0e2] text-black p-4 rounded-md'
                             ])
-                            ->reactive()
+                            
                             ->reactive()
                             ->viewData(function ($get, $record, $livewire) {
 
