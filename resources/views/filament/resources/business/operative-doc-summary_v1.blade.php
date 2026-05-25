@@ -20,38 +20,35 @@
         <div class="text-right text-sm font-medium text-gray-600 mb-2" style="border-bottom: 1px solid #100f0d;">
             Date: {{ \Carbon\Carbon::now()->format('d/m/Y') }}
         </div> --}}
-
+        <br>
         {{-------------------------------------------------------------------------------}}
         {{-- DOCUMENT DETAILS SECTION                                                  --}}
         {{-------------------------------------------------------------------------------}}
         <h4 class="font-semibold mt-6 mb-4" style="color: #db4a2b; font-size: 15px;">
-        General Details
+            General Details
         </h4>
-
+        <br>
+        
         <table class="w-full table-auto text-sm border-separate border-spacing-0">
             <colgroup>
                 {{-- 4 columnas con datos → auto --}}
-                <col>
-                <col>
-                <col>
-                <col>
+                <col style="width:25%;">
+                <col style="width:25%;">
+                <col style="width:25%;">
+                <col style="width:25%;">
 
                 {{-- 2 columnas dummy con ancho fijo --}}
                 <col style="width: 150px;">
                 <col style="width: 150px;">
-                {{-- o Tailwind:--}}
-                <col class="w-[80px]">
-                <col class="w-[80px]">
-                
             </colgroup>
 
             <tbody>
                 <tr>
-                    <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d; border-bottom: black;">
+                    <td class="px-2 py-1 text-left font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">
                         Document type:
                     </td>
                     <td class="px-2 py-1 font-thin border-b" style="border-bottom: 1px solid #100f0d;">{{ $documentType ?? '-' }}</td>
-                    <td class="px-2 py-1 text-left font-semibold border-b " style="color: #100f0d; border-bottom: 1px solid #100f0d;">
+                    <td class="px-2 py-1 text-left font-semibold border-b" style="color: #100f0d; border-bottom: 1px solid #100f0d;">
                         Creation date:
                     </td>
                     <td class="px-2 py-1 border-b" style="border-bottom: 1px solid #100f0d;">
@@ -80,7 +77,7 @@
                 </tr>
 
                 <tr>
-                    <td class="px-2 py-1 text-left font-semibold border-b" style="color: #100f0d;">
+                    <td class="px-2 py-1 text-left font-semibold border-b" style="color: #100f0d; border-bottom: 1px solid #100f0d;">
                         Original currency:
                     </td>
                     <td class="px-2 py-1 font-thin border-b" style="border-bottom: 1px solid #100f0d;">{{ $originalCurrency ?? '-' }}</td>
@@ -97,10 +94,10 @@
 
                 {{-- ✅✅✅ CHANGE [ROE-VIEW-1]: Nueva fila para mostrar RoE for Reference --}}
                 <tr>
-                    <td class="px-2 py-1 text-left font-semibold border-b " style="color: #100f0d;">
+                    <td class="px-2 py-1 text-left font-semibold border-b " style="color: #100f0d; border-bottom: 1px solid #100f0d;">
                         RoE for Reference:
                     </td>
-                    <td class="px-2 py-1 font-thin border-b ">
+                    <td class="px-2 py-1 font-thin border-b" style="border-bottom: 1px solid #100f0d;">
                         {{ isset($roe_fs) ? number_format((float) $roe_fs, 8) : '-' }}
                     </td>
 
@@ -134,11 +131,11 @@
             </colgroup>
             <thead>
                 <tr class="border-b text-gray-300 border-gray-600">
-                    <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
-                    <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Id</th>
-                    <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Description</th>
-                    <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Share (%)</th>
-                    <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Agreement Type</th>
+                    <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";>#</th>
+                    <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";">Id</th>
+                    <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";">Description</th>
+                    <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left";">Share (%)</th>
+                    <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left";">Agreement Type</th>
                 </tr>
             </thead>
 
@@ -183,7 +180,7 @@
 
 
 
-
+        <br>
         {{-------------------------------------------------------------------------------}}
         {{-- INSUREDS (grouped by Placement Scheme)                                      --}}
         {{-------------------------------------------------------------------------------}}
@@ -241,22 +238,22 @@
                             <col style="width:8%;">   {{-- Share --}}
                             <col style="width:8%;">   {{-- Country --}}
                             <col style="width:9%;">   {{-- Allocation --}}
-                            <col style="width:10%;">   {{-- Annual Premium --}}
-                            <col style="width:10%;">   {{-- Annual Premium Ftp --}}
-                            <col style="width:10%;">   {{-- Annual Premium Fts --}}
+                            <col style="width:9%;">   {{-- Annual Premium --}}
+                            <col style="width:9%;">   {{-- Annual Premium Ftp --}}
+                            <col style="width:9%;">   {{-- Annual Premium Fts --}}
                         </colgroup>
 
                         <thead>
                             <tr class="border-b border-gray-600">
-                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
-                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Insured</th>
-                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Coverage</th>
-                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Share</th>
-                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Country</th>
-                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Allocation</th>
-                                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium</th>
-                                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Ftp</th>
-                                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Fts</th>
+                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";">#</th>
+                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";">Insured</th>
+                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";">Coverage</th>
+                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:left";">Share</th>
+                                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left";">Country</th>
+                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:left";">Allocation</th>
+                                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left";">Annual<br>Premium</th>
+                                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left";">Annual<br>Premium Ftp</th>
+                                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left";">Annual<br>Premium Fts</th>
                             </tr>
                         </thead>
 
@@ -391,11 +388,11 @@
 
                 {{-- Table headers for each group --}}
                     <tr class="text-sm text-gray-300 uppercase">
-                        <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">#</th>
-                        <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Partner</th>
-                        <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Share</th> 
-                        <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Concept</th>
-                        <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Value</th>
+                        <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">#</th>
+                        <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Partner</th>
+                        <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Share</th> 
+                        <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Concept</th>
+                        <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Value</th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
                     <th class="px-2 py-1 text-right"></th>

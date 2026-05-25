@@ -1964,21 +1964,12 @@ class OperativeDocsRelationManager extends RelationManager
                             ->color('primary')
                             ->extraAttributes([
                                 'type' => 'button',
-                                'class' => 'no-print', // 👈 AQUÍ
+                                'class' => 'no-print',
                             ])
-                            ->alpineClickHandler(function ($record) {
-                                $date = $record->creation_date ?? $record->created_at ?? now();
-
-                                // 👉 31-Dec-2010
-                                $formatted = Carbon::parse($date)->format('d-M-Y');
-
-                                // 👉 Summary_2010-CMY001-001-01_(31-Dec-2010)
-                                $filename = "Summary_{$record->id}_({$formatted})";
-                                $jsFilename = json_encode($filename);
-
-                                return <<<JS
+                            ->alpineClickHandler("
+                                (() => {
                                     const oldTitle = document.title;
-                                    document.title = {$jsFilename};
+                                    document.title = 'Summary';
 
                                     const restore = () => {
                                         document.title = oldTitle;
@@ -1988,8 +1979,8 @@ class OperativeDocsRelationManager extends RelationManager
                                     window.addEventListener('afterprint', restore);
 
                                     window.print();
-                                JS;
-                            }),
+                                })()
+                            "),
                     ]),
 
 
