@@ -1,10 +1,13 @@
 <div
-    class="overflow-auto border border-gray-800 rounded p-4 space-y-4"
+    class="border border-gray-800 rounded p-4 space-y-4"
     style="
         max-height:1200px;
         background-color:#f1efea;
         color:#1f262a;
         font-family:'Montserrat',sans-serif;
+        /* 👇 clave: el reporte usa el alto del viewport */
+        max-height: calc(100vh - 220px);
+        overflow: auto;
     "
 >
     <div class="min-w-[1200px]" style="padding: 24px;">
