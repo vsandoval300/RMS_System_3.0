@@ -357,7 +357,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->label('Underwriting Month')
                                                             ->required()
                                                             ->dehydratedWhenHidden()
-                                                            ->displayFormat('F Y')
+                                                            ->displayFormat('d/m/Y')
                                                             ->format('Y-m-d')
                                                             ->native(false)
                                                             ->closeOnDateSelection()
