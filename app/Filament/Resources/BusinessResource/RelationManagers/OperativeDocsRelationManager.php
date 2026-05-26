@@ -358,13 +358,13 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->required()
                                                             ->dehydratedWhenHidden()
                                                             ->displayFormat('F Y')
-                                                            ->format('Y-m-01')
+                                                            ->format('Y-m-d')
                                                             ->native(false)
                                                             ->closeOnDateSelection()
                                                             ->live()
                                                             ->afterStateHydrated(function ($component, $state, $record) {
                                                                 if (! $record && blank($state)) {
-                                                                    $component->state(now()->format('Y-m-01'));
+                                                                    $component->state(now()->format('Y-m-d'));
                                                                 }
                                                             })
                                                             ->columnSpan(3),
