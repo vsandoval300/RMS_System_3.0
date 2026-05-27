@@ -5,7 +5,6 @@
         <div
             style="
                 border-radius: 12px;
-                padding: 16px;
                 margin-bottom: 16px;
             "
 
@@ -23,7 +22,7 @@
         >
 
             <div
-                style="font-weight: 600; margin-bottom: 8px;"
+                style="font-weight: 600; margin-bottom: 10px;"
                 class="text-gray-900 dark:text-white"
             >
 
@@ -51,7 +50,7 @@
                     <div
                         style="
                             border-radius: 8px;
-                            padding: 8px;
+                            
                             margin-top: 8px;
                             font-size: 12px;
                             background: #f9fafb;
