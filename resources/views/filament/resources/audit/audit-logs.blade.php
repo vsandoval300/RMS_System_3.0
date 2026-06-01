@@ -1,11 +1,4 @@
-<div
-    class="
-        max-h-[75vh]
-        overflow-y-auto
-        pr-2
-        space-y-2
-    "
->
+<div class="audit-modal-content" style="max-height: 45vh !important;">
 
     @forelse ($logs as $log)
 
@@ -17,7 +10,6 @@
                 border-gray-200
                 px-3
                 py-2
-
                 dark:border-gray-700
             "
         >
@@ -26,24 +18,16 @@
             <div class="min-w-0">
 
                 <div
-                    class="
-                        text-xs
-                        font-semibold
-                        leading-tight
-                        break-words
-                    "
+                    
                 >
                     {{ $log->event }}
                 </div>
 
                 <div
-                    class="
-                        mt-1
-                        text-[11px]
-                        text-gray-500
-                        dark:text-gray-400
-                    "
-                >
+                style="font-size: small; 
+                    justify-content: space-between;
+                    align-items: center;">
+                
 
                     {{ $log->created_at->format('d/m/Y H:i') }}
 
@@ -63,38 +47,17 @@
                     @foreach ($log->changes as $field => $values)
 
                         <div
-                            class="
-                                rounded-md
-                                border
-                                border-gray-200
-                                bg-gray-50
-                                px-2
-                                py-1.5
-
-                                dark:border-gray-700
-                                dark:bg-gray-800
-                            "
+                            
                         >
 
                             <div
-                                class="
-                                    text-[11px]
-                                    font-semibold
-                                    break-words
-                                    mb-1
-                                "
+                                
                             >
                                 {{ $field }}
                             </div>
 
                             <div
-                                class="
-                                    text-[11px]
-                                    leading-tight
-                                    text-gray-600
-                                    dark:text-gray-300
-                                    break-words
-                                "
+                                
                             >
                                 <span class="font-medium">
                                     From:
@@ -104,13 +67,7 @@
                             </div>
 
                             <div
-                                class="
-                                    text-[11px]
-                                    leading-tight
-                                    text-gray-600
-                                    dark:text-gray-300
-                                    break-words
-                                "
+                                
                             >
                                 <span class="font-medium">
                                     To:
