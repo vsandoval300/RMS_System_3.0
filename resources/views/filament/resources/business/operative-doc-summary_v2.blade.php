@@ -540,7 +540,7 @@ font-weight: 600;">
 font-weight: 600;">
         Transactions Lifecycle
     </h4>
-
+    <br>
     @php
         $nodesFlat = collect($groupedCostNodes ?? [])
             ->flatMap(fn ($g) => $g['nodes'] ?? [])
@@ -574,15 +574,16 @@ font-weight: 600;">
             @endphp
 
             {{-- Subtítulo por Installment --}}
+            <br>
             <div class="mt-4 mb-2 text-sm" style="color:#100f0d;">
-                <span class="font-semibold">Installment {{ $txn['index'] ?? ($tIdx + 1) }}</span>
+                <span class="font-semibold" style="font-weight: 600;">Installment {{ $txn['index'] ?? ($tIdx + 1) }}</span>
                 <span class="ml-2 text-gray-500">
-                    (Proportion: {{ number_format($pPct, 2) }}%,
+                    (Proportion: {{ number_format($pPct, 2) }}%, 
                     Exch. Rate: {{ $exchRate !== null ? number_format((float)$exchRate, 4) : '-' }},
                     Due: {{ $dueDate ? \Carbon\Carbon::parse($dueDate)->format('d/m/Y') : '-' }})
                 </span>
             </div>
-
+            <br>
             <table class="w-full text-sm border-collapse mt-2">
                 <colgroup>
                 <col style="width:5%;">
