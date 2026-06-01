@@ -26,7 +26,7 @@
                 <div
                 style="font-size: small; 
                     justify-content: space-between;
-                    align-items: center;">
+                    text-align: end;">
                 
 
                     {{ $log->created_at->format('d/m/Y H:i') }}

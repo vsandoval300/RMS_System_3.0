@@ -124,11 +124,11 @@ font-weight: 600;">
             </colgroup>
         <thead>
              <tr class="border-b text-gray-300 border-gray-600">
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left">#</th>
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left">Id</th>
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left">Description</th>
-                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left">Share (%)</th>
-                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:left">Agreement Type</th>
+                <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; color: #100f0d; text-align:left">#</th>
+                <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; color: #100f0d; text-align:left">Id</th>
+                <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; color: #100f0d; text-align:left">Description</th>
+                <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; color: #100f0d; text-align:left">Share (%)</th>
+                <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; color: #100f0d; text-align:left">Agreement Type</th>
             </tr>
         </thead>
 
@@ -217,8 +217,8 @@ font-weight: 600;">
                     $totalFts        = $rows->sum(fn($i) => $i['premium_fts'] ?? 0);
                 @endphp
 
-                <div class="px-2 py-1 text-left font-semibold mt-4 text-sm" style="color: #100f0d;">
-                    Placement Scheme: <span class="font-bold">{{ $schemeLabel }}</span>
+                <div class="px-2 py-1 text-left font-semibold mt-4 text-sm" style="color: #100f0d; font-weight: 600;">
+                    Placement Scheme: <span>{{ $schemeLabel }}</span>
                 </div>
 
                 <table
@@ -239,15 +239,15 @@ font-weight: 600;">
 
                     <thead>
                         <tr class="border-b border-gray-600">
-                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">#</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Insured</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Coverage</th>
-                            <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Share</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">Country</th>
-                            <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d;">Allocation</th>
-                            <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium</th>
-                            <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Ftp</th>
-                            <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d;">Annual<br>Premium Fts</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">#</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Insured</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Coverage</th>
+                            <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Share</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Country</th>
+                            <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Allocation</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Annual<br>Premium</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Annual<br>Premium Ftp</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Annual<br>Premium Fts</th>
                         </tr>
                     </thead>
 
@@ -348,7 +348,7 @@ font-weight: 600;">
         <colgroup>
             <col style="width:4%;">
             <col style="width:60%;">
-            <col style="width:10%;">
+            
             <col style="width:8%;">
             <col style="width:8%;">
             <col style="width:10%;">
@@ -358,7 +358,7 @@ font-weight: 600;">
             <tr>
                 <th class="px-2 py-1 text-left text-gray-400"></th>
                 <th class="px-2 py-1 text-left text-gray-400"></th>
-                <th class="px-2 py-1 text-left text-gray-400"></th>
+                
                 <th class="px-2 py-1 text-left text-gray-400"></th> 
                 <th class="px-2 py-1 text-right text-gray-400"></th>
                 <th class="px-2 py-1" style="color: #100f0d; font-weight: 600; padding-left: 0.5rem; padding-right: 0.5rem; border-bottom: 1px solid #100f0d;">Orig. Curr.</th>
@@ -370,17 +370,17 @@ font-weight: 600;">
         <tbody>
 
             <tr class="bg-gray-900 text-gray-300 font-semibold">
-                <td colspan="5" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Gross Underwritten Premium</td>
+                <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Gross Underwritten Premium</td>
                 <td class="px-2 py-1 border-gray-600 font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($totalPremiumFts ?? 0, 2) }}</td>
                 <td class="px-2 py-1 border-gray-600 font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td> 
             </tr>
 
-            <tr><td colspan="7" class="py-2"></td></tr>
+            <tr><td colspan="6" class="py-2"></td></tr>
 
             <tr class="text-sm text-gray-300 uppercase">
                 <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left;">#</th>
                 <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left;">Partner</th>
-                <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";>Share</th> 
+                
                 <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left;">Concept</th>
                 <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left;">Value</th>
                 <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
@@ -391,7 +391,7 @@ font-weight: 600;">
             @forelse ($groupedCostNodes ?? [] as $group)
 
                 <tr>
-                    <td colspan="7" class="px-0 py-1">
+                    <td colspan="6" class="px-0 py-1">
                         <div class="border-t border-gray-600 w-full h-px"></div>
                     </td>
                 </tr>
@@ -401,7 +401,7 @@ font-weight: 600;">
                     <tr class="bg-gray-800 text-gray-300 border-b border-gray-600">
                         <td class="px-2 py- 1" style="border-bottom: 1px solid #100f0d;">{{ $node['index'] }}</td>
                         <td class="px-2 py-1" style="border-bottom: 1px solid #100f0d;">{{ $node['partner'] ?? '-' }}</td>                    <!-- VARIABLE NUEVA -->
-                        <td class="px-2 py-1" style="border-bottom: 1px solid #100f0d;">{{ number_format($node['share'] * 100, 2) }}%</td>
+                        
                         <td class="px-2 py-1" style="border-bottom: 1px solid #100f0d;">{{ $node['deduction'] ?? '-' }}</td>
                         <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">{{ number_format($node['value'] * 100, 2) }}%</td>
                         <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">${{ number_format($node['deduction_amount']* -1, 2) }}</td>
@@ -411,7 +411,7 @@ font-weight: 600;">
 
                 {{-- Subtotal row BELOW each group --}}
                 <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
-                    <td colspan="4" class="px-2 py-1 text-left font-semibold" style="color: #100f0d;">
+                    <td colspan="3" class="px-2 py-1 text-left font-semibold" style="color: #100f0d; font-weight: 600;">
                         Share {{ number_format($group['share'] * 100, 2) }}%.
                     </td> 
                     <td class="px-2 py-1 text-right text-gray-300 font-semibold" style="color: #100f0d; font-weight: 600;">Subtotal:</td>
@@ -421,7 +421,7 @@ font-weight: 600;">
 
             @empty
                 <tr>
-                    <td colspan="3" class="px-2 py-2 text-center text-gray-400 font-semibold" style="color: #100f0d; font-weight: 600;">No cost nodes available</td>
+                    <td colspan="2" class="px-2 py-2 text-center text-gray-400 font-semibold" style="color: #100f0d; font-weight: 600;">No cost nodes available</td>
                 </tr>
             @endforelse
 
@@ -432,13 +432,13 @@ font-weight: 600;">
                 $grandTotalUsd = collect($groupedCostNodes ?? [])->sum('subtotal_usd');
             @endphp
             <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
-                <td colspan="5" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Total Deductions:</td>
+                <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Total Deductions:</td>
                 <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($grandTotalOrig * -1, 2) }}</td>
                 <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($grandTotalUsd * -1, 2) }}</td> 
             </tr>
             <tr><td colspan="4" class="py-2"></td></tr>
            <tr class="bg-gray-900 text-gray-300 font-semibold">
-                <td colspan="5" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Net Underwritten Premium</td>
+                <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Net Underwritten Premium</td>
                 <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($totalPremiumFts - $grandTotalOrig?? 0, 2) }}</td>
                 <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td> 
             </tr>
@@ -466,12 +466,12 @@ font-weight: 600;">
         </colgroup>
         <thead>
              <tr class="border-b border-gray-600">
-                <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">#</th>
-                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Proportion</th>
-                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
-                <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Due Date</th>
-                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Orig. Curr.</th>
-                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">US Dollars</th>
+                <th class="px-2 py-1 text-left font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">#</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Proportion</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
+                <th class="px-2 py-1 text-center font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Due Date</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Orig. Curr.</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">US Dollars</th>
              </tr>
         </thead>
         <tbody>
@@ -585,29 +585,29 @@ font-weight: 600;">
 
             <table class="w-full text-sm border-collapse mt-2">
                 <colgroup>
-                <col style="width:10%;">  
-                <col style="width:10%;">  
-                <col style="width:10%;">  
+                <col style="width:5%;">
+                <col style="width:5%;">  
+                <col style="width:20%;">
+                <col style="width:20%;">
                 <col style="width:10%;">
                 <col style="width:10%;">
-                <col style="width:10%;">
-                <col style="width:10%;">
-                <col style="width:10%;">
+                <col style="width:5%;">
+                <col style="width:5%;">
                 <col style="width:10%;">
                 <col style="width:10%;">
             </colgroup>
                 <thead>
                     <tr class="border-b border-gray-600" style="table-layout: fixed; width: 100%; border-collapse: collapse;">
-                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d; border-bottom: 1px solid #100f0d;">#</th>
-                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d; border-bottom: 1px solid #100f0d;">Deduction</th>
-                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d; border-bottom: 1px solid #100f0d;">Source</th>
-                        <th class="px-2 py-1 text-left font-semibold"  style="color: #100f0d; border-bottom: 1px solid #100f0d;">Destination</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Gross Amount</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Discount</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Banking Fee</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Net Amount</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d;">Status</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">#</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Deduction</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Source</th>
+                        <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Destination</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Gross Amount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Discount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Banking Fee</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Net Amount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Status</th>
                     </tr>
                 </thead>
 
