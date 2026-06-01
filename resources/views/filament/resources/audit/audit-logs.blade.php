@@ -12,6 +12,16 @@
                 py-2
                 dark:border-gray-700
             "
+            style="margin-top: calc(0.25rem * calc(1 - 0));
+                    margin-bottom: calc(0.25rem * 0);
+                    border-radius: 0.375rem;
+                    border-width: 1px;
+                    border-color: rgb(229,231,235,0.8);
+                    padding-left: 0.75rem;
+                    padding-right: 0.75rem;
+                    padding-top: 0.5rem;
+                    padding-bottom: 0.5rem;
+                    box-shadow: 0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0,0,0,0.05);"
         >
 
             <!-- Header -->
