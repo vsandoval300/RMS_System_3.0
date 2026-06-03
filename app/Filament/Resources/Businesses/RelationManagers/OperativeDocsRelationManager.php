@@ -784,6 +784,8 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->reactive()
                                                     ->required(),
 
+                                                    
+
                                                 Group::make()
                                                     ->schema([
                                                         View::make('partials.scheme-nodes-preview')

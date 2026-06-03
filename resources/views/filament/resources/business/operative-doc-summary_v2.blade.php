@@ -391,8 +391,8 @@ font-weight: 600;">
             @forelse ($groupedCostNodes ?? [] as $group)
 
                 <tr>
-                    <td colspan="6" class="px-0 py-1">
-                        <div class="border-t border-gray-600 w-full h-px"></div>
+                    <td colspan="6" style="padding-left: 0px; padding-right: 0px; padding-top: 0.25rem; padding-bottom: 0.25rem;">
+                        <div class="border-t border-gray-600 w-full h-px" style="height: 1px; width: 100%;"></div>
                     </td>
                 </tr>
 
@@ -432,15 +432,15 @@ font-weight: 600;">
                 $grandTotalUsd = collect($groupedCostNodes ?? [])->sum('subtotal_usd');
             @endphp
             <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
-                <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Total Deductions:</td>
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($grandTotalOrig * -1, 2) }}</td>
-                <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($grandTotalUsd * -1, 2) }}</td> 
+                <td colspan="4" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Total Deductions:</td>
+                <td style="color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($grandTotalOrig * -1, 2) }}</td>
+                <td style="color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($grandTotalUsd * -1, 2) }}</td> 
             </tr>
-            <tr><td colspan="4" class="py-2"></td></tr>
+            <tr><td colspan="4" style="padding-top: 0.5rem; padding-bottom: 0.5rem;"></td></tr>
            <tr class="bg-gray-900 text-gray-300 font-semibold">
                 <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Net Underwritten Premium</td>
-                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($totalPremiumFts - $grandTotalOrig?? 0, 2) }}</td>
-                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td> 
+                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($totalPremiumFts - $grandTotalOrig?? 0, 2) }}</td>
+                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td> 
             </tr>
         </tbody>
     </table>

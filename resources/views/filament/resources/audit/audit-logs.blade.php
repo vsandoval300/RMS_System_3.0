@@ -61,15 +61,15 @@
                         >
 
                             <div
-                                
+                                style="font-size: small;"
                             >
                                 {{ $field }}
                             </div>
 
                             <div
-                                
+                                style="font-size: small;"
                             >
-                                <span class="font-medium">
+                                <span class="font-small" style="font-size: small;">
                                     From:
                                 </span>
 
@@ -77,9 +77,9 @@
                             </div>
 
                             <div
-                                
+                                style="font-size: small;"
                             >
-                                <span class="font-medium">
+                                <span class="font-small" style="font-size: small;">
                                     To:
                                 </span>
 
