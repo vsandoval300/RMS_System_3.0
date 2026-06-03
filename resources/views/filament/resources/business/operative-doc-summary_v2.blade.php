@@ -240,14 +240,14 @@ font-weight: 600;">
                     <thead>
                         <tr class="border-b border-gray-600">
                             <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">#</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Insured</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Coverage</th>
-                            <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Share</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Country</th>
-                            <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Allocation</th>
-                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Annual<br>Premium</th>
-                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Annual<br>Premium Ftp</th>
-                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Annual<br>Premium Fts</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Insured</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Coverage</th>
+                            <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Share</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d;">Country</th>
+                            <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Allocation</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Annual<br>Premium</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align: center; color: #100f0d;">Annual<br>Premium Ftp</th>
+                            <th class="px-2 py-1 text-center font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align: center; color: #100f0d;">Annual<br>Premium Fts</th>
                         </tr>
                     </thead>
 
@@ -264,27 +264,27 @@ font-weight: 600;">
                                     {{ $insured['coverage']['name'] ?? '-' }}
                                 </td>
 
-                                <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">
+                                <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:center;">
                                     {{ number_format($schemeShare * 100, 2) . '%' }}
                                 </td>
 
-                                <td class="px-2 py-1 truncate" style="border-bottom: 1px solid #100f0d;" title="{{ $insured['company']['country']['name'] ?? '-' }}">
+                                <td class="px-2 py-1 truncate" style="border-bottom: 1px solid #100f0d; text-align:center;" title="{{ $insured['company']['country']['name'] ?? '-' }}">
                                     {{ $insured['company']['country']['name'] ?? '-' }}
                                 </td>
 
-                                <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">
+                                <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:center;">
                                     {{ isset($insured['allocation_percent']) ? number_format($insured['allocation_percent'] * 100, 2) . '%' : '-' }}
                                 </td>
 
-                                <td class="px-2 py-1 text-right whitespace-nowrap" style="border-bottom: 1px solid #100f0d;">
+                                <td class="px-2 py-1 text-right whitespace-nowrap" style="border-bottom: 1px solid #100f0d; text-align:right; white-space: nowrap;">
                                     ${{ number_format($insured['premium'] ?? 0, 2) }}
                                 </td>
 
-                                <td class="px-2 py-1 text-right whitespace-nowrap" style="border-bottom: 1px solid #100f0d;">
+                                <td class="px-2 py-1 text-right whitespace-nowrap" style="border-bottom: 1px solid #100f0d; text-align:right; white-space: nowrap;">
                                     ${{ number_format($insured['premium_ftp'] ?? 0, 2) }}
                                 </td>
 
-                                <td class="px-2 py-1 text-right whitespace-nowrap" style="border-bottom: 1px solid #100f0d;">
+                                <td class="px-2 py-1 text-right whitespace-nowrap" style="border-bottom: 1px solid #100f0d; text-align:right; white-space: nowrap;">
                                     ${{ number_format($insured['premium_fts'] ?? 0, 2) }}
                                 </td>
                             </tr>
@@ -302,13 +302,13 @@ font-weight: 600;">
                             <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600;">
                                 {{ number_format($totalAllocation * 100, 2) . '%' }}
                             </td>
-                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600;">
+                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600; text-align:right; white-space: nowrap;">
                                 ${{ number_format($totalPremium, 2) }}
                             </td>
-                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600;">
+                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600; text-align:right; white-space: nowrap;">
                                 ${{ number_format($totalFtp, 2) }}
                             </td>
-                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600;">
+                            <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600; text-align:right; white-space: nowrap;">
                                 ${{ number_format($totalFts, 2) }}
                             </td>
                         </tr>
@@ -403,9 +403,9 @@ font-weight: 600;">
                         <td class="px-2 py-1" style="border-bottom: 1px solid #100f0d;">{{ $node['partner'] ?? '-' }}</td>                    <!-- VARIABLE NUEVA -->
                         
                         <td class="px-2 py-1" style="border-bottom: 1px solid #100f0d;">{{ $node['deduction'] ?? '-' }}</td>
-                        <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">{{ number_format($node['value'] * 100, 2) }}%</td>
-                        <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">${{ number_format($node['deduction_amount']* -1, 2) }}</td>
-                        <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">${{ number_format($node['deduction_usd']* -1, 2) }}</td> 
+                        <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:right;">{{ number_format($node['value'] * 100, 2) }}%</td>
+                        <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:right;">${{ number_format($node['deduction_amount']* -1, 2) }}</td>
+                        <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:right;">${{ number_format($node['deduction_usd']* -1, 2) }}</td> 
                     </tr>
                 @endforeach
 
@@ -414,9 +414,9 @@ font-weight: 600;">
                     <td colspan="3" class="px-2 py-1 text-left font-semibold" style="color: #100f0d; font-weight: 600;">
                         Share {{ number_format($group['share'] * 100, 2) }}%.
                     </td> 
-                    <td class="px-2 py-1 text-right text-gray-300 font-semibold" style="color: #100f0d; font-weight: 600;">Subtotal:</td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600;">${{ number_format($group['subtotal_orig']* -1, 2) }}</td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600;">${{ number_format($group['subtotal_usd']* -1, 2) }}</td>
+                    <td class="px-2 py-1 text-right text-gray-300 font-semibold" style="color: #100f0d; font-weight: 600; text-align:right;">Subtotal:</td>
+                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align:right;">${{ number_format($group['subtotal_orig']* -1, 2) }}</td>
+                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align:right;">${{ number_format($group['subtotal_usd']* -1, 2) }}</td>
                 </tr>
 
             @empty
@@ -433,14 +433,14 @@ font-weight: 600;">
             @endphp
             <tr class="border-t border-gray-600 bg-gray-900 text-gray-300 font-semibold">
                 <td colspan="4" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Total Deductions:</td>
-                <td style="color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($grandTotalOrig * -1, 2) }}</td>
-                <td style="color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($grandTotalUsd * -1, 2) }}</td> 
+                <td style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem;">${{ number_format($grandTotalOrig * -1, 2) }}</td>
+                <td style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem;">${{ number_format($grandTotalUsd * -1, 2) }}</td> 
             </tr>
             <tr><td colspan="4" style="padding-top: 0.5rem; padding-bottom: 0.5rem;"></td></tr>
            <tr class="bg-gray-900 text-gray-300 font-semibold">
                 <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Net Underwritten Premium</td>
-                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($totalPremiumFts - $grandTotalOrig?? 0, 2) }}</td>
-                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align: left; padding-right: 0.5rem;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td> 
+                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align:right;">${{ number_format($totalPremiumFts - $grandTotalOrig?? 0, 2) }}</td>
+                <td class="px-2 py-1 text-right border-t border-gray-600 font-semibold" style="border-top: 1px solid #100f0d; color: #100f0d; font-weight: 600; text-align:right;">${{ number_format($totalConvertedPremium - $grandTotalUsd ?? 0, 2) }}</td> 
             </tr>
         </tbody>
     </table>
@@ -467,11 +467,11 @@ font-weight: 600;">
         <thead>
              <tr class="border-b border-gray-600">
                 <th class="px-2 py-1 text-left font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">#</th>
-                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Proportion</th>
-                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
-                <th class="px-2 py-1 text-center font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Due Date</th>
-                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">Orig. Curr.</th>
-                <th class="px-2 py-1 text-right font-semibold" style="text-align: left; color: #100f0d; border-bottom: 1px solid #100f0d;">US Dollars</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: right; color: #100f0d; border-bottom: 1px solid #100f0d;">Proportion</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: right; color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
+                <th class="px-2 py-1 text-center font-semibold" style="text-align: center; color: #100f0d; border-bottom: 1px solid #100f0d;">Due Date</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: right; color: #100f0d; border-bottom: 1px solid #100f0d;">Orig. Curr.</th>
+                <th class="px-2 py-1 text-right font-semibold" style="text-align: right; color: #100f0d; border-bottom: 1px solid #100f0d;">US Dollars</th>
              </tr>
         </thead>
         <tbody>
@@ -497,13 +497,13 @@ font-weight: 600;">
 
                 <tr class="bg-gray-800 text-gray-300 border-b border-gray-700">
                    <td class="px-2 py-1">{{ $loop->iteration }}</td>
-                    <td class="px-2 py-1 text-right">{{ number_format($proportion * 100, 2) }}%</td>
-                    <td class="px-2 py-1 text-right">{{ number_format($rate, 4) }}</td>
-                    <td class="px-2 py-1 text-center">
+                    <td class="px-2 py-1 text-right" style="text-align: right;">{{ number_format($proportion * 100, 2) }}%</td>
+                    <td class="px-2 py-1 text-right" style="text-align: right;">{{ number_format($rate, 4) }}</td>
+                    <td class="px-2 py-1 text-center" style="text-align: center;">
                         {{ $dueDate ? \Carbon\Carbon::parse($dueDate)->format('d/m/Y') : '-' }}
                     </td>
-                    <td class="px-2 py-1 text-right">${{ number_format($amountOrig, 2) }}</td>
-                    <td class="px-2 py-1 text-right">${{ number_format($amountUsd, 2) }}</td>
+                    <td class="px-2 py-1 text-right" style="text-align: right;">${{ number_format($amountOrig, 2) }}</td>
+                    <td class="px-2 py-1 text-right" style="text-align: right;">${{ number_format($amountUsd, 2) }}</td>
                 </tr>
             @empty
                 <tr>
@@ -523,8 +523,8 @@ font-weight: 600;">
                 {{-- Fila de totales --}}
                 <tr class="bg-gray-800 text-gray-300 font-semibold">
                     <td colspan="4" class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">Total:</td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($grandOrig, 2) }}</td>
-                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem; padding-right: 0.5rem;">${{ number_format($grandUsd, 2) }}</td>
+                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem;">${{ number_format($grandOrig, 2) }}</td>
+                    <td class="px-2 py-1 text-right font-semibold" style="color: #100f0d; font-weight: 600; text-align: right; padding-left: 0.5rem;">${{ number_format($grandUsd, 2) }}</td>
                 </tr>
             @endif
 
@@ -603,12 +603,12 @@ font-weight: 600;">
                         <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Deduction</th>
                         <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Source</th>
                         <th class="px-2 py-1 text-left font-semibold"  style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Destination</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Gross Amount</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Discount</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Banking Fee</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Net Amount</th>
-                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d; border-bottom: 1px solid #100f0d;">Status</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d; border-bottom: 1px solid #100f0d;">Exchange Rate</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d; border-bottom: 1px solid #100f0d;">Gross Amount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d; border-bottom: 1px solid #100f0d;">Discount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="white-space: nowrap; padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d; border-bottom: 1px solid #100f0d;">Banking Fee</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d; border-bottom: 1px solid #100f0d;">Net Amount</th>
+                        <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d; border-bottom: 1px solid #100f0d;">Status</th>
                     </tr>
                 </thead>
 
@@ -638,39 +638,39 @@ font-weight: 600;">
                         <tr class="bg-gray-800 text-gray-300 border-b border-gray-700">
                             <td class="px-2 py-1">{{ $num }}</td>
 
-                            <td class="px-2 py-1 text-left">
+                            <td class="px-2 py-1 text-left" style="text-align: left;">
                                 {{ $node['deduction'] ?? '-' }}
                             </td>
 
-                            <td class="px-2 py-1 text-left">
+                            <td class="px-2 py-1 text-left" style="text-align: left;">
                                 {{ $node['partner_short'] ?? $node['partner'] ?? '-' }}
                             </td>
 
-                            <td class="px-2 py-1 text-left">
+                            <td class="px-2 py-1 text-left" style="text-align: left;">
                                 {{ $destination }}
                             </td>
 
-                            <td class="px-2 py-1 text-right">
+                            <td class="px-2 py-1 text-right" style="text-align: right;">
                                 {{ $rate !== null ? number_format((float)$rate, 5) : '-' }}
                             </td>
 
-                            <td class="px-2 py-1 text-right">
+                            <td class="px-2 py-1 text-right" style="text-align: right;">
                                 {{ $gross !== null ? number_format((float)$gross, 2) : '—' }}
                             </td>
 
-                            <td class="px-2 py-1 text-right">
+                            <td class="px-2 py-1 text-right" style="text-align: right;">
                                 {{ $discount !== null ? number_format((float)$discount, 2) : '—' }}
                             </td>
 
-                            <td class="px-2 py-1 text-right">
+                            <td class="px-2 py-1 text-right" style="text-align: right;">
                                 {{ $banking !== null ? number_format((float)$banking, 2) : '—' }}
                             </td>
 
-                            <td class="px-2 py-1 text-right">
+                            <td class="px-2 py-1 text-right" style="text-align: right;">
                                 {{ $net !== null ? number_format((float)$net, 2) : '—' }}
                             </td>
 
-                            <td class="px-2 py-1 text-right">
+                            <td class="px-2 py-1 text-right" style="text-align: right;">
                                 <span class="uppercase text-xs tracking-wide">
                                     {{ $status }}
                                 </span>

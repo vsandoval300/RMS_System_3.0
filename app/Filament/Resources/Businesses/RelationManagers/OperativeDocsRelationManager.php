@@ -782,10 +782,46 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->searchable()
                                                     ->preload()
                                                     ->reactive()
-                                                    ->required(),
+                                                    ->required()
 
-                                                    
+                                                    // 👇 Crear nuevo Placement Scheme desde el selector
+                                                    ->createOptionForm([
+                                                        TextInput::make('description')
+                                                            ->label('Description')
+                                                            ->required()
+                                                            ->maxLength(255),
 
+                                                        TextInput::make('share')
+                                                            ->label('Share %')
+                                                            ->required()
+                                                            ->numeric()
+                                                            ->suffix('%'),
+
+                                                        Select::make('agreement_type')
+                                                            ->label('Agreement Type')
+                                                            ->options([
+                                                                'QS' => 'Quota Share',
+                                                                'Surplus' => 'Surplus',
+                                                                'XoL' => 'Excess of Loss',
+                                                                'Stop Loss' => 'Stop Loss',
+                                                            ])
+                                                        ->required(),
+                                                    ])
+
+                                                    ->createOptionUsing(function (array $data): string {
+                                                        $lastIndex = CostScheme::max('index') ?? 0;
+
+                                                        $scheme = CostScheme::create([
+                                                            'id' => 'SCHE-' . now()->format('Ymd') . '-' . str_pad($lastIndex + 1, 4, '0', STR_PAD_LEFT),
+                                                            'index' => $lastIndex + 1,
+                                                            'description' => $data['description'],
+                                                            'share' => ((float) $data['share']) /100,
+                                                            'agreement_type' => $data['agreement_type'],
+                                                        ]);
+
+                                                        return $scheme->id;
+                                                    }),
+                                                //Termina nuevo boton    
                                                 Group::make()
                                                     ->schema([
                                                         View::make('partials.scheme-nodes-preview')

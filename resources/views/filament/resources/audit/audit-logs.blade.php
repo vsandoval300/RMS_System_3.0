@@ -28,7 +28,7 @@
             <div class="min-w-0">
 
                 <div
-                    
+                    style="font-size: small;"
                 >
                     {{ $log->event }}
                 </div>
@@ -52,7 +52,7 @@
             <!-- Changes -->
             @if (!empty($log->changes))
 
-                <div class="mt-3 space-y-1.5">
+                <div class="mt-3 space-y-1.5" style="font-size: small;">
 
                     @foreach ($log->changes as $field => $values)
 
@@ -98,7 +98,7 @@
 
     @empty
 
-        <div class="text-xs text-gray-500 dark:text-gray-400">
+        <div class="text-xs text-gray-500 dark:text-gray-400" style="font-size: small;">
             No audit logs found.
         </div>
 
