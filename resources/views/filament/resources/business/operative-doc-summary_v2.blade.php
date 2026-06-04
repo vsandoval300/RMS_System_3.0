@@ -240,8 +240,8 @@ font-weight: 600;">
                     <thead>
                         <tr class="border-b border-gray-600">
                             <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">#</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Insured</th>
-                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Coverage</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Insured</th>
+                            <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:left; color: #100f0d;">Coverage</th>
                             <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Share</th>
                             <th class="px-2 py-1 text-left font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:right; color: #100f0d;">Country</th>
                             <th class="px-2 py-1 text-right font-semibold" style="padding-left: 0.5rem; padding-right: 0.5rem; text-align:center; color: #100f0d;">Allocation</th>
@@ -260,7 +260,7 @@ font-weight: 600;">
                                     {{ $insured['company']['name'] ?? '-' }}
                                 </td>
 
-                                <td class="px-2 py-1 truncate" style="border-bottom: 1px solid #100f0d;" title="{{ $insured['coverage']['name'] ?? '-' }}">
+                                <td class="px-2 py-1 truncate" style="border-bottom: 1px solid #100f0d; text-align:left;" title="{{ $insured['coverage']['name'] ?? '-' }}">
                                     {{ $insured['coverage']['name'] ?? '-' }}
                                 </td>
 
