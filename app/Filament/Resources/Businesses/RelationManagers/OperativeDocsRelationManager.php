@@ -60,7 +60,8 @@ use App\Services\OperativeDocSummaryV2Service;
 use Illuminate\Support\Str;
 use App\Models\Coverage;
 use App\Models\Business;
-use App\Enums\BusinessLifecycleStatus; 
+use App\Enums\BusinessLifecycleStatus;
+use App\Filament\Resources\CostSchemes\CostSchemeResource;
 use Filament\Forms\Components\Alert;
 use App\Models\OperativeDoc;
 
@@ -785,42 +786,18 @@ class OperativeDocsRelationManager extends RelationManager
                                                     ->required()
 
                                                     // 👇 Crear nuevo Placement Scheme desde el selector
-                                                    ->createOptionForm([
-                                                        TextInput::make('description')
-                                                            ->label('Description')
-                                                            ->required()
-                                                            ->maxLength(255),
+                                                    ->createOptionForm(
+                                                        CostSchemeResource::getFormComponents(
+                                                            isInlineCreate:true
+                                                        )
+                                                    )
 
-                                                        TextInput::make('share')
-                                                            ->label('Share %')
-                                                            ->required()
-                                                            ->numeric()
-                                                            ->suffix('%'),
-
-                                                        Select::make('agreement_type')
-                                                            ->label('Agreement Type')
-                                                            ->options([
-                                                                'QS' => 'Quota Share',
-                                                                'Surplus' => 'Surplus',
-                                                                'XoL' => 'Excess of Loss',
-                                                                'Stop Loss' => 'Stop Loss',
-                                                            ])
-                                                        ->required(),
-                                                    ])
-
-                                                    ->createOptionUsing(function (array $data): string {
-                                                        $lastIndex = CostScheme::max('index') ?? 0;
-
-                                                        $scheme = CostScheme::create([
-                                                            'id' => 'SCHE-' . now()->format('Ymd') . '-' . str_pad($lastIndex + 1, 4, '0', STR_PAD_LEFT),
-                                                            'index' => $lastIndex + 1,
-                                                            'description' => $data['description'],
-                                                            'share' => ((float) $data['share']) /100,
-                                                            'agreement_type' => $data['agreement_type'],
-                                                        ]);
-
-                                                        return $scheme->id;
-                                                    }),
+                                                    ->createOptionAction(
+                                                        fn (Action $action) => $action
+                                                            ->modalWidth('7xl')
+                                                            //->slideOver()
+                                                            ->stickyModalHeader()
+                                                    ),
                                                 //Termina nuevo boton    
                                                 Group::make()
                                                     ->schema([

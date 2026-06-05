@@ -60,7 +60,11 @@ class ListBusinesses extends ListRecords
                 Select::make('reinsurer_ids')
                     ->label('Reinsurer(s)')
                     ->placeholder('All reinsurers')
-                    ->options(fn () => Reinsurer::orderBy('name')->pluck('name', 'id'))
+                    ->options(fn () => Reinsurer::query()
+                        ->whereHas('businesses')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                    )
                     ->searchable()
                     ->preload()
                     ->multiple(),
