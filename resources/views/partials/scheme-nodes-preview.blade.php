@@ -15,23 +15,23 @@
             <thead class="bg-gray-50 dark:bg-gray-800">
                 <tr class="align-middle border-b border-gray-200 dark:border-gray-700">
 
-                    <th class="w-36 px-3 py-3 text-left font-semibold">
+                    <th class="w-36 px-3 py-3 text-left font-semibold" style="text-align: left;">
                         #
                     </th>
 
-                    <th class="w-36 px-3 py-3 text-left font-semibold">
+                    <th class="w-36 px-3 py-3 text-left font-semibold" style="text-align: left;">
                         Concept
                     </th>
 
-                    <th class="px-3 py-3 text-left font-semibold">
+                    <th class="px-3 py-3 text-left font-semibold" style="text-align: left;">
                         Source
                     </th>
 
-                    <th class="px-3 py-3 text-left font-semibold">
+                    <th class="px-3 py-3 text-left font-semibold" style="text-align: left;">
                         Destination
                     </th>
 
-                    <th class="w-28 px-3 py-3 text-right font-semibold">
+                    <th class="w-28 px-3 py-3 text-right font-semibold" style="text-align: right;">
                         Value
                     </th>
 
@@ -43,16 +43,16 @@
                         <td class="px-3 py-2 font-semibold w-36">
                             {{ $node->index }}
                         </td>
-                        <td class="truncate px-3 py-2" style="text-align: center;">
+                        <td class="truncate px-3 py-2" style="text-align: left;">
                             {{ $node->deduction?->concept ?? '—' }}
                         </td>
-                        <td class="truncate px-3 py-2" style="text-align: center;">
+                        <td class="truncate px-3 py-2" style="text-align: left;">
                             {{ $node->partnerSource->short_name ?? 'N/A' }}
                         </td>
-                        <td class="truncate px-3 py-2" style="text-align: center;">
+                        <td class="truncate px-3 py-2" style="text-align: left;">
                             {{ $node->partnerDestination->short_name ?? '—' }}
                         </td>
-                        <td class="px-3 py-2 text-right tabular-nums" style="text-align: center;">
+                        <td class="px-3 py-2 text-right tabular-nums" style="text-align: right;">
                             {{ $fmtPct($node->value ?? 0) }}
                         </td>
                     </tr>
@@ -62,11 +62,11 @@
                 <tr class="border-t border-gray-200 dark:border-gray-700">
 
                     <td colspan="4"
-                        class="px-3 py-2 text-right font-semibold">
+                        class="px-3 py-2 text-right font-semibold" style="text-align: right;">
                         Total
                     </td>
 
-                    <td class="px-3 py-2 text-right font-semibold tabular-nums">
+                    <td class="px-3 py-2 text-right font-semibold tabular-nums" style="text-align: right;">
                         {{ $fmtPct($total) }}
                     </td>
                 </tr>
