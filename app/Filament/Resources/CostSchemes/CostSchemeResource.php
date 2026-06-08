@@ -143,8 +143,20 @@ class CostSchemeResource extends Resource
                             \Filament\Schemas\Components\Section::make()
                                 ->schema([
                                     Textarea::make('description')
+                                        ->label('Description')
                                         ->required()
-                                        ->autosize(),
+                                        ->autosize()
+                                        ->afterStateHydrated(function ($state, callable $set) {
+                                            if (blank($state)) {
+                                                $set('description', 'Each and every loss, subject to the applicable annual aggregate.');
+                                            }
+                                        })
+                                        ->helperText(fn ($record) =>
+                                            $record
+                                                ? 'Review and update the description of the placement scheme as needed.'
+                                                : 'You may keep the default text or replace it with a brief description of the placement scheme.'
+                                        )
+                                        ->columnSpan('full'),
                                 ])
                                 ->columnSpan(12),
                         ])

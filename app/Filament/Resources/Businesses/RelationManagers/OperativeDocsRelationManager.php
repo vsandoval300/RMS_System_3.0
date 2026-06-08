@@ -797,7 +797,51 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->modalWidth('7xl')
                                                             //->slideOver()
                                                             ->stickyModalHeader()
-                                                    ),
+                                                    )
+                                                    ->createOptionUsing(function (array $data): string {
+
+                                                        $nodes = $data['costNodexes'] ?? [];
+
+                                                        unset($data['costNodexes']);
+
+                                                        $lastIndex = CostScheme::max('index') ?? 0;
+
+                                                        $schemeId = 'SCHE-' . now()->format('Ymd')
+                                                            . '-' . str_pad($lastIndex + 1, 4, '0', STR_PAD_LEFT);
+
+                                                        $scheme = CostScheme::create([
+                                                            'id' => $schemeId,
+                                                            'index' => $lastIndex + 1,
+
+                                                            // campos del padre
+                                                            'agreement_type' => $data['agreement_type'],
+                                                            'share' => ($data['share'] ?? 0) / 100,
+                                                            'description' => $data['description'] ?? null,
+                                                        ]);
+
+                                                        // guardar nodos
+                                                        foreach ($nodes as $i => $node) {
+
+                                                            $scheme->costNodexes()->create([
+                                                                'id' => $node['id']
+                                                                    ?? "{$schemeId}-" . Str::lower(Str::ulid()->toBase32()),
+
+                                                                'index' => $i + 1,
+
+                                                                'concept' => $node['concept'] ?? null,
+                                                                'partner_source_id' => $node['partner_source_id'] ?? null,
+                                                                'partner_destination_id' => $node['partner_destination_id'] ?? null,
+
+                                                                // ya viene convertido por dehydrateStateUsing()
+                                                                'value' => $node['value'] ?? 0,
+
+                                                                'apply_to_gross' => $node['apply_to_gross'] ?? false,
+                                                            ]);
+                                                        }
+
+                                                        // esto selecciona automáticamente el nuevo item
+                                                        return $scheme->id;
+                                                    }),
                                                 //Termina nuevo boton    
                                                 Group::make()
                                                     ->schema([
