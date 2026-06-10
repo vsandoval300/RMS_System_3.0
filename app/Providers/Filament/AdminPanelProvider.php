@@ -23,11 +23,22 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;   // ✅ Asegúrate de tener esta línea
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+            fn (): string => view('filament.components.login-version')->render(),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_NAV_END,
+            fn (): string => view('filament.components.sidebar-version')->render(),
+        );
 
         // ✅ Registro de colores personalizados
             FilamentColor::register([

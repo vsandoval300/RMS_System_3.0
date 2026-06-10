@@ -55,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
                         ->append(class_basename($entity))
                         ->toString()
                     };
-            });
+            }
+        );
     }
 }

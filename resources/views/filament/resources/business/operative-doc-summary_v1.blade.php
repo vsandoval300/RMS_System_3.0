@@ -307,8 +307,8 @@
                                 <td class="px-2 py-1"></td>
                                 <td class="px-2 py-1"></td>
 
-                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:right;">Totals:</td>
-                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:right;">
+                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:center;">Totals:</td>
+                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:center;">
                                     {{ number_format($totalAllocation * 100, 2) . '%' }}
                                 </td>
                                 <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600; text-align:right;">
