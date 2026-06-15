@@ -48,6 +48,7 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 
+use function Termwind\style;
 
 class CostSchemeResource extends Resource
 {
@@ -122,23 +123,34 @@ class CostSchemeResource extends Resource
                                                 ),
                                         ]),
                                 ])
-                                ->columnSpan(6),
+                                ->columns(1)
+                                ->columnSpan(6)
+                                ->compact(),
 
                             \Filament\Schemas\Components\Section::make()
                                 ->schema([
                                     \Filament\Schemas\Components\Grid::make(2)
                                         ->schema([
                                             TextInput::make('index')
-                                                ->disabled()
-                                                ->dehydrated(),
-
-                                            TextInput::make('id')
+                                                ->label('Daily Index')
+                                                ->numeric()
+                                                ->required()
                                                 ->disabled()
                                                 ->dehydrated()
-                                                ->hiddenOn('create'),
+                                                ->columnSpan(1),
+
+                                            TextInput::make('id')
+                                                ->label('Scheme Id')
+                                                ->disabled()
+                                                ->dehydrated()
+                                                ->required()
+                                                ->hiddenOn('create')
+                                                ->afterStateHydrated(fn ($component, $state) => $component->state($state))
+                                                ->columnSpan(1),
                                         ]),
                                 ])
-                                ->columnSpan(6),
+                                ->columnSpan(6)
+                                ->compact(),
 
                             \Filament\Schemas\Components\Section::make()
                                 ->schema([
@@ -158,12 +170,16 @@ class CostSchemeResource extends Resource
                                         )
                                         ->columnSpan('full'),
                                 ])
-                                ->columnSpan(12),
+                                ->columnSpan(12)
+                                ->compact(),
                         ])
                         ->columns(12),
-                ]),
-
+                ])
+                ->maxWidth('8xl')
+                ->collapsible(),
             \Filament\Schemas\Components\Section::make('Cost Nodes')
+                ->description('Define the cost nodes of this scheme')
+                ->columnSpanFull()
                 ->schema([
                     Repeater::make('costNodexes')
                         ->when(
@@ -355,7 +371,7 @@ class CostSchemeResource extends Resource
                                         }),
                                     ])
                                     // ocupa el ancho de la fila pero alinea el input a la derecha
-                                    ->extraAttributes(['class' => 'w-full flex justify-end'])
+                                    ->extraAttributes(['class' => 'w-full flex justify-end', 'style' => 'display: flex; width: 100%; justify-content: flex-end;'])
                                     ->columnSpanFull(),
 
 
