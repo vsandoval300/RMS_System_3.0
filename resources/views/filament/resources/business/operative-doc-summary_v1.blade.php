@@ -253,7 +253,7 @@
                                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left;">Coverage</th>
                                 <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:left;">Share</th>
                                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left;">Country</th>
-                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:left;">Allocation</th>
+                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:right;">Allocation</th>
                                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:center;">Annual<br>Premium</th>
                                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:center;">Annual<br>Premium Ftp</th>
                                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:center;">Annual<br>Premium Fts</th>
@@ -281,7 +281,7 @@
                                         {{ $insured['company']['country']['name'] ?? '-' }}
                                     </td>
 
-                                    <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">
+                                    <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:right;">
                                         {{ isset($insured['allocation_percent']) ? number_format($insured['allocation_percent'] * 100, 2) . '%' : '-' }}
                                     </td>
 
@@ -307,8 +307,8 @@
                                 <td class="px-2 py-1"></td>
                                 <td class="px-2 py-1"></td>
 
-                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:left;">Totals:</td>
-                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:left;">
+                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:right;">Totals:</td>
+                                <td class="px-2 py-1 text-right font-semibold" style="color:#100f0d; font-weight: 600; text-align:right;">
                                     {{ number_format($totalAllocation * 100, 2) . '%' }}
                                 </td>
                                 <td class="px-2 py-1 text-right font-semibold whitespace-nowrap" style="color:#100f0d; font-weight: 600; text-align:right;">
