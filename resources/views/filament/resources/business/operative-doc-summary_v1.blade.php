@@ -395,7 +395,7 @@
                         <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Partner</th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Share</th> 
                         <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Concept</th>
-                        <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Value</th>
+                        <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:right";">Value</th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
                     <th class="px-2 py-1 text-right"></th>
