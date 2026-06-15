@@ -134,7 +134,7 @@ class CostSchemeResource extends Resource
                                             TextInput::make('index')
                                                 ->label('Daily Index')
                                                 ->numeric()
-                                                ->required()
+                                                //->required()
                                                 ->disabled()
                                                 ->dehydrated()
                                                 ->columnSpan(1),
@@ -143,7 +143,7 @@ class CostSchemeResource extends Resource
                                                 ->label('Scheme Id')
                                                 ->disabled()
                                                 ->dehydrated()
-                                                ->required()
+                                                //->required()
                                                 ->hiddenOn('create')
                                                 ->afterStateHydrated(fn ($component, $state) => $component->state($state))
                                                 ->columnSpan(1),
