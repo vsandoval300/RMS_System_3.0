@@ -804,7 +804,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                         unset($data['costNodexes']);
 
-                                                        $lastIndex = CostScheme::max('index') ?? 0;
+                                                        /*$lastIndex = CostScheme::max('index') ?? 0;
 
                                                         $schemeId = 'SCHE-' . now()->format('Ymd')
                                                             . '-' . str_pad($lastIndex + 1, 4, '0', STR_PAD_LEFT);
@@ -815,8 +815,37 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             // campos del padre
                                                             'agreement_type' => $data['agreement_type'],
-                                                            'share' => ($data['share'] ?? 0) / 100,
+                                                            'share' => $data['share'],
                                                             'description' => $data['description'] ?? null,
+                                                        ]);*/
+                                                        $today = now();
+
+                                                        $maxIndexToday = (int) (
+                                                            CostScheme::withTrashed()
+                                                                ->whereDate('created_at', $today->toDateString())
+                                                                ->max('index') ?? 0
+                                                        );
+
+                                                        $nextIndex = $maxIndexToday + 1;
+
+                                                        $schemeId = sprintf(
+                                                            'SCHE-%s-%04d',
+                                                            $today->format('Ymd'),
+                                                            $nextIndex
+                                                        );
+
+                                                        $scheme = CostScheme::create([
+                                                            'id' => $schemeId,
+                                                            'index' => $nextIndex,
+
+                                                            'agreement_type' => $data['agreement_type'],
+
+                                                            // 👈 importante
+                                                            'share' => $data['share'],
+
+                                                            'description' => $data['description'] ?? null,
+
+                                                            //'created_by_user' => Auth::id(),
                                                         ]);
 
                                                         // guardar nodos
