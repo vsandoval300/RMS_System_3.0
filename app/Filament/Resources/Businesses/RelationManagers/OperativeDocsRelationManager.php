@@ -837,15 +837,11 @@ class OperativeDocsRelationManager extends RelationManager
                                                         $scheme = CostScheme::create([
                                                             'id' => $schemeId,
                                                             'index' => $nextIndex,
-
                                                             'agreement_type' => $data['agreement_type'],
-
                                                             // 👈 importante
                                                             'share' => $data['share'],
-
                                                             'description' => $data['description'] ?? null,
-
-                                                            //'created_by_user' => Auth::id(),
+                                                            'created_by_user' => Auth::id(),
                                                         ]);
 
                                                         // guardar nodos
