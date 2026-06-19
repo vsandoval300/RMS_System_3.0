@@ -55,21 +55,25 @@ class ViewTransaction extends ViewRecord
             Action::make('auditInfo')
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modalHeading('Audit info')
-                ->modalWidth('4xl')        // 👈 aquí controlas el ancho del modal
-                ->modalSubmitAction(false) // no necesitamos botón de "Save"
-                ->closeModalByClickingAway() // opcional
-                ->schema([
-                    \Filament\Schemas\Components\View::make('filament.resources.audit.audit-logs')
-                        ->viewData([
-                            'logs' => $this->getRecord()
-                                ->auditLogs()
-                                ->with('user')
-                                ->latest()
-                                ->get(),
-                        ])
-                        ->columnSpanFull(),
-                ]),   
+                ->stickyModalHeader()
+
+                ->extraModalWindowAttributes([
+                    'class' => 'audit-modal',
+                ])
+
+                ->modalWidth('4xl')
+                ->modalContent(fn () => view(
+                    'filament.resources.audit.audit-logs',
+                    [
+                        'logs' => $this->getRecord()
+                            ->auditLogs()
+                            ->with('user')
+                            ->latest()
+                            ->get(),
+                    ],
+                ))
+                ->modalSubmitAction(false)
+                ->modalCancelAction(false),   
                 
             Action::make('close')
                 ->label('Close')
