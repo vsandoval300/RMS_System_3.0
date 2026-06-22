@@ -7,8 +7,6 @@ use Filament\Schemas\Components\View;
 use App\Filament\Resources\Companies\CompaniesResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Actions\Action;
 use Filament\Forms;

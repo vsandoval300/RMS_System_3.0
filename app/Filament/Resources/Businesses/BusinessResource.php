@@ -52,9 +52,6 @@ use Filament\Tables\Filters\Filter;
 use Illuminate\Support\HtmlString;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Tabs;
-use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Schemas\Components\Group as ComponentsGroup;
 
 class BusinessResource extends Resource

@@ -34,7 +34,8 @@ class CreateCurrencies extends CreateRecord
      */
     protected function getCreateFormAction(): Action
     {
-        return Action::make('create')
+        return parent::getCreateFormAction()
+            ->submit(null)
             ->label(
                 __('filament-panels::resources/pages/create-record.form.actions.create.label')
             )
@@ -51,6 +52,14 @@ class CreateCurrencies extends CreateRecord
                 $this->create();
             })
 
+            ->action(function () {
+                try {
+                    $this->create();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
             ->keyBindings(['mod+s']);
     }
 

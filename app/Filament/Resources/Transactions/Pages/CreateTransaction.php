@@ -97,8 +97,8 @@ class CreateTransaction extends CreateRecord
 
     protected function getCreateFormAction(): Action
     {
-        return Action::make('create')
-        ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
+        return parent::getCreateFormAction()
+            ->submit(null)
         ->requiresConfirmation()
         ->modalHeading('Create Transaction')
         ->modalDescription('Are you sure you want to create this Transaction?')
@@ -109,7 +109,15 @@ class CreateTransaction extends CreateRecord
             // ✅ SOLO aquí te vas al index
             $this->redirect(static::getResource()::getUrl('index'));
         })
-        ->keyBindings(['mod+s']);
+        ->action(function () {
+                try {
+                    $this->create();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
+            ->keyBindings(['mod+s']);
     }
 
     protected function getFormActions(): array

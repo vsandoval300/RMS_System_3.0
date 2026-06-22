@@ -31,6 +31,14 @@ class EditClients extends EditRecord
         Actions\Action::make('saveAndClose')
             ->label('Save & Close')
             ->color('primary')
+            ->action(function () {
+                try {
+                    $this->save();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
             ->keyBindings(['mod+s'])      // ⌘S / Ctrl-S
             ->action('saveAndClose'),     // 👈 Llama al método de la página
 
@@ -47,7 +55,8 @@ class EditClients extends EditRecord
     /* protected function getSaveFormAction(): Action
     {
         // devuelve la acción creada por Filament, pero oculta
-        return parent::getSaveFormAction()->hidden();
+        return parent::getSaveFormAction()
+            ->submit(null)->hidden();
     }
 
     protected function getCancelFormAction(): Action
@@ -115,15 +124,22 @@ class EditClients extends EditRecord
      */
     protected function getSaveFormAction(): Action
     {
-        return Action::make('save')
+        return parent::getSaveFormAction()
+            ->submit(null)
             // mismo label que Filament usa por defecto
-            ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
             ->requiresConfirmation()
             ->modalHeading('Save Client')
             ->modalDescription('Are you sure you want to save these changes?')  
             ->modalSubmitActionLabel('Save') 
             // qué hacer al confirmar en el modal
-            ->action(fn () => $this->save())
+            ->action(function () {
+                try {
+                    $this->save();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
             ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
     }
 

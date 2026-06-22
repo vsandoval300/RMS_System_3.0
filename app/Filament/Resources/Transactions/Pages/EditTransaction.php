@@ -552,13 +552,20 @@ class EditTransaction extends EditRecord
 
     protected function getSaveFormAction(): Action
     {
-        return Action::make('save')
-            ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
+        return parent::getSaveFormAction()
+            ->submit(null)
             ->requiresConfirmation()
             ->modalHeading('Save Transaction')
             ->modalDescription('Are you sure you want to save these changes?')
             ->modalSubmitActionLabel('Save')
-            ->action(fn () => $this->save())
+            ->action(function () {
+                try {
+                    $this->save();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
             ->keyBindings(['mod+s']);
     }
 

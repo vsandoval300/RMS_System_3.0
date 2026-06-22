@@ -57,7 +57,7 @@ use Filament\Infolists\Components\ViewEntry;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Grid;
+use Filament\Schemas\Components\Grid;
 
 
 use Filament\Infolists\Components\RepeatableEntry;

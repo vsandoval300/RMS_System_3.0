@@ -39,14 +39,11 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Facades\Storage;           // 👈 importa la facade
 use Filament\Forms\Get;
 use Filament\Support\Enums\VerticalAlignment;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Illuminate\Support\HtmlString;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Group;
-use Filament\Infolists\Components\Tabs;
-use Filament\Infolists\Components\Tabs\Tab;
 
 class TreatyResource extends Resource
 {

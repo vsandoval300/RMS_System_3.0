@@ -33,15 +33,22 @@ class EditIndustries extends EditRecord
      */
     protected function getSaveFormAction(): Action
     {
-        return Action::make('save')
+        return parent::getSaveFormAction()
+            ->submit(null)
             // mismo label que Filament usa por defecto
-            ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
             ->requiresConfirmation()
             ->modalHeading('Save Industry')
             ->modalDescription('Are you sure you want to save these changes?')  
             ->modalSubmitActionLabel('Save') 
             // qué hacer al confirmar en el modal
-            ->action(fn () => $this->save())
+            ->action(function () {
+                try {
+                    $this->save();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
             ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
     }
 

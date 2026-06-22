@@ -7,7 +7,6 @@ use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
 use Carbon\Carbon;
 
 class AtRiskUsers extends TableWidget

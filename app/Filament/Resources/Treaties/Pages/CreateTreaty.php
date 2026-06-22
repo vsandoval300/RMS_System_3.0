@@ -35,15 +35,22 @@ class CreateTreaty extends CreateRecord
      */
     protected function getCreateFormAction(): Action
     {
-        return Action::make('create')
+        return parent::getCreateFormAction()
+            ->submit(null)
             // label por defecto de Filament
-            ->label(__('filament-panels::resources/pages/create-record.form.actions.create.label'))
             ->requiresConfirmation()
             ->modalHeading('Create Treaty')
             ->modalDescription('Are you sure you want to create this Treaty?')
             ->modalSubmitActionLabel('Create')
             // qué hacer cuando el usuario confirma en el modal
-            ->action(fn () => $this->create())
+            ->action(function () {
+                try {
+                    $this->create();
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->unmountAction();
+                    throw $e;
+                }
+            })
             ->keyBindings(['mod+s']); // ⌘+S / Ctrl+S
     }
 

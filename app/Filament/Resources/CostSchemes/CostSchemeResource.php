@@ -42,9 +42,8 @@ use Filament\Forms\Components\Textarea;
 
 
 // 👇 IMPORTS para INFOLIST
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\Section as InfoSection;
-use Filament\Infolists\Components\Grid as InfoGrid;
+use Filament\Schemas\Components\Section as InfoSection;
+use Filament\Schemas\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 
