@@ -50,27 +50,27 @@ class ViewBusiness extends ViewRecord
         return [
 
             Action::make('auditInfo')
-    ->label('Audit info')
-    ->icon('heroicon-o-clipboard-document-list')
-    ->stickyModalHeader()
+                ->label('Audit info')
+                ->icon('heroicon-o-clipboard-document-list')
+                ->stickyModalHeader()
 
-    ->extraModalWindowAttributes([
-        'class' => 'audit-modal',
-    ])
+                ->extraModalWindowAttributes([
+                    'class' => 'audit-modal',
+                ])
 
-    ->modalWidth('7xl')
-    ->modalContent(fn () => view(
-        'filament.resources.audit.audit-logs',
-        [
-            'logs' => $this->getRecord()
-                ->auditLogs()
-                ->with('user')
-                ->latest()
-                ->get(),
-        ],
-    ))
-    ->modalSubmitAction(false)
-    ->modalCancelAction(false),
+                ->modalWidth('7xl')
+                ->modalContent(fn () => view(
+                    'filament.resources.audit.audit-logs',
+                    [
+                        'logs' => $this->getRecord()
+                            ->auditLogs()
+                            ->with('user')
+                            ->latest()
+                            ->get(),
+                    ],
+                ))
+                ->modalSubmitAction(false)
+                ->modalCancelAction(false),
                 
             Action::make('close')
                 ->label('Close')

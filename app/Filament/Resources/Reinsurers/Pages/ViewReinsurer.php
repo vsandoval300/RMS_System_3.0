@@ -31,27 +31,25 @@ class ViewReinsurer extends ViewRecord
             Action::make('auditInfo')
                 ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modalHeading(' ')
-                ->modalDescription('Review the full change history for this record, including who modified it and when.')
+                ->stickyModalHeader()
+
+                ->extraModalWindowAttributes([
+                    'class' => 'audit-modal',
+                ])
+
                 ->modalWidth('4xl')
+                ->modalContent(fn () => view(
+                    'filament.resources.audit.audit-logs',
+                    [
+                        'logs' => $this->getRecord()
+                            ->auditLogs()
+                            ->with('user')
+                            ->latest()
+                            ->get(),
+                    ],
+                ))
                 ->modalSubmitAction(false)
-                ->closeModalByClickingAway()
-                ->schema(function () {
-
-                    return [
-
-                        // ── Change history (vista Blade que ya tienes) ──
-                        View::make('filament.resources.audit.audit-logs')
-                            ->viewData([
-                                'logs' => $this->getRecord()
-                                    ->auditLogs()
-                                    ->with('user')
-                                    ->latest()
-                                    ->get(),
-                            ])
-                            ->columnSpanFull(),
-                    ];
-                }),
+                ->modalCancelAction(false),
 
             Action::make('close')
                 ->label('Close')

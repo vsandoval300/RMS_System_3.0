@@ -28,26 +28,27 @@ class ViewTreaty extends viewRecord
     {
         return [
             Action::make('auditInfo')
-                ->label('Audit Info')
+                ->label('Audit info')
                 ->icon('heroicon-o-clipboard-document-list')
-                ->modalHeading(' ')
-                ->modalDescription('Review the full change history for this record, including who modified it and when.')
+                ->stickyModalHeader()
+
+                ->extraModalWindowAttributes([
+                    'class' => 'audit-modal',
+                ])
+
                 ->modalWidth('4xl')
+                ->modalContent(fn () => view(
+                    'filament.resources.audit.audit-logs',
+                    [
+                        'logs' => $this->getRecord()
+                            ->auditLogs()
+                            ->with('user')
+                            ->latest()
+                            ->get(),
+                    ],
+                ))
                 ->modalSubmitAction(false)
-                ->closeModalByClickingAway()
-                ->schema(function () {
-                    $record = $this->getRecord();
-
-                    return [
-
-                        // ── Change history (vista Blade que ya tienes) ──
-                        \Filament\Schemas\Components\View::make('filament.resources.audit.audit-logs')
-                            ->viewData([
-                                'record' => $record,
-                            ])
-                            ->columnSpanFull(),
-                    ];
-                }),
+                ->modalCancelAction(false),
 
             Action::make('close')
                 ->label('Close')

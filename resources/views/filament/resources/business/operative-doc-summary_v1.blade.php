@@ -253,7 +253,7 @@
                                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left;">Coverage</th>
                                 <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:left;">Share</th>
                                 <th class="px-2 py-1 text-left font-semibold" style="color: #100f0d; text-align:left;">Country</th>
-                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:left;">Allocation</th>
+                                <th class="px-2 py-1 text-right font-semibold" style="color: #100f0d; text-align:right;">Allocation</th>
                                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:center;">Annual<br>Premium</th>
                                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:center;">Annual<br>Premium Ftp</th>
                                 <th class="px-2 py-1 text-center font-semibold" style="color: #100f0d; text-align:center;">Annual<br>Premium Fts</th>
@@ -281,7 +281,7 @@
                                         {{ $insured['company']['country']['name'] ?? '-' }}
                                     </td>
 
-                                    <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d;">
+                                    <td class="px-2 py-1 text-right" style="border-bottom: 1px solid #100f0d; text-align:right;">
                                         {{ isset($insured['allocation_percent']) ? number_format($insured['allocation_percent'] * 100, 2) . '%' : '-' }}
                                     </td>
 
@@ -395,7 +395,7 @@
                         <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Partner</th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Share</th> 
                         <th class="px-2 py-1 font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Concept</th>
-                        <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:left";">Value</th>
+                        <th class="px-2 py-1  font-semibold" style="color: #100f0d; border-bottom: 1px solid #100f0d; text-align:right";">Value</th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
                         <th class="px-2 py-1" style="color: #100f0d; border-bottom: 1px solid #100f0d;"></th>
                     <th class="px-2 py-1 text-right"></th>

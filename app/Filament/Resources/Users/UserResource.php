@@ -33,6 +33,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Support\RawJs;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Tables\Columns\ViewColumn;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -292,7 +293,7 @@ public static function infolist(Schema $schema): Schema
                                 ->hidden(fn ($record) => blank(data_get($record, 'image')))
                                 ->extraAttributes([
                                     'style' => '
-                                        min-height:360px; width:100%;
+                                        min-height:230px; width:100%;
                                         border-radius:14px;
                                         background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
                                         border:1px solid rgba(255,255,255,0.15);
@@ -308,7 +309,7 @@ public static function infolist(Schema $schema): Schema
                                 ->hiddenLabel()->html()
                                 ->state('
                                     <div style="
-                                        min-height:360px; width:100%;
+                                        min-height:230px; width:100%;
                                         border-radius:14px;
                                         display:flex; align-items:center; justify-content:center;
                                         margin:0;
@@ -406,6 +407,15 @@ public static function infolist(Schema $schema): Schema
                 //->toggleable(isToggledHiddenByDefault: true)
                 ->extraAttributes(['class' => 'w-24 text-gray-500']),
 
+
+                // ViewColumn::make('name')
+                //     ->label('Name')
+                //     ->view('filament.components.user-avatar')
+                //     ->sortable()
+                //     ->searchable(query: function ($query, string $search): void {
+                //         $query->where('name', 'like', "%{$search}%");
+                //     }),
+
             TextColumn::make('name')
                 ->label('Name')
                 ->formatStateUsing(function (string $state): string {
@@ -419,12 +429,22 @@ public static function infolist(Schema $schema): Schema
                     $circleBg = '#41a2c3'; // ← tu color
 
                     return "
-                            <div style='display:flex;align-items:center;gap:8px;'>
-                                <img src=\"{$circleBg}\"
-                                    style='width:24px;height:24px;border-radius:50%;object-fit:cover;' />
-                                <span>{$name}</span>
-                            </div>
-                        ";
+                        <span style='display:inline-flex;align-items:center;gap:8px'>
+                            <span style='
+                                background:#41a2c3;
+                                width:24px;
+                                height:24px;
+                                border-radius:9999px;
+                                color:white;
+                                font-size:10px;
+                                font-weight:600;
+                                display:inline-flex;
+                                align-items:center;
+                                justify-content:center;
+                            '>{$initials}</span>
+                            {$escName}
+                        </span>
+                    ";
                 })
                 ->html()
                 ->searchable()
@@ -432,7 +452,14 @@ public static function infolist(Schema $schema): Schema
 
 
             TextColumn::make('email')
-                ->icon('heroicon-m-envelope')
+                //->icon('heroicon-m-envelope')
+                ->html()
+                ->formatStateUsing(fn ($state) => "
+                    <span style='display:inline-flex;align-items:center;gap:6px'>
+                        ✉
+                        {$state}
+                    </span>
+                ")  
                 ->label('Email')
                 ->searchable()
                 ->sortable(),

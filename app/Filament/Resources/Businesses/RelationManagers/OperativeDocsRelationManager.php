@@ -64,11 +64,7 @@ use App\Enums\BusinessLifecycleStatus;
 use App\Filament\Resources\CostSchemes\CostSchemeResource;
 use Filament\Forms\Components\Alert;
 use App\Models\OperativeDoc;
-
-
-
-
-
+use Illuminate\Support\Facades\Auth;
 
 class OperativeDocsRelationManager extends RelationManager
 {
@@ -804,7 +800,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                         unset($data['costNodexes']);
 
-                                                        $lastIndex = CostScheme::max('index') ?? 0;
+                                                        /*$lastIndex = CostScheme::max('index') ?? 0;
 
                                                         $schemeId = 'SCHE-' . now()->format('Ymd')
                                                             . '-' . str_pad($lastIndex + 1, 4, '0', STR_PAD_LEFT);
@@ -815,8 +811,33 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             // campos del padre
                                                             'agreement_type' => $data['agreement_type'],
-                                                            'share' => ($data['share'] ?? 0) / 100,
+                                                            'share' => $data['share'],
                                                             'description' => $data['description'] ?? null,
+                                                        ]);*/
+                                                        $today = now();
+
+                                                        $maxIndexToday = (int) (
+                                                            CostScheme::withTrashed()
+                                                                ->whereDate('created_at', $today->toDateString())
+                                                                ->max('index') ?? 0
+                                                        );
+
+                                                        $nextIndex = $maxIndexToday + 1;
+
+                                                        $schemeId = sprintf(
+                                                            'SCHE-%s-%04d',
+                                                            $today->format('Ymd'),
+                                                            $nextIndex
+                                                        );
+
+                                                        $scheme = CostScheme::create([
+                                                            'id' => $schemeId,
+                                                            'index' => $nextIndex,
+                                                            'agreement_type' => $data['agreement_type'],
+                                                            // 👈 importante
+                                                            'share' => $data['share'],
+                                                            'description' => $data['description'] ?? null,
+                                                            'created_by_user' => Auth::id(),
                                                         ]);
 
                                                         // guardar nodos
@@ -1173,36 +1194,59 @@ class OperativeDocsRelationManager extends RelationManager
                 // 🟡 SUMMARY Section
                 // ──────────────────────────────────────────────────────────────────────────────
 
-                    Section::make()
+                   Section::make()
                     ->schema([
                         Placeholder::make('spacer')
+                            ->label('')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
                             ->content(new HtmlString('
-                                <div class="space-y-2">
+                                <div class="w-full space-y-2">
                                     <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">
                                         Warning
                                     </h2>
 
                                     <div class="
-                                        flex items-center gap-2
-                                        text-sm rounded-md p-3 border
+                                        w-full flex items-center gap-3
+                                        rounded-md border p-3
                                         bg-warning-50 border-gray-200
                                         dark:bg-warning-900/20 dark:border-white/10
                                     ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-danger-600 dark:text-danger-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 9v2m0 4h.01M10.29 3.86l-8.3 14.38A1 1 0 002.83 20h16.34a1 1 0 00.86-1.76L11.71 3.86a1 1 0 00-1.72 0z" />
-                                        </svg>
+                                        <div style="flex: 0 0 auto;">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                style="
+                                                    width: 20px;
+                                                    height: 20px;
+                                                    min-width: 20px;
+                                                    min-height: 20px;
+                                                    display: block;
+                                                    color: rgb(220 38 38);
+                                                "
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M12 9v2m0 4h.01M10.29 3.86l-8.3 14.38A1 1 0 002.83 20h16.34a1 1 0 00.86-1.76L11.71 3.86a1 1 0 00-1.72 0z"
+                                                />
+                                            </svg>
+                                        </div>
 
                                         <span class="font-bold text-danger-700 dark:text-danger-300">
-                                            Please switch back to &quot;Document Details&quot; to continue.
+                                            Please switch back to "Document Details" to continue.
                                         </span>
                                     </div>
                                 </div>
                             '))
                             ->extraAttributes([
-                                'class' => '!p-0 !border-0 !bg-transparent',
+                                'class' => '!p-0 !border-0 !bg-transparent w-full',
                             ]),
                     ])
+                    ->columnSpanFull()
                     ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'summary')
                     ->hiddenOn('view'),
                         
