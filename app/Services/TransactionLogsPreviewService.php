@@ -10,10 +10,12 @@ class TransactionLogsPreviewService
     public function build(
         string $opDocumentId,
         int $typeId,
-        float $proportion, // esperado en decimal: 0–1 (ej: 0.25)
+        float $proportion,
         float $exchRate,
-        ?string $remittanceCode = null,
-        $dueDate = null,
+        mixed $remittanceCode = null,
+        mixed $dueDate = null,
+        ?string $costSchemeId = null,
+        ?float $overrideBasePremium = null,
     ): array {
 
         $doc = OperativeDoc::query()
@@ -64,6 +66,12 @@ class TransactionLogsPreviewService
                 continue;
             }
 
+            // ✅ Si el usuario eligió un esquema específico,
+            // solo se calcula ese esquema.
+            if (filled($costSchemeId) && (string) $scheme->id !== (string) $costSchemeId) {
+                continue;
+            }
+
             $nodes = $scheme->costNodexes ?? collect();
             $maxSteps = max($maxSteps, $nodes->count());
 
@@ -88,6 +96,21 @@ class TransactionLogsPreviewService
          * ✅ totalGross = suma de grossScheme de todos los esquemas
          */
         $totalGrossAmount = round(collect($schemeData)->sum('gross'), 2);
+
+        // Bordereaux override: reemplaza el gross base manteniendo
+        // las proporciones entre schemes para que los descuentos apliquen bien.
+        if ($overrideBasePremium !== null) {
+            if ($totalGrossAmount > 0) {
+                $scale = $overrideBasePremium / $totalGrossAmount;
+                foreach ($schemeData as &$sd) {
+                    $sd['gross'] = round($sd['gross'] * $scale, 2);
+                }
+                unset($sd);
+            } elseif (! empty($schemeData)) {
+                $schemeData[0]['gross'] = $overrideBasePremium;
+            }
+            $totalGrossAmount = round($overrideBasePremium, 2);
+        }
 
         /**
          * ✅ Construir filas globales por "paso" (índice de nodo)

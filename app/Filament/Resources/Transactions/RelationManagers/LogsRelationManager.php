@@ -16,12 +16,15 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Support\RawJs;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;   
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 
 
 
@@ -110,7 +113,7 @@ class LogsRelationManager extends RelationManager
 
             Section::make()
                 ->columnSpanFull()
-                ->columns(4)
+                ->columns(5)
                 ->schema([
                     TextInput::make('gross_amount')
                         ->label('Gross amount')
@@ -134,15 +137,22 @@ class LogsRelationManager extends RelationManager
                         ->label('Banking fee')
                         ->required()
                         ->mask(RawJs::make('$money($input, ".", ",", 2)'))
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                            $gross    = (float) str_replace(',', '', (string) ($get('gross_amount_calc') ?? 0));
+                            $discount = (float) str_replace(',', '', (string) ($get('commission_discount') ?? 0));
+                            $fee      = (float) str_replace(',', '', (string) ($state ?? 0));
+                            $set('net_amount', number_format(round($gross - $discount - $fee, 2), 2, '.', ','));
+                        })
                         ->dehydrateStateUsing(fn ($state) =>
                             $state === null || $state === '' ? null : (float) str_replace(',', '', (string) $state)
                         ),
 
-                    // ✅ net_amount es storedAs(...) → no editable
                     TextInput::make('net_amount')
                         ->label('Net amount')
                         ->disabled()
-                        ->dehydrated(false),
+                        ->dehydrated(false)
+                        ->mask(RawJs::make('$money($input, ".", ",", 2)')),
 
             // ✅ NUEVA SECCIÓN: Evidence
             Section::make('Evidence')
@@ -172,13 +182,7 @@ class LogsRelationManager extends RelationManager
                 ]),
 
 
-
-
-
-
-
-
-                ]),
+            ]),
         ]);
     }
 
@@ -208,7 +212,7 @@ class LogsRelationManager extends RelationManager
                 TextColumn::make('sent_date')->date(),
                 TextColumn::make('received_date')->date(),
                 TextColumn::make('exch_rate')->numeric(decimalPlaces: 5),
-                TextColumn::make('gross_amount')->numeric(2),
+                //TextColumn::make('gross_amount')->numeric(2),
                 TextColumn::make('gross_amount_calc')->numeric(2),
                 TextColumn::make('commission_discount')->label('Discount')->numeric(2),
                 TextColumn::make('banking_fee')->numeric(2),
@@ -284,7 +288,46 @@ class LogsRelationManager extends RelationManager
                 // ✅ NO CreateAction
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->modalWidth('7xl')
+                    ->after(function ($record, $livewire) {
+                        $record->refresh();
+
+                        $logStatus = filled($record->received_date)
+                            ? 'Completed'
+                            : (filled($record->sent_date) ? 'In process' : 'Pending');
+
+                        $record->forceFill([
+                            'status' => $logStatus,
+                        ])->saveQuietly();
+
+                        $transaction = $livewire->getOwnerRecord()->refresh();
+
+                        $logs = $transaction->logs()
+                            ->withoutTrashed()
+                            ->orderBy('index')
+                            ->get();
+
+                        $statuses = $logs
+                            ->pluck('status')
+                            ->map(fn ($status) => trim((string) $status));
+
+                        $lastLog = $logs->last();
+
+                        $transactionStatusId = match (true) {
+                            $lastLog && trim((string) $lastLog->status) === 'Completed' => 3,
+                            $statuses->contains('In process') => 2,
+                            $statuses->contains('Completed') => 2,
+                            default => 1,
+                        };
+
+                        $transaction->forceFill([
+                            'transaction_status_id' => $transactionStatusId,
+                        ])->saveQuietly();
+
+                        $livewire->dispatch('transaction-status-updated');
+                        $livewire->dispatch('$refresh');
+                    }),
                 
                         /* Action::make('viewPdf')
                             ->label('View PDF')

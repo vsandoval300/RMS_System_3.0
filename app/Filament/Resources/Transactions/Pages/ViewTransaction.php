@@ -15,7 +15,7 @@ class ViewTransaction extends ViewRecord
 {
     protected static string $resource = TransactionResource::class;
     
-    protected Width|string|null $maxContentWidth = '8xl';
+    protected Width|string|null $maxContentWidth = 'max-w-[1800px]';
 
     public function getTitle(): string
     {
@@ -79,4 +79,12 @@ class ViewTransaction extends ViewRecord
                 ->url(static::getResource()::getUrl('index')),      
         ];
     }
+
+    protected function getViewData(): array
+    {
+        return [
+            'contentWidth' => '1800px',
+        ];
+    }
+
 }

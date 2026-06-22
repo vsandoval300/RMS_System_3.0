@@ -14,16 +14,16 @@ use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
 use Filament\Facades\Filament;
+use App\Models\TransactionLog;
+use Illuminate\Support\Facades\DB;
+use App\Services\TransactionLogsPreviewService;
 
 
 class CreateTransaction extends CreateRecord
 {
     protected static string $resource = TransactionResource::class;
 
-    /* protected function getRedirectUrl(): string
-    {
-        return static::getResource()::getUrl('index');
-    } */
+    
 
     protected function authorizeAccess(): void
     {
@@ -139,4 +139,114 @@ class CreateTransaction extends CreateRecord
         $data['amount'] ??= 0; // ✅ evita null y cumple NOT NULL
         return $data;
     }
+
+    protected function afterFill(): void
+    {
+        $opDocumentId = request()->query('op_document_id');
+
+        if (blank($opDocumentId)) {
+            return;
+        }
+
+        $nextIndex = Transaction::where('op_document_id', $opDocumentId)->count() + 1;
+
+        $opDoc = OperativeDoc::query()
+            ->with('business')
+            ->whereKey($opDocumentId)
+            ->first();
+
+        $currencyId = $opDoc?->business?->currency_id;
+
+        $this->form->fill([
+            ...$this->form->getRawState(),
+
+            'op_document_id' => $opDocumentId,
+            'index' => $nextIndex,
+            'id' => (string) Str::uuid(),
+            'exch_rate' => ((int) $currencyId === 157) ? 1 : null,
+            'exchange_rate_locked' => ((int) $currencyId === 157),
+            'transaction_status_id' => 1,
+            'preview_logs' => [],
+        ]);
+    }
+
+    protected function handleRecordCreation(array $data): Transaction
+    {
+        return DB::transaction(function () use ($data) {
+
+            $createdTransaction = null;
+            $previousAutoBuildLogs = Transaction::$autoBuildLogs;
+
+            try {
+                Transaction::$autoBuildLogs = false;
+
+                foreach ($data['transactions_batch'] ?? [] as $row) {
+
+                    $proportion = ((float) str_replace([',', '%'], '', (string) ($row['proportion'] ?? 0))) / 100;
+
+                    $transaction = Transaction::create([
+                        'id' => $row['id'],
+                        'index' => $row['index'],
+                        'op_document_id' => $data['op_document_id'],
+                        'transaction_type_id' => 1,
+                        'transaction_status_id' => 1,
+                        'due_date' => $row['due_date'],
+                        'proportion' => $proportion,
+                        'exch_rate' => $row['exch_rate'],
+                        'remmitance_code' => null,
+                        'amount' => 0,
+                    ]);
+
+                    $createdTransaction ??= $transaction;
+
+                    $logs = app(TransactionLogsPreviewService::class)->build(
+                        opDocumentId: (string) $data['op_document_id'],
+                        typeId: 1,
+                        proportion: $proportion,
+                        exchRate: (float) $row['exch_rate'],
+                        remittanceCode: null,
+                        dueDate: $row['due_date'],
+                        costSchemeId: ($row['cost_scheme_option'] ?? 'all') === 'all'
+                            ? null
+                            : (string) $row['cost_scheme_option'],
+                    );
+
+                    foreach ($logs as $logRow) {
+                        TransactionLog::create([
+                            'transaction_id' => $transaction->id,
+                            'index' => $logRow['index'] ?? null,
+                            'deduction_type' => $logRow['deduction_id'] ?? null,
+                            'from_entity' => $logRow['from_entity'] ?? null,
+                            'to_entity' => $logRow['to_entity'] ?? null,
+                            'proportion' => $logRow['proportion'] ?? $transaction->proportion,
+                            'exch_rate' => $logRow['exchange_rate']
+                                ?? $logRow['exch_rate']
+                                ?? $transaction->exch_rate,
+                            'commission_percentage' => $logRow['commission_percentage'] ?? 0,
+                            'gross_amount' => $logRow['gross_amount'] ?? 0,
+                            'gross_amount_calc' => $logRow['gross_amount'] ?? 0,
+                            'commission_discount' => $logRow['discount']
+                                ?? $logRow['commission_discount']
+                                ?? 0,
+                            'net_amount' => $logRow['net_amount'] ?? 0,
+                            'sent_date' => null,
+                            'received_date' => null,
+                            'status' => 'Pending',
+                            'evidence_path' => null,
+                            'banking_fee' => $logRow['banking_fee'] ?? 0,
+                        ]);
+                    }
+                }
+            } finally {
+                Transaction::$autoBuildLogs = $previousAutoBuildLogs;
+            }
+
+            return $createdTransaction;
+        });
+    }
+
+
+
+
+    
 }

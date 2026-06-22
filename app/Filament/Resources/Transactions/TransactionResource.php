@@ -45,6 +45,14 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\Hidden;
 use App\Models\TransactionLog;
+use App\Models\Reinsurer;
+use App\Models\TransactionStatus;
+use Filament\Actions\Action;
+use App\Models\CostScheme;
+use Illuminate\Support\HtmlString;
+use Filament\Tables\Columns\ViewColumn;
+use Filament\Infolists\Components\ViewEntry;
+
 
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
@@ -62,6 +70,10 @@ use Illuminate\Support\Facades\Storage;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+
+    protected static ?string $navigationLabel  = 'Instalments';
+    protected static ?string $modelLabel       = 'Instalment';
+    protected static ?string $pluralModelLabel = 'Instalments';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Transactions';
@@ -82,290 +94,494 @@ class TransactionResource extends Resource
             ->join('operative_docs', 'transactions.op_document_id', '=', 'operative_docs.id')
             ->join('businesses', 'operative_docs.business_id', '=', 'businesses.id')
             ->join('reinsurers', 'businesses.reinsurer_id', '=', 'reinsurers.id')
-            ->select('transactions.*') // 👈 importante para evitar conflictos de columnas
+            ->select('transactions.*')
             ->orderBy('reinsurers.name')
-            ->orderBy('transactions.op_document_id');
+            ->orderBy('transactions.op_document_id')
+            ->orderBy('transactions.index');
     }
 
-/*--------------------------------------------------------------
- | 1. Form
- --------------------------------------------------------------*/
-public static function form(Schema $schema): Schema
+    /*--------------------------------------------------------------
+    | 1. Form
+    --------------------------------------------------------------*/
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+
+                Hidden::make('prefill_op_document_id')
+                    ->default(fn () => request()->query('op_document_id'))
+                    ->dehydrated(false)
+                    ->visible(false)
+                    ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
+                        if ($record?->exists || blank($state)) {
+                            return;
+                        }
+
+                        if (blank($get('op_document_id'))) {
+                            $set('op_document_id', $state);
+                        }
+
+                        static::applyDocumentDefaults($get('op_document_id'), $get, $set);
+
+                        if (filled($get('installment_number'))) {
+                            static::buildTransactionsBatch(
+                                $get('op_document_id'),
+                                (int) $get('installment_number'),
+                                $set
+                            );
+                        }
+                    }),
+
+                Hidden::make('preview_logs')
+                    ->default([])
+                    ->dehydrated(false),
+
+                Section::make('Installment Settings')
+                    ->description(fn (string $operation) => match ($operation) {
+                        'edit' => 'Review the transaction details and update only the transaction lifecycle records as needed.',
+                        default => 'Select the document and specify the number of installments to be created.',
+                    })
+                    ->columns(8)
+                    ->columnSpanFull()
+                    ->schema([
+
+                        Select::make('op_document_id')
+                            ->label('Document')
+                            ->placeholder('Select document.')
+                            //->helperText('Choose the document to be used for transaction generation.')
+                            ->relationship('operativeDoc', 'id')
+                            ->searchable()
+                            ->disabled(fn (?Transaction $record) => $record?->exists)
+                            ->dehydrated()
+                            ->preload()
+                            ->optionsLimit(10000)
+                            ->required()
+                            ->live()
+                            ->columnSpan(2)
+                            ->default(fn () => request()->query('op_document_id'))
+                            ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
+                                if ($record?->exists || blank($state)) {
+                                    return;
+                                }
+
+                                static::applyDocumentDefaults($state, $get, $set);
+
+                                if (filled($get('installment_number'))) {
+                                    static::buildTransactionsBatch(
+                                        $state,
+                                        (int) $get('installment_number'),
+                                        $set
+                                    );
+                                }
+                            })
+                            ->afterStateUpdated(function ($state, Set $set, Get $get, ?Transaction $record) {
+                                if ($record?->exists) {
+                                    return;
+                                }
+
+                                $set('transactions_batch', []);
+
+                                static::applyDocumentDefaults($state, $get, $set);
+
+                                if (filled($state)) {
+                                    static::buildTransactionsBatch(
+                                        $state,
+                                        (int) ($get('installment_number') ?: 1),
+                                        $set
+                                    );
+                                }
+                            }),
+
+
+                        TextInput::make('transaction_status_display')
+                            ->label('Transaction Status')
+                            ->visibleOn('edit')
+                            ->readOnly()
+                            ->dehydrated(false)
+                            ->formatStateUsing(fn (?Transaction $record) =>
+                                $record?->fresh('status')?->status?->transaction_status ?? 'Pending'
+                            )
+                            ->suffixIcon(fn (?Transaction $record) => match (
+                                $record?->fresh('status')?->status?->transaction_status
+                            ) {
+                                'Completed' => 'heroicon-m-check-circle',
+                                'In process' => 'heroicon-m-clock',
+                                default => 'heroicon-m-exclamation-circle',
+                            })
+                            ->columnSpan(1),
+
+
+                        TextInput::make('proportion_display')
+                            ->label('Proportion')
+                            ->visibleOn('edit')
+                            //->readOnly()
+                            ->dehydrated(false)
+                            ->suffix('%')
+                            ->formatStateUsing(fn (?Transaction $record) =>
+                                $record?->proportion !== null
+                                    ? number_format(((float) $record->proportion) * 100, 2)
+                                    : null
+                            )
+                            ->columnSpan(1),    
+
+
+                        View::make('filament.components.transaction-progress-bar')
+                            ->visibleOn('edit')
+                            ->viewData(fn (?Transaction $record) => [
+                                'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
+                            ])
+                            ->columnSpan(4),    
+
+
+                        TextInput::make('installment_number')
+                            ->label('Instalments')
+                            ->visibleOn('create')
+                            //->helperText('Number of transactions to generate.')
+                            ->default(1)
+                            ->required()
+                            ->readOnly()
+                            ->inputMode('numeric')
+                            ->rule('integer')
+                            ->minValue(1)
+                            ->extraInputAttributes([
+                                'style' => 'text-align:center;',
+                            ])
+
+                            ->prefixAction(
+                                Action::make('minus')
+                                    ->icon('heroicon-m-minus')
+                                    ->action(function (Get $get, Set $set) {
+                                        $current = (int) ($get('installment_number') ?: 1);
+                                        $newValue = max(1, $current - 1);
+
+                                        $set('installment_number', $newValue);
+
+                                        $docId = $get('op_document_id');
+
+                                        if (blank($docId)) {
+                                            $set('transactions_batch', []);
+                                            return;
+                                        }
+
+                                        static::buildTransactionsBatch(
+                                            $docId,
+                                            $newValue,
+                                            $set
+                                        );
+                                    })
+                            )
+
+                            ->suffixAction(
+                                Action::make('plus')
+                                    ->icon('heroicon-m-plus')
+                                    ->action(function (Get $get, Set $set) {
+                                        $current = (int) ($get('installment_number') ?: 0);
+                                        $newValue = $current + 1;
+
+                                        $set('installment_number', $newValue);
+
+                                        $docId = $get('op_document_id');
+
+                                        if (blank($docId)) {
+                                            $set('transactions_batch', []);
+                                            return;
+                                        }
+
+                                        static::buildTransactionsBatch(
+                                            $docId,
+                                            $newValue,
+                                            $set
+                                        );
+                                    })
+                            )
+
+                            ->placeholder('Enter installment number')
+                            ->dehydrated(false)
+                            ->live(debounce: 200)
+
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                $docId = $get('op_document_id');
+
+                                if (
+                                    blank($docId) ||
+                                    blank($state) ||
+                                    (int) $state <= 0
+                                ) {
+                                    $set('transactions_batch', []);
+                                    return;
+                                }
+
+                                static::buildTransactionsBatch(
+                                    $docId,
+                                    (int) $state,
+                                    $set
+                                );
+                            })
+
+                            ->columnSpan(1),
+                    ]),
+
+
+
+                Repeater::make('transactions_batch')
+                     ->label(
+                        new HtmlString(
+                            '<span style="padding-left:18px; font-size:16px; font-weight:600;">
+                                Instalments Batch
+                            </span>'
+                        )
+                    )
+                    ->columnSpanFull()
+                    ->dehydrated()
+                    ->visible(fn (Get $get) =>
+                        filled($get('op_document_id')) &&
+                        filled($get('installment_number')) &&
+                        (int) $get('installment_number') > 0
+                    )
+                    ->addable(false)
+                    ->deletable(false)
+                    ->reorderable(false)
+                    ->schema([
+
+                        Section::make('Transaction Information')
+                            ->description("Overview of the transaction's primary details.")
+                            ->columns(8)
+                            ->schema([
+
+                                TextInput::make('index')
+                                    ->required()
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->columnSpan(1),
+
+                                TextInput::make('id')
+                                    ->label('Id transaction')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->columnSpan(2),
+
+                                Hidden::make('transaction_type_id')
+                                    ->default(1),
+
+                                Hidden::make('preview_logs')
+                                    ->default([])
+                                    ->dehydrated(false),    
+
+                                DatePicker::make('due_date')
+                                    ->label('Due Date')
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcBatchPreviewLogs($get, $set))
+                                    ->columnSpan(1),
+
+                                TextInput::make('proportion')
+                                    ->label('Proportion')
+                                    
+                                    ->dehydrated()
+                                    ->default('')
+                                    ->placeholder('Enter proportion')
+                                    ->suffix('%')
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcBatchPreviewLogs($get, $set))
+                                    ->inputMode('decimal')
+                                    ->rule('numeric')
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->step(0.01)
+                                    
+                                    ->columnSpan(1),
+
+                                TextInput::make('exch_rate')
+                                    ->label('Exchange Rate')
+                                    ->dehydrated()
+                                    ->placeholder('Enter exchange rate')
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcBatchPreviewLogs($get, $set))
+                                    ->numeric()
+                                    ->disabled(fn (Get $get) => (bool) $get('exchange_rate_locked'))
+                                    ->minValue(0)
+                                    ->step(0.00001)
+                                    ->columnSpan(1),
+
+                                Select::make('cost_scheme_option')
+                                    ->label('Cost Scheme')
+                                    ->placeholder('Select cost scheme.')
+                                    ->native(false)
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcBatchPreviewLogs($get, $set))
+                                    ->options(function (Get $get) {
+                                        $docId = $get('../../op_document_id');
+
+                                        if (blank($docId)) {
+                                            return [];
+                                        }
+
+                                        $schemes = CostScheme::query()
+                                            ->whereHas('businessDocSchemes', function ($query) use ($docId) {
+                                                $query->where('op_document_id', $docId);
+                                            })
+                                            ->pluck('id', 'id')
+                                            ->toArray();
+
+                                        return count($schemes) > 1
+                                            ? ['all' => 'All'] + $schemes
+                                            : $schemes;
+                                    })
+                                    ->columnSpan(2),
+
+                                Hidden::make('exchange_rate_locked')
+                                    ->default(false)
+                                    ->dehydrated(false),
+
+                                Section::make('Transaction Lifecycle')
+                                    ->columnSpanFull()
+                                    ->description('Preview of generated lifecycle records based on current form values.')
+                                    ->schema([
+                                        View::make('filament.resources.transaction.transaction-logs-preview')
+                                            ->viewData(fn (Get $get) => [
+                                                'logs' => $get('preview_logs') ?? [],
+                                            ])
+                                            ->dehydrated(false),
+                                    ])
+                                    ->collapsed(false),
+
+
+
+
+                            ]),
+
+                    ]),
+            ]);
+    }
+
+
+
+
+protected static function buildTransactionsBatch(string $opDocumentId, int $count, Set $set): void
 {
-    return $schema
-        ->components([
+    $baseIndex = Transaction::where('op_document_id', $opDocumentId)->count();
 
-            Hidden::make('prefill_op_document_id')
-                ->default(fn () => request()->query('op_document_id'))
-                ->dehydrated(false)
-                ->visible(false)
-                ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
-                    // Solo en create
-                    if ($record?->exists) {
-                        return;
-                    }
+    $opDoc = OperativeDoc::query()
+        ->with('business')
+        ->whereKey($opDocumentId)
+        ->first();
 
-                    // Si no viene por URL, no hacemos nada
-                    if (blank($state)) {
-                        return;
-                    }
+    $currencyId = $opDoc?->business?->currency_id;
 
-                    // Si el select aún no tiene valor, lo seteamos
-                    if (blank($get('op_document_id'))) {
-                        $set('op_document_id', $state);
-                    }
+    $exchRate = ((int) $currencyId === 157) ? 1 : null;
+    $exchangeRateLocked = ((int) $currencyId === 157);
 
-                    // Ejecutar la misma lógica que cuando el usuario selecciona el documento
-                    static::applyDocumentDefaults($get('op_document_id'), $get, $set);
-                }),
+    $schemes = CostScheme::query()
+        ->whereHas('businessDocSchemes', function ($query) use ($opDocumentId) {
+            $query->where('op_document_id', $opDocumentId);
+        })
+        ->pluck('id')
+        ->toArray();
 
-            // ✅✅✅ [NEW] Estado para guardar el preview (NO se guarda en DB)
-            Hidden::make('preview_logs')
-                ->default([])
-                ->dehydrated(false),
+    $costSchemeOption = count($schemes) === 1
+        ? $schemes[0]
+        : 'all';
 
-            Section::make('Transaction Information')
-                ->columnSpanFull()
-                ->description("Overview of the transaction's primary details.")
-                ->schema([
+    $rows = [];
 
-                    Section::make()
-                        ->columns(8)
-                        ->columnSpanFull()
-                        ->schema([
-                            // ───── Columna 1: Document ─────
-                            Select::make('op_document_id')
-                                ->label('Document')
-                                ->placeholder('Select document.')
-                                ->relationship('operativeDoc', 'id')
-                                ->searchable()
-                                ->preload()
-                                ->optionsLimit(10000)
-                                ->required()
-                                ->live()
-                                ->columnSpan(2)
-                                ->default(fn () => request()->query('op_document_id'))
+    for ($i = 1; $i <= $count; $i++) {
+        $rows[] = [
+            'index' => $baseIndex + $i,
+            'id' => (string) Str::uuid(),
+            'transaction_type_id' => 1,
+            'due_date' => null,
+            'proportion' => '',
+            'exch_rate' => $exchRate,
+            'exchange_rate_locked' => $exchangeRateLocked,
+            'cost_scheme_option' => $costSchemeOption,
+            'preview_logs' => [],
+        ];
+    }
 
-                                // ✅ Cuando viene precargado, simula que el usuario lo seleccionó
-                                ->afterStateHydrated(function (Select $component, $state, ?Transaction $record) {
-                                    if ($record?->exists) {
-                                        return;
-                                    }
-
-                                    if (blank($state)) {
-                                        return;
-                                    }
-
-                                    // 🔥 Esto dispara tu afterStateUpdated y por ende applyDocumentDefaults()
-                                    $component->callAfterStateUpdated();
-                                })
-
-                                // ✅ Cuando el usuario selecciona manualmente
-                                ->afterStateUpdated(function ($state, Set $set, Get $get, ?Transaction $record) {
-                                    if ($record?->exists) return;
-                                    static::applyDocumentDefaults($state, $get, $set);
-                                }),
-
-
-
-
-
-                            // ───── Columna 2: Vacía ─────
-                            Placeholder::make('spacer')
-                                ->hiddenLabel()
-                                ->content(' ')
-                                ->columnSpan(3),
-
-                            // ───── Columna 3: Index ─────
-                            TextInput::make('index')
-                                ->required()
-                                ->numeric()
-                                ->disabled()
-                                ->dehydrated()
-                                ->columnSpan(1)
-                                ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
-                                    if ($record?->exists) return;
-
-                                    // Solo si viene documento precargado y el index está vacío
-                                    $docId = $get('op_document_id');
-                                    if (blank($state) && filled($docId)) {
-                                        $set('index', Transaction::where('op_document_id', $docId)->count() + 1);
-                                    }
-                                }),
-
-                                                        // ───── Columna 4: Id ─────
-                                                        TextInput::make('id')
-                                                            ->label('Id transaction')
-                                                            ->disabled()
-                                                            ->dehydrated()
-                                                            ->columnSpan(2)
-                                                            ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
-                                    if ($record?->exists) return;
-
-                                    $docId = $get('op_document_id');
-                                    if (blank($state) && filled($docId)) {
-                                        $set('id', (string) Str::uuid());
-                                    }
-                                }),
-                        ]),
-
-                    Section::make()
-                        ->columns(4)
-                        ->columnSpanFull()
-                        ->schema([
-
-                            Select::make('transaction_type_id')
-                                ->label('Type')
-                                ->placeholder('Select a transaction type')
-                                ->options(
-                                    TransactionType::query()
-                                        ->orderBy('id')
-                                        ->get()
-                                        ->mapWithKeys(fn ($type) => [
-                                            $type->id => "{$type->id} - {$type->description}",
-                                        ])
-                                        ->toArray()
-                                )
-                                ->searchable()
-                                ->required()
-                                ->live() // ✅✅✅ [NEW] para disparar preview
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set)) // ✅✅✅ [NEW]
-                                ->columnSpan(1),
-
-                            Select::make('transaction_status_id')
-                                ->label('Status')
-                                ->relationship('status', 'transaction_status')
-                                ->required()
-                                ->default(fn (?Transaction $record) => $record ? null : 1)
-                                ->disabled(fn (?Transaction $record) => $record === null)
-                                ->dehydrated()
-                                ->columnSpan(1),
-
-                            DatePicker::make('due_date')
-                                ->label('Due Date')
-                                ->required()
-                                //->native(false) // opcional pero ayuda en muchos casos
-                                ->live()        // 👈 importante
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set))
-                                ->columnSpan(1),
-
-                            Select::make('remmitance_code')
-                                ->label('Remittance code')
-                                ->placeholder('Select an option')
-                                ->relationship('remmitanceCode', 'remmitance_code')
-                                ->searchable()
-                                ->preload()
-                                ->native(false)
-                                ->live() // ✅✅✅ [NEW] si afecta preview
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set)) // ✅✅✅ [NEW]
-                                ->columnSpan(1),
-                        ]),
-
-                    Section::make()
-                        ->columns(4)
-                        ->columnSpanFull()
-                        ->schema([
-
-                            TextInput::make('proportion')
-                                ->label('Proportion')
-                                ->visibleOn('create')   // 👈 solo create
-                                ->dehydrated()
-                                ->placeholder('Enter proportion (0%–100%).')
-                                ->suffix('%')
-                                ->required()
-                                ->numeric()
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set)) // ✅✅✅ [NEW]
-                                ->minValue(0)
-                                ->maxValue(100)
-                                ->step(0.01)
-                                ->mask(RawJs::make('$money($input, ".", ",", 2)'))
-                                ->formatStateUsing(fn ($state) => $state !== null ? round(((float) $state) * 100, 2) : null)
-                                ->dehydrateStateUsing(function ($state) {
-                                    if ($state === null || $state === '') {
-                                        return null;
-                                    }
-
-                                    $value = (float) str_replace(',', '', (string) $state);
-
-                                    return $value / 100;
-                                })
-                                ->columnSpan(1),
-
-                            TextInput::make('exch_rate')
-                                ->label('Exchange Rate')
-                                ->visibleOn('create')   // 👈 solo create
-                                ->dehydrated()
-                                ->placeholder('Enter the transaction exchange rate.')
-                                ->required()
-                                ->numeric()
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::recalcPreviewLogs($get, $set)) // ✅✅✅ [NEW]
-                                ->minValue(0)
-                                ->step(0.00001)
-                                ->columnSpan(1),
-       
-                        ]),
-                ])
-                ->columns(2),
-
-
-             
-
-            // ✅✅✅ [NEW] SECCIÓN CON TABLA PREVIEW (readonly)
-            Section::make('Transaction Lifecycle')
-                ->columnSpanFull()
-                ->description('Preview of generated lifecycle records based on current form values.')
-                ->visibleOn('create')
-                ->schema([
-                    View::make('filament.resources.transaction.transaction-logs-preview')
-                        ->viewData(fn (Get $get) => [
-                            'logs' => $get('preview_logs') ?? [],
-                        ])
-                        ->dehydrated(false),
-                ])
-                ->collapsed(false),
-
-        ]);
+    $set('transactions_batch', $rows);
 }
 
+protected static function recalcBatchPreviewLogs(Get $get, Set $set): void
+{
+    $opDocumentId = $get('../../op_document_id');
 
+    $proportionUi = $get('proportion');
+    $exchRate     = $get('exch_rate');
+    $dueDate      = $get('due_date');
+    $costSchemeId = $get('cost_scheme_option');
 
+    if (
+        blank($opDocumentId) ||
+        $proportionUi === '' ||
+        $proportionUi === null ||
+        blank($exchRate) ||
+        blank($dueDate) ||
+        blank($costSchemeId)
+    ) {
+        $set('preview_logs', []);
+        return;
+    }
 
+    $proportionDecimal = ((float) str_replace([',', '%'], '', (string) $proportionUi)) / 100;
+
+    $logs = app(TransactionLogsPreviewService::class)->build(
+        opDocumentId: (string) $opDocumentId,
+        typeId: 1,
+        proportion: (float) $proportionDecimal,
+        exchRate: (float) $exchRate,
+        remittanceCode: null,
+        dueDate: $dueDate,
+
+        // ✅ NUEVO
+        costSchemeId: $costSchemeId === 'all' ? null : (string) $costSchemeId,
+    );
+
+    $set('preview_logs', $logs);
+}
 
 
 // ✅✅✅ [NEW]
 protected static function recalcPreviewLogs(Get $get, Set $set): void
 {
     $opDocumentId = $get('op_document_id');
-    $typeId       = $get('transaction_type_id');
-    $proportionUi = $get('proportion');   // UI: 0–100
+
+    // ✅ Siempre será 1
+    //$typeId = $get('transaction_type_id') ?: 1;
+
+    $proportionUi = $get('proportion');
     $exchRate     = $get('exch_rate');
     $dueDate      = $get('due_date');
 
-    // Si falta lo mínimo, no hay preview
-    if (blank($opDocumentId) || blank($typeId) || blank($proportionUi) || blank($exchRate)) {
+    if (
+        blank($opDocumentId) ||
+        $proportionUi === '' ||
+        $proportionUi === null ||
+        blank($exchRate)
+    ) {
         $set('preview_logs', []);
         return;
     }
 
-    // si por algún motivo viene como string vacío en un re-render, no recalcules
     if ($dueDate === '' || $dueDate === null) {
         $set('preview_logs', []);
         return;
     }
 
-    $proportionDecimal = ((float) str_replace(',', '', (string) $proportionUi)) / 100;
+    $proportionDecimal = ((float) str_replace([',', '%'], '', (string) $proportionUi)) / 100;
 
     $logs = app(TransactionLogsPreviewService::class)->build(
         opDocumentId: (string) $opDocumentId,
-        typeId: (int) $typeId,
+        typeId: 1,
         proportion: (float) $proportionDecimal,
         exchRate: (float) $exchRate,
         remittanceCode: $get('remmitance_code'),
         dueDate: $get('due_date'),
     );
 
+    $set('transaction_type_id', 1);
     $set('preview_logs', $logs);
 }
 
@@ -375,41 +591,66 @@ protected static function applyDocumentDefaults(?string $opDocumentId, Get $get,
 {
     if (blank($opDocumentId)) {
         $set('index', null);
-        $set('id', null);
+        $set('transaction_type_id', 1);
+        $set('due_date', null);
         $set('exch_rate', null);
+        $set('exchange_rate_locked', false);
+        $set('proportion', '');
+        $set('cost_scheme_option', null);
         $set('preview_logs', []);
+
         return;
     }
 
-    // ✅ Index
+    // ✅ No limpiar transaction_type_id; siempre debe quedarse en 1
+    $set('transaction_type_id', 1);
+    $set('due_date', null);
+    $set('proportion', '');
+    $set('preview_logs', []);
+
     $nextIndex = Transaction::where('op_document_id', $opDocumentId)->count() + 1;
     $set('index', $nextIndex);
 
-    // ✅ Id transaction
-    $set('id', (string) Str::uuid());
+    if (blank($get('id'))) {
+        $set('id', (string) Str::uuid());
+    }
 
-    // ✅ currency rule
-    $currencyId = OperativeDoc::query()
+    // ✅ Cost schemes asociados al documento
+    $schemes = CostScheme::query()
+        ->whereHas('businessDocSchemes', function ($query) use ($opDocumentId) {
+            $query->where('op_document_id', $opDocumentId);
+        })
+        ->pluck('id')
+        ->toArray();
+
+    $set(
+        'cost_scheme_option',
+        count($schemes) === 1
+            ? $schemes[0]
+            : 'all'
+    );
+
+    $opDoc = OperativeDoc::query()
+        ->with('business')
         ->whereKey($opDocumentId)
-        ->with('business:business_code,currency_id')
-        ->first()
-        ?->business
-        ?->currency_id;
+        ->first();
 
+    $currencyId = $opDoc?->business?->currency_id;
     $currentRate = $get('exch_rate');
 
     if ((int) $currencyId === 157) {
         $set('exch_rate', 1);
+        $set('exchange_rate_locked', true);
     } else {
+        $set('exchange_rate_locked', false);
+
         if ($currentRate === null || $currentRate === '' || (float) $currentRate === 1.0) {
             $set('exch_rate', null);
         }
     }
 
-    // ✅ preview
     static::recalcPreviewLogs($get, $set);
 }
-
 
 
 
@@ -423,7 +664,6 @@ public static function infolist(Schema $schema): Schema
         Section::make('Transaction Profile')
             ->columnSpanFull()
             ->schema([
-                // ✅ Grid padre con 2 columnas (en pantallas medianas+)
                 \Filament\Schemas\Components\Grid::make()
                     ->columns([
                         'default' => 1,
@@ -436,150 +676,200 @@ public static function infolist(Schema $schema): Schema
                         \Filament\Schemas\Components\Grid::make(1)
                             ->columnSpan([
                                 'default' => 1,
-                                'md' => 1,   // ✅ clave: NO ocupar las 2 columnas
+                                'md' => 1,
                             ])
                             ->extraAttributes(['style' => 'row-gap:0;'])
                             ->schema([
 
-                                // Id
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('id_label')->hiddenLabel()
-                                        ->state('Id transaction:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('id')->hiddenLabel()
-                                        ->state(fn ($record) => $record->id ?: '—')
-                                        ->columnSpan(9),
-                                ]),
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('id_label')->hiddenLabel()
+                                            ->state('Id transaction:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(3),
 
-                                // Index
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('index_label')->hiddenLabel()
-                                        ->state('Index:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('index')->hiddenLabel()
-                                        ->state(fn ($record) => $record->index ?: '—')
-                                        ->columnSpan(9),
-                                ]),
+                                        TextEntry::make('id')->hiddenLabel()
+                                            ->state(fn ($record) => $record->id ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
 
-                                // Document
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('document_label')->hiddenLabel()
-                                        ->state('Document:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('op_document_id')->hiddenLabel()
-                                        ->state(fn ($record) => $record->op_document_id ?: '—')
-                                        ->columnSpan(9),
-                                ]),
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('index_label')->hiddenLabel()
+                                            ->state('Index:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(3),
 
-                                // Transaction type
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('type_label')->hiddenLabel()
-                                        ->state('Transaction type:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('type.description')->hiddenLabel()
-                                        ->state(fn ($record) => $record->type?->description ?? '—')
-                                        ->columnSpan(9),
-                                ]),
+                                        TextEntry::make('index')->hiddenLabel()
+                                            ->state(fn ($record) => $record->index ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
 
-                                // Transaction type
-                                /* InfoGrid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('amount')
-                                        ->hiddenLabel()
-                                        ->state('Amount:')
-                                        ->weight('bold')
-                                        ->alignment('right')
-                                        ->columnSpan(3),
-                                    TextEntry::make('amount')
-                                        ->hiddenLabel()
-                                        ->state(fn ($record) =>
-                                            filled($record->amount)
-                                                ? number_format((float) $record->amount, 2, '.', ',')
-                                                : '—'
-                                        )
-                                        ->columnSpan(9),
-                                ]), */
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('document_label')->hiddenLabel()
+                                            ->state('Document:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(3),
+
+                                        TextEntry::make('op_document_id')->hiddenLabel()
+                                            ->state(fn ($record) => $record->op_document_id ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('type_label')->hiddenLabel()
+                                            ->state('Transaction type:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(3),
+
+                                        TextEntry::make('type.description')->hiddenLabel()
+                                            ->state(fn ($record) => $record->type?->description ?? '—')
+                                            ->columnSpan(9),
+                                    ]),
                             ]),
 
                         /* ───────────── RIGHT COLUMN ───────────── */
                         \Filament\Schemas\Components\Grid::make(1)
                             ->columnSpan([
                                 'default' => 1,
-                                'md' => 1,   // ✅ clave: NO ocupar las 2 columnas
+                                'md' => 1,
                             ])
                             ->extraAttributes(['style' => 'row-gap:0;'])
                             ->schema([
 
-                                // Transaction status
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('status_label')->hiddenLabel()
-                                        ->state('Transaction status:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('status.transaction_status')->hiddenLabel()
-                                        ->state(fn ($record) => $record->status?->transaction_status ?? '—')
-                                        ->columnSpan(9),
-                                ]),
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('status_label')->hiddenLabel()
+                                            ->state('Transaction status:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(4),
 
-                                // Remittance code
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('remmitance_label')->hiddenLabel()
-                                        ->state('Remittance code:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('remmitanceCode.remmitance_code')->hiddenLabel()
-                                        ->state(fn ($record) => $record->remmitanceCode?->remmitance_code ?? '—')
-                                        ->columnSpan(9),
-                                ]),
+                                        TextEntry::make('status.transaction_status')->hiddenLabel()
+                                            ->state(fn ($record) => $record->status?->transaction_status ?? '—')
+                                            ->columnSpan(8),
+                                    ]),
 
-                                // Due date
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('duedate_label')->hiddenLabel()
-                                        ->state('Due date:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('due_date')->hiddenLabel()
-                                        ->state(fn ($record) =>
-                                            $record->due_date
-                                                ? $record->due_date->format('M j, Y')
-                                                : '—'
-                                        )
-                                        ->columnSpan(9),
-                                ]),
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('remmitance_label')->hiddenLabel()
+                                            ->state('Remittance code:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(4),
 
-                                // Proportion
-                                \Filament\Schemas\Components\Grid::make(12)->extraAttributes([
-                                    'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                ])->schema([
-                                    TextEntry::make('proportion_label')->hiddenLabel()
-                                        ->state('Porportion:')
-                                        ->weight('bold')->alignment('right')->columnSpan(3),
-                                    TextEntry::make('proportion')->hiddenLabel()
-                                        ->state(fn ($record) =>
-                                            $record->proportion !== null
-                                                ? number_format(((float) $record->proportion) * 100, 2) . '%'
-                                                : '—'
-                                        )
-                                        ->columnSpan(9),
-                                ]),
+                                        TextEntry::make('remmitanceCode.remmitance_code')->hiddenLabel()
+                                            ->state(fn ($record) => $record->remmitanceCode?->remmitance_code ?? '—')
+                                            ->columnSpan(8),
+                                    ]),
+
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('duedate_label')->hiddenLabel()
+                                            ->state('Due date:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(4),
+
+                                        TextEntry::make('due_date')->hiddenLabel()
+                                            ->state(fn ($record) =>
+                                                $record->due_date
+                                                    ? $record->due_date->format('M j, Y')
+                                                    : '—'
+                                            )
+                                            ->columnSpan(8),
+                                    ]),
+
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('proportion_label')->hiddenLabel()
+                                            ->state('Proportion:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(4),
+
+                                        TextEntry::make('proportion')->hiddenLabel()
+                                            ->state(fn ($record) =>
+                                                $record->proportion !== null
+                                                    ? number_format(((float) $record->proportion) * 100, 2) . '%'
+                                                    : '—'
+                                            )
+                                            ->columnSpan(8),
+                                    ]),
+
+                                
+
+
+
+
+
+
+                                    
                             ]),
+
+                            
                     ]),
+
+                    \Filament\Schemas\Components\Grid::make(12)
+                    ->extraAttributes([
+                        'style' => '
+                            border-bottom:1px solid rgba(255,255,255,0.12);
+                            padding:12px 0;
+                        ',
+                    ])
+                    ->schema([
+
+                        TextEntry::make('lifecycle_progress_label')
+                            ->hiddenLabel()
+                            ->state('Lifecycle progress:')
+                            ->weight('bold')
+                            ->alignment('right')
+                            ->columnSpan(2),
+
+                        ViewEntry::make('lifecycle_progress')
+                            ->hiddenLabel()
+                            ->view('filament.components.transaction-progress-bar-inline')
+                            ->viewData(fn ($record) => [
+                                'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
+                            ])
+                            ->columnSpan(10),
+
+                    ]),
+
+
             ])
             ->maxWidth('8xl')
             ->collapsible(),
-
     ]);
 }
 
@@ -639,19 +929,32 @@ public static function infolist(Schema $schema): Schema
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('operativeDoc.business.reinsurer.name')
+                TextColumn::make('operativeDoc.business.reinsurer.short_name')
                     ->label('Reinsurer')
                     ->sortable()
                     ->searchable(),
 
                 TextColumn::make('op_document_id')
                     ->label('Document')
-                    ->sortable()
+                    ->sortable(query: fn (Builder $query, string $direction): Builder =>
+                        $query->orderBy('transactions.op_document_id', $direction)
+                              ->orderBy('transactions.index')
+                    )
                     ->searchable(),
 
                 TextColumn::make('index')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Index')
+                    ->sortable()
+                    ->formatStateUsing(function ($state, Transaction $record): string {
+                        static $countCache = [];
+                        $docId = $record->op_document_id;
+                        if (! isset($countCache[$docId])) {
+                            $countCache[$docId] = Transaction::where('op_document_id', $docId)
+                                ->whereNull('deleted_at')
+                                ->count();
+                        }
+                        return "{$state} / {$countCache[$docId]}";
+                    }),
 
                 TextColumn::make('proportion')
                     ->label('Proportion')
@@ -664,11 +967,25 @@ public static function infolist(Schema $schema): Schema
 
                 TextColumn::make('due_date')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->color(fn (Transaction $record): ?string =>
+                        $record->due_date?->isPast() &&
+                        $record->status?->transaction_status !== 'Completed'
+                            ? 'danger'
+                            : null
+                    )
+                    ->icon(fn (Transaction $record): ?string =>
+                        $record->due_date?->isPast() &&
+                        $record->status?->transaction_status !== 'Completed'
+                            ? 'heroicon-m-exclamation-triangle'
+                            : null
+                    )
+                    ->iconColor('danger'),
 
                 TextColumn::make('remmitance_code')
                     ->label('Remittance')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('type.description')
                     ->label('Type')
@@ -678,6 +995,7 @@ public static function infolist(Schema $schema): Schema
                 TextColumn::make('latest_net_amount')
                     ->label('Net amount')
                     ->numeric(decimalPlaces: 2)
+                    ->alignEnd()
                     ->sortable(),     
 
                 TextColumn::make('status.transaction_status')
@@ -691,6 +1009,11 @@ public static function infolist(Schema $schema): Schema
                     })
                     ->searchable()
                     ->sortable(),
+
+                ViewColumn::make('lifecycle_progress')
+                    ->label('Progress')
+                    ->view('filament.components.transaction-progress-column')
+                    ->sortable(false),
 
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -715,19 +1038,86 @@ public static function infolist(Schema $schema): Schema
             ])
 
             ->filters([
+                SelectFilter::make('reinsurer_id')
+                    ->label('Reinsurer')
+                    ->options(
+                        Reinsurer::query()
+                            ->orderBy('short_name')
+                            ->pluck('short_name', 'id')
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn (Builder $query, $value): Builder =>
+                                $query->whereHas('operativeDoc.business', function (Builder $query) use ($value) {
+                                    $query->where('reinsurer_id', $value);
+                                })
+                        );
+                    }),
+
+                SelectFilter::make('transaction_status_id')
+                    ->label('Status')
+                    ->options(
+                        TransactionStatus::query()
+                            ->orderBy('transaction_status')
+                            ->pluck('transaction_status', 'id')
+                    )
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('transaction_type_id')
+                    ->label('Type')
+                    ->options(
+                        TransactionType::query()
+                            ->orderBy('description')
+                            ->pluck('description', 'id')
+                    )
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('op_document_id')
                     ->label('Document')
-                    ->relationship('operativeDoc', 'id') // ✅ AJUSTA: nombre de relación en Transaction
+                    ->options(
+                        OperativeDoc::query()
+                            ->orderBy('id')
+                            ->pluck('id', 'id')
+                    )
                     ->searchable()
                     ->preload(),
             ])
             
             ->recordActions([
                 ActionGroup::make([
+                    Action::make('lifecycle')
+                        ->label('Lifecycle')
+                        ->icon('heroicon-o-list-bullet')
+                        ->modalHeading(fn (Transaction $record) =>
+                            "Transaction Lifecycle - {$record->op_document_id}"
+                        )
+                        ->modalWidth('7xl')
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close')
+                        ->schema([
+                            \Filament\Schemas\Components\View::make(
+                                'filament.components.transaction-logs-table'
+                            )
+                                ->viewData(fn (Transaction $record) => [
+                                    'logs' => $record->logs()
+                                        ->with([
+                                            'deduction',
+                                            'fromPartner',
+                                            'toPartner',
+                                        ])
+                                        ->orderBy('index')
+                                        ->get(),
+                                ]),
+                        ]),
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -741,7 +1131,7 @@ public static function infolist(Schema $schema): Schema
         return [
             LogsRelationManager::class,
             SupportsRelationManager::class,
-            
+            \App\Filament\Resources\Transactions\RelationManagers\RecalculationsRelationManager::class,
         ];
     }
 
