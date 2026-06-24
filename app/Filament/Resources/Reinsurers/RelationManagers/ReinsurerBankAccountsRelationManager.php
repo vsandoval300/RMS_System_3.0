@@ -60,6 +60,7 @@ class ReinsurerBankAccountsRelationManager extends RelationManager
                     . ' - (' . ($record->ffc_acct_name ?? 'No FFC name') . ')'
             )
             ->searchable()
+            ->optionsLimit(300)
             ->preload()
             ->createOptionForm($this->bankAccountForm())
             ->required()
