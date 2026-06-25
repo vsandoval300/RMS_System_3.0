@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Transactions\Widgets;
 use App\Models\Transaction;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TransactionsByMonthChart extends ChartWidget
 {
@@ -35,15 +36,22 @@ class TransactionsByMonthChart extends ChartWidget
             $cursor->addMonth();
         }
 
+        // Subquery: last transaction_log per transaction (highest index, PostgreSQL DISTINCT ON)
+        $latestLog = DB::table('transaction_logs')
+            ->selectRaw('DISTINCT ON (transaction_id) transaction_id, net_amount')
+            ->whereNull('deleted_at')
+            ->orderByRaw('transaction_id, "index" DESC');
+
         $rows = Transaction::query()
             ->join('operative_docs', 'transactions.op_document_id', '=', 'operative_docs.id')
             ->join('businesses', 'operative_docs.business_code', '=', 'businesses.business_code')
             ->join('transaction_statuses', 'transactions.transaction_status_id', '=', 'transaction_statuses.id')
+            ->joinSub($latestLog, 'latest_log', 'latest_log.transaction_id', '=', 'transactions.id')
             ->when($this->reinsurerId, fn ($q) => $q->where('businesses.reinsurer_id', $this->reinsurerId))
             ->whereNull('transactions.deleted_at')
             ->whereDate('transactions.due_date', '>=', $from->toDateString())
             ->whereDate('transactions.due_date', '<=', $to->toDateString())
-            ->selectRaw("TO_CHAR(transactions.due_date, 'YYYY-MM') as month, transaction_statuses.transaction_status as status, SUM(transactions.amount) as total")
+            ->selectRaw("TO_CHAR(transactions.due_date, 'YYYY-MM') as month, transaction_statuses.transaction_status as status, SUM(latest_log.net_amount) as total")
             ->groupBy('month', 'status')
             ->get()
             ->groupBy('status');

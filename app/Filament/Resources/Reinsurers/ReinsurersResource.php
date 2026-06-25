@@ -33,6 +33,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Html;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile; // Livewire v3
@@ -339,6 +340,43 @@ class ReinsurersResource extends Resource
                         Section::make('Logo Upload')
                             ->columnSpan(1)
                             ->schema([
+                                Html::make(function ($record) {
+                                        if (blank($record?->logo)) {
+                                            return new \Illuminate\Support\HtmlString(
+                                                '<p style="color:#9ca3af;font-size:0.8rem;margin:0;">No logo uploaded yet.</p>'
+                                            );
+                                        }
+                                        $_path = $record->logo;
+                                        if (str_starts_with($_path, 'http://') || str_starts_with($_path, 'https://')) {
+                                            $url = $_path;
+                                        } else {
+                                            /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
+                                            $s3  = Storage::disk('s3');
+                                            $url = $s3->url($_path);
+                                        }
+                                        $filename = basename($_path);
+                                        $relPath  = str_starts_with($_path, 'http') ? ltrim(parse_url($_path, PHP_URL_PATH), '/') : $_path;
+                                        try {
+                                            /** @var \Illuminate\Filesystem\FilesystemAdapter $s3dl */
+                                            $s3dl  = Storage::disk('s3');
+                                            $dlUrl = $s3dl->temporaryUrl($relPath, now()->addMinutes(30), ['ResponseContentDisposition' => 'attachment; filename="' . addslashes($filename) . '"']);
+                                        } catch (\Throwable $e) {
+                                            $dlUrl = $url;
+                                        }
+                                        $html  = '<div style="display:flex;flex-direction:column;align-items:center;';
+                                        $html .= 'gap:10px;padding:16px;border-radius:10px;';
+                                        $html .= 'background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.1);">';
+                                        $html .= '<img src="' . e($url) . '" alt="Logo"';
+                                        $html .= ' style="max-height:160px;max-width:100%;object-fit:contain;border-radius:6px;" />';
+                                        $html .= '<div style="display:flex;gap:8px;">';
+                                        $html .= '<a href="' . e($dlUrl) . '"';
+                                        $html .= ' style="font-size:0.78rem;color:#34d399;text-decoration:none;';
+                                        $html .= 'padding:4px 12px;border-radius:6px;border:1px solid rgba(52,211,153,0.4);">Download</a>';
+                                        $html .= '</div>';
+                                        $html .= '<code style="font-size:0.7rem;color:#6b7280;">' . e($filename) . '</code>';
+                                        $html .= '</div>';
+                                        return new \Illuminate\Support\HtmlString($html);
+                                    }),
                                 FileUpload::make('logo')
                                     ->label('Reinsurer Logo')
                                     ->disk('s3')
@@ -347,14 +385,8 @@ class ReinsurersResource extends Resource
                                     ->image()
                                     ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
                                     ->preserveFilenames()
-                                    ->previewable(false)
                                     ->downloadable()
                                     ->openable()
-                                    ->hint(function ($record) {
-                                        return $record?->logo
-                                            ? 'Existing logo: ' . basename($record->logo)
-                                            : 'No logo uploaded yet.';
-                                    })
                                     ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
 
                                     // 👇 CLAVE: si el estado viene null, conservar el valor que ya tenía el registro
@@ -385,6 +417,43 @@ class ReinsurersResource extends Resource
                         Section::make('Icon Upload')
                             ->columnSpan(1)
                             ->schema([
+                                Html::make(function ($record) {
+                                        if (blank($record?->icon)) {
+                                            return new \Illuminate\Support\HtmlString(
+                                                '<p style="color:#9ca3af;font-size:0.8rem;margin:0;">No icon uploaded yet.</p>'
+                                            );
+                                        }
+                                        $_path = $record->icon;
+                                        if (str_starts_with($_path, 'http://') || str_starts_with($_path, 'https://')) {
+                                            $url = $_path;
+                                        } else {
+                                            /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
+                                            $s3  = Storage::disk('s3');
+                                            $url = $s3->url($_path);
+                                        }
+                                        $filename = basename($_path);
+                                        $relPath  = str_starts_with($_path, 'http') ? ltrim(parse_url($_path, PHP_URL_PATH), '/') : $_path;
+                                        try {
+                                            /** @var \Illuminate\Filesystem\FilesystemAdapter $s3dl */
+                                            $s3dl  = Storage::disk('s3');
+                                            $dlUrl = $s3dl->temporaryUrl($relPath, now()->addMinutes(30), ['ResponseContentDisposition' => 'attachment; filename="' . addslashes($filename) . '"']);
+                                        } catch (\Throwable $e) {
+                                            $dlUrl = $url;
+                                        }
+                                        $html  = '<div style="display:flex;flex-direction:column;align-items:center;';
+                                        $html .= 'gap:10px;padding:16px;border-radius:10px;';
+                                        $html .= 'background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.1);">';
+                                        $html .= '<img src="' . e($url) . '" alt="Icon"';
+                                        $html .= ' style="max-height:160px;max-width:100%;object-fit:contain;border-radius:6px;" />';
+                                        $html .= '<div style="display:flex;gap:8px;">';
+                                        $html .= '<a href="' . e($dlUrl) . '"';
+                                        $html .= ' style="font-size:0.78rem;color:#34d399;text-decoration:none;';
+                                        $html .= 'padding:4px 12px;border-radius:6px;border:1px solid rgba(52,211,153,0.4);">Download</a>';
+                                        $html .= '</div>';
+                                        $html .= '<code style="font-size:0.7rem;color:#6b7280;">' . e($filename) . '</code>';
+                                        $html .= '</div>';
+                                        return new \Illuminate\Support\HtmlString($html);
+                                    }),
                                 FileUpload::make('icon')
                                     ->label('Reinsurer Icon')
                                     ->disk('s3')
@@ -393,14 +462,8 @@ class ReinsurersResource extends Resource
                                     ->image()
                                     ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
                                     ->preserveFilenames()
-                                    ->previewable(false)
                                     ->downloadable()
                                     ->openable()
-                                    ->hint(function ($record) {
-                                        return $record?->icon
-                                            ? 'Existing icon: ' . basename($record->icon)
-                                            : 'No icon uploaded yet.';
-                                    })
                                     ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
 
                                     ->dehydrateStateUsing(function ($state, ?Reinsurer $record) {
@@ -698,17 +761,6 @@ public static function infolist(Schema $schema): Schema
 
 
 
-
-
-
-
-
-
-
-
-
-
-
     public static function table(Table $table): Table
     {
         return $table
@@ -853,9 +905,6 @@ public static function infolist(Schema $schema): Schema
 
             ])
 
-
-
-
             ->headerActions([
                         Action::make('export')
                             ->label('Export to Excel')
@@ -880,16 +929,6 @@ public static function infolist(Schema $schema): Schema
                             }),
                     ])
 
-
-
-
-
-
-
-
-
-
-
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()
@@ -908,7 +947,8 @@ public static function infolist(Schema $schema): Schema
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->paginationPageOptions([10, 25, 50, 100, 'all']);
     }
 
     public static function getRelations(): array

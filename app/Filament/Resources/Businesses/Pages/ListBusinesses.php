@@ -6,6 +6,7 @@ use App\Models\Reinsurer;
 use Filament\Actions\CreateAction;
 use App\Exports\OperativeDocsExport;
 use App\Filament\Resources\Businesses\BusinessResource;
+use App\Filament\Resources\Businesses\Widgets\BusinessByYearChart;
 use App\Filament\Resources\Businesses\Widgets\BusinessStatsOverview;
 use App\Jobs\GenerateOperativeDocsReport;
 use App\Jobs\NotifyReportReady;
@@ -251,6 +252,7 @@ class ListBusinesses extends ListRecords
     {
         return [
             BusinessStatsOverview::class,
+            BusinessByYearChart::class,
         ];
     }
     

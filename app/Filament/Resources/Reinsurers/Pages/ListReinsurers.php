@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Reinsurers\Pages;
 use Filament\Actions\CreateAction;
 use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Resources\Reinsurers\ReinsurersResource;
+use App\Filament\Resources\Reinsurers\Widgets\ReinsurersPerYearChart;
 use App\Models\OperativeStatus;
 use App\Models\Reinsurer;
 use Filament\Actions;
@@ -15,6 +16,13 @@ class ListReinsurers extends ListRecords
     protected static string $resource = ReinsurersResource::class;
 
     /* ────────────────────────── HEADER ACTIONS ───────────────────────── */
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ReinsurersPerYearChart::class,
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

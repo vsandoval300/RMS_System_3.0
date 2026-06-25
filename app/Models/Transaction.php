@@ -240,8 +240,9 @@ $payload = collect($rows)->map(function (array $row) use ($tx, $now) {
 
 
         static::deleted(function (self $model) {
-            // ✅ Soft delete de logs relacionados
+            // ✅ Soft delete de logs y recalculations relacionados
             $model->logs()->delete();
+            $model->recalculations()->delete();
 
             // ✅ Reordenar las transacciones restantes del mismo documento
             self::where('op_document_id', $model->op_document_id)
@@ -256,6 +257,7 @@ $payload = collect($rows)->map(function (array $row) use ($tx, $now) {
 
         static::restored(function (self $model) {
             $model->logs()->withTrashed()->restore();
+            $model->recalculations()->withTrashed()->restore();
         });
 
         static::forceDeleted(function (self $model) {

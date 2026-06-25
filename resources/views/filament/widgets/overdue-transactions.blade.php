@@ -54,7 +54,7 @@
                             </td>
 
                             <td style="padding:12px 20px 12px 0; text-align:right; font-family:ui-monospace,monospace; color:#d1d5db; white-space:nowrap;">
-                                ${{ number_format((float) $row->amount, 2) }}
+                                ${{ number_format((float) $row->net_amount, 2) }}
                             </td>
 
                             <td style="padding:12px 0; white-space:nowrap; min-width:110px;">

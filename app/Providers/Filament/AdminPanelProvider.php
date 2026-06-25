@@ -40,6 +40,18 @@ class AdminPanelProvider extends PanelProvider
             fn (): string => view('filament.components.sidebar-version')->render(),
         );
 
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): string => view('filament.widgets.reinsurers-chart-labels')->render(),
+            scopes: \App\Filament\Resources\Reinsurers\Pages\ListReinsurers::class,
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): string => view('filament.widgets.businesses-chart-labels')->render(),
+            scopes: \App\Filament\Resources\Businesses\Pages\ListBusinesses::class,
+        );
+
         // ✅ Registro de colores personalizados
             FilamentColor::register([
                 //'danger' => Color::Red,

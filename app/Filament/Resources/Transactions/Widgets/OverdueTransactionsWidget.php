@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Transactions\Widgets;
 
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\Transaction;
+use App\Models\TransactionLog;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -35,12 +36,19 @@ class OverdueTransactionsWidget extends Widget
                 'transactions.id',
                 'transactions.index',
                 'transactions.due_date',
-                'transactions.amount',
                 'operative_docs.id as doc_id',
                 'reinsurers.short_name as reinsurer',
                 'transaction_statuses.transaction_status as status',
                 'transaction_types.description as type',
             )
+            ->addSelect([
+                'net_amount' => TransactionLog::query()
+                    ->select('net_amount')
+                    ->whereColumn('transaction_logs.transaction_id', 'transactions.id')
+                    ->whereNull('transaction_logs.deleted_at')
+                    ->orderByDesc('index')
+                    ->limit(1),
+            ])
             ->orderBy('transactions.due_date', 'asc')
             ->limit(10)
             ->get()

@@ -11,11 +11,16 @@ use Filament\Actions\Action;
 use Filament\Forms;
 use Illuminate\Database\Eloquent\Builder;
 
+
+
 class ViewTransaction extends ViewRecord
 {
     protected static string $resource = TransactionResource::class;
     
-    protected Width|string|null $maxContentWidth = 'max-w-[1800px]';
+    public function getMaxContentWidth(): ?string
+    {
+        return '7xl';
+    }
 
     public function getTitle(): string
     {
@@ -84,11 +89,6 @@ class ViewTransaction extends ViewRecord
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return [
-            'contentWidth' => '1800px',
-        ];
-    }
+    
 
 }
