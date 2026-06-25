@@ -1,12 +1,31 @@
 <script>
 (function () {
     window.filamentChartJsPlugins = window.filamentChartJsPlugins ?? [];
+
     if (!window.filamentChartJsPlugins.some(function (p) { return p.id === 'barLabels-reinsurers'; })) {
         window.filamentChartJsPlugins.push({
             id: 'barLabels-reinsurers',
+
+            beforeUpdate: function (chart) {
+                if ((chart.data.datasets[0] || {}).chartId !== 'reinsurers-per-year') return;
+                var isDark = document.documentElement.classList.contains('dark');
+                var textColor = isDark ? 'rgba(255,255,255,0.75)' : 'rgba(55,65,81,0.9)';
+
+                if (chart.options.scales) {
+                    Object.values(chart.options.scales).forEach(function (scale) {
+                        if (scale.ticks) scale.ticks.color = textColor;
+                    });
+                }
+                if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+                    chart.options.plugins.legend.labels.color = textColor;
+                }
+            },
+
             afterDraw: function (chart) {
                 if ((chart.data.datasets[0] || {}).chartId !== 'reinsurers-per-year') return;
 
+                var isDark = document.documentElement.classList.contains('dark');
+                var labelColor = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(30,41,59,0.9)';
                 var ctx = chart.ctx;
                 var labels = chart.data.labels || [];
 
@@ -27,7 +46,7 @@
 
                     ctx.save();
                     ctx.font = 'bold 13px ui-sans-serif, system-ui, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                    ctx.fillStyle = labelColor;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     var x = chart.getDatasetMeta(0).data[j].x;
