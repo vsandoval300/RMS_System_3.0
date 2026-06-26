@@ -99,8 +99,8 @@ class BankAccountsResource extends Resource
                                 ->placeholder('Select intermediary bank')
                                 ->relationship('bank','name')
                                 ->searchable()
-                                ->preload()
-                                ->required(),
+                                ->preload(),
+                                
                                
                             Select::make('bank_id')
                                 ->label('Bank / For Credit to')

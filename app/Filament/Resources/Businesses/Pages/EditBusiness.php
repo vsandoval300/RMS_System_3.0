@@ -64,12 +64,9 @@ class EditBusiness extends EditRecord
 
     protected function getRedirectUrl(): ?string
     {
-        // Después de guardar cambios → vuelve al listado
         return $this->getResource()::getUrl('edit', [
             'record' => $this->record,
         ]);
-        //return static::getResource()::getUrl('index');
-        // o: return CostSchemeResource::getUrl('index');
     }
 
     /**
