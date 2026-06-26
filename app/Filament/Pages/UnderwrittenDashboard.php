@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Underwritten\Widgets\UnderwrittenOverview;
+use App\Filament\Underwritten\Widgets\UnderwrittenProfile;
 use Filament\Pages\Page;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
@@ -9,23 +11,23 @@ class UnderwrittenDashboard extends Page
 {
     use HasPageShield;
 
-    protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
+    protected static string | \BackedEnum | null $navigationIcon  = 'heroicon-o-chart-bar';
     protected static ?int    $navigationSort  = 1;
-    protected static ?string $navigationGroup = 'Underwritten';
+    protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
 
-    protected static string $view = 'filament.pages.underwritten-dashboard';
+    protected string $view = 'filament.pages.underwritten-dashboard';
 
     // Widgets que se muestran arriba del contenido
     protected function getHeaderWidgets(): array
     {
         return [
 
-            \App\Filament\Underwritten\Widgets\UnderwrittenOverview::class,
-            \App\Filament\Underwritten\Widgets\UnderwrittenProfile::class,
+            UnderwrittenOverview::class,
+            UnderwrittenProfile::class,
         ];
     }
 
-    public function getHeaderWidgetsColumns(): int | array
+    public function getHeaderWidgetsColumns(): int|array
     {
         return 1;
     }

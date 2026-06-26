@@ -1,108 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Business;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BusinessPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('view_any_business');
+        return $authUser->can('view_any_business');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Business $business): bool
+    public function view(AuthUser $authUser, Business $business): bool
     {
-        return $user->can('view_business');
+        return $authUser->can('view_business');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create_business');
+        return $authUser->can('create_business');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Business $business): bool
+    public function update(AuthUser $authUser, Business $business): bool
     {
-        return $user->can('update_business');
+        return $authUser->can('update_business');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Business $business): bool
+    public function delete(AuthUser $authUser, Business $business): bool
     {
-        return $user->can('delete_business');
+        return $authUser->can('delete_business');
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->can('delete_any_business');
+        return $authUser->can('delete_any_business');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, Business $business): bool
+    public function restore(AuthUser $authUser, Business $business): bool
     {
-        return $user->can('force_delete_business');
+        return $authUser->can('restore_business');
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Business $business): bool
     {
-        return $user->can('force_delete_any_business');
+        return $authUser->can('force_delete_business');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
-    public function restore(User $user, Business $business): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_business');
+        return $authUser->can('force_delete_any_business');
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_any_business');
+        return $authUser->can('restore_any_business');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
-    public function replicate(User $user, Business $business): bool
+    public function replicate(AuthUser $authUser, Business $business): bool
     {
-        return $user->can('replicate_business');
+        return $authUser->can('replicate_business');
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder_business');
+        return $authUser->can('reorder_business');
     }
+
 }

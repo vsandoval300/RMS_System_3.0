@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class LoginActivityChart extends ChartWidget
 {
-    protected static ?string $heading = 'Login Activity';
+    protected ?string $heading = 'Login Activity';
 
     public ?string $filter = '30d';
 

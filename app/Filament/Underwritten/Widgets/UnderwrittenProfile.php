@@ -2,10 +2,12 @@
 
 namespace App\Filament\Underwritten\Widgets;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Components\Grid;
 use App\Models\Business;
 use App\Models\Reinsurer;
 use Carbon\Carbon;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -14,12 +16,15 @@ use Filament\Widgets\Widget;
 
 use function Illuminate\Support\years;
 
-class UnderwrittenProfile extends Widget implements HasForms
+class UnderwrittenProfile extends Widget implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
-    protected static string $view = 'filament.widgets.underwritten-profile';
+    protected string $view = 'filament.widgets.underwritten-profile';
     protected int|string|array $columnSpan = 'full';
+    protected ?string $maxHeight = '300px';
+
 
     public ?int $reinsurer = null;
     public array $years = [];

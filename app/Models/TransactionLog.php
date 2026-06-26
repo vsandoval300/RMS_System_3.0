@@ -36,11 +36,13 @@ class TransactionLog extends Model
         'proportion',
         'commission_percentage',
         'gross_amount',
+        
 
         // GENERATED en DB:
-        // 'gross_amount_calc',
-        // 'commission_discount',
-        // 'net_amount',
+        'gross_amount_calc',
+        'commission_discount',
+        'net_amount',
+        'status',
 
         'banking_fee',
         'evidence_path',
@@ -65,30 +67,62 @@ class TransactionLog extends Model
     ];
 
     protected static function booted(): void
-    {
-        static::creating(function (self $model) {
-            if (blank($model->id)) {
-                $model->id = (string) Str::uuid();
+{
+    static::creating(function (self $model) {
+        if (blank($model->id)) {
+            $model->id = (string) Str::uuid();
+        }
+    });
+
+    static::saving(function (self $model) {
+        if (! blank($model->received_date)) {
+            $model->status = 'Completed';
+        } elseif (! blank($model->sent_date)) {
+            $model->status = 'In process';
+        } else {
+            $model->status = 'Pending';
+        }
+
+        // Recalculate net_amount whenever banking_fee changes
+        $model->net_amount = round(
+            (float) ($model->gross_amount_calc ?? 0)
+            - (float) ($model->commission_discount ?? 0)
+            - (float) ($model->banking_fee ?? 0),
+            2
+        );
+    });
+
+    static::saved(function (self $model) {
+        $transaction = $model->transaction;
+
+        if (! $transaction) {
+            return;
+        }
+
+        $newStatus = $transaction->resolveTransactionStatus();
+
+        if ($transaction->transaction_status_id !== $newStatus) {
+            $transaction->update([
+                'transaction_status_id' => $newStatus,
+            ]);
+        }
+
+        // Cascade: when net_amount changes, the next log's gross must equal this net.
+        // Skipped for newly-created logs (the service already computes the full chain).
+        if (! $model->wasRecentlyCreated && $model->wasChanged('net_amount')) {
+            $nextLog = self::where('transaction_id', $model->transaction_id)
+                ->where('index', $model->index + 1)
+                ->withoutTrashed()
+                ->first();
+
+            if ($nextLog) {
+                $nextLog->gross_amount      = $model->net_amount;
+                $nextLog->gross_amount_calc = $model->net_amount;
+                $nextLog->save();           // triggers saving() → net recalc, then saved() → next cascade
             }
-        });
-
-        //Aqui va la funcion para mandar a llamar al lifecyclesStatus
-        static::saved(function (self $model) {
-            $transaction = $model->transaction;
-
-            if (!$transaction) {
-                return;
-            }
-
-            $newStatus = $transaction->resolveTransactionStatus();
-
-            if ($transaction->transaction_status_id !== $newStatus) {
-                $transaction->update([
-                    'transaction_status_id' => $newStatus
-                ]);
-            }
-        });
-    }
+        }
+    });
+}
 
 
     /* --------------------------------------------------

@@ -1,108 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Coverage;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoveragePolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('view_any_coverages');
+        return $authUser->can('view_any_coverages');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Coverage $coverage): bool
+    public function view(AuthUser $authUser, Coverage $coverage): bool
     {
-        return $user->can('view_coverages');
+        return $authUser->can('view_coverages');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create_coverages');
+        return $authUser->can('create_coverages');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Coverage $coverage): bool
+    public function update(AuthUser $authUser, Coverage $coverage): bool
     {
-        return $user->can('update_coverages');
+        return $authUser->can('update_coverages');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Coverage $coverage): bool
+    public function delete(AuthUser $authUser, Coverage $coverage): bool
     {
-        return $user->can('delete_coverages');
+        return $authUser->can('delete_coverages');
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->can('delete_any_coverages');
+        return $authUser->can('delete_any_coverages');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, Coverage $coverage): bool
+    public function restore(AuthUser $authUser, Coverage $coverage): bool
     {
-        return $user->can('force_delete_coverages');
+        return $authUser->can('restore_coverages');
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Coverage $coverage): bool
     {
-        return $user->can('force_delete_any_coverages');
+        return $authUser->can('force_delete_coverages');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
-    public function restore(User $user, Coverage $coverage): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_coverages');
+        return $authUser->can('force_delete_any_coverages');
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_any_coverages');
+        return $authUser->can('restore_any_coverages');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
-    public function replicate(User $user, Coverage $coverage): bool
+    public function replicate(AuthUser $authUser, Coverage $coverage): bool
     {
-        return $user->can('replicate_coverages');
+        return $authUser->can('replicate_coverages');
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder_coverages');
+        return $authUser->can('reorder_coverages');
     }
+
 }

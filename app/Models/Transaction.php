@@ -15,6 +15,8 @@ use App\Services\TransactionLogsPreviewService;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Enums\TransactionLifecycleStatus;
 use Illuminate\Support\Carbon;
+use App\Services\TransactionLogsBuilderService;
+use App\Models\TransactionRecalculation;
 
 class Transaction extends Model
 {
@@ -88,6 +90,11 @@ class Transaction extends Model
         return $this->hasMany(TransactionSupport::class, 'transaction_id');
     }
 
+    public function recalculations(): HasMany
+    {
+        return $this->hasMany(TransactionRecalculation::class, 'transaction_id');
+    }
+
     public function lastLog(): HasOne
     {
         return $this->hasOne(TransactionLog::class, 'transaction_id')
@@ -158,6 +165,7 @@ class Transaction extends Model
             $model->remmitance_code       ??= null;
         });
 
+
         /**
          * ✅ Crear logs al crear Transaction
          */
@@ -169,12 +177,11 @@ class Transaction extends Model
             DB::transaction(function () use ($tx) {
                 TransactionLog::where('transaction_id', $tx->id)->forceDelete();
 
-                // ✅ IMPORTANTE: NO castear a float aquí (pierde precisión antes de tiempo)
                 $rows = app(TransactionLogsPreviewService::class)->build(
                     opDocumentId: (string) $tx->op_document_id,
                     typeId: (int) $tx->transaction_type_id,
-                    proportion: (float) $tx->proportion,   
-                    exchRate: (float) $tx->exch_rate, 
+                    proportion: (float) $tx->proportion,
+                    exchRate: (float) $tx->exch_rate,
                     remittanceCode: $tx->remmitance_code,
                     dueDate: $tx->due_date,
                 );
@@ -185,39 +192,59 @@ class Transaction extends Model
 
                 $now = now();
 
-                $payload = collect($rows)->map(function (array $row) use ($tx, $now) {
-                    return [
-                        'id'             => (string) Str::uuid(),
-                        'transaction_id' => $tx->id,
-                        'index'          => (int) ($row['index'] ?? 1),
+$payload = collect($rows)->map(function (array $row) use ($tx, $now) {
+    return [
+        'id'             => (string) Str::uuid(),
+        'transaction_id' => $tx->id,
 
-                        'deduction_type' => (int) ($row['deduction_id'] ?? $row['deduction_type'] ?? 1),
-                        'from_entity'    => (int) ($row['from_entity'] ?? 0),
-                        'to_entity'      => (int) ($row['to_entity'] ?? 0),
+        'index'          => $row['index'] ?? null,
+        'proportion'     => (string) ($row['proportion'] ?? $tx->proportion),
+        'exch_rate'      => (string) ($row['exchange_rate'] ?? $row['exch_rate'] ?? $tx->exch_rate),
 
-                        'sent_date'      => null,
-                        'received_date'  => null,
+        'deduction_type' => $row['deduction_id'] ?? $row['deduction_type'] ?? null,
+        'from_entity'    => $row['from_entity'] ?? null,
+        'to_entity'      => $row['to_entity'] ?? null,
 
-                        // ✅ Guardar sin perder decimales: manda strings
-                        'exch_rate'      => (string) ($row['exchange_rate'] ?? $tx->exch_rate),
-                        'proportion'     => (string) ($row['proportion'] ?? $tx->proportion),
+        'commission_percentage' => (string) ($row['commission_percentage'] ?? 0),
 
-                        // ✅ ya viene del nodo por step (service)
-                        'commission_percentage' => (string) ($row['commission_percentage'] ?? 0),
+        // valores que vienen del Transaction Cycle / Preview
+        'gross_amount'       => (string) ($row['gross_amount'] ?? 0),
+        'gross_amount_calc'  => (string) ($row['gross_amount_calc'] ?? $row['gross_amount'] ?? 0),
+        'commission_discount'=> (string) ($row['commission_discount'] ?? $row['discount'] ?? 0),
+        'banking_fee'        => (string) ($row['banking_fee'] ?? 0),
+        'net_amount'         => (string) ($row['net_amount'] ?? 0),
 
-                        'gross_amount'   => (string) ($row['gross_amount'] ?? 0),
-                        'banking_fee'    => 0,
+        // status inicial
+        'status'             => $row['status'] ?? 'Pending',
 
-                        'created_at'     => $now,
-                        'updated_at'     => $now,
-                    ];
-                })->all();
+        'sent_date'      => null,
+        'received_date'  => null,
+
+        'created_at'     => $now,
+        'updated_at'     => $now,
+    ];
+})->all();
+
+                logger()->info('TX LOGS DEBUG', [
+                    'transaction_id' => $tx->id,
+                    'tx_proportion' => $tx->proportion,
+                    'tx_exch_rate' => $tx->exch_rate,
+                    'rows_from_service' => $rows,
+                    'payload_inserted' => $payload,
+                ]);
 
                 TransactionLog::insert($payload);
             });
         });
 
+
+
         static::deleted(function (self $model) {
+            // ✅ Soft delete de logs y recalculations relacionados
+            $model->logs()->delete();
+            $model->recalculations()->delete();
+
+            // ✅ Reordenar las transacciones restantes del mismo documento
             self::where('op_document_id', $model->op_document_id)
                 ->orderBy('index')
                 ->get()
@@ -227,27 +254,42 @@ class Transaction extends Model
                     $record->saveQuietly();
                 });
         });
+
+        static::restored(function (self $model) {
+            $model->logs()->withTrashed()->restore();
+            $model->recalculations()->withTrashed()->restore();
+        });
+
+        static::forceDeleted(function (self $model) {
+            $model->logs()->withTrashed()->forceDelete();
+        });
+
+
     }
 
 
     public function resolveTransactionStatus(?Carbon $today = null): TransactionLifecycleStatus
     {
-        $statuses = $this->logs()
+        $logs = $this->logs()
             ->withoutTrashed()
-            ->select('status')
-            ->distinct()
-            ->pluck('status');
+            ->orderBy('index')
+            ->get();
 
-        if ($statuses->isEmpty()) {
+        if ($logs->isEmpty()) {
             return TransactionLifecycleStatus::PENDING;
         }
 
-        if ($statuses->contains('In process')) {
-            return TransactionLifecycleStatus::IN_PROCESS;
+        $lastLog = $logs->last();
+
+        // ✅ Si el último log está completado, toda la transacción se considera completada
+        if ($lastLog && $lastLog->status === 'Completed') {
+            return TransactionLifecycleStatus::COMPLETED;
         }
 
-        if ($statuses->count() === 1 && $statuses->contains('Completed')) {
-            return TransactionLifecycleStatus::COMPLETED;
+        $statuses = $logs->pluck('status');
+
+        if ($statuses->contains('In process')) {
+            return TransactionLifecycleStatus::IN_PROCESS;
         }
 
         if ($statuses->contains('Completed')) {
@@ -255,5 +297,30 @@ class Transaction extends Model
         }
 
         return TransactionLifecycleStatus::PENDING;
+    }
+
+
+    public function lifecycleProgressPercentage(): int
+    {
+        $logs = $this->logs()
+            ->withoutTrashed()
+            ->orderBy('index')
+            ->get();
+
+        if ($logs->isEmpty()) {
+            return 0;
+        }
+
+        $lastLog = $logs->last();
+
+        if ($lastLog && $lastLog->status === 'Completed') {
+            return 100;
+        }
+
+        $completed = $logs
+            ->where('status', 'Completed')
+            ->count();
+
+        return (int) round(($completed / $logs->count()) * 100);
     }
 }

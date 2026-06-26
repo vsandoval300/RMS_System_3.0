@@ -1,108 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\DocumentType;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class DocumentTypePolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('view_any_corporate::documents');
+        return $authUser->can('view_any_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, DocumentType $documentType): bool
+    public function view(AuthUser $authUser, DocumentType $documentType): bool
     {
-        return $user->can('view_corporate::documents');
+        return $authUser->can('view_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create_corporate::documents');
+        return $authUser->can('create_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, DocumentType $documentType): bool
+    public function update(AuthUser $authUser, DocumentType $documentType): bool
     {
-        return $user->can('update_corporate::documents');
+        return $authUser->can('update_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, DocumentType $documentType): bool
+    public function delete(AuthUser $authUser, DocumentType $documentType): bool
     {
-        return $user->can('delete_corporate::documents');
+        return $authUser->can('delete_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->can('delete_any_corporate::documents');
+        return $authUser->can('delete_any_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, DocumentType $documentType): bool
+    public function restore(AuthUser $authUser, DocumentType $documentType): bool
     {
-        return $user->can('force_delete_corporate::documents');
+        return $authUser->can('restore_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, DocumentType $documentType): bool
     {
-        return $user->can('force_delete_any_corporate::documents');
+        return $authUser->can('force_delete_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
-    public function restore(User $user, DocumentType $documentType): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_corporate::documents');
+        return $authUser->can('force_delete_any_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_any_corporate::documents');
+        return $authUser->can('restore_any_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
-    public function replicate(User $user, DocumentType $documentType): bool
+    public function replicate(AuthUser $authUser, DocumentType $documentType): bool
     {
-        return $user->can('replicate_corporate::documents');
+        return $authUser->can('replicate_corporate::documents');
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder_corporate::documents');
+        return $authUser->can('reorder_corporate::documents');
     }
+
 }

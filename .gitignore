@@ -13,6 +13,8 @@
 /.zed
 /auth.json
 /node_modules
+/public/js/filament
+/public/css/filament
 /public/build
 /public/hot
 /public/storage
@@ -23,3 +25,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 composer.lock
+CLAUDE.md

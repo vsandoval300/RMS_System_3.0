@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -32,11 +34,11 @@ class NotifyReportReady implements ShouldQueue
     {
         $user = User::find($this->userId);
 
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title('Report ready')
             ->body("Your report {$this->filename} is ready.")
             ->actions([
-                \Filament\Notifications\Actions\Action::make('download')
+                Action::make('download')
                     ->label('Download')
                     ->url(url("/reports/download/{$this->filename}"), true)
                     ->button()

@@ -7,8 +7,9 @@ use App\Services\PremiumForPeriodService;
 
 class PremiumForPeriod extends ChartWidget
 {
-    protected static string $view = 'filament.widgets.premium-for-period';
-    protected static ?string $heading = 'Underwritten Premium';
+    protected string $view = 'filament.widgets.premium-for-period';
+    protected ?string $heading = 'Underwritten Premium';
+    protected ?string $maxHeight = '300px';
 
     public ?int $reinsurer = null;
     protected static bool $isLazy = false;

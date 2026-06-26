@@ -16,11 +16,11 @@ class UsersDashboard extends Page
 {
     use HasPageShield;
 
-    protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
+    protected static string | \BackedEnum | null $navigationIcon  = 'heroicon-o-chart-bar';
     protected static ?int    $navigationSort  = 40;
-    protected static ?string $navigationGroup = 'Security';
+    protected static string | \UnitEnum | null $navigationGroup = 'Security';
 
-    protected static string $view = 'filament.pages.users-dashboard';
+    protected string $view = 'filament.pages.users-dashboard';
 
     // Widgets que se muestran arriba del contenido
     protected function getHeaderWidgets(): array
@@ -34,7 +34,7 @@ class UsersDashboard extends Page
         ];
     }
 
-    public function getHeaderWidgetsColumns(): int | array
+    public function getHeaderWidgetsColumns(): int|array
     {
         return [
             'md' => 2,

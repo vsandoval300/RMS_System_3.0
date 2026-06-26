@@ -1,0 +1,197 @@
+<?php
+
+namespace App\Filament\Resources\BusinessDocTypes;
+
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\BusinessDocTypes\Pages\ListBusinessDocTypes;
+use App\Filament\Resources\BusinessDocTypes\Pages\CreateBusinessDocTypes;
+use App\Filament\Resources\BusinessDocTypes\Pages\ViewBusinessDocTypes;
+use App\Filament\Resources\BusinessDocTypes\Pages\EditBusinessDocTypes;
+use App\Filament\Resources\BusinessDocTypesResource\Pages;
+use App\Filament\Resources\BusinessDocTypesResource\RelationManagers;
+use App\Models\BusinessDocType;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Validation\Rules\Unique;
+use Filament\Infolists\Components\TextEntry;
+
+class BusinessDocTypesResource extends Resource
+{
+    protected static ?string $model = BusinessDocType::class;
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
+    protected static ?string $navigationLabel = 'Business Document Types';
+    protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
+    protected static ?int    $navigationSort  = 7;   // aparecerá primero
+
+    public static function getNavigationBadge(): ?string
+    {
+        return BusinessDocType::count(); // o self::$model::count()
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                //
+                Section::make('Business Document Type')
+                ->columns(1)    // ← aquí defines dos columnas
+                ->columnSpanFull()
+                ->schema([
+
+                    TextInput::make('name')
+                        ->label('Name')
+                        ->required()
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
+                        )
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state))))
+                        ->helperText('First letter of each word will be capitalised.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
+
+                    Textarea::make('description')
+                        ->label('Description')
+                        ->required()
+                        ->columnSpan('full')
+                        ->autosize()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state))))
+                        ->helperText('Please provide a brief description of the sector. Only the first letter will be capitalised.'),
+                        //->extraAttributes(['class' => 'w-1/2']),
+
+                ])
+                ->maxWidth('5xl')
+                ->compact(),
+            ]);
+    }
+
+
+
+
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            /* ─────────────────────────  PROFILE  ───────────────────────── */
+            Section::make('Business Document Type')
+            ->columnSpanFull()
+            ->schema([
+                \Filament\Schemas\Components\Grid::make(2)
+                    ->extraAttributes(['style' => 'gap: 6px;'])
+                    ->schema([
+                        // Filas “Label (3) + Value (9)”
+                        \Filament\Schemas\Components\Grid::make(1)
+                            ->columnSpan(2)
+                            ->extraAttributes(['style' => 'row-gap: 0;'])
+                            ->schema([
+                                // Name
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 2px;'])
+                                    ->schema([
+                                        TextEntry::make('name_label')->hiddenLabel()->state('Name:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('name_value')->hiddenLabel()
+                                            ->state(fn ($record) => $record->name ?: '—')
+                                            ->columnSpan(9),
+                                    ]),
+
+                                // Description
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 2px;'])
+                                    ->schema([
+                                        TextEntry::make('desc_label')->hiddenLabel()->state('Description:')
+                                            ->weight('bold')->alignment('right')->columnSpan(3),
+                                        TextEntry::make('desc_value')->hiddenLabel()
+                                            ->state(fn ($record) => $record->description ?: '—')
+                                            ->extraAttributes(['style' => 'line-height:1.35;'])
+                                            ->columnSpan(9),
+                                    ]),
+                            ]),
+                    ]),
+            ])
+            ->maxWidth('5xl')
+            ->collapsible(),
+        ]);
+    }
+
+
+
+
+
+
+
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->recordUrl(fn (BusinessDocType $record) => static::getUrl('view', ['record' => $record]))
+            ->columns([
+                //
+                TextColumn::make('id')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->extraAttributes([
+                        'style' => 'width: 300px; white-space: normal;', // ✅ Deja que el texto se envuelva
+                    ]),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->sortable()
+                    ->searchable()
+                    ->wrap()
+                    ->extraAttributes([
+                        'style' => 'width: 600px; white-space: normal;', // ancho fijo de 300px
+                    ]),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListBusinessDocTypes::route('/'),
+            'create' => CreateBusinessDocTypes::route('/create'),
+            'view'   => ViewBusinessDocTypes::route('/{record}'),   // 👈 NUEVA
+            'edit' => EditBusinessDocTypes::route('/{record}/edit'),
+        ];
+    }
+}

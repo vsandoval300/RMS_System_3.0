@@ -1,17 +1,26 @@
 <x-filament::section heading="Underwritten Overview">
 
-<div class="max-w-xs">
+<div class="max-w-2xl">
         {{ $this->form }}
-    </div>
+</div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::class, [
-            'reinsurer' => $this->reinsurer
-        ], key('business-chart-' . $this->reinsurer))
+    @php
+        $widgets = [    
+            \App\Filament\Underwritten\Widgets\UnderwrittenBusinessAnual::make([
+                'reinsurer' => $this->reinsurer
+            ]),
 
-        @livewire(\App\Filament\Underwritten\Widgets\PremiumForPeriod::class, [
-            'reinsurer' => $this->reinsurer
-        ], key('premium-chart-' . $this->reinsurer))
+            \App\Filament\Underwritten\Widgets\PremiumForPeriod::make([
+                'reinsurer' => $this->reinsurer
+            ]),
+        ];
+    @endphp
+        
+    <div class="mt-6">
+        <x-filament-widgets::widgets
+            :columns="2"
+            :widgets="$widgets"
+        />
     </div>
     
 </x-filament::section>

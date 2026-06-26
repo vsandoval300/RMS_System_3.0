@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use App\Filament\Pages\UsersDashboard;
+use Filament\Widgets\AccountWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -20,11 +23,34 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;   // ✅ Asegúrate de tener esta línea
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+            fn (): string => view('filament.components.login-version')->render(),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_NAV_END,
+            fn (): string => view('filament.components.sidebar-version')->render(),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): string => view('filament.widgets.reinsurers-chart-labels')->render(),
+            scopes: \App\Filament\Resources\Reinsurers\Pages\ListReinsurers::class,
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): string => view('filament.widgets.businesses-chart-labels')->render(),
+            scopes: \App\Filament\Resources\Businesses\Pages\ListBusinesses::class,
+        );
 
         // ✅ Registro de colores personalizados
             FilamentColor::register([
@@ -32,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
                 //'gray' => Color::Zinc,
                 //'gray' => Color::hex('#27272a'),   // zinc-500
                 //'info' => Color::Blue,
-                'primary' => Color::hex('#41A2C3'), // puedes registrar más
+                'primary' =>  '#41A2C3'
                 //'success' => Color::Green,
                 //'warning' => Color::Amber,
             ]);
@@ -94,7 +120,7 @@ class AdminPanelProvider extends PanelProvider
 
 
 
-
+            ->globalSearch(false)
             /*->colors([
                 'primary' => Color::Blue,
             ]) */
@@ -102,8 +128,8 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             //->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters') // ✅ ESTA ES LA NUEVA LÍNEA
             ->pages([
-                Pages\Dashboard::class,
-                \App\Filament\Pages\UsersDashboard::class,
+                Dashboard::class,
+                UsersDashboard::class,
             ])
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             // ->discoverWidgets(
@@ -111,7 +137,7 @@ class AdminPanelProvider extends PanelProvider
             //     for: 'App\\Filament\\User\\Widgets'
             // )
             ->widgets([
-                Widgets\AccountWidget::class,
+                AccountWidget::class,
                 //Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([

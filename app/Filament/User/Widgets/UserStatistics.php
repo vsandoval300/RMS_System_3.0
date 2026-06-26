@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserStatistics extends BaseWidget
 {
-    protected static ?string $pollingInterval = '60s';
+    protected ?string $pollingInterval = '60s';
 
     protected function getStats(): array
     {
