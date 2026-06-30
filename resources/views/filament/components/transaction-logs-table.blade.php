@@ -35,7 +35,7 @@
                 <th style="padding: 10px 12px; text-align:left;">Destination</th>
                 <th style="padding: 10px 12px; text-align:right;">Fx</th>
                 <th style="padding: 10px 12px; text-align:right;">Ded</th>
-                <th style="padding: 10px 12px; text-align:right;">Gross</th>
+                <th style="padding: 10px 12px; text-align:right;">Premium Fts</th>
                 <th style="padding: 10px 12px; text-align:right;">Discount</th>
                 <th style="padding: 10px 12px; text-align:right;">Fee</th>
                 <th style="padding: 10px 12px; text-align:right;">Net</th>

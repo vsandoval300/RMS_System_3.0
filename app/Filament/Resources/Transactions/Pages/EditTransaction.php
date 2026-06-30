@@ -409,6 +409,22 @@ class EditTransaction extends EditRecord
         ]);
     }
 
+    public function getRelationManagers(): array
+    {
+        $managers = [
+            \App\Filament\Resources\Transactions\RelationManagers\LogsRelationManager::class,
+            \App\Filament\Resources\Transactions\RelationManagers\SupportsRelationManager::class,
+        ];
+
+        $premiumType = $this->record->operativeDoc?->business?->premium_type;
+
+        if (in_array($premiumType, ['Estimated', 'Declared'], true)) {
+            $managers[] = \App\Filament\Resources\Transactions\RelationManagers\RecalculationsRelationManager::class;
+        }
+
+        return $managers;
+    }
+
     public static function canDelete(Model $record): bool
     {
         return false;

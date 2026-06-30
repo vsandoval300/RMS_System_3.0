@@ -211,6 +211,12 @@ class TransactionResource extends Resource
                             ->columnSpan(1),
 
 
+                        DatePicker::make('due_date')
+                            ->label('Due Date')
+                            ->visibleOn('edit')
+                            ->dehydrated(fn (string $operation) => $operation === 'edit')
+                            ->columnSpan(1),
+
                         TextInput::make('exch_rate')
                             ->label('Exchange Rate')
                             ->visibleOn('edit')
@@ -237,7 +243,7 @@ class TransactionResource extends Resource
                             ->viewData(fn (?Transaction $record) => [
                                 'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
                             ])
-                            ->columnSpan(3),
+                            ->columnSpan(2),
 
 
                         TextInput::make('installment_number')
@@ -869,7 +875,7 @@ public static function infolist(Schema $schema): Schema
                             ->viewData(fn ($record) => [
                                 'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
                             ])
-                            ->columnSpan(10),
+                            ->columnSpan(5),
 
                     ]),
 
@@ -987,7 +993,15 @@ public static function infolist(Schema $schema): Schema
                             ? 'heroicon-m-exclamation-triangle'
                             : null
                     )
-                    ->iconColor('danger'),
+                    ->iconColor('danger')
+                    ->description(fn (Transaction $record): ?string =>
+                        $record->due_date && $record->status?->transaction_status !== 'Completed'
+                            ? (function () use ($record) {
+                                $days = (int) now()->startOfDay()->diffInDays($record->due_date->startOfDay(), false);
+                                return $days >= 0 ? "+{$days} days" : "{$days} days";
+                            })()
+                            : null
+                    ),
 
                 TextColumn::make('remmitance_code')
                     ->label('Remittance')
