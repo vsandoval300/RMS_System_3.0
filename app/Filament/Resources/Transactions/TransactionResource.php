@@ -757,6 +757,26 @@ public static function infolist(Schema $schema): Schema
                                             ->state(fn ($record) => $record->type?->description ?? '—')
                                             ->columnSpan(9),
                                     ]),
+
+                                \Filament\Schemas\Components\Grid::make(12)
+                                    ->extraAttributes([
+                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('exch_rate_label')->hiddenLabel()
+                                            ->state('Exchange rate:')
+                                            ->weight('bold')
+                                            ->alignment('right')
+                                            ->columnSpan(3),
+
+                                        TextEntry::make('exch_rate')->hiddenLabel()
+                                            ->state(fn ($record) =>
+                                                $record->exch_rate !== null
+                                                    ? number_format((float) $record->exch_rate, 4)
+                                                    : '—'
+                                            )
+                                            ->columnSpan(9),
+                                    ]),
                             ]),
 
                         /* ───────────── RIGHT COLUMN ───────────── */
@@ -856,8 +876,10 @@ public static function infolist(Schema $schema): Schema
                     \Filament\Schemas\Components\Grid::make(12)
                     ->extraAttributes([
                         'style' => '
+                            border-top:1px solid light-dark(#e5e7eb, rgba(255,255,255,0.12));
                             border-bottom:1px solid rgba(255,255,255,0.12);
                             padding:12px 0;
+                            margin-top:8px;
                         ',
                     ])
                     ->schema([
