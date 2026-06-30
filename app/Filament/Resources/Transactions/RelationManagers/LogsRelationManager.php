@@ -20,7 +20,9 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Illuminate\Support\HtmlString;
+use App\Models\TransactionLog;
 use Illuminate\Support\Facades\Storage;   
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Str;
@@ -96,15 +98,37 @@ class LogsRelationManager extends RelationManager
                 ->columnSpanFull()
                 ->columns(2)
                 ->schema([
-                    DatePicker::make('sent_date'),
-                    DatePicker::make('received_date'),
+                    Hidden::make('prev_received_date')->dehydrated(false),
+
+                    DatePicker::make('sent_date')
+                        ->live()
+                        ->minDate(fn (Get $get) => $get('prev_received_date') ?: null)
+                        ->rules([
+                            fn (Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get) {
+                                $prevReceived = $get('prev_received_date');
+                                if (filled($prevReceived) && filled($value) && $value < $prevReceived) {
+                                    $fail('Sent date must be on or after the previous log\'s Received date.');
+                                }
+                            },
+                        ]),
+
+                    DatePicker::make('received_date')
+                        ->minDate(fn (Get $get) => $get('sent_date') ?: null)
+                        ->rules([
+                            fn (Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get) {
+                                $sent = $get('sent_date');
+                                if (filled($sent) && filled($value) && $value < $sent) {
+                                    $fail('Received date must be on or after Sent date.');
+                                }
+                            },
+                        ]),
                 ]),
 
             Section::make()
                 ->columnSpanFull()
                 ->columns(2)
                 ->schema([
-                    TextInput::make('exch_rate')->numeric(),
+                    TextInput::make('exch_rate')->numeric()->readOnly()->dehydrated(false),
                     TextInput::make('status')
                         ->maxLength(30)
                         ->disabled()
@@ -211,9 +235,8 @@ class LogsRelationManager extends RelationManager
 
                 TextColumn::make('sent_date')->date(),
                 TextColumn::make('received_date')->date(),
-                TextColumn::make('exch_rate')->numeric(decimalPlaces: 5),
                 //TextColumn::make('gross_amount')->numeric(2),
-                TextColumn::make('gross_amount_calc')->numeric(2),
+                TextColumn::make('gross_amount_calc')->label('Premium Fts')->numeric(2),
                 TextColumn::make('commission_discount')->label('Discount')->numeric(2),
                 TextColumn::make('banking_fee')->numeric(2),
                 TextColumn::make('net_amount')->numeric(2),
@@ -289,6 +312,19 @@ class LogsRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
+                    ->mutateRecordDataUsing(function (array $data, $record): array {
+                        $prevLog = TransactionLog::query()
+                            ->where('transaction_id', $record->transaction_id)
+                            ->where('index', $record->index - 1)
+                            ->withoutTrashed()
+                            ->first();
+
+                        $data['prev_received_date'] = $prevLog?->received_date
+                            ? \Carbon\Carbon::parse($prevLog->received_date)->format('Y-m-d')
+                            : null;
+
+                        return $data;
+                    })
                     ->modalWidth('7xl')
                     ->after(function ($record, $livewire) {
                         $record->refresh();

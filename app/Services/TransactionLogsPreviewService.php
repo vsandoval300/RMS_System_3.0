@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\OperativeDoc;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TransactionLogsPreviewService
@@ -36,6 +37,16 @@ class TransactionLogsPreviewService
 
         if (! $doc) {
             return [];
+        }
+
+        // Factor Fts: pro-rata del premium según días de cobertura del documento
+        $ftsMultiplier = 1.0;
+        if ($doc->inception_date && $doc->expiration_date) {
+            $inception     = Carbon::parse($doc->inception_date);
+            $expiration    = Carbon::parse($doc->expiration_date);
+            $daysInYear    = $inception->isLeapYear() ? 366 : 365;
+            $coverageDays  = $inception->diffInDays($expiration);
+            $ftsMultiplier = $daysInYear > 0 ? ($coverageDays / $daysInYear) : 1.0;
         }
 
         /**
@@ -78,8 +89,9 @@ class TransactionLogsPreviewService
             $shareDecimal = $this->toDecimalRate($scheme->share ?? 0);
             $schemePremiumSum = (float) ($premiumSumBySchemeId[$scheme->id] ?? 0);
 
-            // ✅ Gross por scheme (constante para ese scheme)
-            $grossScheme = ($schemePremiumSum * $shareDecimal * $proportion) / $safeExchRate;
+            // ✅ Gross por scheme usando Annual Premium Fts (pro-rata por días de cobertura)
+            $ftsPremium  = $schemePremiumSum * $shareDecimal * $ftsMultiplier;
+            $grossScheme = ($ftsPremium * $proportion) / $safeExchRate;
 
             $schemeData[] = [
                 'scheme_id' => $scheme->id,

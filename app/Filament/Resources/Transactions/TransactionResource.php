@@ -136,7 +136,7 @@ class TransactionResource extends Resource
                     ->default([])
                     ->dehydrated(false),
 
-                Section::make('Installment Settings')
+                Section::make('Instalment Settings')
                     ->description(fn (string $operation) => match ($operation) {
                         'edit' => 'Review the transaction details and update only the transaction lifecycle records as needed.',
                         default => 'Select the document and specify the number of installments to be created.',
@@ -211,10 +211,17 @@ class TransactionResource extends Resource
                             ->columnSpan(1),
 
 
+                        TextInput::make('exch_rate')
+                            ->label('Exchange Rate')
+                            ->visibleOn('edit')
+                            ->numeric()
+                            ->dehydrated(fn (string $operation) => $operation === 'edit')
+                            ->columnSpan(1),
+
                         TextInput::make('proportion_display')
                             ->label('Proportion')
                             ->visibleOn('edit')
-                            //->readOnly()
+                            ->readOnly()
                             ->dehydrated(false)
                             ->suffix('%')
                             ->formatStateUsing(fn (?Transaction $record) =>
@@ -222,7 +229,7 @@ class TransactionResource extends Resource
                                     ? number_format(((float) $record->proportion) * 100, 2)
                                     : null
                             )
-                            ->columnSpan(1),    
+                            ->columnSpan(1),
 
 
                         View::make('filament.components.transaction-progress-bar')
@@ -230,7 +237,7 @@ class TransactionResource extends Resource
                             ->viewData(fn (?Transaction $record) => [
                                 'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
                             ])
-                            ->columnSpan(4),    
+                            ->columnSpan(3),
 
 
                         TextInput::make('installment_number')
@@ -471,7 +478,7 @@ protected static function buildTransactionsBatch(string $opDocumentId, int $coun
 
     $currencyId = $opDoc?->business?->currency_id;
 
-    $exchRate = ((int) $currencyId === 157) ? 1 : null;
+    $exchRate = ((int) $currencyId === 157) ? 1 : ($opDoc?->roe_fs ?? null);
     $exchangeRateLocked = ((int) $currencyId === 157);
 
     $schemes = CostScheme::query()
@@ -645,7 +652,7 @@ protected static function applyDocumentDefaults(?string $opDocumentId, Get $get,
         $set('exchange_rate_locked', false);
 
         if ($currentRate === null || $currentRate === '' || (float) $currentRate === 1.0) {
-            $set('exch_rate', null);
+            $set('exch_rate', $opDoc?->roe_fs ?? null);
         }
     }
 

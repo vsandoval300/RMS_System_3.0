@@ -73,14 +73,13 @@ class CreateTransaction extends CreateRecord
                 $nextIndex = Transaction::where('op_document_id', $opDocumentId)->count() + 1;
                 $newId     = (string) Str::uuid();
 
-                $currencyId = OperativeDoc::query()
+                $opDoc = OperativeDoc::query()
                     ->whereKey($opDocumentId)
                     ->with('business:business_code,currency_id')
-                    ->first()
-                    ?->business
-                    ?->currency_id;
+                    ->first();
 
-                $exchRate = ((int) $currencyId === 157) ? 1 : null;
+                $currencyId = $opDoc?->business?->currency_id;
+                $exchRate = ((int) $currencyId === 157) ? 1 : ($opDoc?->roe_fs ?? null);
 
                 // 5) rellenar form conservando Document y nuevos index/id
                 $this->form->fill([
@@ -171,7 +170,7 @@ class CreateTransaction extends CreateRecord
             'op_document_id' => $opDocumentId,
             'index' => $nextIndex,
             'id' => (string) Str::uuid(),
-            'exch_rate' => ((int) $currencyId === 157) ? 1 : null,
+            'exch_rate' => ((int) $currencyId === 157) ? 1 : ($opDoc?->roe_fs ?? null),
             'exchange_rate_locked' => ((int) $currencyId === 157),
             'transaction_status_id' => 1,
             'preview_logs' => [],

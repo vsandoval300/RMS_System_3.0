@@ -55,7 +55,7 @@
                             'Commission %',
                             'Source',
                             'Destination',
-                            'Gross amount',
+                            'Premium Fts',
                             'Discount',
                             'Banking fee',
                             'Net amount',
