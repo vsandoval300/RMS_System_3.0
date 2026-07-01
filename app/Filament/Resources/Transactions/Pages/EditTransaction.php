@@ -432,7 +432,7 @@ class EditTransaction extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Edit – ' . ($this->record?->name ?? 'Transaction');
+        return 'Edit Premium Payment Record';
     }
 
     protected function getRedirectUrl(): ?string

@@ -653,18 +653,22 @@ class BusinessResource extends Resource
                                 ->hiddenLabel()
                                 ->state(function ($record) {
                                     $status = $record->business_lifecycle_status;
+                                    $value  = $status?->value ?? null;
 
-                                    $value = $status === null
-                                        ? '—'
-                                        : (method_exists($status, 'label')
-                                            ? $status->label()
-                                            : ($status->value ?? $status->name));
+                                    if (! $value) {
+                                        return new HtmlString('<strong>Lifecycle status:</strong> —');
+                                    }
 
-                                    $value = e($value);
+                                    [$bg, $text] = match ($value) {
+                                        'In Force'  => ['light-dark(#dcfce7,#14532d)', 'light-dark(#166534,#86efac)'],
+                                        'To Expire' => ['light-dark(#fef9c3,#713f12)', 'light-dark(#854d0e,#fde047)'],
+                                        'Expired'   => ['light-dark(#fee2e2,#7f1d1d)', 'light-dark(#991b1b,#fca5a5)'],
+                                        default     => ['light-dark(#f3f4f6,#374151)', 'light-dark(#374151,#d1d5db)'],
+                                    };
 
-                                    return new HtmlString(
-                                        "<strong>Lifecycle status:</strong> {$value}"
-                                    );
+                                    $badge = "<span style=\"display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:14px;font-weight:500;background-color:{$bg};color:{$text}\">{$value}</span>";
+
+                                    return new HtmlString("<strong>Lifecycle status:</strong> {$badge}");
                                 })
                                 ->columnSpan(2),
 

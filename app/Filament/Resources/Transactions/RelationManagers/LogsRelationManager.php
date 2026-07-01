@@ -33,7 +33,8 @@ use Livewire\Attributes\On;
 class LogsRelationManager extends RelationManager
 {
     protected static string $relationship = 'logs';
-    protected static ?string $title = 'Transaction Lifecycle';
+    protected static ?string $title = 'Lifecycle Premium Payment';
+    protected static string|\BackedEnum|null $icon = 'heroicon-o-arrow-path';
 
     // ✅ Bloquea crear logs manualmente
     public function canCreate(): bool
@@ -50,7 +51,8 @@ class LogsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make()
+            Section::make('General Information')
+                ->icon('heroicon-o-information-circle')
                 ->columnSpanFull()
                 ->columns(6)
                 ->schema([
@@ -94,17 +96,34 @@ class LogsRelationManager extends RelationManager
                         ->columnSpan(3),
                 ]),
 
-            Section::make()
+            Section::make('Timeline')
+                ->icon('heroicon-o-calendar-days')
                 ->columnSpanFull()
                 ->columns(2)
                 ->schema([
                     Hidden::make('prev_received_date')->dehydrated(false),
 
+                    DatePicker::make('due_date')
+                        ->label('Due Date')
+                        ->nullable()
+                        ->live()
+                        ->columnSpanFull(),
+
                     DatePicker::make('sent_date')
                         ->live()
-                        ->minDate(fn (Get $get) => $get('prev_received_date') ?: null)
+                        ->disabled(fn (Get $get) => blank($get('due_date')))
+                        ->helperText(fn (Get $get) => blank($get('due_date')) ? 'Set Due Date first.' : null)
+                        ->minDate(fn (Get $get) => $get('prev_received_date') && $get('prev_received_date') > $get('due_date')
+                            ? $get('prev_received_date')
+                            : ($get('due_date') ?: null))
                         ->rules([
                             fn (Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get) {
+                                if (filled($value) && blank($get('due_date'))) {
+                                    $fail('Due Date must be set before assigning Sent date.');
+                                }
+                                if (filled($value) && filled($get('due_date')) && $value < $get('due_date')) {
+                                    $fail('Sent date must be on or after Due date.');
+                                }
                                 $prevReceived = $get('prev_received_date');
                                 if (filled($prevReceived) && filled($value) && $value < $prevReceived) {
                                     $fail('Sent date must be on or after the previous log\'s Received date.');
@@ -113,18 +132,26 @@ class LogsRelationManager extends RelationManager
                         ]),
 
                     DatePicker::make('received_date')
-                        ->minDate(fn (Get $get) => $get('sent_date') ?: null)
+                        ->disabled(fn (Get $get) => blank($get('due_date')))
+                        ->helperText(fn (Get $get) => blank($get('due_date')) ? 'Set Due Date first.' : null)
+                        ->minDate(fn (Get $get) => collect([$get('due_date'), $get('sent_date')])->filter()->max() ?: null)
                         ->rules([
                             fn (Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get) {
-                                $sent = $get('sent_date');
-                                if (filled($sent) && filled($value) && $value < $sent) {
+                                if (filled($value) && blank($get('due_date'))) {
+                                    $fail('Due Date must be set before assigning Received date.');
+                                }
+                                if (filled($value) && filled($get('due_date')) && $value < $get('due_date')) {
+                                    $fail('Received date must be on or after Due date.');
+                                }
+                                if (filled($value) && filled($get('sent_date')) && $value < $get('sent_date')) {
                                     $fail('Received date must be on or after Sent date.');
                                 }
                             },
                         ]),
                 ]),
 
-            Section::make()
+            Section::make('Status')
+                ->icon('heroicon-o-signal')
                 ->columnSpanFull()
                 ->columns(2)
                 ->schema([
@@ -135,7 +162,8 @@ class LogsRelationManager extends RelationManager
                         ->dehydrated(false),
                 ]),
 
-            Section::make()
+            Section::make('Financial Details')
+                ->icon('heroicon-o-banknotes')
                 ->columnSpanFull()
                 ->columns(5)
                 ->schema([
@@ -177,9 +205,10 @@ class LogsRelationManager extends RelationManager
                         ->disabled()
                         ->dehydrated(false)
                         ->mask(RawJs::make('$money($input, ".", ",", 2)')),
+                ]),
 
-            // ✅ NUEVA SECCIÓN: Evidence
             Section::make('Evidence')
+                ->icon('heroicon-o-paper-clip')
                 ->columnSpanFull()
                 ->description('Upload a PDF evidence file for this log row (optional).')
                 ->schema([
@@ -187,32 +216,31 @@ class LogsRelationManager extends RelationManager
                         ->label('Evidence (PDF)')
                         ->disk('s3')
                         ->directory('reinsurers/transactions/log_evidence')
-                        ->visibility('public') // o 'private'
+                        ->visibility('public')
                         ->openable()
                         ->downloadable()
-                        ->acceptedFileTypes([
-                            'application/pdf',
-                        ])
-                        ->maxSize(20480) // 20MB
+                        ->acceptedFileTypes(['application/pdf'])
+                        ->maxSize(20480)
                         ->helperText('Only PDF files are allowed.')
                         ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $record) {
-                            // En edición: usa el id real del log
-                            // En create (si aún no existe record): genera uno temporal
                             $id = $record?->id ?: (string) Str::uuid();
-
-                            // Como ya es PDF, forzamos extensión .pdf
                             return "{$id}.pdf";
                         }),
                 ]),
-
-
-            ]),
         ]);
+
     }
 
     public function table(Table $table): Table
     {
         return $table
+            ->heading(new \Illuminate\Support\HtmlString(
+                '<span style="display:flex;align-items:center;gap:0.5rem;">'
+                . '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;flex-shrink:0;">'
+                . '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>'
+                . '</svg>'
+                . 'Lifecycle Premium Payment</span>'
+            ))
             ->columns([
                 TextColumn::make('index')
                     ->label('#')
@@ -225,16 +253,46 @@ class LogsRelationManager extends RelationManager
 
                 TextColumn::make('fromPartner.short_name')
                     ->label('Source')
+                    ->formatStateUsing(fn (?string $state): string => $state ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $state)) : '—')
                     ->sortable()
                     ->searchable(),
 
                 TextColumn::make('toPartner.short_name')
                     ->label('Destination')
+                    ->formatStateUsing(fn (?string $state): string => $state ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $state)) : '—')
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('sent_date')->date(),
-                TextColumn::make('received_date')->date(),
+                TextColumn::make('due_date')
+                    ->label('Due Date')
+                    ->date()
+                    ->sortable()
+                    ->color(fn (TransactionLog $record): ?string =>
+                        $record->due_date && $record->status !== 'Completed' && now()->startOfDay()->gt($record->due_date->startOfDay())
+                            ? 'danger'
+                            : null
+                    )
+                    ->icon(fn (TransactionLog $record): ?string =>
+                        $record->due_date && $record->status !== 'Completed' && now()->startOfDay()->gt($record->due_date->startOfDay())
+                            ? 'heroicon-o-exclamation-triangle'
+                            : null
+                    )
+                    ->description(fn (TransactionLog $record): ?string =>
+                        $record->due_date && $record->status !== 'Completed'
+                            ? (function () use ($record): string {
+                                $days = (int) now()->startOfDay()->diffInDays($record->due_date->startOfDay(), false);
+                                return $days >= 0 ? "+{$days} days" : "{$days} days";
+                            })()
+                            : null
+                    ),
+
+                TextColumn::make('sent_date')
+                    ->label('Sent date')
+                    ->date(),
+
+                TextColumn::make('received_date')
+                    ->label('Received date')
+                    ->date(),
                 //TextColumn::make('gross_amount')->numeric(2),
                 TextColumn::make('gross_amount_calc')->label('Premium Fts')->numeric(2),
                 TextColumn::make('commission_discount')->label('Discount')->numeric(2),
@@ -304,7 +362,13 @@ class LogsRelationManager extends RelationManager
                             })
                     ),
 
-                TextColumn::make('status')->badge(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'Completed'  => 'success',
+                        'In process' => 'warning',
+                        default      => 'gray',
+                    }),
             ])
             ->defaultSort('index', 'asc')
             ->headerActions([
@@ -312,6 +376,7 @@ class LogsRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
+                    ->modalHeading(new \Illuminate\Support\HtmlString('<span style="font-size:1.375rem;font-weight:700;">Edit Settlement Stage</span>'))
                     ->mutateRecordDataUsing(function (array $data, $record): array {
                         $prevLog = TransactionLog::query()
                             ->where('transaction_id', $record->transaction_id)

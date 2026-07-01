@@ -19,7 +19,7 @@ class ViewTransaction extends ViewRecord
     
 public function getTitle(): string
     {
-        return 'View – ' . ($this->record?->name ?? 'Transaction');
+        return 'View Premium Payment Record';
     }
 
     protected function getRecordQuery(): Builder

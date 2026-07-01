@@ -133,6 +133,11 @@ class CreateTransaction extends CreateRecord
         ];
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
+
     protected function getFormDefaults(): array
     {
         return [
@@ -218,8 +223,9 @@ class CreateTransaction extends CreateRecord
                             : (string) $row['cost_scheme_option'],
                     );
 
+                    $lastLog = null;
                     foreach ($logs as $logRow) {
-                        TransactionLog::create([
+                        $lastLog = TransactionLog::create([
                             'transaction_id' => $transaction->id,
                             'index' => $logRow['index'] ?? null,
                             'deduction_type' => $logRow['deduction_id'] ?? null,
@@ -242,6 +248,10 @@ class CreateTransaction extends CreateRecord
                             'evidence_path' => null,
                             'banking_fee' => $logRow['banking_fee'] ?? 0,
                         ]);
+                    }
+
+                    if ($lastLog && filled($row['due_date'])) {
+                        $lastLog->updateQuietly(['due_date' => $row['due_date']]);
                     }
                 }
             } finally {

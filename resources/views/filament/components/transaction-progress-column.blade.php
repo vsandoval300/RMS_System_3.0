@@ -1,34 +1,46 @@
 @php
-    $progress = $getRecord()->lifecycleProgressPercentage();
+    $record = $getRecord();
 
-    $barColor = match (true) {
-        $progress >= 100 => '#22c55e',
-        $progress > 0 => '#65a30d',
-        default => '#9ca3af',
+    $logs = $record->relationLoaded('logs')
+        ? $record->logs->sortBy('index')->values()
+        : $record->logs()->withoutTrashed()->orderBy('index')->get();
+
+    $total     = $logs->count();
+    $completed = $logs->filter(fn ($l) => trim((string) $l->status) === 'Completed')->count();
+    $progress  = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
+
+    $dotStyle = function (string $status): array {
+        return match ($status) {
+            'Completed'  => ['bg' => '#22c55e', 'border' => '#16a34a'],
+            'In process' => ['bg' => '#f59e0b', 'border' => '#d97706'],
+            default      => ['bg' => 'transparent', 'border' => '#9ca3af'],
+        };
     };
 @endphp
 
-<div class="flex items-center gap-2 min-w-[120px]">
-    <div
-        style="
-            width: 90px;
-            height: 8px;
-            border-radius: 9999px;
-            overflow: hidden;
-            border: 1px solid light-dark(#d1d5db, #374151);
-            background-color: light-dark(#f9fafb, #111827);
-        "
-    >
-        <div
-            style="
-                width: {{ $progress }}%;
-                height: 100%;
-                background: {{ $barColor }};
-            "
-        ></div>
-    </div>
+<div class="flex items-center gap-1 flex-wrap">
 
-    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
-        {{ $progress }}%
-    </span>
+    @foreach ($logs as $log)
+        @php $style = $dotStyle(trim((string) $log->status)); @endphp
+
+        <div style="
+            width: 14px;
+            height: 14px;
+            border-radius: 9999px;
+            border: 2px solid {{ $style['border'] }};
+            background-color: {{ $style['bg'] }};
+            flex-shrink: 0;
+        "></div>
+
+        @if (! $loop->last)
+            <span style="font-size:10px; color: light-dark(#9ca3af,#6b7280); line-height:1;">›</span>
+        @endif
+    @endforeach
+
+    @if ($total > 0)
+        <span style="font-size:11px; font-weight:500; color: light-dark(#374151,#d1d5db); margin-left:4px;">
+            {{ $progress }}%
+        </span>
+    @endif
+
 </div>

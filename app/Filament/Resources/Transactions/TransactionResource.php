@@ -71,11 +71,11 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $navigationLabel  = 'Instalments';
-    protected static ?string $modelLabel       = 'Instalment';
-    protected static ?string $pluralModelLabel = 'Instalments';
+    protected static ?string $navigationLabel  = 'Premium Payment Tracker';
+    protected static ?string $modelLabel       = 'Premium Payment';
+    protected static ?string $pluralModelLabel = 'Premium Payment Tracker';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
     protected static string | \UnitEnum | null $navigationGroup = 'Transactions';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero
 
@@ -95,6 +95,7 @@ class TransactionResource extends Resource
             ->join('businesses', 'operative_docs.business_id', '=', 'businesses.id')
             ->join('reinsurers', 'businesses.reinsurer_id', '=', 'reinsurers.id')
             ->select('transactions.*')
+            ->with('logs')
             ->orderBy('reinsurers.name')
             ->orderBy('transactions.op_document_id')
             ->orderBy('transactions.index');
@@ -145,10 +146,23 @@ class TransactionResource extends Resource
                     ->columnSpanFull()
                     ->schema([
 
+                        TextInput::make('index_display')
+                            ->label('Index')
+                            ->visibleOn('edit')
+                            ->readOnly()
+                            ->dehydrated(false)
+                            ->formatStateUsing(function (?Transaction $record): string {
+                                if (! $record?->exists) return '—';
+                                $total = Transaction::where('op_document_id', $record->op_document_id)
+                                    ->whereNull('deleted_at')
+                                    ->count();
+                                return "{$record->index} of {$total}";
+                            })
+                            ->columnSpan(1),
+
                         Select::make('op_document_id')
                             ->label('Document')
                             ->placeholder('Select document.')
-                            //->helperText('Choose the document to be used for transaction generation.')
                             ->relationship('operativeDoc', 'id')
                             ->searchable()
                             ->disabled(fn (?Transaction $record) => $record?->exists)
@@ -157,7 +171,7 @@ class TransactionResource extends Resource
                             ->optionsLimit(10000)
                             ->required()
                             ->live()
-                            ->columnSpan(2)
+                            ->columnSpan(fn (string $operation) => $operation === 'edit' ? 2 : 2)
                             ->default(fn () => request()->query('op_document_id'))
                             ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
                                 if ($record?->exists || blank($state)) {
@@ -243,7 +257,7 @@ class TransactionResource extends Resource
                             ->viewData(fn (?Transaction $record) => [
                                 'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
                             ])
-                            ->columnSpan(2),
+                            ->columnSpan(1),
 
 
                         TextInput::make('installment_number')
@@ -674,7 +688,8 @@ protected static function applyDocumentDefaults(?string $opDocumentId, Get $get,
 public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
-        Section::make('Transaction Profile')
+        Section::make('Premium Payment Information')
+            ->icon('heroicon-o-banknotes')
             ->columnSpanFull()
             ->schema([
                 \Filament\Schemas\Components\Grid::make()
@@ -722,7 +737,12 @@ public static function infolist(Schema $schema): Schema
                                             ->columnSpan(3),
 
                                         TextEntry::make('index')->hiddenLabel()
-                                            ->state(fn ($record) => $record->index ?: '—')
+                                            ->state(function ($record) {
+                                                if (! $record?->index) return '—';
+                                                $total = Transaction::where('op_document_id', $record->op_document_id)
+                                                    ->whereNull('deleted_at')->count();
+                                                return "{$record->index} of {$total}";
+                                            })
                                             ->columnSpan(9),
                                     ]),
 
@@ -988,7 +1008,7 @@ public static function infolist(Schema $schema): Schema
                                 ->whereNull('deleted_at')
                                 ->count();
                         }
-                        return "{$state} / {$countCache[$docId]}";
+                        return "{$state} of {$countCache[$docId]}";
                     }),
 
                 TextColumn::make('proportion')
