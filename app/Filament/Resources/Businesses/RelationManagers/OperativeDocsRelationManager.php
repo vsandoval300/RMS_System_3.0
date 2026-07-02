@@ -1923,22 +1923,36 @@ class OperativeDocsRelationManager extends RelationManager
                     // Buscar el Slip original
                     $slip = $business->operativeDocs()
                         ->where('operative_doc_type_id', 1)
-                        ->with('schemes')
+                        ->with([
+                            'schemes',
+                            'insureds',
+                        ])
                         ->first();
+
+                    $schemes = $slip?->schemes
+                        ->sortBy('index')
+                        ->map(fn ($scheme) => [
+                            'cscheme_id' => $scheme->cscheme_id,
+                        ])
+                        ->values()
+                        ->all() ?? [];
+                    
+                    $insureds = $slip?->insureds
+                        ->map(fn ($insured) => [
+                            'company_id'  => $insured->company_id,
+                            'cscheme_id'  => $insured->cscheme_id,
+                            'coverage_id' => $insured->coverage_id,
+                            'premium'     => $insured->premium,
+                        ])
+                        ->values()
+                        ->all() ?? [];
 
 
                     $action->fillForm([
                         'id' => $generatedId,
                         'roe_fs' => number_format((float) ($slip?->roe_fs ?? 1), 8, '.', ''),
-                        'schemes' => $slip
-                            ? $slip->schemes
-                                ->sortBy('index')
-                                ->map(fn ($scheme) => [
-                                    'cscheme_id' => $scheme->cscheme_id,
-                                ])
-                                ->values()
-                                ->all()
-                            : [],
+                        'schemes'  => $schemes,
+                        'insureds' => $insureds,
                     ]);
 
 
