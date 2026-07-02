@@ -386,6 +386,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             // ✅ Hidratar correctamente
                                                             ->afterStateHydrated(function ($component, $state, $record, $livewire) {
+                                                                
 
                                                                 $isUsd = method_exists($livewire, 'getOwnerRecord')
                                                                     && (int) $livewire->getOwnerRecord()?->currency_id === 157;
@@ -1194,7 +1195,7 @@ class OperativeDocsRelationManager extends RelationManager
                 // 🟡 SUMMARY Section
                 // ──────────────────────────────────────────────────────────────────────────────
 
-                   Section::make()
+                   /* Section::make()
                     ->schema([
                         Placeholder::make('spacer')
                             ->label('')
@@ -1248,7 +1249,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ])
                     ->columnSpanFull()
                     ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'summary')
-                    ->hiddenOn('view'),
+                    ->hiddenOn('view'), */
                         
 
                     Section::make('Overview')
@@ -1919,8 +1920,15 @@ class OperativeDocsRelationManager extends RelationManager
                     $newIndex = $lastIndex ? $lastIndex + 1 : 1;
                     $generatedId = $business->business_code . '-' . str_pad($newIndex, 2, '0', STR_PAD_LEFT);
 
+                    // Buscar el Slip original
+                    $roe_fs = $business->operativeDocs()
+                    ->where('operative_doc_type_id', 1)
+                    ->value('roe_fs');
+
+
                     $action->fillForm([
                         'id' => $generatedId,
+                        'roe_fs' => number_format((float) ($roe_fs ?? 1), 8, '.', ''),
                     ]);
 
 
