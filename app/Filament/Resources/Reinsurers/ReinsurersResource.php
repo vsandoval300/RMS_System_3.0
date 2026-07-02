@@ -508,10 +508,12 @@ public static function infolist(Schema $schema): Schema
                 ->schema([
 
                     /* ── Cols 1–2: filas compactas "Label + Value" ── */
-                    Grid::make(1)
+                    Section::make()->compact()
                         ->columnSpan(2)
-                        ->extraAttributes(['style' => 'row-gap: 0;'])
                         ->schema([
+                            Grid::make(1)
+                                ->extraAttributes(['style' => 'row-gap: 0;'])
+                                ->schema([
 
                             // Name
                             Grid::make(12)
@@ -656,6 +658,7 @@ public static function infolist(Schema $schema): Schema
                                         ->state(fn ($record) => $record->cns_reinsurer ?: '—')
                                         ->columnSpan(9),
                                 ]),
+                                ]),
                         ]),
 
                     /* ── Col 3: Branding (logo arriba / icon abajo, mismo alto) ── */
@@ -665,6 +668,7 @@ public static function infolist(Schema $schema): Schema
                                 ->schema([
 
                                     // LOGO
+                                    Section::make('Logo')->compact()->schema([
                                     ImageEntry::make('logo_img')
                                         ->label('Logo')
                                         ->disk('s3')
@@ -701,8 +705,10 @@ public static function infolist(Schema $schema): Schema
                                         ')
                                         ->visible(fn ($record) => blank($record->logo))
                                         ->extraAttributes(['style' => 'margin:0; padding:0;']),
+                                    ]),
 
                                     // ICON
+                                    Section::make('Icon')->compact()->schema([
                                     ImageEntry::make('icon_img')
                                         ->label('Icon')
                                         ->disk('s3')
@@ -749,6 +755,7 @@ public static function infolist(Schema $schema): Schema
                                         })
                                         ->visible(fn ($record) => blank($record->icon))
                                         ->extraAttributes(['style' => 'margin:0; padding:0;']),
+                                    ]),
                                 ]),
                     ]),
             ])
