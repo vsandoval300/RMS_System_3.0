@@ -22,6 +22,11 @@ class UnderwrittenOverview extends Widget implements HasForms, HasActions
 
     public ?int $reinsurer = null;
 
+    public function updatedReinsurer(): void
+    {
+        $this->dispatch('reinsurer-filter-changed', reinsurer: $this->reinsurer);
+    }
+
     protected function getFormSchema(): array
     {
         return [

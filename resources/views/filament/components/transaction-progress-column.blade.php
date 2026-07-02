@@ -38,7 +38,7 @@
     @endforeach
 
     @if ($total > 0)
-        <span style="font-size:11px; font-weight:500; color: light-dark(#374151,#d1d5db); margin-left:4px;">
+        <span style="font-size:14px; font-weight:500; color: light-dark(#374151,#d1d5db); margin-left:4px;">
             {{ $progress }}%
         </span>
     @endif

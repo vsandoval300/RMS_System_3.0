@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Reinsurer;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 
 class UnderwrittenBusinessAnual extends ChartWidget
 {
@@ -13,6 +14,12 @@ class UnderwrittenBusinessAnual extends ChartWidget
 
     public ?int $reinsurer = null;
     protected static bool $isLazy = false;
+
+    #[On('reinsurer-filter-changed')]
+    public function updateReinsurer(?int $reinsurer): void
+    {
+        $this->reinsurer = $reinsurer;
+    }
     protected ?string $maxHeight = '300px';
 
     protected function getData(): array

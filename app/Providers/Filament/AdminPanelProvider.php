@@ -66,13 +66,46 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             
             ->navigationGroups([
-                NavigationGroup::make('Resources')->collapsed(),
-                NavigationGroup::make('Banks')->collapsed(),
-                NavigationGroup::make('Customers')->collapsed(),
-                NavigationGroup::make('Compliance')->collapsed(),
-                NavigationGroup::make('Reinsurers')->collapsed(),
-                NavigationGroup::make('Underwritten')->collapsed(),
-                NavigationGroup::make('Transactions')->collapsed(),
+                NavigationGroup::make('Security')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Resources')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Banks')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Customers')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Compliance')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Reinsurers')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Underwritten')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Transactions')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
                 NavigationGroup::make('Filament Shield')
                     ->collapsed(),
             ])

@@ -17,18 +17,5 @@ class UnderwrittenDashboard extends Page
 
     protected string $view = 'filament.pages.underwritten-dashboard';
 
-    // Widgets que se muestran arriba del contenido
-    protected function getHeaderWidgets(): array
-    {
-        return [
-
-            UnderwrittenOverview::class,
-            UnderwrittenProfile::class,
-        ];
-    }
-
-    public function getHeaderWidgetsColumns(): int|array
-    {
-        return 1;
-    }
+    public string $activeTab = 'overview';
 }

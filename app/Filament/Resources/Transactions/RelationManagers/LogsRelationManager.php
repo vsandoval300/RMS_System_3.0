@@ -257,6 +257,12 @@ class LogsRelationManager extends RelationManager
                     ->sortable()
                     ->searchable(),
 
+                TextColumn::make('flow_direction')
+                    ->label('')
+                    ->state(fn (TransactionLog $record) => '→')
+                    ->color('gray')
+                    ->alignCenter(),
+
                 TextColumn::make('toPartner.short_name')
                     ->label('Destination')
                     ->formatStateUsing(fn (?string $state): string => $state ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $state)) : '—')
