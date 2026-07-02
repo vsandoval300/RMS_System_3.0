@@ -1921,14 +1921,24 @@ class OperativeDocsRelationManager extends RelationManager
                     $generatedId = $business->business_code . '-' . str_pad($newIndex, 2, '0', STR_PAD_LEFT);
 
                     // Buscar el Slip original
-                    $roe_fs = $business->operativeDocs()
-                    ->where('operative_doc_type_id', 1)
-                    ->value('roe_fs');
+                    $slip = $business->operativeDocs()
+                        ->where('operative_doc_type_id', 1)
+                        ->with('schemes')
+                        ->first();
 
 
                     $action->fillForm([
                         'id' => $generatedId,
-                        'roe_fs' => number_format((float) ($roe_fs ?? 1), 8, '.', ''),
+                        'roe_fs' => number_format((float) ($slip?->roe_fs ?? 1), 8, '.', ''),
+                        'schemes' => $slip
+                            ? $slip->schemes
+                                ->sortBy('index')
+                                ->map(fn ($scheme) => [
+                                    'cscheme_id' => $scheme->cscheme_id,
+                                ])
+                                ->values()
+                                ->all()
+                            : [],
                     ]);
 
 
