@@ -5,7 +5,7 @@ namespace App\Filament\Underwritten\Widgets;
 use App\Models\Business;
 use App\Services\PremiumForPeriodService;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class UnderwrittenPremium extends ChartWidget
 {
@@ -23,6 +23,13 @@ class UnderwrittenPremium extends ChartWidget
         return [
             'refreshChart' => '$refresh',
         ];
+    }
+
+    #[On('analytics-filters-updated')]
+    public function updateFromAnalyticsFilters(int $year, ?int $reinsurer): void
+    {
+        $this->reinsurer = $reinsurer;
+        $this->years     = [$year];
     }
 
     protected function getData(): array

@@ -670,7 +670,7 @@ public static function infolist(Schema $schema): Schema
                                     // LOGO
                                     Section::make('Logo')->compact()->schema([
                                     ImageEntry::make('logo_img')
-                                        ->label('Logo')
+                                        ->hiddenLabel()
                                         ->disk('s3')
                                         ->visibility('public')
                                         ->getStateUsing(fn ($record) => $record->logo)
@@ -690,7 +690,7 @@ public static function infolist(Schema $schema): Schema
                                         ]),
 
                                     TextEntry::make('logo_placeholder')
-                                        ->label('Logo')
+                                        ->hiddenLabel()
                                         ->weight('bold')
                                         ->html()
                                         ->state('
@@ -710,7 +710,7 @@ public static function infolist(Schema $schema): Schema
                                     // ICON
                                     Section::make('Icon')->compact()->schema([
                                     ImageEntry::make('icon_img')
-                                        ->label('Icon')
+                                        ->hiddenLabel()
                                         ->disk('s3')
                                         ->visibility('public')
                                         ->getStateUsing(fn ($record) => $record->icon)
@@ -730,7 +730,7 @@ public static function infolist(Schema $schema): Schema
                                         ]),
 
                                     TextEntry::make('icon_fallback')
-                                        ->label('Icon')
+                                        ->hiddenLabel()
                                         ->weight('bold')
                                         ->html()
                                         ->state(function ($record) {

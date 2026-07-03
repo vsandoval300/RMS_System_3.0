@@ -3,6 +3,7 @@
 namespace App\Filament\Underwritten\Widgets;
 
 use App\Models\OperativeDoc;
+use App\Models\Reinsurer;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
@@ -11,11 +12,65 @@ class ReinsurerPremiumComparison extends Widget
 {
     protected string $view = 'filament.widgets.reinsurer-premium-comparison';
 
-    public int $selectedYear;
+    public int    $selectedYear;
+    public ?int   $selectedReinsurer = null;
+    public string $sortColumn        = 'code';
+    public string $chartView         = 'table';
 
     public function mount(): void
     {
         $this->selectedYear = now()->year;
+    }
+
+    public function updatedSelectedYear(): void
+    {
+        $this->dispatchFiltersUpdated();
+    }
+
+    public function updatedSelectedReinsurer(): void
+    {
+        $this->dispatchFiltersUpdated();
+    }
+
+    public function setSortColumn(string $column): void
+    {
+        $this->sortColumn = $column;
+    }
+
+    private function dispatchFiltersUpdated(): void
+    {
+        $this->dispatch('analytics-filters-updated',
+            year:      $this->selectedYear,
+            reinsurer: $this->selectedReinsurer,
+        );
+    }
+
+    public function getReinsurers(): array
+    {
+        return Reinsurer::orderBy('short_name')
+            ->pluck('short_name', 'id')
+            ->toArray();
+    }
+
+    public function getBusinessCounts(): array
+    {
+        $year     = $this->selectedYear;
+        $prevYear = $year - 1;
+
+        $counts = DB::table('operative_docs as d')
+            ->when($this->selectedReinsurer, fn ($q) =>
+                $q->join('businesses as b', 'b.business_code', '=', 'd.business_code')
+                  ->where('b.reinsurer_id', $this->selectedReinsurer)
+            )
+            ->selectRaw('EXTRACT(YEAR FROM d.rep_date)::int as year, COUNT(DISTINCT d.business_code) as cnt')
+            ->whereRaw('EXTRACT(YEAR FROM d.rep_date) IN (?, ?)', [$year, $prevYear])
+            ->groupByRaw('EXTRACT(YEAR FROM d.rep_date)')
+            ->pluck('cnt', 'year');
+
+        return [
+            'ac' => (int) ($counts[$year]     ?? 0),
+            'pl' => (int) ($counts[$prevYear] ?? 0),
+        ];
     }
 
     public function getAvailableYears(): array
@@ -43,6 +98,11 @@ class ReinsurerPremiumComparison extends Widget
             ->where(fn ($q) => $q
                 ->whereYear('rep_date', $year)
                 ->orWhereYear('rep_date', $prevYear)
+            )
+            ->when($this->selectedReinsurer, fn ($q) =>
+                $q->whereHas('business', fn ($b) =>
+                    $b->where('reinsurer_id', $this->selectedReinsurer)
+                )
             )
             ->get();
 
@@ -89,18 +149,25 @@ class ReinsurerPremiumComparison extends Widget
             return [];
         }
 
-        uasort($byReinsurer, fn ($a, $b) => strnatcasecmp((string) $a['cns_code'], (string) $b['cns_code']));
+        if ($this->sortColumn === 'ac') {
+            uasort($byReinsurer, fn ($a, $b) => $b['ac'] <=> $a['ac']);
+        } else {
+            uasort($byReinsurer, fn ($a, $b) => strnatcasecmp((string) $a['cns_code'], (string) $b['cns_code']));
+        }
 
         $deltas = array_values(array_map(fn ($r) => abs($r['ac'] - $r['pl']), $byReinsurer));
         $maxAbsDelta = max(1, ...$deltas);
 
         return array_values(array_map(fn ($name, $r) => [
-            'name'     => $name,
-            'cns_code' => $r['cns_code'],
-            'ac'       => $r['ac'],
-            'pl'       => $r['pl'],
-            'delta'    => $r['ac'] - $r['pl'],
-            'bar_pct'  => round(abs($r['ac'] - $r['pl']) / $maxAbsDelta * 100, 1),
+            'name'      => $name,
+            'cns_code'  => $r['cns_code'],
+            'ac'        => $r['ac'],
+            'pl'        => $r['pl'],
+            'delta'     => $r['ac'] - $r['pl'],
+            'bar_pct'   => round(abs($r['ac'] - $r['pl']) / $maxAbsDelta * 100, 1),
+            'delta_pct' => $r['pl'] > 0
+                ? round(($r['ac'] - $r['pl']) / $r['pl'] * 100, 1)
+                : ($r['ac'] > 0 ? 100.0 : 0.0),
         ], array_keys($byReinsurer), $byReinsurer));
     }
 }

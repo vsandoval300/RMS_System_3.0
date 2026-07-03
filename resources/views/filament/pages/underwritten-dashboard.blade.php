@@ -51,6 +51,10 @@
     {{-- Tab 2: Analytics --}}
     @if ($activeTab === 'analytics')
         @livewire(\App\Filament\Underwritten\Widgets\ReinsurerPremiumComparison::class)
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            @livewire(\App\Filament\Underwritten\Widgets\AnalyticsBusinessChart::class, key('analytics-business'))
+            @livewire(\App\Filament\Underwritten\Widgets\AnalyticsPremiumChart::class, key('analytics-premium'))
+        </div>
     @endif
 
 </x-filament-panels::page>
