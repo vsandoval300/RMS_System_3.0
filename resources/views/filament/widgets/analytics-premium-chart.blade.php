@@ -17,7 +17,7 @@
     <h3 style="font-size:1.05rem; font-weight:600; margin:0 0 2px; color:light-dark(#111827,#f3f4f6);">
         Underwritten Premium Profile
     </h3>
-    <p style="font-size:0.72rem; color:light-dark(#9ca3af,#6b7280); margin:0 0 0.75rem;">
+    <p style="font-size:0.875rem; color:light-dark(#9ca3af,#6b7280); margin:0 0 0.75rem;">
         AC: {{ $this->year }} &nbsp;vs&nbsp; PL: {{ $this->year - 1 }}
     </p>
 
@@ -55,8 +55,8 @@
                     flex-direction: column;
                     align-items: center;
                 ">
-                    <span style="font-size:0.65rem; font-weight:700; color:{{ $color }}; line-height:1.2;">{{ $arrow }}</span>
-                    <span style="font-size:0.65rem; font-weight:700; color:{{ $color }}; line-height:1.2; white-space:nowrap;">{{ $sign }}{{ $row['delta_pct'] }}%</span>
+                    <span style="font-size:0.80rem; font-weight:700; color:{{ $color }}; line-height:1.2;">{{ $arrow }}</span>
+                    <span style="font-size:0.80rem; font-weight:700; color:{{ $color }}; line-height:1.2; white-space:nowrap;">{{ $sign }}{{ $row['delta_pct'] }}%</span>
                 </div>
 
                 {{-- Bar --}}
@@ -75,12 +75,12 @@
             </div>
 
             {{-- AC value --}}
-            <div style="font-size:0.72rem; font-weight:500; color:light-dark(#6b7280,#9ca3af); text-align:center; margin-top:5px; white-space:nowrap;">
+            <div style="font-size:0.85rem; font-weight:500; color:light-dark(#6b7280,#9ca3af); text-align:center; margin-top:5px; white-space:nowrap;">
                 {{ $fmt($row['ac']) }}
             </div>
 
             {{-- Month label --}}
-            <div style="font-size:0.72rem; color:light-dark(#9ca3af,#6b7280); text-align:center; margin-top:2px;">
+            <div style="font-size:0.85rem; color:light-dark(#9ca3af,#6b7280); text-align:center; margin-top:2px;">
                 {{ $row['month'] }}
             </div>
 

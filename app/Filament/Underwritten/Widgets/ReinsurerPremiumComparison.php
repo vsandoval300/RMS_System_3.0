@@ -2,6 +2,7 @@
 
 namespace App\Filament\Underwritten\Widgets;
 
+use App\Models\Business;
 use App\Models\OperativeDoc;
 use App\Models\Reinsurer;
 use Carbon\Carbon;
@@ -47,8 +48,15 @@ class ReinsurerPremiumComparison extends Widget
 
     public function getReinsurers(): array
     {
-        return Reinsurer::orderBy('short_name')
-            ->pluck('short_name', 'id')
+        $ids = Business::withoutGlobalScopes()
+            ->whereNotNull('reinsurer_id')
+            ->whereNull('deleted_at')
+            ->distinct()
+            ->pluck('reinsurer_id');
+
+        return Reinsurer::whereIn('id', $ids)
+            ->orderBy('name')
+            ->pluck('name', 'id')
             ->toArray();
     }
 

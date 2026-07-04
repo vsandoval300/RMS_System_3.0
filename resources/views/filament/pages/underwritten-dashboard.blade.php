@@ -25,6 +25,23 @@
         </button>
 
         <button
+            wire:click="$set('activeTab', 'portfolio')"
+            style="
+                padding: 10px 20px;
+                font-size: 1rem;
+                font-weight: 500;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                transition: all .15s;
+                {{ $activeTab === 'portfolio'
+                    ? 'color:#41A2C3; border-bottom:2px solid #41A2C3; margin-bottom:-1px;'
+                    : 'color: light-dark(#6b7280,#9ca3af); border-bottom:2px solid transparent; margin-bottom:-1px;' }}"
+        >
+            Portfolio Growth
+        </button>
+
+        <button
             wire:click="$set('activeTab', 'analytics')"
             style="
                 padding: 10px 20px;
@@ -38,7 +55,7 @@
                     ? 'color:#41A2C3; border-bottom:2px solid #41A2C3; margin-bottom:-1px;'
                     : 'color: light-dark(#6b7280,#9ca3af); border-bottom:2px solid transparent; margin-bottom:-1px;' }}"
         >
-            Analytics
+            Reinsurer Metrics
         </button>
     </div>
 
@@ -48,7 +65,12 @@
         @livewire(\App\Filament\Underwritten\Widgets\UnderwrittenProfile::class)
     @endif
 
-    {{-- Tab 2: Analytics --}}
+    {{-- Tab 2: Portfolio Growth --}}
+    @if ($activeTab === 'portfolio')
+        @livewire(\App\Filament\Underwritten\Widgets\PortfolioGrowth::class)
+    @endif
+
+    {{-- Tab 3: Reinsurer Metrics --}}
     @if ($activeTab === 'analytics')
         @livewire(\App\Filament\Underwritten\Widgets\ReinsurerPremiumComparison::class)
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
