@@ -1082,6 +1082,48 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 : null
                                                             )
                                                             ->step(0.01)
+                                                            // Si el documento es Endorsement B, al cargar el repeater
+                                                            // el Premium se fuerza a 0.
+                                                            ->afterStateHydrated(function (Get $get, Set $set) {
+
+                                                                $docType = (int) $get('../../operative_doc_type_id');
+
+                                                                // Cambia el 3 por el ID real de Endorsement B
+                                                                if ($docType === 4) {
+                                                                    $set('premium', 0);
+                                                                }
+                                                            })
+
+                                                            // No permitir editar el Premium para Endorsement B
+                                                            ->readOnly(function (Get $get) {
+
+                                                                $docType = (int) $get('../../operative_doc_type_id');
+
+                                                                return $docType === 4;
+                                                            })
+
+                                                            // Validación de servidor
+                                                            ->rule(function (Get $get) {
+
+                                                                return function (string $attribute, $value, \Closure $fail) use ($get) {
+
+                                                                    $docType = (int) $get('../../operative_doc_type_id');
+
+                                                                    if ($docType !== 4) {
+                                                                        return;
+                                                                    }
+
+                                                                    $premium = (float) str_replace(
+                                                                        [',', '$', ' '],
+                                                                        '',
+                                                                        (string) $value
+                                                                    );
+
+                                                                    if ($premium > 0) {
+                                                                        $fail('Premium must be equal to 0 for Endorsement B.');
+                                                                    }
+                                                                };
+                                                            })
                                                             ->required()
                                                             ->columnSpan(2),
                                                     ])
@@ -1942,7 +1984,7 @@ class OperativeDocsRelationManager extends RelationManager
                             'company_id'  => $insured->company_id,
                             'cscheme_id'  => $insured->cscheme_id,
                             'coverage_id' => $insured->coverage_id,
-                            'premium'     => $insured->premium,
+                            'premium'     => null,
                         ])
                         ->values()
                         ->all() ?? [];
