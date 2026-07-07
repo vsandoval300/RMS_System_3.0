@@ -261,7 +261,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                                 return $slipExists ? null : 1;
                                                             })
-                                                            ->afterStateHydrated(function (Set $set, $record, $state) {
+                                                            ->afterStateHydrated(function (Set $set,Get $get, $record, $state) {
                                                                 if ($record) {
                                                                     return; // Edit: no tocar
                                                                 }
@@ -276,6 +276,33 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 if (! $slipExists && blank($state)) {
                                                                     $set('operative_doc_type_id', 1);
                                                                 }
+                                                            })
+                                                            ->afterStateUpdated(function (Set $set, Get $get, $state) {
+
+                                                                logger()->info('Document Type changed', [
+                                                                    'state' => $state,
+                                                                    'insureds' => $get('insureds'),
+                                                                ]);
+
+                                                                $insureds = collect($get('insureds') ?? []);
+
+                                                                if ($insureds->isEmpty()) {
+                                                                    return;
+                                                                }
+
+                                                                $insureds = $insureds
+                                                                    ->map(function ($insured) use ($state) {
+
+                                                                        $insured['premium'] = ((int) $state === 4)
+                                                                            ? 0
+                                                                            : null;
+
+                                                                        return $insured;
+                                                                    })
+                                                                    ->values()
+                                                                    ->all();
+
+                                                                $set('insureds', $insureds);
                                                             })
                                                             ->disabled(function ($record) {
                                                                 if ($record) {
