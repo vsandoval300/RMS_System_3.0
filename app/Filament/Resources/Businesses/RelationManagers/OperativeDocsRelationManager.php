@@ -191,7 +191,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->disabled()
                                                             ->dehydrated() //CAMBIO
                                                             ->required()
-                                                            ->columnSpan(8),
+                                                            ->columnSpan(10),
                                                      ]),
                                            /* ])
                                             ->compact(), */
