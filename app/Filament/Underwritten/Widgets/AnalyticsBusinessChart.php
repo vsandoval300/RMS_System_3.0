@@ -12,8 +12,10 @@ class AnalyticsBusinessChart extends Widget
     protected int|string|array $columnSpan = 1;
     protected static bool $isLazy = false;
 
-    public int $year;
-    public ?int $reinsurer = null;
+    public int     $year;
+    public ?int    $reinsurer  = null;
+    public bool    $showPlan   = false;
+    public ?string $budgetId   = null;
 
     public function mount(): void
     {
@@ -25,6 +27,15 @@ class AnalyticsBusinessChart extends Widget
     {
         $this->year      = $year;
         $this->reinsurer = $reinsurer;
+    }
+
+    #[On('budget-plan-filters-updated')]
+    public function updateFromBudgetFilters(int $year, ?int $reinsurer, bool $showPlan, ?string $budgetId): void
+    {
+        $this->year      = $year;
+        $this->reinsurer = $reinsurer;
+        $this->showPlan  = $showPlan;
+        $this->budgetId  = $budgetId;
     }
 
     public function getChartData(): array

@@ -25,7 +25,7 @@
     $withoutOpDelta= $withoutOpAc - $withoutOpPl;
 @endphp
 
-<div>
+<x-filament::section heading="Reinsurer Metrics">
 
     {{-- ── Filter bar ── --}}
     <div style="
@@ -94,88 +94,159 @@
     </div>
 
     {{-- ── Stat tiles ── --}}
-    <div style="display:flex; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+    <style>
+        .rpc-tiles {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
+            margin-bottom: 0.6rem;
+        }
+        @media (max-width: 800px) { .rpc-tiles { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .rpc-tiles { grid-template-columns: 1fr; } }
 
-        {{-- Tile: Gross Premium --}}
-        <div style="
+        .rpc-tile {
             background: light-dark(#ffffff, #1e2533);
             border: 1px solid light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.08));
             border-radius: 12px;
-            padding: 1.1rem 1.5rem;
-            min-width: 180px;
-            text-align: center;
-        ">
-            <div style="font-size:0.95rem; font-weight:500; color:light-dark(#6b7280,#9ca3af); margin-bottom:6px;">
-                Gross Premium (USD)
+            padding: 1rem 1.25rem 0.85rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .rpc-tile-accent {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+        }
+        .rpc-tile-label {
+            font-size: 0.81rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: light-dark(#9ca3af, #6b7280);
+            margin-bottom: 0.3rem;
+            margin-top: 0.25rem;
+        }
+        .rpc-tile-value {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: light-dark(#111827, #f3f4f6);
+            line-height: 1.15;
+            font-variant-numeric: tabular-nums;
+        }
+        .rpc-tile-delta {
+            font-size: 0.84rem;
+            font-weight: 600;
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .rpc-tile-context {
+            font-size: 0.87rem;
+            color: light-dark(#9ca3af, #6b7280);
+            margin-top: 0.45rem;
+            padding-top: 0.45rem;
+            border-top: 1px solid light-dark(rgba(0,0,0,0.06), rgba(255,255,255,0.06));
+            line-height: 1.4;
+        }
+        .rpc-tile-context b {
+            color: light-dark(#6b7280, #9ca3af);
+            font-weight: 600;
+        }
+    </style>
+
+    <div class="rpc-tiles">
+
+        {{-- Tile: Gross Premium --}}
+        <div class="rpc-tile">
+            <div class="rpc-tile-accent" style="background: linear-gradient(90deg, #3b82f6, #6366f1);"></div>
+            <div class="rpc-tile-label">Gross Premium (USD)</div>
+            <div class="rpc-tile-value">{{ $fmt($totalAc) }}</div>
+            <div class="rpc-tile-delta" style="color:{{ $totalDelta >= 0 ? '#65a30d' : '#dc2626' }};">
+                {{ $totalDelta >= 0 ? '▲' : '▼' }}
+                {{ $totalDelta >= 0 ? '+' : '' }}{{ $fmt($totalDelta) }}
+                <span style="font-weight:400; color:light-dark(#9ca3af,#6b7280);">ΔPY</span>
             </div>
-            <div style="font-size:1.9rem; font-weight:700; color:light-dark(#111827,#f3f4f6); line-height:1.1;">
-                {{ $fmt($totalAc) }}
-            </div>
-            <div style="font-size:0.9rem; font-weight:600; margin-top:6px; color:{{ $totalDelta >= 0 ? '#65a30d' : '#dc2626' }};">
-                {{ $totalDelta >= 0 ? '+' : '' }}{{ $fmt($totalDelta) }}&nbsp;<span style="font-weight:400; opacity:0.8;">ΔPL</span>
+            <div class="rpc-tile-context">
+                <b>AC {{ $this->selectedYear }}</b> vs <b>PY {{ $prevYear }}</b> · Total gross written premium across all reinsurers
             </div>
         </div>
 
         {{-- Tile: Businesses --}}
-        <div style="
-            background: light-dark(#ffffff, #1e2533);
-            border: 1px solid light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.08));
-            border-radius: 12px;
-            padding: 1.1rem 1.5rem;
-            min-width: 180px;
-            text-align: center;
-        ">
-            <div style="font-size:0.95rem; font-weight:500; color:light-dark(#6b7280,#9ca3af); margin-bottom:6px;">
-                Businesses
+        <div class="rpc-tile">
+            <div class="rpc-tile-accent" style="background: linear-gradient(90deg, #10b981, #059669);"></div>
+            <div class="rpc-tile-label">Businesses</div>
+            <div class="rpc-tile-value">{{ number_format($biz['ac']) }}</div>
+            <div class="rpc-tile-delta" style="color:{{ $bizDelta >= 0 ? '#65a30d' : '#dc2626' }};">
+                {{ $bizDelta >= 0 ? '▲' : '▼' }}
+                {{ $bizDelta >= 0 ? '+' : '' }}{{ number_format($bizDelta) }}
+                <span style="font-weight:400; color:light-dark(#9ca3af,#6b7280);">ΔPY</span>
             </div>
-            <div style="font-size:1.9rem; font-weight:700; color:light-dark(#111827,#f3f4f6); line-height:1.1;">
-                {{ number_format($biz['ac']) }}
-            </div>
-            <div style="font-size:0.9rem; font-weight:600; margin-top:6px; color:{{ $bizDelta >= 0 ? '#65a30d' : '#dc2626' }};">
-                {{ $bizDelta >= 0 ? '+' : '' }}{{ number_format($bizDelta) }}&nbsp;<span style="font-weight:400; opacity:0.8;">ΔPL</span>
+            <div class="rpc-tile-context">
+                Underwritten policies bound in <b>{{ $this->selectedYear }}</b> · Prior year: <b>{{ number_format($biz['pl']) }}</b>
             </div>
         </div>
 
         {{-- Tile: With Operation --}}
-        <div style="
-            background: light-dark(#ffffff, #1e2533);
-            border: 1px solid light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.08));
-            border-radius: 12px;
-            padding: 1.1rem 1.5rem;
-            min-width: 180px;
-            text-align: center;
-        ">
-            <div style="font-size:0.95rem; font-weight:500; color:light-dark(#6b7280,#9ca3af); margin-bottom:6px;">
-                With Operation
+        <div class="rpc-tile">
+            <div class="rpc-tile-accent" style="background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+            <div class="rpc-tile-label">With Operation</div>
+            <div class="rpc-tile-value">{{ number_format($withOpAc) }}</div>
+            <div class="rpc-tile-delta" style="color:{{ $withOpDelta >= 0 ? '#65a30d' : '#dc2626' }};">
+                {{ $withOpDelta >= 0 ? '▲' : '▼' }}
+                {{ $withOpDelta >= 0 ? '+' : '' }}{{ number_format($withOpDelta) }}
+                <span style="font-weight:400; color:light-dark(#9ca3af,#6b7280);">ΔPY</span>
             </div>
-            <div style="font-size:1.9rem; font-weight:700; color:light-dark(#111827,#f3f4f6); line-height:1.1;">
-                {{ number_format($withOpAc) }}
-            </div>
-            <div style="font-size:0.9rem; font-weight:600; margin-top:6px; color:{{ $withOpDelta >= 0 ? '#65a30d' : '#dc2626' }};">
-                {{ $withOpDelta >= 0 ? '+' : '' }}{{ number_format($withOpDelta) }}&nbsp;<span style="font-weight:400; opacity:0.8;">ΔPL</span>
+            <div class="rpc-tile-context">
+                Reinsurers with premium &gt; 0 in <b>{{ $this->selectedYear }}</b> · Prior year: <b>{{ number_format($withOpPl) }}</b>
             </div>
         </div>
 
         {{-- Tile: Without Operation --}}
-        <div style="
-            background: light-dark(#ffffff, #1e2533);
-            border: 1px solid light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.08));
-            border-radius: 12px;
-            padding: 1.1rem 1.5rem;
-            min-width: 180px;
-            text-align: center;
-        ">
-            <div style="font-size:0.95rem; font-weight:500; color:light-dark(#6b7280,#9ca3af); margin-bottom:6px;">
-                Without Operation
+        <div class="rpc-tile">
+            <div class="rpc-tile-accent" style="background: linear-gradient(90deg, #8b5cf6, #6d28d9);"></div>
+            <div class="rpc-tile-label">Without Operation</div>
+            <div class="rpc-tile-value">{{ number_format($withoutOpAc) }}</div>
+            <div class="rpc-tile-delta" style="color:{{ $withoutOpDelta <= 0 ? '#65a30d' : '#dc2626' }};">
+                {{ $withoutOpDelta <= 0 ? '▼' : '▲' }}
+                {{ $withoutOpDelta >= 0 ? '+' : '' }}{{ number_format($withoutOpDelta) }}
+                <span style="font-weight:400; color:light-dark(#9ca3af,#6b7280);">ΔPY</span>
             </div>
-            <div style="font-size:1.9rem; font-weight:700; color:light-dark(#111827,#f3f4f6); line-height:1.1;">
-                {{ number_format($withoutOpAc) }}
-            </div>
-            <div style="font-size:0.9rem; font-weight:600; margin-top:6px; color:{{ $withoutOpDelta <= 0 ? '#65a30d' : '#dc2626' }};">
-                {{ $withoutOpDelta >= 0 ? '+' : '' }}{{ number_format($withoutOpDelta) }}&nbsp;<span style="font-weight:400; opacity:0.8;">ΔPL</span>
+            <div class="rpc-tile-context">
+                Reinsurers with no premium in <b>{{ $this->selectedYear }}</b> · Prior year: <b>{{ number_format($withoutOpPl) }}</b>
             </div>
         </div>
 
+    </div>
+
+    {{-- Legend row --}}
+    <div style="
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+        padding: 0.45rem 0.25rem;
+        margin-bottom: 1rem;
+        font-size: 0.82rem;
+        color: light-dark(#9ca3af, #6b7280);
+    ">
+        <span style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Legend:</span>
+        <span>
+            <b style="color:light-dark(#374151,#d1d5db);">AC</b> — Actual / Current year ({{ $this->selectedYear }})
+        </span>
+        <span>
+            <b style="color:light-dark(#374151,#d1d5db);">PY</b> — Prior / Last year ({{ $prevYear }})
+        </span>
+        <span>
+            <b style="color:light-dark(#374151,#d1d5db);">ΔPY</b> — Variance vs prior year (AC − PY)
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:0.25rem;">
+            <span style="color:#65a30d;font-weight:700;">▲</span> Favorable
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:0.25rem;">
+            <span style="color:#dc2626;font-weight:700;">▼</span> Unfavorable
+        </span>
     </div>
 
     {{-- ── Main card ── --}}
@@ -193,7 +264,7 @@
                     Gross Premium by Reinsurer
                 </h3>
                 <p style="font-size:0.875rem; color:light-dark(#6b7280,#9ca3af); margin:0;">
-                    Comparing {{ $this->selectedYear }} (AC) vs {{ $prevYear }} (PL)
+                    Comparing {{ $this->selectedYear }} (AC) vs {{ $prevYear }} (PY)
                 </p>
             </div>
             {{-- View toggle --}}
@@ -242,8 +313,8 @@
                     AC ({{ $this->selectedYear }}) ↓
                 </div>
                 <div></div>
-                <div style="text-align:center;">ΔPL</div>
-                <div style="text-align:right;">ΔPL%</div>
+                <div style="text-align:center;">ΔPY</div>
+                <div style="text-align:right;">ΔPY%</div>
             </div>
 
             {{-- Data rows --}}
@@ -285,7 +356,7 @@
                 {{-- Spacer --}}
                 <div></div>
 
-                {{-- ΔPL bar + value at bar tip --}}
+                {{-- ΔPY bar + value at bar tip --}}
                 @php
                     $dHalfPct = min($row['bar_pct'] / 2, 50);
                     $dInside  = $dHalfPct >= 35;
@@ -296,26 +367,26 @@
                     @if($isUp)
                     <div style="position:absolute; left:50%; top:4px; bottom:4px; width:{{ $dHalfPct }}%; background:#65a30d; border-radius:0 2px 2px 0;">
                         @if($dInside)
-                        <div style="position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dBarLabel }}</div>
+                        <div style="position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:0.80rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dBarLabel }}</div>
                         @endif
                     </div>
                     @if(!$dInside)
-                    <div style="position:absolute; left:{{ 50 + $dHalfPct }}%; top:50%; transform:translateY(-50%); padding-left:3px; font-size:0.75rem; font-weight:600; color:#65a30d; white-space:nowrap;">{{ $dBarLabel }}</div>
+                    <div style="position:absolute; left:{{ 50 + $dHalfPct }}%; top:50%; transform:translateY(-50%); padding-left:3px; font-size:0.83rem; font-weight:600; color:#65a30d; white-space:nowrap;">{{ $dBarLabel }}</div>
                     @endif
                     @else
                     <div style="position:absolute; right:50%; top:4px; bottom:4px; width:{{ $dHalfPct }}%; background:#dc2626; border-radius:2px 0 0 2px;">
                         @if($dInside)
-                        <div style="position:absolute; left:4px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dBarLabel }}</div>
+                        <div style="position:absolute; left:4px; top:50%; transform:translateY(-50%); font-size:0.80rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dBarLabel }}</div>
                         @endif
                     </div>
                     @if(!$dInside)
-                    <div style="position:absolute; right:{{ 50 + $dHalfPct }}%; top:50%; transform:translateY(-50%); padding-right:3px; font-size:0.75rem; font-weight:600; color:#dc2626; white-space:nowrap;">{{ $dBarLabel }}</div>
+                    <div style="position:absolute; right:{{ 50 + $dHalfPct }}%; top:50%; transform:translateY(-50%); padding-right:3px; font-size:0.83rem; font-weight:600; color:#dc2626; white-space:nowrap;">{{ $dBarLabel }}</div>
                     @endif
                     @endif
                 </div>
 
-                {{-- ΔPL% --}}
-                <div style="text-align:right; font-size:0.75rem; font-weight:600; color:{{ $dColor }};">
+                {{-- ΔPY% --}}
+                <div style="text-align:right; font-size:0.83rem; font-weight:600; color:{{ $dColor }};">
                     {{ $isUp ? '+' : '' }}{{ $row['delta_pct'] }}%
                 </div>
             </div>
@@ -324,10 +395,18 @@
             {{-- Avg label row --}}
             <div style="display:grid; grid-template-columns:22% 1fr 6rem 16% 10%; gap:8px 0; padding:2px 8px 0;">
                 <div></div>
-                <div style="position:relative; height:18px;">
-                    <div style="position:absolute; left:{{ $avgPct }}%; transform:translateX(-50%); white-space:nowrap;
-                                font-size:0.8rem; font-weight:600; color:#C1121F; padding-top:2px;">
-                        Avg. {{ $fmt($avgAc) }}
+                <div style="position:relative; height:22px;">
+                    <div style="position:absolute; left:{{ $avgPct }}%; transform:translateX(-50%); white-space:nowrap; padding-top:2px;">
+                        <span style="
+                            display: inline-block;
+                            font-size: 0.65rem;
+                            font-weight: 700;
+                            color: #ffffff;
+                            background: #ef4444;
+                            padding: 0.18rem 0.45rem;
+                            border-radius: 999px;
+                            line-height: 1;
+                        ">Avg: {{ $fmt($avgAc) }}</span>
                     </div>
                 </div>
                 <div></div>
@@ -342,7 +421,7 @@
                 <div style="font-size:0.82rem; font-weight:700; color:light-dark(#111827,#f3f4f6);">Total</div>
                 <div style="font-size:0.82rem; font-weight:700; color:light-dark(#111827,#f3f4f6); padding-left:2px;">{{ $fmt($totalAc) }}</div>
                 <div></div>
-                <div style="text-align:center; font-size:0.82rem; font-weight:700; color:{{ $totalDelta >= 0 ? '#65a30d' : '#dc2626' }};">
+                <div style="text-align:center; font-size:0.83rem; font-weight:700; color:{{ $totalDelta >= 0 ? '#65a30d' : '#dc2626' }};">
                     {{ $totalDelta >= 0 ? '+' : '' }}{{ $fmt($totalDelta) }}
                 </div>
                 <div></div>
@@ -369,10 +448,10 @@
                             {{ $this->sortColumn === 'ac' ? '↓' : '' }}
                         </th>
                         <th style="text-align:right; padding:4px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6); width:12%;">
-                            PL <span style="font-weight:400; font-size:0.85rem;">({{ $prevYear }})</span>
+                            PY <span style="font-weight:400; font-size:0.85rem;">({{ $prevYear }})</span>
                         </th>
                         <th style="width:6rem; padding:0;"></th>
-                        <th style="text-align:center; padding:4px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6);">ΔPL</th>
+                        <th style="text-align:center; padding:4px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6);">ΔPY</th>
                         <th style="text-align:right; padding:4px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6); width:8%;">% AC</th>
                     </tr>
                 </thead>
@@ -408,26 +487,26 @@
                                 {{-- Green bar extending right --}}
                                 <div style="position:absolute; left:50%; top:3px; bottom:3px; width:{{ $halfPct }}%; background:#65a30d; border-radius:0 2px 2px 0;">
                                     @if($inside)
-                                    <div style="position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dLabel }}</div>
+                                    <div style="position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:0.80rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dLabel }}</div>
                                     @endif
                                 </div>
                                 @if(!$inside)
-                                <div style="position:absolute; left:{{ 50 + $halfPct }}%; top:50%; transform:translateY(-50%); padding-left:4px; font-size:0.75rem; font-weight:600; color:#65a30d; white-space:nowrap;">{{ $dLabel }}</div>
+                                <div style="position:absolute; left:{{ 50 + $halfPct }}%; top:50%; transform:translateY(-50%); padding-left:4px; font-size:0.83rem; font-weight:600; color:#65a30d; white-space:nowrap;">{{ $dLabel }}</div>
                                 @endif
                                 @else
                                 {{-- Red bar extending left --}}
                                 <div style="position:absolute; right:50%; top:3px; bottom:3px; width:{{ $halfPct }}%; background:#dc2626; border-radius:2px 0 0 2px;">
                                     @if($inside)
-                                    <div style="position:absolute; left:5px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dLabel }}</div>
+                                    <div style="position:absolute; left:5px; top:50%; transform:translateY(-50%); font-size:0.80rem; font-weight:700; color:#fff; white-space:nowrap;">{{ $dLabel }}</div>
                                     @endif
                                 </div>
                                 @if(!$inside)
-                                <div style="position:absolute; right:{{ 50 + $halfPct }}%; top:50%; transform:translateY(-50%); padding-right:4px; font-size:0.75rem; font-weight:600; color:#dc2626; white-space:nowrap;">{{ $dLabel }}</div>
+                                <div style="position:absolute; right:{{ 50 + $halfPct }}%; top:50%; transform:translateY(-50%); padding-right:4px; font-size:0.83rem; font-weight:600; color:#dc2626; white-space:nowrap;">{{ $dLabel }}</div>
                                 @endif
                                 @endif
                             </div>
                         </td>
-                        <td style="padding:4px 8px; text-align:right; font-size:0.8rem; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">
+                        <td style="padding:4px 8px; text-align:right; font-size:0.83rem; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">
                             {{ $totalAc > 0 ? number_format($row['ac'] / $totalAc * 100, 1) . '%' : '—' }}
                         </td>
                     </tr>
@@ -440,10 +519,10 @@
                         <td style="padding:5px 8px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:light-dark(#111827,#f3f4f6);">{{ $fmt($totalAc) }}</td>
                         <td style="padding:5px 8px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">{{ $fmt($totalPl) }}</td>
                         <td style="width:6rem; padding:0;"></td>
-                        <td style="padding:5px 8px; text-align:center; font-size:0.85rem; font-weight:700; font-variant-numeric:tabular-nums; color:{{ $totalDelta >= 0 ? '#65a30d' : '#dc2626' }};">
+                        <td style="padding:5px 8px; text-align:center; font-size:0.83rem; font-weight:700; font-variant-numeric:tabular-nums; color:{{ $totalDelta >= 0 ? '#65a30d' : '#dc2626' }};">
                             {{ $totalDelta >= 0 ? '+' : '' }}{{ $fmt($totalDelta) }}
                         </td>
-                        <td style="padding:5px 8px; text-align:right; font-size:0.82rem; font-weight:700; color:light-dark(#6b7280,#9ca3af);">
+                        <td style="padding:5px 8px; text-align:right; font-size:0.83rem; font-weight:700; color:light-dark(#6b7280,#9ca3af);">
                             100%
                         </td>
                     </tr>
@@ -458,4 +537,5 @@
         </div>
     </div>
 
-</div>
+
+</x-filament::section>

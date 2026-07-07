@@ -5,6 +5,8 @@
     $fmt   = fn(int $n): string => $n >= 1_000_000
         ? number_format($n / 1_000_000, 1) . 'M'
         : ($n >= 1_000 ? number_format($n / 1_000, 1) . 'K' : (string) $n);
+    $avg   = count($rows) ? array_sum(array_column($rows, 'ac')) / count($rows) : 0;
+    $avgH  = (int) round(($avg / $maxAc) * $maxH);
 @endphp
 
 <div style="
@@ -15,10 +17,15 @@
     font-size: 0.875rem;
 ">
     <h3 style="font-size:1.05rem; font-weight:600; margin:0 0 2px; color:light-dark(#111827,#f3f4f6);">
-        Underwritten Business Profile
+        Underwritten Businesses
     </h3>
     <p style="font-size:0.875rem; color:light-dark(#9ca3af,#6b7280); margin:0 0 0.75rem;">
-        AC: {{ $this->year }} &nbsp;vs&nbsp; PL: {{ $this->year - 1 }}
+        AC: {{ $this->year }} &nbsp;vs&nbsp;
+        @if($this->showPlan)
+            PY: {{ $this->year - 1 }} <span style="font-size:0.78rem; color:light-dark(#9ca3af,#6b7280);">(no budget data for businesses)</span>
+        @else
+            PY: {{ $this->year - 1 }}
+        @endif
     </p>
 
     <div style="display:flex; gap:3px;">
@@ -72,6 +79,33 @@
                     <div style="position:absolute; top:0; left:0; right:0; height:4px; background:{{ $color }}; border-radius:3px 3px 0 0;"></div>
                     @endif
                 </div>
+
+                {{-- Avg line --}}
+                @if($avg > 0)
+                <div style="
+                    position: absolute;
+                    bottom: {{ $avgH }}px;
+                    left: 0; right: 0;
+                    border-top: 1.5px dashed #ef4444;
+                    z-index: 2;
+                ">
+                    @if($loop->last)
+                    <span style="
+                        position: absolute;
+                        right: 0;
+                        top: -10px;
+                        font-size: 0.65rem;
+                        font-weight: 700;
+                        color: #ffffff;
+                        background: #ef4444;
+                        white-space: nowrap;
+                        line-height: 1;
+                        padding: 0.18rem 0.45rem;
+                        border-radius: 999px;
+                    ">Avg: {{ $fmt((int) round($avg)) }}</span>
+                    @endif
+                </div>
+                @endif
             </div>
 
             {{-- AC value --}}
