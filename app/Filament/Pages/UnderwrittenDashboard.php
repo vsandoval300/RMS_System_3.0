@@ -17,5 +17,5 @@ class UnderwrittenDashboard extends Page
 
     protected string $view = 'filament.pages.underwritten-dashboard';
 
-    public string $activeTab = 'overview';
+    public string $activeTab = 'portfolio';
 }

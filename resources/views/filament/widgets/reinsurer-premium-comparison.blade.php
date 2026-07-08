@@ -338,7 +338,7 @@
                     {{-- Track --}}
                     <div style="position:absolute; inset:0; background:light-dark(#e5e7eb,rgba(255,255,255,0.06)); border-radius:3px;"></div>
                     {{-- Filled bar --}}
-                    <div style="position:absolute; top:0; left:0; bottom:0; width:{{ $acPct }}%; background:#219EBC; border-radius:3px 0 0 3px; z-index:1;"></div>
+                    <div style="position:absolute; top:0; left:0; bottom:0; width:{{ $acPct }}%; background:#41A2C3; border-radius:3px 0 0 3px; z-index:1;"></div>
                     {{-- Value: inside bar if wide enough, otherwise just right of bar end --}}
                     @if($barInner)
                     <div style="position:absolute; top:0; left:0; bottom:0; width:{{ $acPct }}%; display:flex; align-items:center; justify-content:flex-end; padding-right:5px; z-index:2;">

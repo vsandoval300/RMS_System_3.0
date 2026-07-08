@@ -2,15 +2,21 @@
 
 namespace App\Filament\Resources\UnderwrittenBudget\Pages;
 
+use App\Exports\BudgetTemplateExport;
 use App\Filament\Resources\UnderwrittenBudget\UnderwrittenBudgetResource;
 use App\Models\Reinsurer;
 use App\Models\UnderwrittenBudget as UnderwrittenBudgetModel;
 use App\Models\UnderwrittenBudgetItem;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Auth;
+use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BudgetBatchCapture extends Page
 {
+    use WithFileUploads;
+
     protected static string $resource = UnderwrittenBudgetResource::class;
 
     protected string $view = 'filament.resources.underwritten-budget.budget-batch-capture';
@@ -26,6 +32,9 @@ class BudgetBatchCapture extends Page
     /** @var array<string, array{name: string, included: bool, m01: string, ..., m12: string, py_budget: float|null}> */
     public array $rows = [];
 
+    /** Temporary uploaded file for import */
+    public mixed $importFile = null;
+
     // ── Lifecycle ──────────────────────────────────────────
 
     public function mount(): void
@@ -39,13 +48,12 @@ class BudgetBatchCapture extends Page
         $this->loadRows();
     }
 
-    // ── Helpers ────────────────────────────────────────────
+    // ── Row helpers ────────────────────────────────────────
 
     private function loadRows(): void
     {
         $reinsurers = $this->getActiveReinsurers();
 
-        // Load items from the latest existing version for this year (as starting point)
         $latestHeader = UnderwrittenBudgetModel::latestVersion($this->year)->first();
         $previous = $latestHeader
             ? UnderwrittenBudgetItem::where('budget_id', $latestHeader->id)
@@ -55,15 +63,16 @@ class BudgetBatchCapture extends Page
 
         $this->rows = [];
 
-        foreach ($reinsurers as $id => $name) {
+        foreach ($reinsurers as $id => $data) {
             $prev = $previous->get($id);
             $row  = [
-                'name'      => $name,
+                'name'      => $data['name'],
+                'cns_code'  => $data['cns_code'],
                 'included'  => true,
                 'py_budget' => $prev ? (float) $prev->premium_budget : null,
             ];
             foreach (self::MONTHS as $mk) {
-                $row[$mk] = $prev ? number_format((float) $prev->$mk, 2, '.', '') : '0.00';
+                $row[$mk] = $prev ? number_format((float) $prev->$mk, 2, '.', ',') : '0.00';
             }
             $this->rows[(string) $id] = $row;
         }
@@ -73,7 +82,13 @@ class BudgetBatchCapture extends Page
     {
         return Reinsurer::whereIn('operative_status_id', [1, 2, 7])
             ->orderBy('id')
-            ->pluck('name', 'id')
+            ->get(['id', 'name', 'cns_reinsurer'])
+            ->mapWithKeys(fn ($r) => [
+                (string) $r->id => [
+                    'name'     => $r->name,
+                    'cns_code' => $r->cns_reinsurer ?? (string) $r->id,
+                ],
+            ])
             ->toArray();
     }
 
@@ -87,7 +102,98 @@ class BudgetBatchCapture extends Page
         return (float) str_replace(',', '', $val);
     }
 
-    // ── Actions ────────────────────────────────────────────
+    // ── Template download ──────────────────────────────────
+
+    public function downloadTemplate(): mixed
+    {
+        $filename = "budget_template_{$this->year}_v{$this->nextVersion()}.xlsx";
+
+        return Excel::download(
+            new BudgetTemplateExport($this->year, $this->nextVersion(), $this->rows),
+            $filename
+        );
+    }
+
+    // ── File import ────────────────────────────────────────
+
+    public function importFromFile(): void
+    {
+        $this->validate([
+            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'importFile.required' => 'Select a file first.',
+            'importFile.mimes'    => 'Only .xlsx, .xls or .csv files are accepted.',
+            'importFile.max'      => 'File must be under 5 MB.',
+        ]);
+
+        try {
+            $path = $this->importFile->getRealPath();
+
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+            $sheet       = $spreadsheet->getActiveSheet();
+            // $formatData = false → raw numeric values, avoids comma-formatted
+            // strings ("16,827.80") that truncate when cast to float in PHP.
+            $sheetData   = $sheet->toArray(null, true, false, false);
+
+            // Row 0 = header, skip it
+            $updated  = 0;
+            $notFound = 0;
+
+            // Work on a local copy — Livewire won't reliably track
+            // mutations to deeply-nested array keys made inside a loop.
+            $rows = $this->rows;
+
+            foreach (array_slice($sheetData, 1) as $row) {
+                // Col 0 = ID, skip blank/non-numeric rows
+                if (empty($row[0]) || ! is_numeric($row[0])) {
+                    continue;
+                }
+
+                $id = (string) (int) $row[0];
+
+                if (! isset($rows[$id])) {
+                    $notFound++;
+                    continue;
+                }
+
+                // Col 3 = INC flag (D): any non-empty value = included, empty = excluded
+                $incVal = $row[3] ?? null;
+                $rows[$id]['included'] = $incVal !== null && $incVal !== '' && $incVal !== 0 && $incVal !== '0';
+
+                foreach (self::MONTHS as $i => $mk) {
+                    $val = $row[$i + 4] ?? 0;
+                    $rows[$id][$mk] = number_format((float) $val, 2, '.', ',');
+                }
+
+                $updated++;
+            }
+
+            // Reassign all at once so Livewire sends the full updated state
+            $this->rows = $rows;
+
+            $this->importFile = null;
+
+            $body = "{$updated} " . ($updated === 1 ? 'reinsurer' : 'reinsurers') . ' updated.';
+            if ($notFound > 0) {
+                $body .= " {$notFound} rows not matched (ID not found in current list).";
+            }
+
+            Notification::make()
+                ->success()
+                ->title('Import successful')
+                ->body($body)
+                ->send();
+
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->danger()
+                ->title('Import failed')
+                ->body('Could not read file: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    // ── Save ───────────────────────────────────────────────
 
     public function save(): void
     {
@@ -114,7 +220,7 @@ class BudgetBatchCapture extends Page
             'version'    => $version,
             'label'      => trim($this->versionLabel),
             'notes'      => $this->notes !== '' ? $this->notes : null,
-            'created_by' => \Illuminate\Support\Facades\Auth::id(),
+            'created_by' => Auth::id(),
         ]);
 
         foreach ($included as $reinsurerId => $row) {
@@ -150,7 +256,7 @@ class BudgetBatchCapture extends Page
 
     public static function canAccess(array $parameters = []): bool
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
         return $user instanceof \App\Models\User && $user->can('create_underwritten::budget');
     }
 }

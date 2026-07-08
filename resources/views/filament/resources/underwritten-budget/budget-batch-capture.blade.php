@@ -7,195 +7,235 @@
     @endphp
 
     <style>
+        /* ── Semantic tokens — usa variables nativas de Filament v4 / Tailwind v4 ── */
+        .batch-card-wrap {
+            --bc-card:           light-dark(var(--color-white),       #18181B);
+            --bc-surface:        light-dark(var(--color-gray-50),     var(--color-gray-900));
+            --bc-sunken:         light-dark(var(--color-gray-100),    var(--color-gray-700));
+            --bc-border:         light-dark(var(--color-gray-200),    var(--color-gray-700));
+            --bc-border-input:   light-dark(var(--color-gray-300),    var(--color-gray-600));
+            --bc-text:           light-dark(var(--color-gray-950),    var(--color-white));
+            --bc-text-sec:       light-dark(var(--color-gray-700),    var(--color-gray-200));
+            --bc-text-muted:     light-dark(var(--color-gray-500),    var(--color-gray-400));
+            --bc-text-subtle:    light-dark(var(--color-gray-400),    var(--color-gray-600));
+            --bc-input-bg:       light-dark(var(--color-white),       #252527);
+            --bc-row-hover:      light-dark(var(--color-gray-50),     var(--color-gray-700));
+            --bc-row-stripe:     light-dark(var(--color-gray-50),     var(--color-gray-800));
+            --bc-primary:        light-dark(var(--color-primary-600), var(--color-primary-500));
+            --bc-primary-hover:  light-dark(var(--color-primary-700), var(--color-primary-400));
+            --bc-primary-subtle: light-dark(var(--color-primary-50),  var(--color-primary-950));
+            --bc-primary-text:   light-dark(var(--color-primary-700), var(--color-primary-300));
+            --bc-primary-border: light-dark(var(--color-primary-200), var(--color-primary-800));
+            --bc-success:        light-dark(var(--color-success-600), var(--color-success-500));
+            --bc-danger:         light-dark(var(--color-danger-600),  var(--color-danger-400));
+        }
+
+        /* ── Card shell ───────────────────────────────────────── */
         .batch-card {
-            background: light-dark(#ffffff, #1e2535);
-            border: 1px solid light-dark(#e5e7eb, #2d3748);
+            background: var(--bc-card);
+            border: 1px solid var(--bc-border);
             border-radius: 0.75rem;
             overflow: hidden;
         }
         .batch-toolbar {
             padding: 1rem 1.25rem;
-            border-bottom: 1px solid light-dark(#e5e7eb, #2d3748);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            gap: 1rem;
+            border-bottom: 1px solid var(--bc-border);
+            display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
         }
         .batch-toolbar-label {
-            font-size: 0.70rem;
-            font-weight: 600;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: light-dark(#6b7280, #9ca3af);
-            margin-bottom: 0.3rem;
+            font-size: 0.70rem; font-weight: 600;
+            letter-spacing: 0.07em; text-transform: uppercase;
+            color: var(--bc-text-muted); margin-bottom: 0.3rem;
         }
+
+        /* ── Form controls ────────────────────────────────────── */
         .batch-ctrl select,
         .batch-ctrl input[type="text"] {
-            background: light-dark(#f9fafb, #161d2e);
-            border: 1px solid light-dark(#d1d5db, #374151);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border-input);
             border-radius: 0.5rem;
-            color: light-dark(#111827, #f3f4f6);
+            color: var(--bc-text);
             font-size: 0.875rem;
+            line-height: 1.5;
             padding: 0.45rem 0.75rem;
             outline: none;
             transition: border-color 0.15s;
+            box-sizing: border-box;
+        }
+        .batch-ctrl select {
+            appearance: none; -webkit-appearance: none;
+            padding-right: 2rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.6rem center;
         }
         .batch-ctrl select:focus,
         .batch-ctrl input[type="text"]:focus {
-            border-color: light-dark(#6366f1, #818cf8);
-            box-shadow: 0 0 0 3px light-dark(rgba(99,102,241,.15), rgba(129,140,248,.15));
+            border-color: var(--bc-primary);
+            box-shadow: 0 0 0 3px rgb(var(--fi-color-primary-600) / 0.12);
         }
-        .batch-ctrl-year select { width: 7rem; }
-        .batch-ctrl-label input { width: 22rem; }
+        .dark .batch-ctrl select:focus,
+        .dark .batch-ctrl input[type="text"]:focus {
+            box-shadow: 0 0 0 3px rgb(var(--fi-color-primary-500) / 0.18);
+        }
+        .batch-ctrl-year select  { width: 7rem; }
+        .batch-ctrl-label input  { width: 22rem; }
 
         .batch-notes textarea {
-            background: light-dark(#f9fafb, #161d2e);
-            border: 1px solid light-dark(#d1d5db, #374151);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border-input);
             border-radius: 0.5rem;
-            color: light-dark(#111827, #f3f4f6);
+            color: var(--bc-text);
             font-size: 0.875rem;
             padding: 0.45rem 0.75rem;
-            resize: vertical;
-            width: 100%;
-            outline: none;
+            resize: vertical; width: 100%; outline: none;
             transition: border-color 0.15s;
         }
         .batch-notes textarea:focus {
-            border-color: light-dark(#6366f1, #818cf8);
-            box-shadow: 0 0 0 3px light-dark(rgba(99,102,241,.15), rgba(129,140,248,.15));
+            border-color: var(--bc-primary);
+            box-shadow: 0 0 0 3px rgb(var(--fi-color-primary-600) / 0.12);
+        }
+        .dark .batch-notes textarea:focus {
+            box-shadow: 0 0 0 3px rgb(var(--fi-color-primary-500) / 0.18);
         }
 
         .batch-version-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            background: light-dark(#ede9fe, #312e81);
-            color: light-dark(#4f46e5, #a5b4fc);
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.2rem 0.7rem;
-            border: 1px solid light-dark(#c4b5fd, #4338ca);
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: #41A2C3; color: #fff;
+            border-radius: 0.45rem; font-size: 0.875rem; font-weight: 600;
+            padding: 0.45rem 0.85rem;
+            border: none;
         }
 
+        /* ── Data table ───────────────────────────────────────── */
         .batch-table-wrap { overflow-x: auto; }
-        .batch-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-        }
-        .batch-table thead tr {
-            background: light-dark(#f3f4f6, #1a2236);
-        }
+        .batch-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+
+        .batch-table thead tr { background: light-dark(var(--color-gray-50), #1D1D20); }
         .batch-table th {
-            padding: 0.55rem 0.5rem;
-            text-align: center;
-            font-size: 0.65rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            color: light-dark(#6b7280, #9ca3af);
-            border-bottom: 1px solid light-dark(#e5e7eb, #2d3748);
+            padding: 0.55rem 0.5rem; text-align: center;
+            font-size: 0.82rem; font-weight: 600;
+            color: light-dark(var(--color-gray-700), var(--color-gray-200));
+            border-bottom: 1px solid var(--bc-border);
             white-space: nowrap;
         }
-        .batch-table th.col-check   { width: 2.5rem; }
-        .batch-table th.col-id      { width: 3rem; text-align: right; }
-        .batch-table th.col-name    { text-align: left; min-width: 10rem; padding-left: 0.75rem; }
-        .batch-table th.col-py      { text-align: right; min-width: 6.5rem; }
-        .batch-table th.col-month   { width: 8rem; }
-        .batch-table th.col-total   { text-align: right; min-width: 6.5rem; background: light-dark(#eef2ff, #1e2d55); }
-        .batch-table th.col-delta   { text-align: right; min-width: 5rem; }
+        .batch-table th.col-check  { width: 2.5rem; }
+        .batch-table th.col-id     { width: 3rem; text-align: right; }
+        .batch-table th.col-name   { text-align: left; min-width: 10rem; padding-left: 0.75rem; }
+        .batch-table th.col-py     { text-align: right; min-width: 6.5rem; }
+        .batch-table th.col-month  { width: 8rem; }
+        .batch-table th.col-total  { text-align: right; min-width: 6.5rem;
+                                     background: var(--bc-primary-subtle); color: var(--bc-primary-text); }
+        .batch-table th.col-delta  { text-align: right; min-width: 5rem; }
 
         .batch-table tbody tr {
-            border-bottom: 1px solid light-dark(#f3f4f6, #1f2b3e);
+            border-bottom: 1px solid var(--bc-border);
             transition: background 0.1s;
         }
-        .batch-table tbody tr:hover { background: light-dark(#f9fafb, #1a2236); }
+        .batch-table tbody tr:hover      { background: var(--bc-row-hover); }
         .batch-table tbody tr.row-excluded { opacity: 0.45; }
 
-        .batch-table td {
-            padding: 0.45rem 0.5rem;
-            color: light-dark(#374151, #d1d5db);
-            vertical-align: middle;
-        }
-        .batch-table td.col-check  { text-align: center; }
-        .batch-table td.col-id     { text-align: right; color: light-dark(#9ca3af, #6b7280); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
-        .batch-table td.col-name   { font-weight: 500; color: light-dark(#111827, #f3f4f6); padding-left: 0.75rem; }
-        .batch-table td.col-py     { text-align: right; color: light-dark(#6b7280, #9ca3af); font-variant-numeric: tabular-nums; }
-        .batch-table td.col-month  { text-align: center; }
-        .batch-table td.col-total  { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; background: light-dark(rgba(238,242,255,0.5), rgba(30,45,85,0.4)); }
-        .batch-table td.col-delta  { text-align: right; }
+        .batch-table td { padding: 0.45rem 0.5rem; color: var(--bc-text-sec); vertical-align: middle; }
+        .batch-table td.col-check { text-align: center; }
+        .batch-table td.col-id    { text-align: right; color: var(--bc-text-muted);
+                                    font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+        .batch-table td.col-name  { font-weight: 500; color: var(--bc-text); padding-left: 0.75rem; }
+        .batch-table td.col-py    { text-align: right; color: var(--bc-text-muted); font-variant-numeric: tabular-nums; }
+        .batch-table td.col-month { text-align: center; }
+        .batch-table td.col-total { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;
+                                    background: var(--bc-primary-subtle); color: var(--bc-primary-text); }
+        .batch-table td.col-delta { text-align: right; }
 
+        /* ── Month inputs ─────────────────────────────────────── */
         .month-input {
-            background: light-dark(#f9fafb, #161d2e);
-            border: 1px solid light-dark(#d1d5db, #374151);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border);
             border-radius: 0.35rem;
-            color: light-dark(#111827, #f3f4f6);
-            font-size: 0.8rem;
-            font-variant-numeric: tabular-nums;
-            padding: 0.3rem 0.4rem;
-            text-align: right;
-            width: 7.25rem;
-            outline: none;
-            transition: border-color 0.15s;
+            color: var(--bc-text);
+            font-size: 0.8rem; font-variant-numeric: tabular-nums;
+            padding: 0.3rem 0.4rem; text-align: right; width: 7.25rem;
+            outline: none; transition: border-color 0.15s;
         }
         .month-input:focus {
-            border-color: light-dark(#6366f1, #818cf8);
-            box-shadow: 0 0 0 2px light-dark(rgba(99,102,241,.12), rgba(129,140,248,.12));
+            border-color: var(--bc-primary);
+            box-shadow: 0 0 0 2px rgb(var(--fi-color-primary-600) / 0.12);
+        }
+        .dark .month-input:focus {
+            box-shadow: 0 0 0 2px rgb(var(--fi-color-primary-500) / 0.18);
         }
         .month-input:disabled { opacity: 0.35; cursor: not-allowed; }
 
         .row-check {
-            width: 1.05rem; height: 1.05rem;
-            cursor: pointer; accent-color: #6366f1;
+            width: 1.05rem; height: 1.05rem; cursor: pointer;
+            appearance: none; -webkit-appearance: none;
+            border: 2px solid var(--bc-border-input);
+            border-radius: 0.25rem;
+            background: var(--bc-input-bg);
+            position: relative;
+            transition: background 0.12s, border-color 0.12s;
+            flex-shrink: 0;
+        }
+        .row-check:checked {
+            background: #41A2C3;
+            border-color: #41A2C3;
+        }
+        .row-check:checked::after {
+            content: '';
+            position: absolute;
+            left: 50%; top: 42%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 0.28rem; height: 0.52rem;
+            border: 2px solid #fff;
+            border-top: none; border-left: none;
         }
 
-        .delta-up   { color: #22c55e; font-weight: 600; font-size: 0.75rem; }
-        .delta-down { color: #ef4444; font-weight: 600; font-size: 0.75rem; }
-        .delta-flat { color: light-dark(#9ca3af, #6b7280); font-size: 0.75rem; }
+        /* ── Delta badges ─────────────────────────────────────── */
+        .delta-up   { color: var(--bc-success); font-weight: 600; font-size: 0.75rem; }
+        .delta-down { color: var(--bc-danger);  font-weight: 600; font-size: 0.75rem; }
+        .delta-flat { color: var(--bc-text-muted); font-size: 0.75rem; }
 
+        /* ── Footer ───────────────────────────────────────────── */
         .batch-footer {
-            padding: 1rem 1.25rem;
-            border-top: 1px solid light-dark(#e5e7eb, #2d3748);
+            padding: 1rem 1.25rem; border-top: 1px solid var(--bc-border);
             display: flex; align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; gap: 0.75rem;
+            justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
         }
-        .batch-footer-info {
-            font-size: 0.80rem;
-            color: light-dark(#6b7280, #9ca3af);
-        }
-        .batch-footer-info span { font-weight: 700; color: light-dark(#374151, #d1d5db); }
+        .batch-footer-info { font-size: 0.80rem; color: var(--bc-text-muted); }
+        .batch-footer-info span { font-weight: 700; color: var(--bc-text-sec); }
+
+        /* ── Buttons ──────────────────────────────────────────── */
         .btn-save {
-            display: inline-flex; align-items: center; gap: 0.45rem;
-            background: #6366f1; color: #fff; border: none;
-            border-radius: 0.55rem; font-size: 0.875rem; font-weight: 600;
-            padding: 0.55rem 1.25rem; cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: #41A2C3; color: #fff; border: none;
+            border-radius: 0.45rem; font-size: 0.875rem; font-weight: 600;
+            padding: 0.45rem 0.85rem; cursor: pointer;
+            transition: background 0.12s, transform 0.1s;
         }
-        .btn-save:hover  { background: #4f46e5; }
+        .btn-save:hover  { background: #3290af; }
         .btn-save:active { transform: scale(0.98); }
+
         .btn-cancel {
-            display: inline-flex; align-items: center; gap: 0.45rem;
-            background: transparent; color: light-dark(#6b7280, #9ca3af);
-            border: 1px solid light-dark(#d1d5db, #374151);
-            border-radius: 0.55rem; font-size: 0.875rem; font-weight: 500;
-            padding: 0.55rem 1.1rem; cursor: pointer; text-decoration: none;
-            transition: background 0.15s;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: light-dark(var(--color-gray-100), #09090B); color: var(--bc-text-sec);
+            border: 1px solid var(--bc-border-input);
+            border-radius: 0.45rem; font-size: 0.875rem; font-weight: 600;
+            padding: 0.45rem 0.85rem; cursor: pointer; text-decoration: none;
+            transition: background 0.12s;
         }
-        .btn-cancel:hover { background: light-dark(#f3f4f6, #1a2236); }
+        .btn-cancel:hover { background: var(--bc-border); }
+
         .notes-section {
             padding: 0.75rem 1.25rem;
-            border-bottom: 1px solid light-dark(#e5e7eb, #2d3748);
+            border-bottom: 1px solid var(--bc-border);
         }
     </style>
 
-    <div class="batch-card">
+    <div class="batch-card batch-card-wrap">
 
         {{-- Toolbar ─────────────────────────────────────────── --}}
         <div class="batch-toolbar">
-            <div class="batch-ctrl batch-ctrl-year">
-                <div class="batch-toolbar-label">Year</div>
+            <div class="batch-ctrl batch-ctrl-year" style="display:flex; align-items:center; gap:0.5rem;">
+                <label style="font-size:0.875rem; font-weight:500; color:var(--bc-text-sec); white-space:nowrap;">Year</label>
                 <select wire:model.live="year">
                     @foreach(range(now()->year - 2, now()->year + 2) as $y)
                         <option value="{{ $y }}">{{ $y }}</option>
@@ -203,19 +243,23 @@
                 </select>
             </div>
 
-            <div class="batch-ctrl batch-ctrl-label" style="flex:1; min-width:14rem;">
-                <div class="batch-toolbar-label">Version Label <span style="color:#ef4444">*</span></div>
-                <input type="text"
-                       wire:model="versionLabel"
-                       placeholder="e.g. Initial Budget, Q2 Revision…"
-                       style="width:100%">
-                @error('versionLabel')
-                    <div style="color:#ef4444; font-size:0.75rem; margin-top:0.2rem;">{{ $message }}</div>
-                @enderror
+            <div class="batch-ctrl batch-ctrl-label" style="flex:1; min-width:14rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <label style="font-size:0.875rem; font-weight:500; color:var(--bc-text-sec); white-space:nowrap;">
+                    Version Label <span style="color:var(--bc-danger)">*</span>
+                </label>
+                <div style="flex:1; min-width:10rem;">
+                    <input type="text"
+                           wire:model="versionLabel"
+                           placeholder="e.g. Initial Budget, Q2 Revision…"
+                           style="width:100%">
+                    @error('versionLabel')
+                        <div style="color:var(--bc-danger); font-size:0.75rem; margin-top:0.2rem;">{{ $message }}</div>
+                    @enderror
+                </div>
             </div>
 
-            <div style="padding-bottom:0.1rem">
-                <div class="batch-toolbar-label">Will Save As</div>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+                <label style="font-size:0.875rem; font-weight:500; color:var(--bc-text-sec); white-space:nowrap;">Will Save As</label>
                 <div class="batch-version-badge">
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                     v{{ $this->nextVersion() }}
@@ -223,9 +267,77 @@
             </div>
         </div>
 
+        {{-- Import / Export strip ──────────────────────────── --}}
+        <div style="position:relative; background:var(--bc-surface);">
+
+            {{-- Indeterminate progress bar --}}
+            <div wire:loading wire:target="importFromFile"
+                 style="position:absolute; bottom:0; left:0; right:0; height:2px; overflow:hidden; z-index:10;">
+                <div style="height:100%; width:40%; background:linear-gradient(90deg,transparent,#41A2C3,transparent);
+                            animation:import-slide 1.2s ease-in-out infinite;"></div>
+            </div>
+
+            <div style="padding:0.65rem 1.25rem; border-bottom:1px solid var(--bc-border);
+                        display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+
+                {{-- Download template --}}
+                <button wire:click="downloadTemplate" wire:loading.attr="disabled" wire:target="downloadTemplate"
+                        class="btn-save">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span wire:loading.remove wire:target="downloadTemplate">Download Template</span>
+                    <span wire:loading wire:target="downloadTemplate">Generating…</span>
+                </button>
+
+                <div style="width:1px; height:1.5rem; background:var(--bc-border); flex-shrink:0;"></div>
+
+                {{-- File input + Import button --}}
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                    <label style="font-size:0.875rem; font-weight:500; color:var(--bc-text-sec); white-space:nowrap;">
+                        Import:
+                    </label>
+                    <input type="file"
+                           wire:model="importFile"
+                           accept=".xlsx,.xls,.csv"
+                           style="font-size:0.875rem; color:var(--bc-text-sec);
+                                  background:var(--bc-input-bg);
+                                  border:1px solid var(--bc-border-input);
+                                  border-radius:0.45rem; padding:0.45rem 0.75rem; cursor:pointer;">
+                    @error('importFile')
+                        <span style="color:var(--bc-danger); font-size:0.75rem;">{{ $message }}</span>
+                    @enderror
+                    <button wire:click="importFromFile"
+                            wire:loading.attr="disabled"
+                            wire:target="importFromFile,importFile"
+                            style="display:inline-flex; align-items:center; gap:0.4rem;
+                                   background:#41A2C3; color:#ffffff;
+                                   border:none; border-radius:0.45rem;
+                                   font-size:0.875rem; font-weight:600;
+                                   padding:0.45rem 0.85rem; cursor:pointer; transition:background .12s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"
+                                style="transform:scaleY(-1); transform-origin:center"/>
+                            <path d="M3 9l9-9 9 9"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="importFromFile">Load File</span>
+                        <span wire:loading wire:target="importFromFile">Importing…</span>
+                    </button>
+                </div>
+
+                <span style="font-size:0.82rem; color:light-dark(var(--color-gray-500),var(--color-gray-200)); margin-left:auto;">
+                    Accepted: .xlsx, .xls, .csv &nbsp;·&nbsp; Do not modify columns ID or CNS in the template
+                </span>
+            </div>
+        </div>{{-- /import-export wrapper --}}
+
         {{-- Notes ──────────────────────────────────────────── --}}
         <div class="notes-section">
-            <div class="batch-toolbar-label" style="margin-bottom:0.35rem;">Internal Notes (optional)</div>
+            <div class="batch-toolbar-label" style="margin-bottom:0.35rem; text-transform:none; letter-spacing:normal; color:var(--bc-text); font-size:0.875rem; font-weight:400;">Internal notes (Optional)</div>
             <div class="batch-notes">
                 <textarea wire:model="notes" rows="2" placeholder="Reason for revision, assumptions applied…"></textarea>
             </div>
@@ -244,7 +356,7 @@
                         <th class="col-py">Prev. Total</th>
                         @foreach($monthLabels as $i => $label)
                             <th class="col-month">
-                                <span style="font-size:0.60rem; display:block; color:light-dark(#9ca3af,#6b7280);">
+                                <span style="font-size:0.72rem; display:block; color:var(--bc-text-subtle);">
                                     {{ sprintf('%04d%02d', $yr, $i + 1) }}
                                 </span>
                                 {{ $label }}
@@ -286,7 +398,7 @@
                                 @if($hasPrev)
                                     ${{ number_format($pyVal, 2) }}
                                 @else
-                                    <span style="color:light-dark(#d1d5db,#4b5563)">—</span>
+                                    <span style="color:var(--bc-text-subtle)">—</span>
                                 @endif
                             </td>
                             @foreach($months as $mk)
@@ -308,7 +420,7 @@
                     @empty
                         <tr>
                             <td colspan="{{ 4 + count($months) + 2 }}"
-                                style="text-align:center; padding:2rem; color:light-dark(#9ca3af,#6b7280)">
+                                style="text-align:center; padding:2rem; color:var(--bc-text-muted)">
                                 No active reinsurers found.
                             </td>
                         </tr>
@@ -348,6 +460,7 @@
 
     <style>
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes import-slide { 0% { transform: translateX(-150%); } 100% { transform: translateX(350%); } }
     </style>
 
     <script>
@@ -419,14 +532,12 @@
             });
         }
 
-        // Real-time total on input
         document.addEventListener('input', function (e) {
             if (!e.target.classList.contains('month-input')) return;
             var tr = e.target.closest('tr[data-row-id]');
             if (tr) { recalcRow(tr); recalcFooter(); }
         });
 
-        // Show raw on focus, format on blur
         document.addEventListener('focus', function (e) {
             if (!e.target.classList.contains('month-input')) return;
             e.target.value = String(e.target.value).replace(/,/g, '');

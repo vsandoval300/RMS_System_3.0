@@ -60,7 +60,7 @@ class EditBudgetVersion extends Page
                 'py_budget' => (float) $item->premium_budget,
             ];
             foreach (self::MONTHS as $mk) {
-                $row[$mk] = number_format((float) $item->$mk, 2, '.', '');
+                $row[$mk] = number_format((float) $item->$mk, 2, '.', ',');
             }
             $this->rows[(string) $reinsurerId] = $row;
         }

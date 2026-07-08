@@ -4,51 +4,51 @@
 <meta charset="UTF-8">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 7.5pt; color: #111827; background: #fff; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 6.5pt; color: #111827; background: #fff; }
 
-    .page-header { padding: 10px 14px 8px; border-bottom: 2px solid #1e3a5f; display: flex; justify-content: space-between; align-items: flex-end; }
-    .page-title  { font-size: 13pt; font-weight: 700; color: #1e3a5f; }
-    .page-meta   { font-size: 7pt; color: #6b7280; text-align: right; line-height: 1.6; }
+    .page-header { padding: 7px 10px 6px; border-bottom: 2px solid #1e3a5f; display: flex; justify-content: space-between; align-items: flex-end; }
+    .page-title  { font-size: 11pt; font-weight: 700; color: #1e3a5f; }
+    .page-meta   { font-size: 6pt; color: #6b7280; text-align: right; line-height: 1.6; }
     .page-meta b { color: #374151; }
 
     .meta-row {
-        display: flex; gap: 28px; padding: 7px 14px;
-        background: #f3f4f6; border-bottom: 1px solid #e5e7eb; font-size: 7pt;
+        display: flex; gap: 20px; padding: 5px 10px;
+        background: #f3f4f6; border-bottom: 1px solid #e5e7eb; font-size: 6pt;
     }
     .meta-item label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #6b7280; display: block; margin-bottom: 1px; }
-    .meta-item span  { color: #111827; font-size: 8pt; }
+    .meta-item span  { color: #111827; font-size: 7pt; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; }
     thead tr { background: #1e3a5f; color: #ffffff; }
     thead th {
-        padding: 5px 4px; font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
-        letter-spacing: 0.04em; white-space: nowrap; text-align: right;
+        padding: 4px 3px; font-size: 5.5pt; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.03em; white-space: nowrap; text-align: right;
         border: 1px solid #374151;
     }
     thead th.left { text-align: left; }
     thead th.center { text-align: center; }
-    thead .sub { display: block; font-size: 5.5pt; font-weight: 400; color: #93c5fd; letter-spacing: 0; }
+    thead .sub { display: block; font-size: 4.5pt; font-weight: 400; color: #93c5fd; letter-spacing: 0; }
 
     tbody tr { border-bottom: 1px solid #f3f4f6; }
     tbody tr:nth-child(even) { background: #f9fafb; }
-    tbody td { padding: 3.5px 4px; vertical-align: middle; }
+    tbody td { padding: 3px 3px; vertical-align: middle; }
     tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
-    tbody td.id  { text-align: right; color: #9ca3af; font-size: 7pt; }
-    tbody td.name { text-align: left; font-weight: 500; max-width: 110px; }
+    tbody td.id  { text-align: right; color: #9ca3af; font-size: 6pt; }
+    tbody td.name { text-align: left; font-weight: 500; max-width: 95px; }
     tbody td.zero { color: #d1d5db; }
     tbody td.total-col {
         text-align: right; font-weight: 700; font-variant-numeric: tabular-nums;
         background: #eef2ff; color: #1e3a5f;
     }
-    tbody td.pct { text-align: right; color: #6b7280; font-size: 7pt; }
+    tbody td.pct { text-align: right; color: #6b7280; font-size: 6pt; }
 
     tfoot tr { background: #1e3a5f; color: #ffffff; }
-    tfoot td { padding: 5px 4px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; border-top: 2px solid #93c5fd; }
-    tfoot td.left { text-align: left; font-size: 7pt; letter-spacing: 0.05em; text-transform: uppercase; }
+    tfoot td { padding: 4px 3px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; border-top: 2px solid #93c5fd; }
+    tfoot td.left { text-align: left; font-size: 6pt; letter-spacing: 0.05em; text-transform: uppercase; }
 
-    .footer { margin-top: 10px; padding-top: 5px; border-top: 1px solid #e5e7eb; font-size: 6.5pt; color: #9ca3af; display: flex; justify-content: space-between; }
+    .footer { margin-top: 8px; padding-top: 4px; border-top: 1px solid #e5e7eb; font-size: 5.5pt; color: #9ca3af; display: flex; justify-content: space-between; }
 
-    @page { size: A4 landscape; margin: 10mm 10mm 10mm 10mm; }
+    @page { size: A4 landscape; margin: 7mm 8mm 7mm 8mm; }
 </style>
 </head>
 <body>
@@ -81,16 +81,16 @@
 <table>
     <thead>
         <tr>
-            <th class="left" style="width:22px;">#</th>
-            <th class="left" style="width:110px;">Reinsurer</th>
+            <th class="left" style="width:16px;">#</th>
+            <th class="left" style="width:95px;">Reinsurer</th>
             @foreach($monthNames as $i => $name)
-            <th style="width:52px;">
+            <th style="width:44px;">
                 <span class="sub">{{ sprintf('%04d%02d', $budget->year, $i + 1) }}</span>
                 {{ $name }}
             </th>
             @endforeach
-            <th style="width:64px; background:#1a2e50;">Total (USD)</th>
-            <th style="width:34px; background:#1a2e50;">%</th>
+            <th style="width:56px; background:#1a2e50;">Total (USD)</th>
+            <th style="width:26px; background:#1a2e50;">%</th>
         </tr>
     </thead>
     <tbody>

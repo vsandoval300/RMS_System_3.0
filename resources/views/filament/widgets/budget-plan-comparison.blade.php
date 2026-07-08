@@ -30,7 +30,7 @@
 @endphp
 
 <div>
-<x-filament::section heading="AC vs Plan">
+<x-filament::section heading="Portfolio Metrics">
 
     {{-- ── Filter bar ── --}}
     <div style="
@@ -322,8 +322,8 @@
             $avgPct       = $maxAc > 0 ? min(round($avgAc / $maxAc * 100, 1), 100) : 0;
             // Grid: Reinsurer | AC bar | gap | ΔPY | [ΔPL] | ΔPY% | [ΔPL%]
             $gridCols = $showPlan
-                ? '20% 1fr 4rem 14% 14% 8% 8%'
-                : '22% 1fr 6rem 16% 10%';
+                ? '18% 5.5rem 1fr 4rem 14% 14% 8% 8%'
+                : '20% 5.5rem 1fr 6rem 16% 10%';
         @endphp
 
         <div>
@@ -332,13 +332,14 @@
                         border-bottom:2px solid light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));
                         font-size:0.875rem; font-weight:700; color:light-dark(#111827,#f3f4f6);">
                 <div>Reinsurer</div>
-                <div wire:click="setSortColumn('ac')" style="cursor:pointer; user-select:none; padding-left:2px;
+                <div wire:click="setSortColumn('ac')" style="cursor:pointer; user-select:none; text-align:right; padding-right:8px;
                      color:{{ $this->sortColumn === 'ac' ? '#41A2C3' : 'light-dark(#111827,#f3f4f6)' }};">
                     AC ({{ $this->selectedYear }}) ↓
                 </div>
                 <div></div>
+                <div></div>
                 <div style="text-align:center;">ΔPY</div>
-                @if($showPlan)<div style="text-align:center; border-left:2px solid light-dark(rgba(0,0,0,0.10),rgba(255,255,255,0.12)); padding-left:4px;">ΔPL</div>@endif
+                @if($showPlan)<div style="text-align:center;">ΔPL</div>@endif
                 <div style="text-align:right;">ΔPY%</div>
                 @if($showPlan)<div style="text-align:right;">ΔPL%</div>@endif
             </div>
@@ -366,23 +367,30 @@
                     {{ $row['name'] }}
                 </div>
 
+                {{-- AC value label --}}
+                <div style="text-align:right; padding-right:8px; font-size:0.875rem; font-weight:600;
+                             color:light-dark(#111827,#f3f4f6); font-variant-numeric:tabular-nums;
+                             display:flex; align-items:center; justify-content:flex-end; white-space:nowrap;">
+                    {{ $fmt($row['ac']) }}
+                </div>
+
                 {{-- AC horizontal bar --}}
                 <div style="flex:1; height:22px; position:relative; border-radius:3px;">
                     <div style="position:absolute; inset:0; background:light-dark(#e5e7eb,rgba(255,255,255,0.06)); border-radius:3px;"></div>
-                    <div style="position:absolute; top:0; left:0; bottom:0; width:{{ $acPct }}%; background:#219EBC; border-radius:3px 0 0 3px; z-index:1;"></div>
-                    @if($barInner)
-                    <div style="position:absolute; top:0; left:0; bottom:0; width:{{ $acPct }}%; display:flex; align-items:center; justify-content:flex-end; padding-right:5px; z-index:2;">
-                        <span style="font-size:0.75rem; font-weight:600; color:#ffffff; white-space:nowrap;">{{ $fmt($row['ac']) }}</span>
-                    </div>
-                    @else
-                    <div style="position:absolute; top:0; left:{{ $acPct }}%; bottom:0; display:flex; align-items:center; padding-left:5px; z-index:2;">
-                        <span style="font-size:0.875rem; font-weight:500; color:light-dark(#111827,#f3f4f6); white-space:nowrap;">{{ $fmt($row['ac']) }}</span>
-                    </div>
-                    @endif
-                    {{-- Plan marker line --}}
+                    <div style="position:absolute; top:0; left:0; bottom:0; width:{{ $acPct }}%; background:#41A2C3; border-radius:3px 0 0 3px; z-index:1;"></div>
+                    {{-- Plan marker I-beam --}}
                     @if($showPlan && $row['plan'] > 0)
                     @php $planPct = $maxAc > 0 ? min(round($row['plan'] / $maxAc * 100, 1), 100) : 0; @endphp
-                    <div style="position:absolute; left:{{ $planPct }}%; top:0; bottom:0; border-left:2px solid #8b5cf6; z-index:4; pointer-events:none;" title="Plan: {{ $fmt($row['plan']) }}"></div>
+                    <div style="position:absolute; left:calc({{ $planPct }}% - 1px); top:0; bottom:0; z-index:4; pointer-events:none;">
+                        {{-- Top cap --}}
+                        <div style="position:absolute; top:0; left:-3px; width:8px; height:2px; background:light-dark(#374151,#ffffff); border-radius:1px;"></div>
+                        {{-- Vertical stem --}}
+                        <div style="position:absolute; top:0; bottom:0; left:0; width:2px; background:light-dark(#374151,#ffffff);"></div>
+                        {{-- Bottom cap --}}
+                        <div style="position:absolute; bottom:0; left:-3px; width:8px; height:2px; background:light-dark(#374151,#ffffff); border-radius:1px;"></div>
+                        {{-- Label --}}
+                        <span style="position:absolute; top:50%; left:7px; transform:translateY(-50%); white-space:nowrap; font-size:0.75rem; font-weight:700; color:light-dark(#374151,#ffffff); line-height:1;">{{ $fmt($row['plan']) }}</span>
+                    </div>
                     @endif
                     {{-- Average dashed line --}}
                     <div style="position:absolute; left:{{ $avgPct }}%; top:-3px; bottom:-3px; border-left:2px dashed #C1121F; z-index:3; pointer-events:none;"></div>
@@ -448,6 +456,7 @@
             {{-- Avg label --}}
             <div style="display:grid; grid-template-columns:{{ $gridCols }}; gap:8px 0; padding:2px 8px 0;">
                 <div></div>
+                <div></div>
                 <div style="position:relative; height:22px;">
                     <div style="position:absolute; left:{{ $avgPct }}%; transform:translateX(-50%); white-space:nowrap; padding-top:2px;">
                         <span style="display:inline-block; font-size:0.65rem; font-weight:700; color:#ffffff; background:#ef4444; padding:0.18rem 0.45rem; border-radius:999px; line-height:1;">
@@ -467,7 +476,8 @@
                         border-top:1px solid light-dark(rgba(0,0,0,0.08),rgba(255,255,255,0.08));
                         background:light-dark(rgba(0,0,0,0.02),rgba(255,255,255,0.03));">
                 <div style="font-size:0.82rem; font-weight:700; color:light-dark(#111827,#f3f4f6);">Total</div>
-                <div style="font-size:0.82rem; font-weight:700; color:light-dark(#111827,#f3f4f6); padding-left:2px;">{{ $fmt($totalAc) }}</div>
+                <div style="text-align:right; padding-right:8px; font-size:0.82rem; font-weight:700; color:light-dark(#111827,#f3f4f6); font-variant-numeric:tabular-nums;">{{ $fmt($totalAc) }}</div>
+                <div></div>
                 <div></div>
                 <div style="text-align:center; font-size:0.83rem; font-weight:700; color:{{ $totalDeltaPy >= 0 ? '#65a30d' : '#dc2626' }};">
                     {{ $totalDeltaPy >= 0 ? '+' : '' }}{{ $fmt($totalDeltaPy) }}
@@ -503,6 +513,7 @@
                         <th style="text-align:right; padding:4px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6); width:10%;">
                             PY <span style="font-weight:400; font-size:0.85rem;">({{ $prevYear }})</span>
                         </th>
+                        <th style="width:18px; padding:0;"></th>
                         @if($showPlan)
                         <th style="text-align:right; padding:4px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6); width:10%;">
                             PL
@@ -547,6 +558,7 @@
                         <td style="padding:4px 8px; text-align:right; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">
                             {{ $fmt($row['pl']) }}
                         </td>
+                        <td style="width:18px; padding:0;"></td>
                         @if($showPlan)
                         <td style="padding:4px 8px; text-align:right; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">
                             {{ $row['plan'] > 0 ? $fmt($row['plan']) : '—' }}
@@ -621,6 +633,7 @@
                         <td style="padding:5px 8px; font-weight:700; color:light-dark(#111827,#f3f4f6);">Total</td>
                         <td style="padding:5px 8px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:light-dark(#111827,#f3f4f6);">{{ $fmt($totalAc) }}</td>
                         <td style="padding:5px 8px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">{{ $fmt($totalPl) }}</td>
+                        <td style="width:18px; padding:0;"></td>
                         @if($showPlan)
                         <td style="padding:5px 8px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:light-dark(#6b7280,#9ca3af);">{{ $fmt($totalPlan) }}</td>
                         <td style="width:18px; padding:0;"></td>
@@ -687,6 +700,7 @@
         ? $budgets[$this->selectedBudgetId] : 'Plan';
 @endphp
 
+<div style="margin-top: 1.5rem;">
 <x-filament::section heading="Monthly Performance">
     <div x-data>
 
@@ -760,7 +774,7 @@
             <div style="background:light-dark(#ffffff,#1e2533); border:1px solid light-dark(rgba(0,0,0,0.08),rgba(255,255,255,0.08)); border-radius:12px; padding:1.25rem 1.5rem 1rem; font-size:0.875rem;">
                 <h3 style="font-size:1.05rem; font-weight:600; margin:0 0 2px; color:light-dark(#111827,#f3f4f6);">Underwritten Premium</h3>
                 <p style="font-size:0.875rem; color:light-dark(#9ca3af,#6b7280); margin:0 0 0.75rem;">
-                    AC: {{ $this->selectedYear }} &nbsp;vs&nbsp; <span style="color:#8b5cf6; font-weight:600;">PL: {{ $budgetLabel }}</span>
+                    AC: {{ $this->selectedYear }} &nbsp;vs&nbsp; <span style="color:#f59e0b; font-weight:600;">PL: {{ $budgetLabel }}</span>
                 </p>
                 <div style="display:flex; gap:3px;">
                     @foreach($plRows as $row)
@@ -790,4 +804,5 @@
 
     </div>
 </x-filament::section>
+</div>{{-- /margin wrapper --}}
 </div>

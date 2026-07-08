@@ -108,13 +108,13 @@ class UnderwrittenBudgetResource extends Resource
                     Action::make('view_version')
                         ->label('View')
                         ->icon('heroicon-m-eye')
-                        ->color('info')
+                        ->color('gray')
                         ->url(fn ($record) => static::getUrl('view-version', ['record' => $record])),
 
                     Action::make('edit_version')
                         ->label('Edit')
                         ->icon('heroicon-m-pencil-square')
-                        ->color('warning')
+                        ->color('primary')
                         ->url(fn ($record) => static::getUrl('edit-version', ['record' => $record])),
 
                     DeleteAction::make(),

@@ -7,135 +7,169 @@
     @endphp
 
     <style>
+        /* ── Semantic tokens ── */
         .batch-card {
-            background: light-dark(#ffffff, #1e2535);
-            border: 1px solid light-dark(#e5e7eb, #2d3748);
+            --bc-card:           light-dark(var(--color-white),       #18181B);
+            --bc-surface:        light-dark(var(--color-gray-50),     var(--color-gray-900));
+            --bc-sunken:         light-dark(var(--color-gray-100),    var(--color-gray-700));
+            --bc-border:         light-dark(var(--color-gray-200),    var(--color-gray-700));
+            --bc-border-input:   light-dark(var(--color-gray-300),    var(--color-gray-600));
+            --bc-text:           light-dark(var(--color-gray-950),    var(--color-white));
+            --bc-text-sec:       light-dark(var(--color-gray-700),    var(--color-gray-200));
+            --bc-text-muted:     light-dark(var(--color-gray-500),    var(--color-gray-400));
+            --bc-text-subtle:    light-dark(var(--color-gray-400),    var(--color-gray-600));
+            --bc-input-bg:       light-dark(var(--color-white),       #252527);
+            --bc-row-hover:      light-dark(var(--color-gray-50),     var(--color-gray-700));
+            --bc-primary:        light-dark(var(--color-primary-600), var(--color-primary-500));
+            --bc-primary-subtle: light-dark(var(--color-primary-50),  var(--color-primary-950));
+            --bc-primary-text:   light-dark(var(--color-primary-700), var(--color-primary-300));
+            --bc-primary-border: light-dark(var(--color-primary-200), var(--color-primary-800));
+            --bc-success:        light-dark(var(--color-success-600), var(--color-success-500));
+            --bc-danger:         light-dark(var(--color-danger-600),  var(--color-danger-400));
+        }
+
+        .batch-card {
+            background: var(--bc-card);
+            border: 1px solid var(--bc-border);
             border-radius: 0.75rem;
             overflow: hidden;
         }
         .batch-toolbar {
             padding: 1rem 1.25rem;
-            border-bottom: 1px solid light-dark(#e5e7eb, #2d3748);
+            border-bottom: 1px solid var(--bc-border);
             display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem;
         }
         .batch-toolbar-label {
-            font-size: 0.70rem; font-weight: 600; letter-spacing: 0.07em;
-            text-transform: uppercase; color: light-dark(#6b7280, #9ca3af); margin-bottom: 0.3rem;
+            font-size: 0.875rem; font-weight: 600;
+            color: var(--bc-text-muted); margin-bottom: 0.3rem;
         }
         .batch-ctrl input[type="text"] {
-            background: light-dark(#f9fafb, #161d2e);
-            border: 1px solid light-dark(#d1d5db, #374151);
-            border-radius: 0.5rem; color: light-dark(#111827, #f3f4f6);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border-input);
+            border-radius: 0.5rem; color: var(--bc-text);
             font-size: 0.875rem; padding: 0.45rem 0.75rem; outline: none; transition: border-color 0.15s;
         }
         .batch-ctrl input[type="text"]:focus {
-            border-color: light-dark(#6366f1, #818cf8);
-            box-shadow: 0 0 0 3px light-dark(rgba(99,102,241,.15), rgba(129,140,248,.15));
+            border-color: var(--bc-primary);
         }
         .readonly-pill {
             display: inline-flex; align-items: center; gap: 0.4rem;
-            background: light-dark(#f3f4f6, #1a2236);
-            border: 1px solid light-dark(#e5e7eb, #2d3748);
-            border-radius: 0.5rem; color: light-dark(#374151, #d1d5db);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border-input);
+            border-radius: 0.5rem; color: var(--bc-text-sec);
             font-size: 0.875rem; font-weight: 500; padding: 0.45rem 0.85rem;
         }
         .version-badge {
             display: inline-flex; align-items: center; gap: 0.35rem;
-            background: light-dark(#ede9fe, #312e81); color: light-dark(#4f46e5, #a5b4fc);
-            border-radius: 999px; font-size: 0.78rem; font-weight: 700;
-            padding: 0.18rem 0.65rem; border: 1px solid light-dark(#c4b5fd, #4338ca);
+            background: #41A2C3; color: #fff;
+            border-radius: 0.45rem; font-size: 0.875rem; font-weight: 600;
+            padding: 0.45rem 0.85rem; border: none;
         }
         .batch-notes textarea {
-            background: light-dark(#f9fafb, #161d2e);
-            border: 1px solid light-dark(#d1d5db, #374151);
-            border-radius: 0.5rem; color: light-dark(#111827, #f3f4f6);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border-input);
+            border-radius: 0.5rem; color: var(--bc-text);
             font-size: 0.875rem; padding: 0.45rem 0.75rem;
             resize: vertical; width: 100%; outline: none; transition: border-color 0.15s;
         }
-        .batch-notes textarea:focus {
-            border-color: light-dark(#6366f1, #818cf8);
-            box-shadow: 0 0 0 3px light-dark(rgba(99,102,241,.15), rgba(129,140,248,.15));
-        }
+        .batch-notes textarea:focus { border-color: var(--bc-primary); }
+
         .batch-table-wrap { overflow-x: auto; }
-        .batch-table {
-            width: 100%; border-collapse: collapse; font-size: 0.8rem;
-        }
-        .batch-table thead tr { background: light-dark(#f3f4f6, #1a2236); }
+        .batch-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+
+        .batch-table thead tr { background: light-dark(var(--color-gray-50), #1D1D20); }
         .batch-table th {
             padding: 0.55rem 0.5rem; text-align: center;
-            font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
-            color: light-dark(#6b7280, #9ca3af);
-            border-bottom: 1px solid light-dark(#e5e7eb, #2d3748); white-space: nowrap;
+            font-size: 0.82rem; font-weight: 600;
+            color: light-dark(var(--color-gray-700), var(--color-gray-200));
+            border-bottom: 1px solid var(--bc-border); white-space: nowrap;
         }
         .batch-table th.col-check  { width: 2.5rem; }
         .batch-table th.col-id     { width: 3rem; text-align: right; }
         .batch-table th.col-name   { text-align: left; min-width: 10rem; padding-left: 0.75rem; }
         .batch-table th.col-saved  { text-align: right; min-width: 6.5rem; }
         .batch-table th.col-month  { width: 8rem; }
-        .batch-table th.col-total  { text-align: right; min-width: 6.5rem; background: light-dark(#eef2ff, #1e2d55); }
+        .batch-table th.col-total  { text-align: right; min-width: 6.5rem;
+                                     background: var(--bc-primary-subtle); color: var(--bc-primary-text); }
         .batch-table th.col-delta  { text-align: right; min-width: 5rem; }
 
-        .batch-table tbody tr {
-            border-bottom: 1px solid light-dark(#f3f4f6, #1f2b3e); transition: background 0.1s;
-        }
-        .batch-table tbody tr:hover { background: light-dark(#f9fafb, #1a2236); }
+        .batch-table tbody tr { border-bottom: 1px solid var(--bc-border); transition: background 0.1s; }
+        .batch-table tbody tr:hover { background: var(--bc-row-hover); }
         .batch-table tbody tr.row-excluded { opacity: 0.45; }
-        .batch-table td {
-            padding: 0.45rem 0.5rem; color: light-dark(#374151, #d1d5db); vertical-align: middle;
-        }
+        .batch-table td { padding: 0.45rem 0.5rem; color: var(--bc-text-sec); vertical-align: middle; }
         .batch-table td.col-check  { text-align: center; }
-        .batch-table td.col-id     { text-align: right; color: light-dark(#9ca3af, #6b7280); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
-        .batch-table td.col-name   { font-weight: 500; color: light-dark(#111827, #f3f4f6); padding-left: 0.75rem; }
-        .batch-table td.col-saved  { text-align: right; color: light-dark(#6b7280, #9ca3af); font-variant-numeric: tabular-nums; }
+        .batch-table td.col-id     { text-align: right; color: var(--bc-text-muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+        .batch-table td.col-name   { font-weight: 500; color: var(--bc-text); padding-left: 0.75rem; }
+        .batch-table td.col-saved  { text-align: right; color: var(--bc-text-muted); font-variant-numeric: tabular-nums; }
         .batch-table td.col-month  { text-align: center; }
-        .batch-table td.col-total  { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; background: light-dark(rgba(238,242,255,0.5), rgba(30,45,85,0.4)); }
+        .batch-table td.col-total  { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;
+                                     background: var(--bc-primary-subtle); color: var(--bc-primary-text); }
         .batch-table td.col-delta  { text-align: right; }
 
         .month-input {
-            background: light-dark(#f9fafb, #161d2e);
-            border: 1px solid light-dark(#d1d5db, #374151);
-            border-radius: 0.35rem; color: light-dark(#111827, #f3f4f6);
+            background: var(--bc-input-bg);
+            border: 1px solid var(--bc-border);
+            border-radius: 0.35rem; color: var(--bc-text);
             font-size: 0.8rem; font-variant-numeric: tabular-nums;
             padding: 0.3rem 0.4rem; text-align: right; width: 7.25rem; outline: none; transition: border-color 0.15s;
         }
-        .month-input:focus {
-            border-color: light-dark(#6366f1, #818cf8);
-            box-shadow: 0 0 0 2px light-dark(rgba(99,102,241,.12), rgba(129,140,248,.12));
-        }
+        .month-input:focus { border-color: var(--bc-primary); }
         .month-input:disabled { opacity: 0.35; cursor: not-allowed; }
 
-        .row-check { width: 1.05rem; height: 1.05rem; cursor: pointer; accent-color: #6366f1; }
-        .delta-up   { color: #22c55e; font-weight: 600; font-size: 0.75rem; }
-        .delta-down { color: #ef4444; font-weight: 600; font-size: 0.75rem; }
-        .delta-flat { color: light-dark(#9ca3af, #6b7280); font-size: 0.75rem; }
+        .row-check {
+            width: 1.05rem; height: 1.05rem; cursor: pointer;
+            appearance: none; -webkit-appearance: none;
+            border: 2px solid var(--bc-border-input);
+            border-radius: 0.25rem;
+            background: var(--bc-input-bg);
+            position: relative;
+            transition: background 0.12s, border-color 0.12s;
+            flex-shrink: 0;
+        }
+        .row-check:checked { background: #41A2C3; border-color: #41A2C3; }
+        .row-check:checked::after {
+            content: '';
+            position: absolute;
+            left: 50%; top: 42%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 0.28rem; height: 0.52rem;
+            border: 2px solid #fff;
+            border-top: none; border-left: none;
+        }
+
+        .delta-up   { color: var(--bc-success); font-weight: 600; font-size: 0.75rem; }
+        .delta-down { color: var(--bc-danger);  font-weight: 600; font-size: 0.75rem; }
+        .delta-flat { color: var(--bc-text-muted); font-size: 0.75rem; }
 
         .notes-section {
             padding: 0.75rem 1.25rem;
-            border-bottom: 1px solid light-dark(#e5e7eb, #2d3748);
+            border-bottom: 1px solid var(--bc-border);
         }
         .batch-footer {
-            padding: 1rem 1.25rem; border-top: 1px solid light-dark(#e5e7eb, #2d3748);
+            padding: 1rem 1.25rem; border-top: 1px solid var(--bc-border);
             display: flex; align-items: center; justify-content: space-between;
             flex-wrap: wrap; gap: 0.75rem;
         }
-        .batch-footer-info { font-size: 0.80rem; color: light-dark(#6b7280, #9ca3af); }
-        .batch-footer-info span { font-weight: 700; color: light-dark(#374151, #d1d5db); }
+        .batch-footer-info { font-size: 0.80rem; color: var(--bc-text-muted); }
+        .batch-footer-info span { font-weight: 700; color: var(--bc-text-sec); }
         .btn-save {
-            display: inline-flex; align-items: center; gap: 0.45rem;
-            background: #6366f1; color: #fff; border: none; border-radius: 0.55rem;
-            font-size: 0.875rem; font-weight: 600; padding: 0.55rem 1.25rem; cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: #41A2C3; color: #fff; border: none;
+            border-radius: 0.45rem; font-size: 0.875rem; font-weight: 600;
+            padding: 0.45rem 0.85rem; cursor: pointer;
+            transition: background 0.12s, transform 0.1s;
         }
-        .btn-save:hover  { background: #4f46e5; }
+        .btn-save:hover  { background: #3290af; }
         .btn-save:active { transform: scale(0.98); }
         .btn-cancel {
-            display: inline-flex; align-items: center; gap: 0.45rem;
-            background: transparent; color: light-dark(#6b7280, #9ca3af);
-            border: 1px solid light-dark(#d1d5db, #374151); border-radius: 0.55rem;
-            font-size: 0.875rem; font-weight: 500; padding: 0.55rem 1.1rem;
-            cursor: pointer; text-decoration: none; transition: background 0.15s;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: light-dark(var(--color-gray-100), #09090B); color: var(--bc-text-sec);
+            border: 1px solid var(--bc-border-input);
+            border-radius: 0.45rem; font-size: 0.875rem; font-weight: 600;
+            padding: 0.45rem 0.85rem; cursor: pointer; text-decoration: none;
+            transition: background 0.12s;
         }
-        .btn-cancel:hover { background: light-dark(#f3f4f6, #1a2236); }
+        .btn-cancel:hover { background: var(--bc-border); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 
@@ -152,7 +186,7 @@
                 <div class="version-badge">v{{ $version }}</div>
             </div>
             <div class="batch-ctrl" style="flex:1; min-width:14rem;">
-                <div class="batch-toolbar-label">Version Label <span style="color:#ef4444">*</span></div>
+                <div class="batch-toolbar-label">Version Label <span style="color:var(--bc-danger)">*</span></div>
                 <input type="text" wire:model="versionLabel"
                        placeholder="e.g. Initial Budget, Q2 Revision…" style="width:100%">
                 @error('versionLabel')
@@ -163,7 +197,7 @@
 
         {{-- Notes ──────────────────────────────────────────── --}}
         <div class="notes-section">
-            <div class="batch-toolbar-label" style="margin-bottom:0.35rem;">Internal Notes (optional)</div>
+            <div class="batch-toolbar-label" style="margin-bottom:0.35rem; text-transform:none; letter-spacing:normal; color:var(--bc-text); font-size:0.875rem; font-weight:400;">Internal notes (Optional)</div>
             <div class="batch-notes">
                 <textarea wire:model="notes" rows="2" placeholder="Reason for revision, assumptions applied…"></textarea>
             </div>
@@ -182,7 +216,7 @@
                         <th class="col-saved">Saved Total</th>
                         @foreach($monthLabels as $i => $label)
                             <th class="col-month">
-                                <span style="font-size:0.60rem; display:block; color:light-dark(#9ca3af,#6b7280);">
+                                <span style="font-size:0.72rem; display:block; color:light-dark(#9ca3af,#6b7280);">
                                     {{ sprintf('%04d%02d', $yr, $i + 1) }}
                                 </span>
                                 {{ $label }}
