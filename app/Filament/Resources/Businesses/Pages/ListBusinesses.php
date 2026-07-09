@@ -30,9 +30,13 @@ class ListBusinesses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // ✅ Export primero (antes de New Business)
-        // ✅ Export primero (antes de New Business)
-        Action::make('export')
+            Action::make('import_businesses')
+                ->label('Import')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('gray')
+                ->url(BusinessResource::getUrl('import')),
+
+            Action::make('export')
             ->label('Export Report')
             ->icon('heroicon-o-arrow-down-tray')
             ->color('gray')

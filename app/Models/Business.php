@@ -31,7 +31,8 @@ class Business extends Model
         'producer_id', 'currency_id', 'region_id',
         'approval_status', 'approval_status_updated_at',
         'business_lifecycle_status', 'business_lifecycle_status_updated_at',
-        'created_by_user', 'source_code'
+        'created_by_user', 'source_code',
+        'reviewed_by_user_id', 'revision_notes',
     ];
 
     protected $casts = [
@@ -68,6 +69,16 @@ class Business extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by_user');
+    }
+
+    public function createdByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user');
+    }
+
+    public function reviewer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by_user_id');
     }
 
     /* ---------------------------------------------------

@@ -16,6 +16,10 @@
         : (abs($n) >= 1_000 ? number_format($n / 1_000, 1) . 'K' : number_format($n, 0));
 @endphp
 
+<style>
+    .pg-section-wrap .fi-section { background: light-dark(#ffffff, #171718) !important; }
+</style>
+<div class="pg-section-wrap">
 <x-filament::section heading="Portfolio Growth">
 
     {{-- ── Filter bar ── --}}
@@ -34,7 +38,7 @@
             Filters
         </span>
 
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
 
         <div style="display:flex; align-items:center; gap:0.4rem;">
             <label style="font-size:0.95rem; font-weight:500; color:light-dark(#111827,#f3f4f6);">Reinsurer:</label>
@@ -44,7 +48,7 @@
                     background: light-dark(#ffffff, #1e2533);
                     border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
                     border-radius: 6px;
-                    padding: 4px 28px 4px 10px;
+                    padding: 7px 28px 7px 10px;
                     font-size: 0.85rem;
                     color: light-dark(#111827, #f3f4f6);
                     cursor: pointer;
@@ -537,3 +541,4 @@
     </div>
 
 </x-filament::section>
+</div>

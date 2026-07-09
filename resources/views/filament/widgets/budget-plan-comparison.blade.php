@@ -29,7 +29,10 @@
     $withoutOpDelta = $withoutOpAc - $withoutOpPl;
 @endphp
 
-<div>
+<div class="bpc-wrap">
+<style>
+    .bpc-wrap .fi-section { background: light-dark(#ffffff, #171718) !important; }
+</style>
 <x-filament::section heading="Portfolio Metrics">
 
     {{-- ── Filter bar ── --}}
@@ -48,7 +51,7 @@
             Filters
         </span>
 
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
 
         {{-- Year --}}
         <div style="display:flex; align-items:center; gap:0.4rem;">
@@ -56,7 +59,7 @@
             <select wire:model.live="selectedYear" style="
                 background: light-dark(#ffffff, #1e2533);
                 border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
-                border-radius: 6px; padding: 4px 28px 4px 10px;
+                border-radius: 6px; padding: 7px 28px 7px 10px;
                 font-size: 0.85rem; color: light-dark(#111827, #f3f4f6);
                 cursor: pointer; appearance: auto;
             ">
@@ -66,7 +69,7 @@
             </select>
         </div>
 
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
 
         {{-- Reinsurer --}}
         <div style="display:flex; align-items:center; gap:0.4rem;">
@@ -74,7 +77,7 @@
             <select wire:model.live="selectedReinsurer" style="
                 background: light-dark(#ffffff, #1e2533);
                 border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
-                border-radius: 6px; padding: 4px 28px 4px 10px;
+                border-radius: 6px; padding: 7px 28px 7px 10px;
                 font-size: 0.85rem; color: light-dark(#111827, #f3f4f6);
                 cursor: pointer; appearance: auto;
             ">
@@ -85,13 +88,14 @@
             </select>
         </div>
 
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
 
         {{-- Show Plan toggle --}}
         <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; user-select:none;">
             <input
                 type="checkbox"
-                wire:model.live="showPlan"
+                wire:click="toggleShowPlan"
+                @checked($showPlan)
                 style="width:15px; height:15px; accent-color:#8b5cf6; cursor:pointer;"
             >
             <span style="font-size:0.9rem; font-weight:500; color:light-dark(#111827,#f3f4f6);">Show Plan</span>
@@ -109,7 +113,7 @@
                 <select wire:model.live="selectedBudgetId" style="
                     background: light-dark(#ffffff, #1e2533);
                     border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
-                    border-radius: 6px; padding: 4px 28px 4px 10px;
+                    border-radius: 6px; padding: 7px 28px 7px 10px;
                     font-size: 0.85rem; color: light-dark(#111827, #f3f4f6);
                     cursor: pointer; appearance: auto;
                 ">
@@ -702,10 +706,10 @@
 
 <div style="margin-top: 1.5rem;">
 <x-filament::section heading="Monthly Performance">
-    <div x-data>
+    <div x-data="{ showPlan: $wire.entangle('showPlan') }">
 
         {{-- PY view: two charts side by side (visible when showPlan=false) --}}
-        <div x-show="!$wire.showPlan">
+        <div x-show="!showPlan">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
 
             {{-- Businesses --}}
@@ -770,7 +774,7 @@
         </div>{{-- /x-show PY --}}
 
         {{-- PL view: single chart full width (visible when showPlan=true) --}}
-        <div x-show="$wire.showPlan" style="display:none;">
+        <div x-show="showPlan" style="display:none;">
             <div style="background:light-dark(#ffffff,#1e2533); border:1px solid light-dark(rgba(0,0,0,0.08),rgba(255,255,255,0.08)); border-radius:12px; padding:1.25rem 1.5rem 1rem; font-size:0.875rem;">
                 <h3 style="font-size:1.05rem; font-weight:600; margin:0 0 2px; color:light-dark(#111827,#f3f4f6);">Underwritten Premium</h3>
                 <p style="font-size:0.875rem; color:light-dark(#9ca3af,#6b7280); margin:0 0 0.75rem;">

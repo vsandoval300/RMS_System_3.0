@@ -39,13 +39,13 @@
         flex-wrap: wrap;
     ">
         <span style="font-size:0.8rem; font-weight:600; color:light-dark(#6b7280,#9ca3af); letter-spacing:0.03em; text-transform:uppercase;">Filters</span>
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
         <div style="display:flex; align-items:center; gap:0.4rem;">
             <label style="font-size:0.95rem; font-weight:500; color:light-dark(#111827,#f3f4f6);">Year:</label>
             <select wire:model.live="selectedYear" style="
                 background: light-dark(#ffffff, #1e2533);
                 border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
-                border-radius: 6px; padding: 4px 28px 4px 10px;
+                border-radius: 6px; padding: 7px 28px 7px 10px;
                 font-size: 0.85rem; color: light-dark(#111827, #f3f4f6);
                 cursor: pointer; appearance: auto;
             ">

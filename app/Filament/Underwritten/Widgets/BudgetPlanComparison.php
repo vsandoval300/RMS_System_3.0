@@ -41,6 +41,15 @@ class BudgetPlanComparison extends Widget
         $this->dispatchBudgetFilters();
     }
 
+    public function toggleShowPlan(): void
+    {
+        $this->showPlan = ! $this->showPlan;
+        if ($this->showPlan && $this->selectedBudgetId === null) {
+            $this->autoSelectBudget();
+        }
+        $this->dispatchBudgetFilters();
+    }
+
     public function updatedShowPlan(): void
     {
         if ($this->showPlan && $this->selectedBudgetId === null) {

@@ -43,7 +43,7 @@
             Filters
         </span>
 
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
 
         {{-- Year --}}
         <div style="display:flex; align-items:center; gap:0.4rem;">
@@ -54,7 +54,7 @@
                     background: light-dark(#ffffff, #1e2533);
                     border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
                     border-radius: 6px;
-                    padding: 4px 28px 4px 10px;
+                    padding: 7px 28px 7px 10px;
                     font-size: 0.85rem;
                     color: light-dark(#111827, #f3f4f6);
                     cursor: pointer;
@@ -67,7 +67,7 @@
             </select>
         </div>
 
-        <div style="width:1px; height:18px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
+        <div style="width:1px; height:22px; background:light-dark(rgba(0,0,0,0.12),rgba(255,255,255,0.12));"></div>
 
         {{-- Reinsurer --}}
         <div style="display:flex; align-items:center; gap:0.4rem;">
@@ -78,7 +78,7 @@
                     background: light-dark(#ffffff, #1e2533);
                     border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
                     border-radius: 6px;
-                    padding: 4px 28px 4px 10px;
+                    padding: 7px 28px 7px 10px;
                     font-size: 0.85rem;
                     color: light-dark(#111827, #f3f4f6);
                     cursor: pointer;

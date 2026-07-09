@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'department_id',
         'position_id',
+        'manager_id',
     ];
 
 
@@ -62,16 +63,24 @@ class User extends Authenticatable implements FilamentUser
         return true;
     }
 
-    // 👇 relación con Department
     public function department()
     {
         return $this->belongsTo(Department::class);
     }
 
-    // 👇 relación con Position
     public function position()
     {
         return $this->belongsTo(Position::class);
+    }
+
+    public function manager(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function subordinates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(User::class, 'manager_id');
     }
 
     public function loginLogs()

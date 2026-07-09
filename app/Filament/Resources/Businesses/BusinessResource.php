@@ -17,6 +17,7 @@ use App\Filament\Resources\Businesses\Pages\ListBusinesses;
 use App\Filament\Resources\Businesses\Pages\CreateBusiness;
 use App\Filament\Resources\Businesses\Pages\EditBusiness;
 use App\Filament\Resources\Businesses\Pages\ViewBusiness;
+use App\Filament\Resources\Businesses\Pages\ImportBusinesses;
 use App\Filament\Resources\Businesses\Widgets\BusinessStatsOverview;
 use App\Filament\Resources\BusinessResource\Pages;
 use App\Filament\Resources\BusinessResource\RelationManagers;
@@ -53,6 +54,7 @@ use Illuminate\Support\HtmlString;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group as ComponentsGroup;
+use App\Enums\ApprovalStatus;
 
 class BusinessResource extends Resource
 {
@@ -60,8 +62,32 @@ class BusinessResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 10;   // aparecerá primero
-    
+    protected static ?int    $navigationSort  = 10;
+
+    // ── Shared badge renderer for approval_status ──────────────────────────────
+    public static function approvalStatusBadgeHtml(mixed $status): string
+    {
+        $value = $status?->value ?? ($status instanceof \BackedEnum ? $status->value : $status);
+
+        [$label, $bg, $color] = match ($value) {
+            'DFT'   => ['Draft',          'light-dark(#f3f4f6,#27272a)', 'light-dark(#374151,#9ca3af)'],
+            'PND'   => ['Pending Review', 'light-dark(#fef9c3,#1c1a0e)', 'light-dark(#854d0e,#fbbf24)'],
+            'APR'   => ['Approved',       'light-dark(#dcfce7,#052e16)', 'light-dark(#166534,#86efac)'],
+            'REJ'   => ['Needs Revision', 'light-dark(#fee2e2,#1c0a0a)', 'light-dark(#991b1b,#fca5a5)'],
+            'CAN'   => ['Cancelled',      'light-dark(#f3f4f6,#27272a)', 'light-dark(#6b7280,#9ca3af)'],
+            default => ['—',              'light-dark(#f3f4f6,#27272a)', 'light-dark(#6b7280,#9ca3af)'],
+        };
+
+        return "<span style=\"
+            display:inline-flex; align-items:center; gap:0.35rem;
+            background:{$bg}; color:{$color};
+            font-size:0.78rem; font-weight:600;
+            padding:0.2rem 0.65rem; border-radius:9999px;
+            letter-spacing:0.03em;
+        \">{$label}</span>";
+    }
+
+
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
@@ -92,6 +118,43 @@ class BusinessResource extends Resource
     {
         return $schema
             ->schema([
+
+                // ── Revision notes alert (visible only when status = REJ) ──────────
+                Placeholder::make('revision_alert')
+                    ->hiddenLabel()
+                    ->columnSpanFull()
+                    ->visible(fn ($record) =>
+                        $record?->approval_status === ApprovalStatus::REJECTED &&
+                        filled($record?->revision_notes)
+                    )
+                    ->content(fn ($record) => new HtmlString('
+                        <div style="
+                            background: light-dark(#fff7ed, #1c1206);
+                            border: 1px solid light-dark(#fb923c, #c2410c);
+                            border-radius: 0.6rem;
+                            padding: 1rem 1.25rem;
+                            display: flex;
+                            gap: 0.75rem;
+                            align-items: flex-start;
+                        ">
+                            <svg style="flex-shrink:0;width:20px;height:20px;color:light-dark(#ea580c,#fb923c);margin-top:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                            </svg>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:0.9rem; color:light-dark(#9a3412,#fb923c); margin-bottom:0.35rem;">
+                                    Revision Required
+                                </div>
+                                <div style="font-size:0.875rem; color:light-dark(#7c2d12,#fed7aa); white-space:pre-wrap; line-height:1.5;">
+                                    ' . e($record?->revision_notes) . '
+                                </div>
+                                <div style="font-size:0.775rem; color:light-dark(#c2410c,#fb923c); margin-top:0.5rem;">
+                                    Reviewed by: <strong>' . e($record?->reviewer?->name ?? '—') . '</strong>
+                                    &nbsp;·&nbsp;
+                                    ' . ($record?->approval_status_updated_at?->format('M d, Y') ?? '') . '
+                                </div>
+                            </div>
+                        </div>
+                    ')),
 
                 Section::make()
                     ->columnSpan('full')
@@ -303,9 +366,11 @@ class BusinessResource extends Resource
                                     ->searchable()
                                     ->disabled(),
 
-                                TextInput::make('approval_status')
-                                    ->disabled()
-                                    ->default('DFT'),
+                                Placeholder::make('approval_status_badge')
+                                    ->label('Approval Status')
+                                    ->content(fn ($record) => new HtmlString(
+                                        self::approvalStatusBadgeHtml($record?->approval_status)
+                                    )),
 
                                 DatePicker::make('approval_status_updated_at')
                                     ->label('Approval Date')
@@ -330,6 +395,44 @@ class BusinessResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
+
+            // ── Revision notes alert (visible only when status = REJ) ──────────
+            TextEntry::make('revision_alert')
+                ->hiddenLabel()
+                ->columnSpanFull()
+                ->visible(fn ($record) =>
+                    $record?->approval_status === ApprovalStatus::REJECTED &&
+                    filled($record?->revision_notes)
+                )
+                ->html()
+                ->state(fn ($record) => '
+                    <div style="
+                        background: light-dark(#fff7ed, #1c1206);
+                        border: 1px solid light-dark(#fb923c, #c2410c);
+                        border-radius: 0.6rem;
+                        padding: 1rem 1.25rem;
+                        display: flex;
+                        gap: 0.75rem;
+                        align-items: flex-start;
+                    ">
+                        <svg style="flex-shrink:0;width:20px;height:20px;color:light-dark(#ea580c,#fb923c);margin-top:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                        </svg>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:0.9rem; color:light-dark(#9a3412,#fb923c); margin-bottom:0.35rem;">
+                                Revision Required
+                            </div>
+                            <div style="font-size:0.875rem; color:light-dark(#7c2d12,#fed7aa); white-space:pre-wrap; line-height:1.5;">
+                                ' . e($record?->revision_notes) . '
+                            </div>
+                            <div style="font-size:0.775rem; color:light-dark(#c2410c,#fb923c); margin-top:0.5rem;">
+                                Reviewed by: <strong>' . e($record?->reviewer?->name ?? '—') . '</strong>
+                                &nbsp;·&nbsp;
+                                ' . ($record?->approval_status_updated_at?->format('M d, Y') ?? '') . '
+                            </div>
+                        </div>
+                    </div>
+                '),
 
             Section::make() // o InfoSection::make('Business Details')
             ->columnSpan('full')
@@ -621,21 +724,13 @@ class BusinessResource extends Resource
         
                            TextEntry::make('approval_status_entry')
                                 ->hiddenLabel()
-                                ->state(function ($record) {
-                                    $status = $record->approval_status;
-
-                                    $value = $status === null
-                                        ? '—'
-                                        : (method_exists($status, 'label')
-                                            ? $status->label()
-                                            : ($status->value ?? $status->name));
-
-                                    $value = e($value);
-
-                                    return new HtmlString(
-                                        "<strong>Approval status:</strong> {$value}"
-                                    );
-                                })
+                                ->html()
+                                ->state(fn ($record) => new HtmlString(
+                                    '<div style="display:flex;flex-direction:column;gap:3px;">'
+                                    . '<span style="font-size:0.75rem;font-weight:600;color:light-dark(#6b7280,#9ca3af);letter-spacing:0.04em;">APPROVAL STATUS</span>'
+                                    . self::approvalStatusBadgeHtml($record?->approval_status)
+                                    . '</div>'
+                                ))
                                 ->columnSpan(2),
 
                             TextEntry::make('approval_date_entry')
@@ -845,6 +940,27 @@ class BusinessResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('approval_status')
+                    ->label('Approval')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => match ($state?->value ?? $state) {
+                        'DFT' => 'Draft',
+                        'PND' => 'Pending Review',
+                        'APR' => 'Approved',
+                        'REJ' => 'Needs Revision',
+                        'CAN' => 'Cancelled',
+                        default => $state?->value ?? '—',
+                    })
+                    ->color(fn ($state) => match ($state?->value ?? $state) {
+                        'DFT' => 'gray',
+                        'PND' => 'warning',
+                        'APR' => 'success',
+                        'REJ' => 'danger',
+                        'CAN' => 'gray',
+                        default => 'gray',
+                    })
+                    ->sortable(),
 
                 TextColumn::make('business_lifecycle_status')
                     ->label('Lifecycle')
@@ -1347,10 +1463,11 @@ class BusinessResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListBusinesses::route('/'),
+            'index'  => ListBusinesses::route('/'),
             'create' => CreateBusiness::route('/create'),
-            'edit' => EditBusiness::route('/{record}/edit'),
-            'view' => ViewBusiness::route('/{record}/view'), // 👈 Asegúrate que esto esté
+            'edit'   => EditBusiness::route('/{record}/edit'),
+            'view'   => ViewBusiness::route('/{record}/view'),
+            'import' => ImportBusinesses::route('/import'),
             
         ];
     }
