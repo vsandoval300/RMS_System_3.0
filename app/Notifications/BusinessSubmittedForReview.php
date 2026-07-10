@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Models\Business;
+use Filament\Notifications\Actions\Action as FilamentAction;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -25,13 +27,18 @@ class BusinessSubmittedForReview extends Notification
 
     public function toDatabase(object $notifiable): array
     {
-        return [
-            'type'             => 'business_submitted_for_review',
-            'business_code'    => $this->business->business_code,
-            'description'      => $this->business->description,
-            'submitted_by'     => $this->submitterName,
-            'url'              => route('filament.admin.resources.businesses.edit', $this->business),
-        ];
+        return FilamentNotification::make()
+            ->title('Business Submitted for Review')
+            ->body("{$this->submitterName} submitted **{$this->business->business_code}** — {$this->business->description}")
+            ->icon('heroicon-o-paper-airplane')
+            ->warning()
+            ->actions([
+                FilamentAction::make('review')
+                    ->label('Review Business')
+                    ->url(route('filament.admin.resources.businesses.edit', $this->business))
+                    ->markAsRead(),
+            ])
+            ->getDatabaseMessage();
     }
 
     // ── Email ──────────────────────────────────────────────────────────────────
