@@ -40,7 +40,7 @@ class LineOfBusinessResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationLabel = 'Lines of Businesses';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 4;   // aparecerá primero
+    protected static ?int    $navigationSort  = 12;   // aparecerá primero
 
     /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string

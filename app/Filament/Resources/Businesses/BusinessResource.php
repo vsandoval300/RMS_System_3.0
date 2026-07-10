@@ -62,7 +62,7 @@ class BusinessResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 10;
+    protected static ?int    $navigationSort  = 18;
 
     // ── Shared badge renderer for approval_status ──────────────────────────────
     public static function approvalStatusBadgeHtml(mixed $status): string

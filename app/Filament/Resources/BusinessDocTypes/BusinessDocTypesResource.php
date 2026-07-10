@@ -38,7 +38,7 @@ class BusinessDocTypesResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationLabel = 'Business Document Types';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 7;   // aparecerá primero
+    protected static ?int    $navigationSort  = 15;   // aparecerá primero
 
     public static function getNavigationBadge(): ?string
     {

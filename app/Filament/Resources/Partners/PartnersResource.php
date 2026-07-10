@@ -38,7 +38,7 @@ class PartnersResource extends Resource
     protected static ?string $model = Partner::class;
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 5;   // aparecerá primero
+    protected static ?int    $navigationSort  = 13;   // aparecerá primero
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string

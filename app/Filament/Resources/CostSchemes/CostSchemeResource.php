@@ -62,7 +62,7 @@ class CostSchemeResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 8;   // aparecerá primero
+    protected static ?int    $navigationSort  = 16;   // aparecerá primero
 
 
     protected static ?string $navigationLabel = 'Placement Schemes';
