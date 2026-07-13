@@ -35,7 +35,9 @@ class UnderwrittenBusinessAnual extends ChartWidget
         }
         $rows = $query
             ->selectRaw("DATE_PART('year', od.rep_date) AS year, COUNT(*) AS total")
-            ->where('od.operative_doc_type_id', '1') 
+            ->where('od.operative_doc_type_id', '1')
+            ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->groupBy('year')
             ->orderBy('year')
             ->get();

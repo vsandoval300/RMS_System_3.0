@@ -51,6 +51,7 @@ class ReinsurerPremiumComparison extends Widget
         $ids = Business::withoutGlobalScopes()
             ->whereNotNull('reinsurer_id')
             ->whereNull('deleted_at')
+            ->where('approval_status', 'APR')
             ->distinct()
             ->pluck('reinsurer_id');
 
@@ -107,6 +108,7 @@ class ReinsurerPremiumComparison extends Widget
                 ->whereYear('rep_date', $year)
                 ->orWhereYear('rep_date', $prevYear)
             )
+            ->whereHas('business', fn ($b) => $b->where('approval_status', 'APR'))
             ->when($this->selectedReinsurer, fn ($q) =>
                 $q->whereHas('business', fn ($b) =>
                     $b->where('reinsurer_id', $this->selectedReinsurer)

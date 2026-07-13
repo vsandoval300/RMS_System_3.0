@@ -40,6 +40,7 @@ class ReinsurerSegmentation extends Widget
             ->join('operative_docs as od', 'od.business_code', '=', 'b.business_code')
             ->where('od.operative_doc_type_id', '1')
             ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->whereRaw("EXTRACT(YEAR FROM od.rep_date) = ?", [$year])
             ->whereNotNull('b.reinsurer_id')
             ->selectRaw('b.reinsurer_id, COUNT(DISTINCT od.business_code) as biz_count')
@@ -49,7 +50,7 @@ class ReinsurerSegmentation extends Widget
         $docs = OperativeDoc::query()
             ->with(['business.reinsurer', 'schemes.costScheme', 'insureds'])
             ->whereYear('rep_date', $year)
-            ->whereHas('business', fn ($q) => $q->whereNotNull('reinsurer_id')->whereNull('deleted_at'))
+            ->whereHas('business', fn ($q) => $q->whereNotNull('reinsurer_id')->whereNull('deleted_at')->where('approval_status', 'APR'))
             ->get();
 
         $premByReinsurer = [];

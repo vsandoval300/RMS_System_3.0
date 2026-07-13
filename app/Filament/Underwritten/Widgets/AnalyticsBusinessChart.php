@@ -49,6 +49,7 @@ class AnalyticsBusinessChart extends Widget
                 ->selectRaw('EXTRACT(MONTH FROM od.rep_date) as month, COUNT(DISTINCT od.business_code) as total')
                 ->where('od.operative_doc_type_id', '1')
                 ->whereNull('b.deleted_at')
+                ->where('b.approval_status', 'APR')
                 ->whereRaw('EXTRACT(YEAR FROM od.rep_date) = ?', [$year])
                 ->groupByRaw('EXTRACT(MONTH FROM od.rep_date)');
 

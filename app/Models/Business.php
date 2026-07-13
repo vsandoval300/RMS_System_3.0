@@ -33,6 +33,7 @@ class Business extends Model
         'business_lifecycle_status', 'business_lifecycle_status_updated_at',
         'created_by_user', 'source_code',
         'reviewed_by_user_id', 'revision_notes',
+        'import_batch_id',
     ];
 
     protected $casts = [
@@ -246,6 +247,7 @@ class Business extends Model
                 $business->business_lifecycle_status = BusinessLifecycleStatus::ON_HOLD;
                 $business->business_lifecycle_status_updated_at = now();
             }
+
         });
 
         // Borrado y Restauracion para Liability Structures

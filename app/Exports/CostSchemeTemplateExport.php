@@ -157,7 +157,7 @@ class CostNodexDataSheet implements FromArray, WithHeadings, WithStyles, WithTit
         return [
             'scheme_id',           // A  FK → CostSchemes.scheme_id, required
             'index',               // B  integer, required (upsert key with scheme_id)
-            'deduction_id',        // C  FK → REF_Deductions.id, required
+            'deduction_concept',    // C  FK → REF_Deductions.concept, required
             'value',               // D  float, required
             'apply_to_gross',      // E  Yes / No, optional (default: No)
             'partner_source',      // F  name → REF_Partners, required
@@ -203,13 +203,11 @@ class CostNodexDataSheet implements FromArray, WithHeadings, WithStyles, WithTit
             'borders'      => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'd1d5db']]],
         ]);
 
-        // C — deduction_id: blue tint (FK to REF_Deductions)
+        // C — deduction_concept: blue tint (FK to REF_Deductions by concept text)
         $sheet->getStyle("C2:C{$last}")->applyFromArray([
-            'fill'         => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'eff6ff']],
-            'font'         => ['size' => 8.5],
-            'alignment'    => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
-            'numberFormat' => ['formatCode' => '0'],
-            'borders'      => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'bfdbfe']]],
+            'fill'    => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'eff6ff']],
+            'font'    => ['size' => 8.5],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'bfdbfe']]],
         ]);
 
         // D — value: numeric
@@ -242,7 +240,7 @@ class CostNodexDataSheet implements FromArray, WithHeadings, WithStyles, WithTit
             "──────────────────────────────\n" .
             "A  scheme_id           REQUIRED · FK to CostSchemes sheet (or existing scheme)\n" .
             "B  index               REQUIRED · integer · upsert key with scheme_id\n" .
-            "C  deduction_id        REQUIRED · numeric ID from REF_Deductions sheet\n" .
+            "C  deduction_concept    REQUIRED · concept text from REF_Deductions sheet (col A)\n" .
             "D  value               REQUIRED · numeric (e.g. 10.5)\n" .
             "E  apply_to_gross      optional · Yes or No · default: No\n" .
             "F  partner_source      REQUIRED · name from REF_Partners sheet\n" .
@@ -262,10 +260,10 @@ class CsRefDeductionsSheet implements FromArray, WithHeadings, WithStyles, WithT
 {
     public function __construct(private readonly array $rows) {}
     public function title(): string { return 'REF_Deductions'; }
-    public function headings(): array { return ['ID (use in column C of CostNodesx)', 'Concept', 'Description']; }
+    public function headings(): array { return ['Concept (use in CostNodesx · col C)', 'ID', 'Description']; }
     public function array(): array
     {
-        return array_map(fn($r) => [$r['id'], $r['concept'], $r['description'] ?? ''], $this->rows);
+        return array_map(fn($r) => [$r['concept'], $r['id'], $r['description'] ?? ''], $this->rows);
     }
     public function styles(Worksheet $sheet): array
     {
@@ -276,11 +274,11 @@ class CsRefDeductionsSheet implements FromArray, WithHeadings, WithStyles, WithT
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
         $sheet->getStyle("A2:A{$last}")->applyFromArray(['font' => ['bold' => true, 'size' => 8.5]]);
-        $sheet->getStyle("B2:B{$last}")->applyFromArray(['font' => ['size' => 8.5]]);
+        $sheet->getStyle("B2:B{$last}")->applyFromArray(['font' => ['size' => 8.5, 'color' => ['rgb' => '9ca3af']]]);
         $sheet->getStyle("C2:C{$last}")->applyFromArray(['font' => ['size' => 8, 'color' => ['rgb' => '6b7280']]]);
-        $sheet->getColumnDimension('A')->setWidth(12);
-        $sheet->getColumnDimension('B')->setWidth(30);
-        $sheet->getColumnDimension('C')->setWidth(55);
+        $sheet->getColumnDimension('A')->setWidth(22);
+        $sheet->getColumnDimension('B')->setWidth(8);
+        $sheet->getColumnDimension('C')->setWidth(45);
         return [];
     }
 }
@@ -347,7 +345,7 @@ class CsReadmeSheet implements FromArray, WithStyles, WithTitle
             ['Column', 'Field', 'Required', 'Allowed values / Notes'],
             ['A', 'scheme_id',           'YES', 'Must match a scheme_id in the CostSchemes sheet or an existing scheme in the system.'],
             ['B', 'index',               'YES', 'Integer. Used as upsert key together with scheme_id.'],
-            ['C', 'deduction_id',        'YES', 'Numeric ID from the REF_Deductions sheet (column A).'],
+            ['C', 'deduction_concept',    'YES', 'Concept text from the REF_Deductions sheet (column A). E.g. "fee", "retention", "tax".'],
             ['D', 'value',               'YES', 'Numeric value (e.g. 10.5).'],
             ['E', 'apply_to_gross',      'NO',  'Yes or No. Defaults to No if empty.'],
             ['F', 'partner_source',      'YES', 'Must match exactly a Name in the REF_Partners sheet.'],

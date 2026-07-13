@@ -4,10 +4,14 @@ namespace App\Filament\Resources\Businesses\Pages;
 
 use App\Exports\BusinessTemplateExport;
 use App\Exports\CostSchemeTemplateExport;
-use App\Exports\LiabilityStructureTemplateExport;
 use App\Exports\DocSchemeTemplateExport;
 use App\Exports\InsuredTemplateExport;
+use App\Exports\LiabilityStructureTemplateExport;
 use App\Exports\OperativeDocTemplateExport;
+use App\Exports\MasterImportTemplateExport;
+use App\Models\ImportBatch;
+use App\Notifications\BatchImportedNotification;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use App\Filament\Resources\Businesses\BusinessResource;
 use App\Models\Business;
 use App\Models\BusinessDocType;
@@ -121,6 +125,21 @@ class ImportBusinesses extends Page
     public array $dsErrorRows    = [];
 
     public int $dsInsertedCount  = 0;
+
+    // ── Master Import state ────────────────────────────────────────────────────
+    // idle | errors | preview | imported
+    public string $masterState       = 'idle';
+    public mixed  $masterImportFile  = null;
+    public string $masterBatchCode   = '';
+
+    /** @var array<string, array<int, array<string,mixed>>> grouped by sheet name */
+    public array $masterErrorsBySheet   = [];
+
+    /** @var array<string, array{insert:int, skipped:int}> */
+    public array $masterPreviewCounts   = [];
+
+    /** @var array<string, array{inserted:int, skipped:int}> */
+    public array $masterStats           = [];
 
     // ── Step 2 state ───────────────────────────────────────────────────────────
     // idle | errors | preview | imported
@@ -477,9 +496,9 @@ class ImportBusinesses extends Page
         }
 
         // ── Lookup maps ───────────────────────────────────────────────────────
-        $deductionIds = Deduction::pluck('id')
-            ->flip()
-            ->toArray(); // id => true
+        $deductionsByConcept = Deduction::pluck('id', 'concept')
+            ->mapWithKeys(fn ($id, $c) => [mb_strtolower(trim($c)) => $id])
+            ->toArray();
 
         $partners = Partner::pluck('id', 'name')
             ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
@@ -584,13 +603,13 @@ class ImportBusinesses extends Page
 
             $schemeId        = trim((string) ($row[0] ?? ''));
             $indexRaw        = $row[1];
-            $deductionIdRaw  = $row[2];
-            $valueRaw        = $row[3];
-            $applyRaw        = strtolower(trim((string) ($row[4] ?? '')));
-            $partnerSource   = trim((string) ($row[5] ?? ''));
-            $partnerDest     = trim((string) ($row[6] ?? ''));
+            $deductionConceptRaw = $row[2];
+            $valueRaw            = $row[3];
+            $applyRaw            = strtolower(trim((string) ($row[4] ?? '')));
+            $partnerSource       = trim((string) ($row[5] ?? ''));
+            $partnerDest         = trim((string) ($row[6] ?? ''));
 
-            if ($schemeId === '' && $indexRaw === null && $deductionIdRaw === null && $partnerSource === '') {
+            if ($schemeId === '' && $indexRaw === null && $deductionConceptRaw === null && $partnerSource === '') {
                 continue;
             }
 
@@ -609,11 +628,12 @@ class ImportBusinesses extends Page
                 $errors[] = "index must be a positive integer (got: {$index}).";
             }
 
-            $deductionId = ($deductionIdRaw !== null && $deductionIdRaw !== '') ? (int) $deductionIdRaw : null;
-            if ($deductionId === null) {
-                $errors[] = 'deduction_id is required.';
-            } elseif (! isset($deductionIds[$deductionId])) {
-                $errors[] = "Deduction ID {$deductionId} not found. Check REF_Deductions sheet.";
+            $deductionConcept = mb_strtolower(trim((string) ($deductionConceptRaw ?? '')));
+            $deductionId      = $deductionConcept !== '' ? ($deductionsByConcept[$deductionConcept] ?? null) : null;
+            if ($deductionConcept === '') {
+                $errors[] = 'deduction_concept is required.';
+            } elseif ($deductionId === null) {
+                $errors[] = "Deduction not found: '{$deductionConceptRaw}'. Check REF_Deductions sheet (column A).";
             }
 
             $value = ($valueRaw !== null && $valueRaw !== '') ? (float) $valueRaw : null;
@@ -1484,6 +1504,549 @@ class ImportBusinesses extends Page
         $this->dsPreviewRows   = [];
         $this->dsErrorRows     = [];
         $this->dsInsertedCount = 0;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MASTER IMPORT — All sheets in one file
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function downloadMasterTemplate(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $export      = MasterImportTemplateExport::build();
+        $spreadsheet = $export->getSpreadsheet();
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new XlsxWriter($spreadsheet);
+            $writer->save('php://output');
+        }, 'master_import_template.xlsx', [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control'       => 'max-age=0',
+            'Content-Disposition' => 'attachment; filename="master_import_template.xlsx"',
+        ]);
+    }
+
+    public function updatedMasterImportFile(): void
+    {
+        $this->processMasterFile();
+    }
+
+    public function processMasterFile(): void
+    {
+        if (! $this->masterImportFile) {
+            return;
+        }
+
+        // ── DB lookup maps ────────────────────────────────────────────────────
+        $reinsurers = Reinsurer::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $partners = Partner::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $currencies = Currency::pluck('id', 'acronym')
+            ->mapWithKeys(fn ($id, $a) => [strtoupper(trim($a)) => $id])->toArray();
+        $regions = Region::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $docTypes = BusinessDocType::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $deductionsByConcept = Deduction::pluck('id', 'concept')
+            ->mapWithKeys(fn ($id, $c) => [mb_strtolower(trim($c)) => $id])->toArray();
+        $companies = Company::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $coverages = Coverage::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        // Accumulated ID maps — start from DB, grow as we process each sheet
+        $allBizCodes    = Business::withTrashed()->pluck('business_code')->flip()->toArray();
+        $allSchemeIds   = CostScheme::withTrashed()->pluck('id')->flip()->toArray();
+        $allDocIds      = OperativeDoc::withTrashed()->pluck('id')->flip()->toArray();
+        $existingDocIds = $allDocIds; // for upsert detection
+
+        // ── Read Excel ────────────────────────────────────────────────────────
+        $path = $this->masterImportFile->getRealPath();
+        $data = Excel::toArray(null, $path, null, \Maatwebsite\Excel\Excel::XLSX);
+
+        $errsBySheet  = [];
+        $prevCounts   = [];
+        $seenNodeKeys = [];
+
+        // ── Sheet 0: Businesses ────────────────────────────────────────────────
+        $rows = array_slice($data[0] ?? [], 1);
+        $bizErrors = []; $bizInsert = 0; $bizSkip = 0;
+        foreach ($rows as $i => $row) {
+            $row  = array_pad((array) $row, 16, null);
+            $bc   = trim((string) ($row[0]  ?? ''));
+            $desc = trim((string) ($row[2]  ?? ''));
+            $rein = trim((string) ($row[9]  ?? ''));
+            if ($bc === '' && $desc === '' && $rein === '') { continue; }
+            $errors = [];
+            if ($bc === '')                  { $errors[] = 'business_code is required.'; }
+            elseif (strlen($bc) > 19)        { $errors[] = 'business_code max 19 chars.'; }
+            if ($desc === '')                { $errors[] = 'description is required.'; }
+            $rt = trim((string) ($row[3] ?? ''));
+            if (! in_array($rt, self::REINSURANCE_TYPES, true)) { $errors[] = "Invalid reinsurance_type: '{$rt}'."; }
+            $rc = trim((string) ($row[4] ?? ''));
+            if (! in_array($rc, self::RISK_COVERED, true))      { $errors[] = "Invalid risk_covered: '{$rc}'."; }
+            $bt = trim((string) ($row[5] ?? ''));
+            if (! in_array($bt, self::BUSINESS_TYPES, true))    { $errors[] = "Invalid business_type: '{$bt}'."; }
+            $pt = trim((string) ($row[6] ?? ''));
+            if (! in_array($pt, self::PREMIUM_TYPES, true))     { $errors[] = "Invalid premium_type: '{$pt}'."; }
+            $pu = trim((string) ($row[7] ?? ''));
+            if (! in_array($pu, self::PURPOSES, true))          { $errors[] = "Invalid purpose: '{$pu}'."; }
+            $ct = trim((string) ($row[8] ?? ''));
+            if (! in_array($ct, self::CLAIMS_TYPES, true))      { $errors[] = "Invalid claims_type: '{$ct}'."; }
+            $reinId = $rein !== '' ? ($reinsurers[mb_strtolower($rein)] ?? null) : null;
+            if ($rein === '')        { $errors[] = 'reinsurer_name is required.'; }
+            elseif (! $reinId)       { $errors[] = "Reinsurer not found: '{$rein}'."; }
+            $prodName = trim((string) ($row[10] ?? ''));
+            $prodId   = $prodName !== '' ? ($partners[mb_strtolower($prodName)] ?? null) : null;
+            if ($prodName === '')    { $errors[] = 'producer_name is required.'; }
+            elseif (! $prodId)       { $errors[] = "Producer not found: '{$prodName}'."; }
+            $cur   = strtoupper(trim((string) ($row[11] ?? '')));
+            $curId = $cur !== '' ? ($currencies[$cur] ?? null) : null;
+            if ($cur === '')         { $errors[] = 'currency_code is required.'; }
+            elseif (! $curId)        { $errors[] = "Currency not found: '{$cur}'."; }
+            $reg   = trim((string) ($row[12] ?? ''));
+            $regId = $reg !== '' ? ($regions[mb_strtolower($reg)] ?? null) : null;
+            if ($reg === '')         { $errors[] = 'region_name is required.'; }
+            elseif (! $regId)        { $errors[] = "Region not found: '{$reg}'."; }
+            if (empty($errors)) {
+                isset($allBizCodes[$bc]) ? $bizSkip++ : $bizInsert++;
+                $allBizCodes[$bc] = true;
+            } else {
+                $bizErrors[] = ['row' => $i + 2, 'key' => $bc ?: '—', 'errors' => $errors];
+            }
+        }
+        if ($bizErrors) { $errsBySheet['Businesses'] = $bizErrors; }
+        $prevCounts['Businesses'] = ['insert' => $bizInsert, 'skipped' => $bizSkip];
+
+        // ── Sheet 1: CostSchemes ───────────────────────────────────────────────
+        $rows = array_slice($data[1] ?? [], 1);
+        $csErrors = []; $csInsert = 0; $csSkip = 0;
+        foreach ($rows as $i => $row) {
+            $row = array_pad((array) $row, 5, null);
+            $sid = trim((string) ($row[0] ?? ''));
+            $agr = trim((string) ($row[3] ?? ''));
+            if ($sid === '' && $row[2] === null && $agr === '') { continue; }
+            $errors = [];
+            if ($sid === '')       { $errors[] = 'scheme_id is required.'; }
+            elseif (strlen($sid) > 19) { $errors[] = 'scheme_id max 19 chars.'; }
+            $idx = ($row[1] !== null && $row[1] !== '') ? (int) $row[1] : null;
+            if ($idx === null)     { $errors[] = 'index is required.'; }
+            $shr = ($row[2] !== null && $row[2] !== '') ? (float) $row[2] : null;
+            if ($shr === null)     { $errors[] = 'share is required.'; }
+            if (! in_array($agr, self::AGREEMENT_TYPES, true)) { $errors[] = "Invalid agreement_type: '{$agr}'."; }
+            if (empty($errors)) {
+                isset($allSchemeIds[$sid]) ? $csSkip++ : $csInsert++;
+                $allSchemeIds[$sid] = true;
+            } else {
+                $csErrors[] = ['row' => $i + 2, 'key' => $sid ?: '—', 'errors' => $errors];
+            }
+        }
+        if ($csErrors) { $errsBySheet['CostSchemes'] = $csErrors; }
+        $prevCounts['CostSchemes'] = ['insert' => $csInsert, 'skipped' => $csSkip];
+
+        // ── Sheet 2: CostNodesx ────────────────────────────────────────────────
+        $existingNodeKeys = CostNodex::withTrashed()
+            ->selectRaw("CONCAT(cscheme_id, '#', `index`) as nk")
+            ->pluck('nk')->flip()->toArray();
+        $rows = array_slice($data[2] ?? [], 1);
+        $cnErrors = []; $cnInsert = 0; $cnSkip = 0;
+        foreach ($rows as $i => $row) {
+            $row = array_pad((array) $row, 7, null);
+            $sid = trim((string) ($row[0] ?? ''));
+            $psn = trim((string) ($row[5] ?? ''));
+            if ($sid === '' && $row[1] === null && $row[2] === null && $psn === '') { continue; }
+            $errors = [];
+            if ($sid === '')               { $errors[] = 'cscheme_id is required.'; }
+            elseif (! isset($allSchemeIds[$sid])) { $errors[] = "scheme_id '{$sid}' not found in CostSchemes sheet or database."; }
+            $idx = ($row[1] !== null && $row[1] !== '') ? (int) $row[1] : null;
+            if ($idx === null) { $errors[] = 'index is required.'; }
+            $dedConcept = mb_strtolower(trim((string) ($row[2] ?? '')));
+            $dedId      = $dedConcept !== '' ? ($deductionsByConcept[$dedConcept] ?? null) : null;
+            if ($dedConcept === '')  { $errors[] = 'deduction_concept is required.'; }
+            elseif ($dedId === null) { $errors[] = "Deduction not found: '{$row[2]}'. Check REF_Deductions sheet (column A)."; }
+            if (($row[3] ?? null) === null) { $errors[] = 'value is required.'; }
+            $psId = $psn !== '' ? ($partners[mb_strtolower($psn)] ?? null) : null;
+            if ($psn === '')    { $errors[] = 'partner_source is required.'; }
+            elseif (! $psId)    { $errors[] = "Partner source not found: '{$psn}'."; }
+            $pdn  = trim((string) ($row[6] ?? ''));
+            $pdId = $pdn !== '' ? ($partners[mb_strtolower($pdn)] ?? null) : null;
+            if ($pdn === '')    { $errors[] = 'partner_destination is required.'; }
+            elseif (! $pdId)    { $errors[] = "Partner destination not found: '{$pdn}'."; }
+            $nk = "{$sid}#{$idx}";
+            if ($idx !== null && $sid !== '' && empty($errors)) {
+                if (isset($seenNodeKeys[$nk])) { $errors[] = "Duplicate node: scheme '{$sid}' + index {$idx}."; }
+                else { $seenNodeKeys[$nk] = true; }
+            }
+            if (empty($errors)) {
+                isset($existingNodeKeys[$nk]) ? $cnSkip++ : $cnInsert++;
+            } else {
+                $cnErrors[] = ['row' => $i + 2, 'key' => $nk, 'errors' => $errors];
+            }
+        }
+        if ($cnErrors) { $errsBySheet['CostNodesx'] = $cnErrors; }
+        $prevCounts['CostNodesx'] = ['insert' => $cnInsert, 'skipped' => $cnSkip];
+
+        // ── Sheet 3: LiabilityStructures ───────────────────────────────────────
+        $rows = array_slice($data[3] ?? [], 1);
+        $lsErrors = []; $lsInsert = 0;
+        foreach ($rows as $i => $row) {
+            $row = array_pad((array) $row, 9, null);
+            $bc  = trim((string) ($row[0] ?? ''));
+            $cvn = trim((string) ($row[1] ?? ''));
+            if ($bc === '' && $cvn === '' && $row[3] === null) { continue; }
+            $errors = [];
+            if ($bc === '')                     { $errors[] = 'business_code is required.'; }
+            elseif (! isset($allBizCodes[$bc])) { $errors[] = "Business not found: '{$bc}'. Add it in the Businesses sheet."; }
+            $cvId = $cvn !== '' ? ($coverages[mb_strtolower($cvn)] ?? null) : null;
+            if ($cvn === '')   { $errors[] = 'coverage_name is required.'; }
+            elseif (! $cvId)   { $errors[] = "Coverage not found: '{$cvn}'."; }
+            if (($row[3] ?? null) === null) { $errors[] = 'limit is required.'; }
+            if (trim((string) ($row[4] ?? '')) === '') { $errors[] = 'limit_desc is required.'; }
+            if (empty($errors)) { $lsInsert++; }
+            else { $lsErrors[] = ['row' => $i + 2, 'key' => $bc ?: '—', 'errors' => $errors]; }
+        }
+        if ($lsErrors) { $errsBySheet['LiabilityStructures'] = $lsErrors; }
+        $prevCounts['LiabilityStructures'] = ['insert' => $lsInsert, 'skipped' => 0];
+
+        // ── Sheet 4: OperativeDocs ─────────────────────────────────────────────
+        $rows = array_slice($data[4] ?? [], 1);
+        $odErrors = []; $odInsert = 0; $odSkip = 0;
+        foreach ($rows as $i => $row) {
+            $row = array_pad((array) $row, 9, null);
+            $id  = trim((string) ($row[0] ?? ''));
+            $bc  = trim((string) ($row[1] ?? ''));
+            $dsc = trim((string) ($row[3] ?? ''));
+            if ($id === '' && $bc === '' && $dsc === '' && $row[4] === null) { continue; }
+            $errors = [];
+            if ($id === '')        { $errors[] = 'id is required.'; }
+            elseif (strlen($id) > 19) { $errors[] = 'id max 19 chars.'; }
+            if ($bc === '')                     { $errors[] = 'business_code is required.'; }
+            elseif (! isset($allBizCodes[$bc])) { $errors[] = "Business not found: '{$bc}'."; }
+            $dtn  = trim((string) ($row[2] ?? ''));
+            $dtId = $dtn !== '' ? ($docTypes[mb_strtolower($dtn)] ?? null) : null;
+            if ($dtn === '')   { $errors[] = 'doc_type_name is required.'; }
+            elseif (! $dtId)   { $errors[] = "Doc type not found: '{$dtn}'."; }
+            if ($dsc === '')   { $errors[] = 'description is required.'; }
+            if ($this->parseExcelDate($row[4]) === null) { $errors[] = 'inception_date required (YYYY-MM-DD).'; }
+            if ($this->parseExcelDate($row[5]) === null) { $errors[] = 'expiration_date required (YYYY-MM-DD).'; }
+            if (($row[6] ?? null) === null || $row[6] === '') { $errors[] = 'af_mf is required.'; }
+            if (empty($errors)) {
+                isset($existingDocIds[$id]) ? $odSkip++ : $odInsert++;
+                $allDocIds[$id] = true;
+            } else {
+                $odErrors[] = ['row' => $i + 2, 'key' => $id ?: '—', 'errors' => $errors];
+            }
+        }
+        if ($odErrors) { $errsBySheet['OperativeDocs'] = $odErrors; }
+        $prevCounts['OperativeDocs'] = ['insert' => $odInsert, 'skipped' => $odSkip];
+
+        // ── Sheet 5: Insureds ──────────────────────────────────────────────────
+        $rows = array_slice($data[5] ?? [], 1);
+        $inErrors = []; $inInsert = 0;
+        foreach ($rows as $i => $row) {
+            $row  = array_pad((array) $row, 5, null);
+            $odId = trim((string) ($row[0] ?? ''));
+            $csId = trim((string) ($row[1] ?? ''));
+            $cvn  = trim((string) ($row[3] ?? ''));
+            if ($odId === '' && $csId === '' && $cvn === '' && trim((string) ($row[2] ?? '')) === '') { continue; }
+            $errors = [];
+            if ($odId === '')                   { $errors[] = 'op_document_id is required.'; }
+            elseif (! isset($allDocIds[$odId])) { $errors[] = "Operative doc not found: '{$odId}'. Add it in OperativeDocs sheet."; }
+            if ($csId === '')                     { $errors[] = 'cscheme_id is required.'; }
+            elseif (! isset($allSchemeIds[$csId])) { $errors[] = "Cost scheme not found: '{$csId}'."; }
+            $compN = trim((string) ($row[2] ?? ''));
+            $compId = $compN !== '' ? ($companies[mb_strtolower($compN)] ?? null) : null;
+            if ($compN === '')  { $errors[] = 'company_name is required.'; }
+            elseif (! $compId)  { $errors[] = "Company not found: '{$compN}'."; }
+            $cvId = $cvn !== '' ? ($coverages[mb_strtolower($cvn)] ?? null) : null;
+            if ($cvn === '')    { $errors[] = 'coverage_name is required.'; }
+            elseif (! $cvId)    { $errors[] = "Coverage not found: '{$cvn}'."; }
+            if (($row[4] ?? null) === null || $row[4] === '') { $errors[] = 'premium is required.'; }
+            if (empty($errors)) { $inInsert++; }
+            else { $inErrors[] = ['row' => $i + 2, 'key' => $odId ?: '—', 'errors' => $errors]; }
+        }
+        if ($inErrors) { $errsBySheet['Insureds'] = $inErrors; }
+        $prevCounts['Insureds'] = ['insert' => $inInsert, 'skipped' => 0];
+
+        // ── Sheet 6: DocSchemes ────────────────────────────────────────────────
+        $rows = array_slice($data[6] ?? [], 1);
+        $dsErrors = []; $dsInsert = 0;
+        foreach ($rows as $i => $row) {
+            $row  = array_pad((array) $row, 2, null);
+            $odId = trim((string) ($row[0] ?? ''));
+            $csId = trim((string) ($row[1] ?? ''));
+            if ($odId === '' && $csId === '') { continue; }
+            $errors = [];
+            if ($odId === '')                   { $errors[] = 'op_document_id is required.'; }
+            elseif (! isset($allDocIds[$odId])) { $errors[] = "Operative doc not found: '{$odId}'."; }
+            if ($csId === '')                     { $errors[] = 'cscheme_id is required.'; }
+            elseif (! isset($allSchemeIds[$csId])) { $errors[] = "Cost scheme not found: '{$csId}'."; }
+            if (empty($errors)) { $dsInsert++; }
+            else { $dsErrors[] = ['row' => $i + 2, 'key' => $odId ?: '—', 'errors' => $errors]; }
+        }
+        if ($dsErrors) { $errsBySheet['DocSchemes'] = $dsErrors; }
+        $prevCounts['DocSchemes'] = ['insert' => $dsInsert, 'skipped' => 0];
+
+        // ── Decide state ──────────────────────────────────────────────────────
+        $totalRecords = array_sum(array_map(fn ($c) => $c['insert'] + $c['skipped'], $prevCounts));
+
+        if (! empty($errsBySheet)) {
+            $this->masterState        = 'errors';
+            $this->masterErrorsBySheet = $errsBySheet;
+        } elseif ($totalRecords === 0) {
+            $this->masterState        = 'errors';
+            $this->masterErrorsBySheet = ['General' => [['row' => '—', 'key' => '—', 'errors' => ['No data found in any sheet. Fill at least one data sheet before uploading.']]]];
+        } else {
+            $this->masterState        = 'preview';
+            $this->masterPreviewCounts = $prevCounts;
+        }
+    }
+
+    public function confirmMasterImport(): void
+    {
+        if ($this->masterState !== 'preview' || ! $this->masterImportFile) {
+            return;
+        }
+
+        // Re-build lookup maps
+        $reinsurers = Reinsurer::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $partners = Partner::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $currencies = Currency::pluck('id', 'acronym')
+            ->mapWithKeys(fn ($id, $a) => [strtoupper(trim($a)) => $id])->toArray();
+        $regions = Region::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $docTypes = BusinessDocType::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $deductionsByConcept = Deduction::pluck('id', 'concept')
+            ->mapWithKeys(fn ($id, $c) => [mb_strtolower(trim($c)) => $id])->toArray();
+        $companies = Company::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $coverages = Coverage::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $allBizCodes  = Business::withTrashed()->pluck('business_code')->flip()->toArray();
+        $allSchemeIds = CostScheme::withTrashed()->pluck('id')->flip()->toArray();
+        $allDocIds    = OperativeDoc::withTrashed()->pluck('id')->flip()->toArray();
+
+        $path = $this->masterImportFile->getRealPath();
+        $data = Excel::toArray(null, $path, null, \Maatwebsite\Excel\Excel::XLSX);
+
+        // Create batch before inserting data so all records reference it
+        $batch = ImportBatch::create([
+            'imported_by'      => Auth::id(),
+            'status'           => 'pending_review',
+            'source_file_name' => $this->masterImportFile->getClientOriginalName(),
+            'imported_at'      => now(),
+        ]);
+
+        $stats = [];
+
+        DB::transaction(function () use (
+            &$stats, &$allBizCodes, &$allSchemeIds, &$allDocIds,
+            $data, $reinsurers, $partners, $currencies, $regions,
+            $docTypes, $deductionsByConcept, $companies, $coverages,
+            $batch
+        ) {
+            $userId  = Auth::id();
+            $batchId = $batch->id;
+
+            // ── Businesses ────────────────────────────────────────────────────
+            $ins = $skp = 0;
+            foreach (array_slice($data[0] ?? [], 1) as $row) {
+                $row = array_pad((array) $row, 16, null);
+                $bc  = trim((string) ($row[0] ?? ''));
+                if ($bc === '') { continue; }
+                if (isset($allBizCodes[$bc])) { $skp++; continue; }
+                Business::create([
+                    'business_code'    => $bc,
+                    'source_code'      => ($v = trim((string) ($row[1]  ?? ''))) !== '' ? $v : null,
+                    'index'            => ($row[15] !== null && $row[15] !== '') ? (int) $row[15] : 1,
+                    'description'      => trim((string) ($row[2]  ?? '')),
+                    'reinsurance_type' => trim((string) ($row[3]  ?? '')),
+                    'risk_covered'     => trim((string) ($row[4]  ?? '')),
+                    'business_type'    => trim((string) ($row[5]  ?? '')),
+                    'premium_type'     => trim((string) ($row[6]  ?? '')),
+                    'purpose'          => trim((string) ($row[7]  ?? '')),
+                    'claims_type'      => trim((string) ($row[8]  ?? '')),
+                    'reinsurer_id'     => $reinsurers[mb_strtolower(trim((string) ($row[9]  ?? '')))] ?? null,
+                    'producer_id'      => $partners[mb_strtolower(trim((string) ($row[10] ?? '')))] ?? null,
+                    'currency_id'      => $currencies[strtoupper(trim((string) ($row[11] ?? '')))] ?? null,
+                    'region_id'        => $regions[mb_strtolower(trim((string) ($row[12] ?? '')))] ?? null,
+                    'parent_id'        => ($v = trim((string) ($row[13] ?? ''))) !== '' ? $v : null,
+                    'renewed_from_id'  => ($v = trim((string) ($row[14] ?? ''))) !== '' ? $v : null,
+                    'created_by_user'  => $userId,
+                    'import_batch_id'  => $batchId,
+                ]);
+                $allBizCodes[$bc] = true;
+                $ins++;
+            }
+            $stats['Businesses'] = ['inserted' => $ins, 'skipped' => $skp];
+
+            // ── CostSchemes ────────────────────────────────────────────────────
+            $ins = $skp = 0;
+            foreach (array_slice($data[1] ?? [], 1) as $row) {
+                $row = array_pad((array) $row, 5, null);
+                $sid = trim((string) ($row[0] ?? ''));
+                if ($sid === '') { continue; }
+                if (isset($allSchemeIds[$sid])) { $skp++; continue; }
+                CostScheme::create([
+                    'id'              => $sid,
+                    'index'           => ($row[1] !== null) ? (int) $row[1] : 1,
+                    'share'           => ($row[2] !== null) ? (float) $row[2] : null,
+                    'agreement_type'  => trim((string) ($row[3] ?? '')),
+                    'description'     => ($v = trim((string) ($row[4] ?? ''))) !== '' ? $v : null,
+                    'created_by_user' => $userId,
+                    'import_batch_id' => $batchId,
+                ]);
+                $allSchemeIds[$sid] = true;
+                $ins++;
+            }
+            $stats['CostSchemes'] = ['inserted' => $ins, 'skipped' => $skp];
+
+            // ── CostNodesx ─────────────────────────────────────────────────────
+            $ins = $skp = 0;
+            $existingNodeKeys = CostNodex::withTrashed()
+                ->selectRaw("CONCAT(cscheme_id, '#', `index`) as nk")
+                ->pluck('nk')->flip()->toArray();
+            foreach (array_slice($data[2] ?? [], 1) as $row) {
+                $row = array_pad((array) $row, 7, null);
+                $sid = trim((string) ($row[0] ?? ''));
+                $psn = trim((string) ($row[5] ?? ''));
+                if ($sid === '' && $row[1] === null && $psn === '') { continue; }
+                $idx = ($row[1] !== null) ? (int) $row[1] : null;
+                $nk  = $sid . '#' . $idx;
+                if (isset($existingNodeKeys[$nk])) { $skp++; continue; }
+                CostNodex::create([
+                    'id'                     => (string) Str::uuid(),
+                    'cscheme_id'             => $sid,
+                    'index'                  => $idx,
+                    'concept'                => ($c = mb_strtolower(trim((string) ($row[2] ?? '')))) !== '' ? ($deductionsByConcept[$c] ?? null) : null,
+                    'value'                  => ($row[3] !== null) ? (float) $row[3] : null,
+                    'apply_to_gross'         => in_array(strtolower(trim((string) ($row[4] ?? ''))), ['yes', '1', 'true'], true),
+                    'partner_source_id'      => $partners[mb_strtolower($psn)] ?? null,
+                    'partner_destination_id' => $partners[mb_strtolower(trim((string) ($row[6] ?? '')))] ?? null,
+                    'import_batch_id'        => $batchId,
+                ]);
+                $existingNodeKeys[$nk] = true;
+                $ins++;
+            }
+            $stats['CostNodesx'] = ['inserted' => $ins, 'skipped' => $skp];
+
+            // ── LiabilityStructures ────────────────────────────────────────────
+            $ins = 0;
+            foreach (array_slice($data[3] ?? [], 1) as $row) {
+                $row = array_pad((array) $row, 9, null);
+                $bc  = trim((string) ($row[0] ?? ''));
+                $cvn = trim((string) ($row[1] ?? ''));
+                if ($bc === '' && $cvn === '') { continue; }
+                LiabilityStructure::create([
+                    'business_code'   => $bc,
+                    'coverage_id'     => $coverages[mb_strtolower($cvn)] ?? null,
+                    'cls'             => in_array(strtolower(trim((string) ($row[2] ?? ''))), ['yes', '1', 'true'], true),
+                    'limit'           => ($row[3] !== null) ? (float) $row[3] : null,
+                    'limit_desc'      => trim((string) ($row[4] ?? '')),
+                    'sublimit'        => ($row[5] !== null && $row[5] !== '') ? (float) $row[5] : null,
+                    'sublimit_desc'   => ($v = trim((string) ($row[6] ?? ''))) !== '' ? $v : null,
+                    'deductible'      => ($row[7] !== null && $row[7] !== '') ? (float) $row[7] : null,
+                    'deductible_desc' => ($v = trim((string) ($row[8] ?? ''))) !== '' ? $v : null,
+                    'import_batch_id' => $batchId,
+                ]);
+                $ins++;
+            }
+            $stats['LiabilityStructures'] = ['inserted' => $ins, 'skipped' => 0];
+
+            // ── OperativeDocs ──────────────────────────────────────────────────
+            $ins = $skp = 0;
+            foreach (array_slice($data[4] ?? [], 1) as $row) {
+                $row = array_pad((array) $row, 9, null);
+                $id  = trim((string) ($row[0] ?? ''));
+                if ($id === '') { continue; }
+                if (isset($allDocIds[$id])) { $skp++; continue; }
+                OperativeDoc::create([
+                    'id'                    => $id,
+                    'business_code'         => trim((string) ($row[1] ?? '')),
+                    'operative_doc_type_id' => $docTypes[mb_strtolower(trim((string) ($row[2] ?? '')))] ?? null,
+                    'description'           => trim((string) ($row[3] ?? '')),
+                    'inception_date'        => $this->parseExcelDate($row[4]),
+                    'expiration_date'       => $this->parseExcelDate($row[5]),
+                    'af_mf'                 => ($row[6] !== null) ? (float) $row[6] : null,
+                    'roe_fs'                => ($row[7] !== null && $row[7] !== '') ? (float) $row[7] : null,
+                    'rep_date'              => $this->parseExcelDate($row[8]),
+                    'created_by_user'       => $userId,
+                    'import_batch_id'       => $batchId,
+                ]);
+                $allDocIds[$id] = true;
+                $ins++;
+            }
+            $stats['OperativeDocs'] = ['inserted' => $ins, 'skipped' => $skp];
+
+            // ── Insureds ──────────────────────────────────────────────────────
+            $ins = 0;
+            foreach (array_slice($data[5] ?? [], 1) as $row) {
+                $row  = array_pad((array) $row, 5, null);
+                $odId = trim((string) ($row[0] ?? ''));
+                $csId = trim((string) ($row[1] ?? ''));
+                if ($odId === '' && $csId === '') { continue; }
+                BusinessOpDocsInsured::create([
+                    'op_document_id'  => $odId,
+                    'cscheme_id'      => $csId,
+                    'company_id'      => $companies[mb_strtolower(trim((string) ($row[2] ?? '')))] ?? null,
+                    'coverage_id'     => $coverages[mb_strtolower(trim((string) ($row[3] ?? '')))] ?? null,
+                    'premium'         => ($row[4] !== null) ? (float) $row[4] : null,
+                    'import_batch_id' => $batchId,
+                ]);
+                $ins++;
+            }
+            $stats['Insureds'] = ['inserted' => $ins, 'skipped' => 0];
+
+            // ── DocSchemes ────────────────────────────────────────────────────
+            $ins = 0;
+            foreach (array_slice($data[6] ?? [], 1) as $row) {
+                $row  = array_pad((array) $row, 2, null);
+                $odId = trim((string) ($row[0] ?? ''));
+                $csId = trim((string) ($row[1] ?? ''));
+                if ($odId === '' && $csId === '') { continue; }
+                BusinessOpDocsScheme::create([
+                    'op_document_id'  => $odId,
+                    'cscheme_id'      => $csId,
+                    'import_batch_id' => $batchId,
+                ]);
+                $ins++;
+            }
+            $stats['DocSchemes'] = ['inserted' => $ins, 'skipped' => 0];
+        });
+
+        // Persist summary on the batch record
+        $batch->update(['summary_json' => $stats]);
+
+        $this->masterStats     = $stats;
+        $this->masterBatchCode = $batch->batch_code;
+        $this->masterState     = 'imported';
+
+        $totalIns = array_sum(array_column($stats, 'inserted'));
+        $totalSkp = array_sum(array_column($stats, 'skipped'));
+
+        // Notify reviewer (importer's manager) via bell — email via weekly digest
+        $reviewer = Auth::user()->manager;
+        if ($reviewer) {
+            $reviewer->notify(new BatchImportedNotification($batch, Auth::user()->name));
+        }
+
+        Notification::make()
+            ->success()
+            ->title("Import submitted — batch {$batch->batch_code}")
+            ->body("{$totalIns} records inserted · {$totalSkp} skipped · pending manager review")
+            ->send();
+    }
+
+    public function resetMasterState(): void
+    {
+        $this->masterState         = 'idle';
+        $this->masterImportFile    = null;
+        $this->masterBatchCode     = '';
+        $this->masterErrorsBySheet = [];
+        $this->masterPreviewCounts = [];
+        $this->masterStats         = [];
     }
 
     private function parseExcelDate(mixed $value): ?string

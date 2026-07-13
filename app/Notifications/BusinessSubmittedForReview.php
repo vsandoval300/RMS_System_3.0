@@ -20,7 +20,8 @@ class BusinessSubmittedForReview extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        // Mail moved to weekly digest — SendPendingApprovalsDigest command
+        return ['database'];
     }
 
     // ── Bell (in-app) ──────────────────────────────────────────────────────────

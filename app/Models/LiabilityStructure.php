@@ -24,7 +24,8 @@ class LiabilityStructure extends Model
             'sublimit_desc',
             'deductible',
             'deductible_desc',
-            'business_code'
+            'business_code',
+            'import_batch_id',
     ];
     /* ---------------------------------------------------
      |  ➜  Relaciones belongsTo

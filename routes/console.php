@@ -11,3 +11,8 @@ Artisan::command('inspire', function () {
 // Tarea programada para actualizar Status de Business:
 Schedule::command('businesses:refresh-lifecycle-statuses')
     ->dailyAt('02:00');
+
+// Digest semanal de aprobaciones pendientes — lunes 8:00am:
+Schedule::command('rms:send-approvals-digest')
+    ->weeklyOn(1, '08:00')
+    ->withoutOverlapping();

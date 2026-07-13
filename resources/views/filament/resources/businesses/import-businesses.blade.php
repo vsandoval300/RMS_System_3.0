@@ -105,7 +105,221 @@
 </style>
 
 <div class="biz-import">
-<div class="biz-import-wrap" x-data="{ openStep: 1 }">
+<div class="biz-import-wrap" x-data="{ openStep: 1, openMaster: false }">
+
+{{-- ═══════════════════════════════════════════════════════════════════════════ --}}
+{{-- MASTER IMPORT — All sheets in one file (Recommended)                        --}}
+{{-- ═══════════════════════════════════════════════════════════════════════════ --}}
+<div class="biz-import-card" style="border-color: light-dark(#bfdbfe, #1e3a5f); box-shadow: 0 0 0 1px light-dark(#bfdbfe, #1e3a5f);">
+
+    <button type="button"
+            class="biz-accordion-btn"
+            :class="{ 'biz-accordion-btn--open': openMaster }"
+            @click="openMaster = !openMaster"
+            style="background: light-dark(#eff6ff, #0d1a2e);">
+        <svg style="width:20px;height:20px;flex-shrink:0;color:#41A2C3;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        <div style="flex:1; min-width:0;">
+            <div style="font-size:1rem; font-weight:700; color:#41A2C3; line-height:1.2;">Master Import &nbsp;·&nbsp; All Tables in One File</div>
+            <div style="font-size:0.78rem; color: light-dark(#6b7280, #a1a1aa); margin-top:0.15rem;">Download a single template, fill all 8 sheets, upload once.</div>
+        </div>
+        <span class="pill" style="background:light-dark(#dbeafe,#1e3a5f); color:light-dark(#1d4ed8,#93c5fd); flex-shrink:0; font-size:0.7rem; padding:0.2rem 0.65rem;">★ All-in-one</span>
+        @if($masterState === 'imported')
+            <span class="pill success" style="flex-shrink:0;">✓ Imported</span>
+        @endif
+        <svg class="biz-accordion-chevron" :class="{ 'is-open': openMaster }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+
+    <div x-show="openMaster">
+
+        @if($masterState === 'idle')
+        <div class="biz-import-body" style="display:flex; flex-direction:column; gap:1.5rem;">
+            <div class="biz-alert info">
+                <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <div>
+                    <div style="font-weight:600; margin-bottom:0.3rem;">Single-file workflow</div>
+                    <div>The template contains 7 data sheets (Businesses, CostSchemes, CostNodesx, LiabilityStructures, OperativeDocs, Insureds, DocSchemes) plus reference sheets pre-loaded from the database. Fill only the sheets you need, in order. Cross-sheet dropdowns help avoid referential errors. The system validates everything before inserting a single record. Existing records are skipped automatically.</div>
+                </div>
+            </div>
+            <div>
+                <div class="biz-section-title">
+                    <span class="biz-step-badge active">1</span>
+                    Download the Master Template
+                </div>
+                <button wire:click="downloadMasterTemplate" class="btn-primary">
+                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
+                    Download master_import_template.xlsx
+                </button>
+            </div>
+            <div style="border-top:1px solid var(--bc-border);"></div>
+            <div>
+                <div class="biz-section-title">
+                    <span class="biz-step-badge active">2</span>
+                    Upload Completed File (.xlsx)
+                </div>
+                <div class="biz-upload-zone" x-data="{ dragging: false }"
+                     @dragover.prevent="dragging=true" @dragleave.prevent="dragging=false"
+                     @drop.prevent="dragging=false; $refs.masterFileInput.files=$event.dataTransfer.files; $refs.masterFileInput.dispatchEvent(new Event('change'));"
+                     :style="dragging ? 'border-color:#41A2C3;' : ''">
+                    <input type="file" x-ref="masterFileInput" wire:model="masterImportFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="master-file-input">
+                    <label for="master-file-input">
+                        <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
+                        Click to select or drag & drop the master_import_template.xlsx
+                    </label>
+                    <div class="biz-upload-hint">Only .xlsx files. All sheets are validated before any data is inserted.</div>
+                    <div wire:loading wire:target="masterImportFile" style="margin-top:0.6rem; font-size:0.82rem; color:#41A2C3;">Validating all sheets…</div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- ── Errors state ── --}}
+        @if($masterState === 'errors')
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#dc2626;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                <div style="font-size:0.9rem; font-weight:700; color:light-dark(#b91c1c,#fca5a5);">
+                    Validation errors in {{ count($masterErrorsBySheet) }} {{ count($masterErrorsBySheet) === 1 ? 'sheet' : 'sheets' }} — no data was inserted
+                </div>
+            </div>
+            <button wire:click="resetMasterState" class="btn-cancel">← Upload New File</button>
+        </div>
+        <div class="biz-import-body">
+            @foreach($masterErrorsBySheet as $sheetName => $sheetErrors)
+            <div class="biz-tbl-label">{{ $sheetName }} — {{ count($sheetErrors) }} {{ count($sheetErrors) === 1 ? 'error' : 'errors' }}</div>
+            <div class="biz-tbl-wrap" style="margin-bottom:1.5rem;">
+                <table class="biz-tbl">
+                    <thead><tr><th style="width:5rem;">Row</th><th style="width:18rem;">Key</th><th>Errors</th></tr></thead>
+                    <tbody>
+                        @foreach($sheetErrors as $row)
+                        <tr>
+                            <td class="center muted">{{ $row['row'] }}</td>
+                            <td class="mono">{{ $row['key'] ?? '—' }}</td>
+                            <td><ul class="err-list">@foreach($row['errors'] as $err)<li>{{ $err }}</li>@endforeach</ul></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
+        {{-- ── Preview state ── --}}
+        @if($masterState === 'preview')
+        @php
+            $masterTotalInsert = array_sum(array_column($masterPreviewCounts, 'insert'));
+            $masterTotalSkip   = array_sum(array_column($masterPreviewCounts, 'skipped'));
+        @endphp
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">All sheets valid · {{ $masterTotalInsert }} to insert{{ $masterTotalSkip > 0 ? ', ' . $masterTotalSkip . ' already exist (will skip)' : '' }}</span>
+            </div>
+        </div>
+        <div class="biz-import-body">
+            <div class="biz-tbl-wrap">
+                <table class="biz-tbl">
+                    <thead>
+                        <tr>
+                            <th>Sheet</th>
+                            <th style="text-align:right;">To Insert</th>
+                            <th style="text-align:right;">Skip (exists)</th>
+                            <th style="text-align:right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($masterPreviewCounts as $sheet => $counts)
+                        @php $sheetTotal = $counts['insert'] + $counts['skipped']; @endphp
+                        <tr @if($sheetTotal === 0) style="opacity:.4;" @endif>
+                            <td style="font-weight:500;">{{ $sheet }}</td>
+                            <td style="text-align:right; font-variant-numeric:tabular-nums;">
+                                @if($counts['insert'] > 0)
+                                    <span class="pill new">+{{ $counts['insert'] }}</span>
+                                @else —
+                                @endif
+                            </td>
+                            <td style="text-align:right; font-variant-numeric:tabular-nums;">
+                                @if($counts['skipped'] > 0)
+                                    <span class="pill update">→ {{ $counts['skipped'] }}</span>
+                                @else —
+                                @endif
+                            </td>
+                            <td style="text-align:right; font-variant-numeric:tabular-nums; font-weight:600;">{{ $sheetTotal ?: '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="biz-alert info" style="margin-top:1rem;">
+                <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <span>Only new records will be inserted. Existing records (by primary key) are skipped silently. All inserts run inside a single database transaction — if anything fails, no data is committed. The batch will be created with status <strong>Pending Review</strong> and must be approved by a manager before it takes effect.</span>
+            </div>
+        </div>
+        <div class="biz-import-footer">
+            <button wire:click="resetMasterState" class="btn-cancel">← Cancel</button>
+            <button wire:click="confirmMasterImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
+                <span wire:loading.remove wire:target="confirmMasterImport">
+                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Submit Import — {{ $masterTotalInsert }} new records
+                </span>
+                <span wire:loading wire:target="confirmMasterImport">Importing all sheets…</span>
+            </button>
+        </div>
+        @endif
+
+        {{-- ── Imported state ── --}}
+        @if($masterState === 'imported')
+        @php
+            $masterGrandInserted = array_sum(array_column($masterStats, 'inserted'));
+            $masterGrandSkipped  = array_sum(array_column($masterStats, 'skipped'));
+        @endphp
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">Import submitted · pending review</span>
+            </div>
+            <span class="pill" style="background:light-dark(#fef3c7,#2d1f00); color:light-dark(#92400e,#fcd34d); font-size:0.72rem;">⏳ Pending Review</span>
+        </div>
+        <div class="biz-import-body">
+            <div class="biz-alert success" style="margin-bottom:1.5rem;">
+                <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <div>
+                    <div style="font-weight:600; margin-bottom:0.25rem;">Batch <span style="font-family:monospace;">{{ $masterBatchCode }}</span> created</div>
+                    <div>{{ $masterGrandInserted }} records inserted{{ $masterGrandSkipped > 0 ? ' · ' . $masterGrandSkipped . ' skipped (already existed)' : '' }}. A manager must approve this batch before the records are considered active.</div>
+                </div>
+            </div>
+            <div class="biz-tbl-wrap">
+                <table class="biz-tbl">
+                    <thead><tr><th>Sheet</th><th style="text-align:right;">Inserted</th><th style="text-align:right;">Skipped</th></tr></thead>
+                    <tbody>
+                        @foreach($masterStats as $sheet => $s)
+                        <tr @if($s['inserted'] + $s['skipped'] === 0) style="opacity:.4;" @endif>
+                            <td style="font-weight:500;">{{ $sheet }}</td>
+                            <td style="text-align:right; color:#16a34a; font-weight:600; font-variant-numeric:tabular-nums;">{{ $s['inserted'] ?: '—' }}</td>
+                            <td style="text-align:right; color:var(--bc-text-muted); font-variant-numeric:tabular-nums;">{{ $s['skipped'] ?: '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="biz-alert info" style="margin-top:1rem;">
+                <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <span>Go to <strong>Resources → Import Batches</strong> to track approval status or to approve / reject this batch.</span>
+            </div>
+        </div>
+        <div class="biz-import-footer">
+            <button wire:click="resetMasterState" class="btn-cancel">Import Another File</button>
+        </div>
+        @endif
+
+    </div>{{-- end master collapsible --}}
+</div>{{-- end Master Import card --}}
+
+<div style="display:flex; align-items:center; gap:0.75rem; padding:0.25rem 0; margin:0.25rem 0;">
+    <div style="flex:1; height:1px; background:var(--bc-border);"></div>
+    <span style="font-size:0.72rem; font-weight:600; color:var(--bc-text-muted); letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap;">— or use step-by-step imports below —</span>
+    <div style="flex:1; height:1px; background:var(--bc-border);"></div>
+</div>
 
 {{-- ════════════════════════════════════════════════════════════════
      STEP 1 — Businesses Table
@@ -1064,6 +1278,7 @@
 
     </div>{{-- end collapsible --}}
 </div>{{-- end Step 6 card --}}
+
 
 </div>
 </div>

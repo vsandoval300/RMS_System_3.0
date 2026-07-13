@@ -24,8 +24,8 @@ class CostScheme extends Model
         'share',
         'agreement_type',
         'description',
-        'created_by_user', // ✅ NUEVO
-
+        'created_by_user',
+        'import_batch_id',
     ];
 
     // ✅ NUEVO: quién lo creó

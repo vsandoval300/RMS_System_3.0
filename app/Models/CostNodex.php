@@ -29,6 +29,7 @@ class CostNodex extends Model
         'partner_source_id',
         'partner_destination_id',
         'cscheme_id',
+        'import_batch_id',
     ];
 
     // ✅ Recomendado: casteo a boolean

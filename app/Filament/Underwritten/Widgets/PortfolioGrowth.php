@@ -21,6 +21,7 @@ class PortfolioGrowth extends Widget
         $ids = Business::withoutGlobalScopes()
             ->whereNotNull('reinsurer_id')
             ->whereNull('deleted_at')
+            ->where('approval_status', 'APR')
             ->distinct()
             ->pluck('reinsurer_id');
 
@@ -38,6 +39,7 @@ class PortfolioGrowth extends Widget
             ->selectRaw("DATE_PART('year', od.rep_date) AS year, COUNT(DISTINCT od.business_code) AS total")
             ->where('od.operative_doc_type_id', '1')
             ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->when($this->reinsurer, fn($q) => $q->where('b.reinsurer_id', $this->reinsurer))
             ->groupByRaw("DATE_PART('year', od.rep_date)")
             ->orderByRaw("DATE_PART('year', od.rep_date)")
@@ -107,6 +109,7 @@ class PortfolioGrowth extends Widget
         $counts = DB::table('businesses as b')
             ->join('operative_docs as od', 'od.business_code', '=', 'b.business_code')
             ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->where('od.operative_doc_type_id', '1')
             ->whereNotNull('b.reinsurer_id')
             ->whereRaw("DATE_PART('year', od.rep_date) IN (?, ?)", [$currentYear, $currentYear - 1])
@@ -131,6 +134,7 @@ class PortfolioGrowth extends Widget
         $reinsByYear = DB::table('businesses as b')
             ->join('operative_docs as od', 'od.business_code', '=', 'b.business_code')
             ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->where('od.operative_doc_type_id', '1')
             ->whereNotNull('b.reinsurer_id')
             ->selectRaw("DATE_PART('year', od.rep_date) AS yr, COUNT(DISTINCT b.reinsurer_id) AS cnt")

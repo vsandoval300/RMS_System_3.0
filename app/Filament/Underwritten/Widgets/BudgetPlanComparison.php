@@ -100,6 +100,7 @@ class BudgetPlanComparison extends Widget
         $ids = Business::withoutGlobalScopes()
             ->whereNotNull('reinsurer_id')
             ->whereNull('deleted_at')
+            ->where('approval_status', 'APR')
             ->distinct()
             ->pluck('reinsurer_id');
 
@@ -152,6 +153,7 @@ class BudgetPlanComparison extends Widget
                 ->whereYear('rep_date', $year)
                 ->orWhereYear('rep_date', $prevYear)
             )
+            ->whereHas('business', fn ($b) => $b->where('approval_status', 'APR'))
             ->when($this->selectedReinsurer, fn ($q) =>
                 $q->whereHas('business', fn ($b) =>
                     $b->where('reinsurer_id', $this->selectedReinsurer)
@@ -291,6 +293,7 @@ class BudgetPlanComparison extends Widget
                 ->selectRaw('EXTRACT(MONTH FROM od.rep_date) as month, COUNT(DISTINCT od.business_code) as total')
                 ->where('od.operative_doc_type_id', '1')
                 ->whereNull('b.deleted_at')
+                ->where('b.approval_status', 'APR')
                 ->whereRaw('EXTRACT(YEAR FROM od.rep_date) = ?', [$y])
                 ->groupByRaw('EXTRACT(MONTH FROM od.rep_date)');
 

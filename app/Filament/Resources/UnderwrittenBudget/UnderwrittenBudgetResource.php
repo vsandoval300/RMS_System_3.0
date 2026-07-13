@@ -27,7 +27,7 @@ class UnderwrittenBudgetResource extends Resource
     protected static ?string                 $navigationLabel = 'Budget';
     protected static ?string                 $modelLabel      = 'Budget Version';
     protected static ?string                 $pluralModelLabel = 'Budget';
-    protected static ?int                    $navigationSort  = 3;
+    protected static ?int                    $navigationSort  = 4;
 
     public static function getNavigationBadge(): ?string
     {

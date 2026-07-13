@@ -37,6 +37,7 @@ class OperativeDoc extends Model
         //'client_payment_tracking',
         'business_code',
         'created_by_user',
+        'import_batch_id',
     ];
 
     protected $casts = [

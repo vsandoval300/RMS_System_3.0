@@ -22,6 +22,7 @@ class BusinessOpDocsScheme extends Model
         'index',
         'op_document_id',   // FK → operative_docs.id
         'cscheme_id',       // FK → cost_schemes.id
+        'import_batch_id',
     ];
 
     /* ─── belongsTo ─── */
