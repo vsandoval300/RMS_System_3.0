@@ -57,7 +57,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Color;
 
 class BusinessesDataSheet implements FromArray, WithHeadings, WithStyles, WithTitle, WithColumnWidths
 {
@@ -387,6 +386,10 @@ class BusinessReadmeSheet implements FromArray, WithStyles, WithTitle
             [''],
             ['NOTE ON APPROVAL STATUS'],
             ['• New records are created with approval_status = Draft (DFT).'],
+            ['• The import groups all records into an Import Batch (IMP-YYYY-NNNN) that starts in "Pending Review" status.'],
+            ['• A manager must approve the batch from Import Batches → View → Approve Batch before the records appear in dashboards and reports.'],
+            ['• Approving the batch promotes all associated businesses to Approved (APR) in a single operation.'],
+            ['• Rejecting the batch soft-deletes all associated businesses and their linked documents.'],
             ['• Updating an existing record does NOT change its approval status.'],
             [''],
             ['NOTE ON LIFECYCLE STATUS'],
