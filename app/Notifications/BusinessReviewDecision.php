@@ -54,34 +54,34 @@ class BusinessReviewDecision extends Notification
         if ($this->revisionNotes) {
             $body .= ": {$this->revisionNotes}";
         }
-try {
-    $response = Http::timeout(10)
-        ->connectTimeout(5)
-        ->post(env('TEAMS_WEBHOOK_URL'), [
-            "type" => "message",
-            "attachments" => [
-                [
-                    "contentType" => "application/vnd.microsoft.card.adaptive",
-                    "content" => [
-                        "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
-                        "type" => "AdaptiveCard",
-                        "version" => "1.4",
-                        "body" => [
-                            [
-                                "type" => "TextBlock",
-                                "text" => "Prueba desde Laravel"
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+// try {
+//     $response = Http::timeout(10)
+//         ->connectTimeout(5)
+//         ->post(env('TEAMS_WEBHOOK_URL'), [
+//             "type" => "message",
+//             "attachments" => [
+//                 [
+//                     "contentType" => "application/vnd.microsoft.card.adaptive",
+//                     "content" => [
+//                         "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
+//                         "type" => "AdaptiveCard",
+//                         "version" => "1.4",
+//                         "body" => [
+//                             [
+//                                 "type" => "TextBlock",
+//                                 "text" => "Prueba desde Laravel"
+//                             ]
+//                         ]
+//                     ]
+//                 ]
+//             ]
+//         ]);
 
-    dd($response->status(), $response->body());
+//     dd($response->status(), $response->body());
 
-} catch (ConnectionException $e) {
-    dd($e->getMessage());
-}
+// } catch (ConnectionException $e) {
+//     dd($e->getMessage());
+// }
         // app(\App\Services\TeamsNotificationService::class)
         // ->businessSubmitted(
         //     $$this->business->business_code,

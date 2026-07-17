@@ -7,25 +7,25 @@ use Illuminate\Support\Facades\Http;
 
 class TeamsNotificationService
 {
-    Http::post($url, [
-        "type" => "message",
-        "attachments" => [
-            [
-                "contentType" => "application/vnd.microsoft.card.adaptive",
-                "content" => [
-                    "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
-                    "type" => "AdaptiveCard",
-                    "version" => "1.4",
-                    "body" => [
-                        [
-                            "type" => "TextBlock",
-                            "text" => "Prueba desde Laravel"
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ]);
+    // Http::post($url, [
+    //     "type" => "message",
+    //     "attachments" => [
+    //         [
+    //             "contentType" => "application/vnd.microsoft.card.adaptive",
+    //             "content" => [
+    //                 "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
+    //                 "type" => "AdaptiveCard",
+    //                 "version" => "1.4",
+    //                 "body" => [
+    //                     [
+    //                         "type" => "TextBlock",
+    //                         "text" => "Prueba desde Laravel"
+    //                     ]
+    //                 ]
+    //             ]
+    //         ]
+    //     ]
+    // ]);
     /* public function businessSubmitted(
         Business $business,
         string $submitterName,

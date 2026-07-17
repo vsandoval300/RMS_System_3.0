@@ -37,34 +37,34 @@ class BusinessSubmittedForReview extends Notification
         //     $this->business,
         //     Auth::user()->name
         // );
-        try {
-            $response = Http::timeout(10)
-                ->connectTimeout(5)
-                ->post(env('TEAMS_WEBHOOK_URL'), [
-                    "type" => "message",
-                    "attachments" => [
-                        [
-                            "contentType" => "application/vnd.microsoft.card.adaptive",
-                            "content" => [
-                                "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
-                                "type" => "AdaptiveCard",
-                                "version" => "1.4",
-                                "body" => [
-                                    [
-                                        "type" => "TextBlock",
-                                        "text" => "Prueba desde Laravel"
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]);
+        // try {
+        //     $response = Http::timeout(10)
+        //         ->connectTimeout(5)
+        //         ->post(env('TEAMS_WEBHOOK_URL'), [
+        //             "type" => "message",
+        //             "attachments" => [
+        //                 [
+        //                     "contentType" => "application/vnd.microsoft.card.adaptive",
+        //                     "content" => [
+        //                         "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
+        //                         "type" => "AdaptiveCard",
+        //                         "version" => "1.4",
+        //                         "body" => [
+        //                             [
+        //                                 "type" => "TextBlock",
+        //                                 "text" => "Prueba desde Laravel"
+        //                             ]
+        //                         ]
+        //                     ]
+        //                 ]
+        //             ]
+        //         ]);
 
-            dd($response->status(), $response->body());
+        //     dd($response->status(), $response->body());
 
-        } catch (ConnectionException $e) {
-            dd($e->getMessage());
-        }
+        // } catch (ConnectionException $e) {
+        //     dd($e->getMessage());
+        // }
         
         return FilamentNotification::make()
             ->title('Business Submitted for Review')
