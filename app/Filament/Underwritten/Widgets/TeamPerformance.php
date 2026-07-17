@@ -125,7 +125,7 @@ class TeamPerformance extends Widget
         foreach ($users as $user) {
             $s = $statsMap[$user->id] ?? null;
 
-            $curr = (int) ($s->total    ?? 0);
+            $curr = (int) ($s['total']    ?? 0);
             $prev = (int) ($prevMap[$user->id]->total ?? 0);
             $trend = $this->hasPrevPeriod() ? $this->trendLabel($curr, $prev) : null;
 
@@ -140,7 +140,7 @@ class TeamPerformance extends Widget
             };
 
             $total    = $curr;
-            $approved = (int) ($s->approved ?? 0);
+            $approved = (int) ($s['approved'] ?? 0);
             $completion = $total > 0 ? round(($approved / $total) * 100) : 0;
 
             $members[] = [
@@ -150,10 +150,10 @@ class TeamPerformance extends Widget
                 'level'           => $level,
                 'activity_status' => $activityStatus,
                 'days_since'      => $daysSince,
-                'draft'           => (int) ($s->draft   ?? 0),
-                'pending'         => (int) ($s->pending ?? 0),
+                'draft'           => (int) ($s['draft']   ?? 0),
+                'pending'         => (int) ($s['pending'] ?? 0),
                 'approved'        => $approved,
-                'rejected'        => (int) ($s->rejected ?? 0),
+                'rejected'        => (int) ($s['rejected'] ?? 0),
                 'total'           => $total,
                 'completion'      => $completion,
                 'trend'           => $trend,
@@ -163,6 +163,7 @@ class TeamPerformance extends Widget
                 $members,
                 $this->buildTree($user->id, $statsMap, $prevMap, $activityMap, $level + 1)
             );
+            //logger()->info('Team performance', ['members' => $members]);
         }
 
         return $members;
