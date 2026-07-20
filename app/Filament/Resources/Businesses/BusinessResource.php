@@ -45,7 +45,6 @@ use App\Models\OperativeDoc;
 use Filament\Pages\SubNavigationPosition;     
 use Filament\Resources\Pages\Page; 
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\View as ViewField;
 use Filament\Facades\Filament;
 use App\Models\User;
 use Filament\Tables\Filters\SelectFilter;
@@ -323,14 +322,6 @@ class BusinessResource extends Resource
                                             ->default(157)
                                             ->required(),
 
-                                        Select::make('region_id')
-                                            ->label('Region')
-                                            ->relationship('region', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->default(2)
-                                            ->required(),
-
                                         Select::make('producer_id')
                                             ->label('Producer')
                                             ->relationship('producer', 'name')
@@ -376,6 +367,27 @@ class BusinessResource extends Resource
                                     ->label('Approval Date')
                                     ->disabled(),
                             ]),
+                    ]),
+
+                Section::make('Territorial Coverage')
+                    ->columnSpan('full')
+                    ->description('Geographic scope of this business contract.')
+                    ->schema([
+                        Select::make('region_id')
+                            ->label('Region')
+                            ->relationship('region', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->default(2)
+                            ->required()
+                            ->live(),
+
+                        Placeholder::make('region_map')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->content(fn () => new HtmlString(
+                                view('filament.components.region-map')->render()
+                            )),
                     ]),
             ]);
     }
@@ -726,8 +738,8 @@ class BusinessResource extends Resource
                                 ->hiddenLabel()
                                 ->html()
                                 ->state(fn ($record) => new HtmlString(
-                                    '<div style="display:flex;flex-direction:column;gap:3px;">'
-                                    . '<span style="font-size:0.75rem;font-weight:600;color:light-dark(#6b7280,#9ca3af);letter-spacing:0.04em;">APPROVAL STATUS</span>'
+                                    '<div style="display:flex;align-items:center;gap:8px;">'
+                                    . '<span style="font-weight:600;">Approval Status:</span>'
                                     . self::approvalStatusBadgeHtml($record?->approval_status)
                                     . '</div>'
                                 ))

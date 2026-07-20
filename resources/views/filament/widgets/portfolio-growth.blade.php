@@ -108,7 +108,7 @@
                 overflow: hidden;
             }
             .pg-tile-label {
-                font-size: 0.74rem;
+                font-size: 0.81rem;
                 font-weight: 600;
                 letter-spacing: 0.07em;
                 text-transform: uppercase;
