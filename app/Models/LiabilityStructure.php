@@ -26,6 +26,7 @@ class LiabilityStructure extends Model
             'deductible_desc',
             'business_code',
             'import_batch_id',
+            'country_id',
     ];
     /* ---------------------------------------------------
      |  ➜  Relaciones belongsTo
@@ -38,6 +39,10 @@ class LiabilityStructure extends Model
     public function coverage()
     {
         return $this->belongsTo(Coverage::class, 'coverage_id');
+    }
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
     }
 
     

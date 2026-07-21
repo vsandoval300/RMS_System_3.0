@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Businesses\RelationManagers;
 
+use App\Models\Country;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
@@ -70,10 +71,39 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->preload()
                             ->optionsLimit(300)
                             ->required()
-                            ->columnSpan(6),
+                            ->columnSpan(5),
 
-                        Section::make()
-                        ->schema([
+                        Select::make('country_id')
+                            ->label('Country')
+
+                            ->options(function () {
+                                $business = $this->getOwnerRecord();
+
+                                return Country::query()
+                                    ->where('region_id', $business->region_id)
+                                    ->orderBy('alpha_3')
+                                    ->pluck('alpha_3', 'id');
+                            })
+
+                            ->getSearchResultsUsing(function (string $search) {
+                                $business = $this->getOwnerRecord();
+
+                                return Country::query()
+                                    ->where('region_id', $business->region_id)
+                                    ->where(function ($query) use ($search) {
+                                        $query->where('alpha_3', 'like', "%{$search}%")
+                                            ->orWhere('name', 'like', "%{$search}%");
+                                    })
+                                    ->orderBy('alpha_3')
+                                    ->pluck('alpha_3', 'id');
+                            })
+
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(4),
+
+                        //Section::make()
+                        //->schema([
                             Radio::make('cls')
                             ->label('CSL')
                             ->options([
@@ -84,9 +114,9 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->inline() // horizontal
                             ->default(false) // "No" preseleccionado
                             ->required()
-                        ])
-                        ->columnSpan(6)
-                        ->compact()
+                        //])
+                        ->columnSpan(3)
+                        //->compact()
                         ->extraAttributes(['class' => 'h-full flex items-center justify-center bg-gray-800 rounded-lg'])
                     ]),
                 ])
