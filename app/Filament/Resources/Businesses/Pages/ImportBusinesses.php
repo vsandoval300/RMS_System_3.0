@@ -1645,7 +1645,7 @@ class ImportBusinesses extends Page
 
         // ── Sheet 2: CostNodesx ────────────────────────────────────────────────
         $existingNodeKeys = CostNodex::withTrashed()
-            ->selectRaw("CONCAT(cscheme_id, '#', `index`) as nk")
+            ->selectRaw("CONCAT(cscheme_id, '#', \"index\") as nk")
             ->pluck('nk')->flip()->toArray();
         $rows = array_slice($data[2] ?? [], 1);
         $cnErrors = []; $cnInsert = 0; $cnSkip = 0;
@@ -1906,7 +1906,7 @@ class ImportBusinesses extends Page
             // ── CostNodesx ─────────────────────────────────────────────────────
             $ins = $skp = 0;
             $existingNodeKeys = CostNodex::withTrashed()
-                ->selectRaw("CONCAT(cscheme_id, '#', `index`) as nk")
+                ->selectRaw("CONCAT(cscheme_id, '#', \"index\") as nk")
                 ->pluck('nk')->flip()->toArray();
             foreach (array_slice($data[2] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 7, null);
