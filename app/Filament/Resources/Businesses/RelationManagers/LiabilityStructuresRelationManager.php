@@ -231,6 +231,13 @@ class LiabilityStructuresRelationManager extends RelationManager
                     ->sortable()
                     ->searchable(),
 
+                TextColumn::make('country.alpha_3')
+                    ->verticalAlignment(VerticalAlignment::Start)
+                    ->label('Country')
+                    ->sortable()
+                    ->searchable()
+                    ->tooltip(fn ($record) => $record->country?->name),
+
                 TextColumn::make('coverage.name')
                     ->label('Coverage')
                     ->verticalAlignment(VerticalAlignment::Start) 
