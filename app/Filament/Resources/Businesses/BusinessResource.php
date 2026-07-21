@@ -11,6 +11,8 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\Businesses\RelationManagers\LiabilityStructuresRelationManager;
 use App\Filament\Resources\Businesses\RelationManagers\OperativeDocsRelationManager;
 use App\Filament\Resources\Businesses\Pages\ListBusinesses;
@@ -29,7 +31,6 @@ use Filament\Forms;
 use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Select;
@@ -1453,12 +1454,16 @@ class BusinessResource extends Resource
                 ])
 
 
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete selected businesses')
+                        ->modalDescription('Are you sure you want to delete the selected businesses? This action can be undone by restoring the records.')
+                        ->modalSubmitActionLabel('Yes, delete'),
+                ]),
             ]);
-            //->bulkActions([
-                    //Tables\Actions\BulkActionGroup::make([
-                    //Tables\Actions\DeleteBulkAction::make(),
-             //   ]),
-            //]);
     }
 
     public static function getRelations(): array

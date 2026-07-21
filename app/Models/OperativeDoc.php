@@ -174,6 +174,26 @@ class OperativeDoc extends Model
             }
         });
 
+        // Cascade soft/force delete a hijos antes de eliminar el doc
+        static::deleting(function (OperativeDoc $model) {
+            if ($model->isForceDeleting()) {
+                $model->schemes()->withTrashed()->forceDelete();
+                $model->insureds()->withTrashed()->forceDelete();
+                $model->transactions()->withTrashed()->each->forceDelete();
+            } else {
+                $model->schemes()->get()->each->delete();
+                $model->insureds()->get()->each->delete();
+                $model->transactions()->get()->each->delete();
+            }
+        });
+
+        // Restaurar hijos antes de que el doc quede visible de nuevo
+        static::restoring(function (OperativeDoc $model) {
+            $model->schemes()->onlyTrashed()->restore();
+            $model->insureds()->onlyTrashed()->restore();
+            $model->transactions()->onlyTrashed()->restore();
+        });
+
         // Paso 2: Reordenar índices al eliminar
         static::deleted(function ($model) {
             self::where('business_code', $model->business_code)
