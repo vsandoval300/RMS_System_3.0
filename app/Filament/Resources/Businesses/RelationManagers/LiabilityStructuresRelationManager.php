@@ -234,6 +234,8 @@ class LiabilityStructuresRelationManager extends RelationManager
                 TextColumn::make('country.alpha_3')
                     ->verticalAlignment(VerticalAlignment::Start)
                     ->label('Country')
+                    ->badge()
+                    ->color('info')
                     ->sortable()
                     ->searchable()
                     ->tooltip(fn ($record) => $record->country?->name),
