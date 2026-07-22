@@ -123,17 +123,14 @@ class BankAccountsResource extends Resource
                                 ->label('Beneficiay Name')
                                 ->inlineLabel()
                                 ->placeholder("Please provide the beneficiary's full name")
-                                ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_name', ucwords(strtolower($state)))),
-                                //->helperText('First letter of each word will be capitalised.'),
+                                ->maxLength(255),
                                 
                             Textarea::make('beneficiary_address')
                                 ->label('Beneficiary Address')
                                 ->inlineLabel()
                                 ->placeholder("Please provide beneficiary adress")
-                                ->columnSpan('full')
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_address', ucfirst(strtolower($state)))),
-
+                                ->columnSpan('full'),
+                                
                             TextInput::make('beneficiary_swift')
                                 ->label('Beneficiary SWIFT code')
                                 ->inlineLabel()
@@ -164,9 +161,8 @@ class BankAccountsResource extends Resource
                                 ->inlineLabel()
                                 ->placeholder('Please provide account name.')
                                 ->required()
-                                ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_name', ucwords(strtolower($state)))),
-
+                                ->maxLength(255),
+                                
                             TextInput::make('ffc_acct_no')
                                 ->label('For Further Account Number')
                                 ->inlineLabel()
@@ -176,17 +172,14 @@ class BankAccountsResource extends Resource
                                     ignoreRecord: true,
                                     modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
                                 )
-                                ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_no', ucwords(strtolower($state)))),
-                               
+                                ->maxLength(255),
+                                
                             Textarea::make('ffc_acct_address')
                                 ->label('For Further Account Address')
                                 ->inlineLabel()
                                 ->placeholder("Please provide adress")
                                 ->required()
-                                ->columnSpan('full')
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('ffc_acct_address', ucfirst(strtolower($state)))),
-                                
+                                ->columnSpan('full'),
                                 
                         ])
                         ->columns(1)
