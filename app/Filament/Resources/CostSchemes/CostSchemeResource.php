@@ -47,6 +47,7 @@ use Filament\Schemas\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 
+use Filament\Notifications\Notification;
 use function Termwind\style;
 
 class CostSchemeResource extends Resource
@@ -752,12 +753,38 @@ class CostSchemeResource extends Resource
                     ViewAction::make()
                      ->modalWidth('7xl'), // 👈 aumenta el ancho del modal
                     EditAction::make(),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->before(function (CostScheme $record, \Filament\Actions\DeleteAction $action) {
+                            $inUse = $record->businessDocSchemes()->whereNull('deleted_at')->exists();
+                            if ($inUse) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Cannot delete cost scheme')
+                                    ->body('This cost scheme is assigned to one or more operative documents. Remove the assignment first.')
+                                    ->persistent()
+                                    ->send();
+                                $action->halt();
+                            }
+                        }),
                 ])
 
             ])
             ->toolbarActions([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()
+                    ->before(function (\Illuminate\Database\Eloquent\Collection $records, \Filament\Actions\DeleteBulkAction $action) {
+                        $blocked = $records->filter(
+                            fn ($r) => $r->businessDocSchemes()->whereNull('deleted_at')->exists()
+                        );
+                        if ($blocked->isNotEmpty()) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Cannot delete ' . $blocked->count() . ' scheme(s)')
+                                ->body('Some selected schemes are assigned to operative documents. Remove the assignments first.')
+                                ->persistent()
+                                ->send();
+                            $action->halt();
+                        }
+                    }),
             ]);
     }
 

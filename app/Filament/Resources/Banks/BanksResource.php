@@ -71,21 +71,13 @@ class BanksResource extends Resource
                                 ignoreRecord: true,
                                 modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
                             )
-                            ->maxLength(255)
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('name', ucwords(strtolower($state)))),
-                            /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
-                                ? 'First letter of each word will be capitalised.' 
-                                : null), */
-                            
+                            ->maxLength(255),
+
                         Textarea::make('address')
                             ->label('Address')
                             ->placeholder('Please provide bank address')
-                            ->required()
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('address', ucfirst(strtolower($state)))),
-                            /* ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
-                                ? 'Please provide address.' 
-                                : null), */
-                            
+                            ->required(),
+
                         TextInput::make('aba_number')
                             ->label('ABA number')
                             ->placeholder('Please provide ABA number.')
@@ -95,7 +87,6 @@ class BanksResource extends Resource
                                 modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
                             )
                             ->maxLength(255)
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('aba_number', ucwords(strtolower($state))))
                             ->helperText(fn (string $context) => in_array($context, ['create', 'edit']) 
                                 ? '9 digits, e.g. 123456789' 
                                 : null),
