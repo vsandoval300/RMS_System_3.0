@@ -51,6 +51,9 @@ use App\Models\User;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Support\HtmlString;
+use App\Services\BusinessRenewalService;
+use App\Services\BusinessTechnicalResultService;
+use Illuminate\Support\Facades\Gate;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group as ComponentsGroup;
@@ -737,7 +740,6 @@ class BusinessResource extends Resource
         
                            TextEntry::make('approval_status_entry')
                                 ->hiddenLabel()
-                                ->html()
                                 ->state(fn ($record) => new HtmlString(
                                     '<div style="display:flex;align-items:center;gap:8px;">'
                                     . '<span style="font-weight:600;">Approval Status:</span>'
@@ -1364,79 +1366,108 @@ class BusinessResource extends Resource
                         ->label('Technical result')
                         ->icon('heroicon-m-calculator')
                         ->color('primary')
-                        ->disabled(function (): bool {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            return ! ($user?->can('Business:TechnicalResult') ?? false);
+                        ->disabled(fn () => ! Gate::allows('Business:TechnicalResult'))
+                        ->tooltip(fn () => Gate::allows('Business:TechnicalResult')
+                            ? 'View technical result'
+                            : 'You do not have permission to access Technical Result'
+                        )
+                        ->modalHeading(fn (Business $record) => "Technical Result — {$record->business_code}")
+                        ->modalContent(function (Business $record): \Illuminate\Contracts\View\View {
+                            $data = app(BusinessTechnicalResultService::class)->build($record);
+                            return view('filament.resources.business.technical-result', $data);
                         })
-                        ->tooltip(function (): string {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            return ($user?->can('Business:TechnicalResult') ?? false)
-                                ? 'View technical result'
-                                : 'You do not have permission to access Technical Result';
-                        })
-                        ->action(function (): void {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            if (! ($user?->can('Business:TechnicalResult') ?? false)) {
-                                Notification::make()
-                                    ->title('Permission denied')
-                                    ->body('You do not have permission to access Technical Result.')
-                                    ->danger()
-                                    ->send();
-
-                                return;
-                            }
-
-                            Notification::make()
-                                ->title('Technical result')
-                                ->body('This feature is coming soon.')
-                                ->info()
-                                ->send();
-                        }),
+                        ->modalWidth('7xl')
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close'),
 
 
                     Action::make('renewal')
                         ->label('Renewal')
                         ->icon('heroicon-m-arrow-path')
                         ->color('primary')
-                        ->disabled(function (): bool {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
+                        ->disabled(fn () => ! \Illuminate\Support\Facades\Gate::allows('Business:Renewal'))
+                        ->tooltip(fn () => \Illuminate\Support\Facades\Gate::allows('Business:Renewal')
+                            ? 'Renew this business'
+                            : 'You do not have permission to renew this business'
+                        )
+                        ->modalHeading('Renew Business')
+                        ->modalDescription('A new business will be created as a renewal of the current one. Review the details below before confirming.')
+                        ->modalWidth('lg')
+                        ->form(function (Business $record): array {
+                            $service = app(BusinessRenewalService::class);
+                            $dates   = $service->previewSlipDates($record);
 
-                            return ! ($user?->can('Business:Renewal') ?? false);
+                            return [
+                                TextInput::make('new_business_code')
+                                    ->label('New Business Code')
+                                    ->default(fn () => $service->suggestBusinessCode($record))
+                                    ->required()
+                                    ->unique(Business::class, 'business_code')
+                                    ->helperText('Auto-suggested based on the original code and new inception year. You can edit it.'),
+
+                                DatePicker::make('new_inception_date')
+                                    ->label('New Slip — Inception Date')
+                                    ->default($dates ? $dates['inception']->toDateString() : null)
+                                    ->required(fn () => $dates !== null)
+                                    ->hidden(fn () => $dates === null),
+
+                                DatePicker::make('new_expiration_date')
+                                    ->label('New Slip — Expiration Date')
+                                    ->default($dates ? $dates['expiration']->toDateString() : null)
+                                    ->required(fn () => $dates !== null)
+                                    ->hidden(fn () => $dates === null)
+                                    ->after('new_inception_date'),
+
+                                Placeholder::make('no_slip_warning')
+                                    ->label('')
+                                    ->content(new HtmlString(
+                                        '<span style="color:#f87171;">⚠ No Slip document found. Operative document will not be created.</span>'
+                                    ))
+                                    ->hidden(fn () => $dates !== null),
+
+                                Placeholder::make('original_info')
+                                    ->label('Renewing from')
+                                    ->content(new HtmlString(
+                                        '<strong>' . $record->business_code . '</strong>'
+                                        . ' — ' . e($record->description ?? '')
+                                    )),
+                            ];
                         })
-                        ->tooltip(function (): string {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            return ($user?->can('Business:Renewal') ?? false)
-                                ? 'Renew this business'
-                                : 'You do not have permission to renew this business';
-                        })
-                        ->action(function (): void {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            if (! ($user?->can('Business:Renewal') ?? false)) {
+                        ->action(function (Business $record, array $data): void {
+                            if (! \Illuminate\Support\Facades\Gate::allows('Business:Renewal')) {
                                 Notification::make()
                                     ->title('Permission denied')
                                     ->body('You do not have permission to renew this business.')
                                     ->danger()
                                     ->send();
-
                                 return;
                             }
 
-                            Notification::make()
-                                ->title('Renewal')
-                                ->body('This feature is coming soon.')
-                                ->info()
-                                ->send();
+                            try {
+                                $newBusiness = app(BusinessRenewalService::class)
+                                    ->renew(
+                                        $record,
+                                        $data['new_business_code'],
+                                        $data['new_inception_date'] ?? null,
+                                        $data['new_expiration_date'] ?? null,
+                                    );
+
+                                Notification::make()
+                                    ->title('Business renewed successfully')
+                                    ->body("Business {$newBusiness->business_code} has been created as a renewal of {$record->business_code}.")
+                                    ->success()
+                                    ->send();
+
+                                redirect(self::getUrl('view', ['record' => $newBusiness->business_code]));
+
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Renewal failed')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                            }
                         }),
 
 

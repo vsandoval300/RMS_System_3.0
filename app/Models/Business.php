@@ -212,7 +212,15 @@ class Business extends Model
                 : BusinessLifecycleStatus::IN_FORCE;
         }
 
-        // 5) Si no hay vigentes y el último no fue cancelación
+        // 5a) Si el doc más reciente aún no ha iniciado → On Hold (negocio con fechas futuras)
+        if ($latestDoc && $latestDoc->inception_date) {
+            $latestStart = Carbon::parse($latestDoc->inception_date)->startOfDay();
+            if ($latestStart->gt($today)) {
+                return BusinessLifecycleStatus::ON_HOLD;
+            }
+        }
+
+        // 5b) Docs existentes pero todos vencidos y no cancelado → Expired
         return BusinessLifecycleStatus::EXPIRED;
     }
 

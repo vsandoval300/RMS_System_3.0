@@ -49,3 +49,32 @@ Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
 Route::get('/reports/download/{file}', function ($file) {
     return Storage::disk('s3')->download('uw-reports/' . $file);
 });
+
+// === Technical Result PDF for Business ===
+Route::get('/admin/business/{businessCode}/technical-result.pdf', function (string $businessCode) {
+    abort_unless(auth()->check(), 403);
+
+    $business = \App\Models\Business::withoutTrashed()->findOrFail($businessCode);
+
+    $data = app(\App\Services\BusinessTechnicalResultService::class)->build($business);
+
+    $html = view('filament.resources.business.technical-result-pdf', $data)->render();
+
+    $options = new \Dompdf\Options();
+    $options->set('isRemoteEnabled', false);
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('defaultFont', 'DejaVu Sans');
+
+    $pdf = new \Dompdf\Dompdf($options);
+    $pdf->loadHtml($html);
+    $pdf->setPaper('A4', 'landscape');
+    $pdf->render();
+
+    $filename = 'technical-result-' . $businessCode . '.pdf';
+
+    return response()->streamDownload(
+        fn () => print($pdf->output()),
+        $filename,
+        ['Content-Type' => 'application/pdf']
+    );
+})->name('business.technical-result.pdf')->middleware(['web', 'auth']);
