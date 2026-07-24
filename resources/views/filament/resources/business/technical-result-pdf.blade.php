@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Technical Result — {{ $business?->business_code ?? '' }}</title>
+    <title>Business Summary — {{ $business?->business_code ?? '' }}</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 10px;
+            font-size: 8px;
             color: #1f262a;
             background: #ffffff;
-            padding: 20px 24px;
+            padding: 28px 40px;
         }
-        h1 { font-size: 16px; color: #db4a2b; font-weight: 700; }
-        h2 { font-size: 12px; color: #1f262a; font-weight: 700; margin-bottom: 6px; }
-        h3 { font-size: 11px; color: #db4a2b; font-weight: 600; margin: 10px 0 4px; }
-        table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        th { text-align: left; padding: 3px 5px; border-bottom: 1px solid #1f262a; font-weight: 600; color: #6b7280; }
-        td { padding: 3px 5px; border-bottom: 1px solid #d1cec9; }
+        h1 { font-size: 14px; color: #db4a2b; font-weight: 700; }
+        h2 { font-size: 10px; color: #1f262a; font-weight: 700; margin-bottom: 4px; }
+        h3 { font-size: 9px; color: #db4a2b; font-weight: 600; margin: 8px 0 3px; }
+        table { width: 100%; border-collapse: collapse; font-size: 8px; }
+        th { text-align: left; padding: 2px 4px; border-bottom: 1px solid #1f262a; font-weight: 600; color: #6b7280; }
+        td { padding: 2px 4px; border-bottom: 1px solid #d1cec9; }
         .right { text-align: right; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
@@ -27,46 +27,49 @@
         .doc-header {
             background-color: #1f262a;
             color: #f1efea;
-            padding: 6px 10px;
+            padding: 5px 8px;
             font-weight: 700;
-            font-size: 11px;
-            margin-top: 14px;
-            margin-bottom: 6px;
+            font-size: 9px;
+            margin-top: 10px;
+            margin-bottom: 5px;
         }
         .section-box {
             border: 1px solid #d1cec9;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
         }
         .totals-box {
             background-color: #1f262a;
             color: #f1efea;
-            padding: 10px 14px;
-            margin-top: 14px;
+            padding: 8px 12px;
+            margin-top: 10px;
         }
         .totals-box td { border-bottom: 1px solid #374151; color: #d1d5db; }
         .totals-box .net td { border-top: 2px solid #4b5563; color: #f1efea; font-weight: 700; }
         .badge {
             display: inline-block;
-            padding: 1px 8px;
+            padding: 1px 6px;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 7px;
             font-weight: 700;
         }
         .page-break { page-break-after: always; }
+        @page {
+            margin-bottom: 40px;
+        }
     </style>
 </head>
 <body>
 
 {{-- ══ HEADER ══════════════════════════════════════════════════════════════ --}}
-<table style="margin-bottom:14px;">
+<table style="margin-bottom:16px; border-bottom:2px solid #db4a2b; padding-bottom:10px;">
     <tr>
-        <td style="border:none;">
-            <h1>Technical Result</h1>
-            <span class="muted" style="font-size:9px;">Generated: {{ \Carbon\Carbon::parse($generatedAt)->format('d/m/Y H:i') }}</span>
+        <td style="border:none; vertical-align:bottom;">
+            <h1 style="font-size:16px; margin-bottom:3px;">Business Summary</h1>
+            <span class="muted" style="font-size:7px;">Generated: {{ \Carbon\Carbon::parse($generatedAt)->format('d/m/Y H:i') }}</span>
         </td>
-        <td style="text-align:right; vertical-align:top; border:none;">
-            <span style="font-size:9px; color:#6b7280;">RMS-System</span>
+        <td style="text-align:right; vertical-align:top; border:none; padding-top:3px;">
+            <span style="font-size:8px; font-weight:700; color:#1f262a; letter-spacing:0.5px;">RMS-Platform</span>
         </td>
     </tr>
 </table>
@@ -104,19 +107,40 @@
 {{-- ══ PER-DOC SUMMARIES ════════════════════════════════════════════════════ --}}
 @foreach ($summaries as $sIdx => $summary)
 @php
-    $docId     = $summary['id']             ?? '—';
-    $docType   = $summary['documentType']   ?? '—';
-    $inception = $summary['inceptionDate']  ?? null;
-    $expiry    = $summary['expirationDate'] ?? null;
-    $currency  = $summary['originalCurrency'] ?? '—';
-    $fts       = (float) ($summary['totalPremiumFts']        ?? 0);
-    $convPrem  = (float) ($summary['totalConvertedPremium']  ?? 0);
-    $groupedNodes = collect($summary['groupedCostNodes'] ?? []);
-    $nodesFlat    = $groupedNodes->flatMap(fn($g) => $g['nodes'] ?? [])->sortBy('index')->values();
+    $docId       = $summary['id']               ?? '—';
+    $docType     = $summary['documentType']     ?? '—';
+    $inception   = $summary['inceptionDate']    ?? null;
+    $expiry      = $summary['expirationDate']   ?? null;
+    $currency    = $summary['originalCurrency'] ?? '—';
+    $premiumType = $summary['premiumType']      ?? '—';
+    $coverageDays= $summary['coverageDays']     ?? '—';
+    $createdAt   = $summary['createdAt']        ?? null;
+    $fts         = (float) ($summary['totalPremiumFts'] ?? 0);
+
+    $groupedNodes    = collect($summary['groupedCostNodes'] ?? []);
+    $nodesFlat       = $groupedNodes->flatMap(fn($g) => $g['nodes'] ?? [])->sortBy('index')->values();
     $grandDeductOrig = $groupedNodes->sum('subtotal_orig');
-    $grandDeductUsd  = $groupedNodes->sum('subtotal_usd');
-    $transactions = collect($summary['transactions'] ?? []);
-    $logsByTxn    = collect($summary['logsByTxn']    ?? []);
+    $transactions    = collect($summary['transactions'] ?? []);
+    $logsByTxn       = collect($summary['logsByTxn']   ?? []);
+
+    $docSchemes  = collect($summary['costSchemes'] ?? []);
+    $docInsureds = collect($summary['insureds']    ?? []);
+    $docSchemeMeta = $docSchemes->mapWithKeys(function ($s) {
+        $key = $s['cscheme_id'] ?? $s['id'] ?? null;
+        return $key ? [$key => ['label' => $s['id'] ?? '—', 'share' => (float)($s['share'] ?? 0)]] : [];
+    });
+    $docInsuredsGrouped = $docInsureds->groupBy(fn ($i) => $i['cscheme_id'] ?? $i['cost_scheme_id'] ?? '—');
+
+    // USD fallback: use roe_fs when exch_rate=0 causes totalConvertedPremium=0
+    $docRoeFs = (float) ($summary['roe_fs'] ?? 0);
+    $convPrem = (float) ($summary['totalConvertedPremium'] ?? 0);
+    if ($convPrem <= 0 && $docRoeFs > 0) {
+        $convPrem = $fts / $docRoeFs;
+    } elseif ($convPrem <= 0) {
+        $convPrem = $fts;
+    }
+    $convRatioDoc    = $fts > 0 ? $convPrem / $fts : 1.0;
+    $grandDeductUsd  = $grandDeductOrig * $convRatioDoc;
     $netOrig = $fts - $grandDeductOrig;
     $netUsd  = $convPrem - $grandDeductUsd;
 @endphp
@@ -124,19 +148,187 @@
 <div class="doc-header">
     {{ sprintf('%02d', $sIdx + 1) }}. {{ $docId }} — {{ $docType }}
     @if ($inception && $expiry)
-        <span style="font-weight:400; color:#9ca3af; font-size:9px; margin-left:8px;">
+        <span style="font-weight:400; color:#9ca3af; font-size:7px; margin-left:8px;">
             {{ \Carbon\Carbon::parse($inception)->format('d/m/Y') }} → {{ \Carbon\Carbon::parse($expiry)->format('d/m/Y') }}
         </span>
     @endif
+    <span style="float:right; color:#db4a2b; font-size:7px; font-weight:400;">Net: ${{ number_format($netOrig, 2) }} {{ $currency }}</span>
 </div>
 
-{{-- Financial Summary --}}
+{{-- General Details --}}
+<div style="background:#374151; color:#f1efea; padding:4px 8px; font-weight:600; font-size:7px; margin-bottom:4px; display:table; width:100%;">
+    <span>General Details</span>
+    <span style="float:right; color:#9ca3af; font-weight:400;">{{ $premiumType }} · {{ $currency }}</span>
+</div>
+<table style="margin-bottom:8px; table-layout:fixed;">
+    <colgroup>
+        <col style="width:22%;">
+        <col style="width:28%;">
+        <col style="width:22%;">
+        <col style="width:28%;">
+    </colgroup>
+    <tbody>
+        <tr>
+            <td class="bold muted">Document type:</td>
+            <td>{{ $docType }}</td>
+            <td class="bold muted">Creation date:</td>
+            <td>{{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d/m/Y') : '—' }}</td>
+        </tr>
+        <tr>
+            <td class="bold muted">Premium type:</td>
+            <td>{{ $premiumType }}</td>
+            <td class="bold muted">Period:</td>
+            <td>
+                {{ $inception ? \Carbon\Carbon::parse($inception)->format('d/m/Y') : '—' }}
+                to
+                {{ $expiry ? \Carbon\Carbon::parse($expiry)->format('d/m/Y') : '—' }}
+            </td>
+        </tr>
+        <tr>
+            <td class="bold muted">Original currency:</td>
+            <td>{{ $currency }}</td>
+            <td class="bold muted">Coverage days:</td>
+            <td>{{ $coverageDays }}</td>
+        </tr>
+        <tr>
+            <td class="bold muted">RoE for Reference:</td>
+            <td colspan="3">{{ $docRoeFs > 0 ? number_format($docRoeFs, 8) : '—' }}</td>
+        </tr>
+    </tbody>
+</table>
+
+{{-- Placement Schemes --}}
+@if ($docSchemes->isNotEmpty())
+<div style="background:#374151; color:#f1efea; padding:4px 8px; font-weight:600; font-size:7px; margin-bottom:4px; display:table; width:100%;">
+    <span>Placement Schemes</span>
+    <span style="float:right; color:#9ca3af; font-weight:400;">{{ $docSchemes->count() }} scheme(s)</span>
+</div>
 <table style="margin-bottom:8px;">
     <thead>
         <tr>
-            <th style="width:60%;"></th>
-            <th class="right">Orig. Curr. ({{ $currency }})</th>
-            <th class="right">US Dollars</th>
+            <th style="width:4%;">#</th>
+            <th style="width:20%;">ID</th>
+            <th>Description</th>
+            <th class="right" style="width:12%;">Share (%)</th>
+            <th class="center" style="width:18%;">Agreement Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($docSchemes as $idx => $scheme)
+        <tr>
+            <td>{{ $idx + 1 }}</td>
+            <td style="font-size:7px;">{{ $scheme['id'] ?? '—' }}</td>
+            <td>{{ $scheme['description'] ?? '—' }}</td>
+            <td class="right bold">{{ number_format(($scheme['share'] ?? 0) * 100, 2) }}%</td>
+            <td class="center">{{ $scheme['agreement_type'] ?? '—' }}</td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
+
+{{-- Insureds --}}
+@if ($docInsureds->isNotEmpty())
+<div style="background:#374151; color:#f1efea; padding:4px 8px; font-weight:600; font-size:7px; margin-bottom:4px; display:table; width:100%;">
+    <span>Insureds</span>
+    <span style="float:right; color:#9ca3af; font-weight:400;">{{ $docInsureds->count() }} member(s)</span>
+</div>
+@foreach ($docInsuredsGrouped as $schemeId => $rows)
+@php
+    $sMeta  = $docSchemeMeta[$schemeId] ?? null;
+    $sLabel = $sMeta['label'] ?? $schemeId;
+    $sShare = (float)($sMeta['share'] ?? 0);
+@endphp
+<div style="font-weight:600; font-size:7px; color:#db4a2b; margin:4px 0 2px; border-bottom:1px solid #d1cec9; padding-bottom:2px;">
+    Placement Scheme: {{ $sLabel }} ({{ number_format($sShare * 100, 2) }}%)
+</div>
+<table style="margin-bottom:6px; table-layout:fixed; width:100%;">
+    <thead>
+        <tr>
+            <th style="width:1%; white-space:nowrap; padding-right:4px;">#</th>
+            <th style="width:31%;">Insured</th>
+            <th style="width:18%;">Coverage</th>
+            <th class="center" style="width:12%;">Country</th>
+            <th class="right" style="width:10%;">Allocation</th>
+            <th class="right" style="width:14%;">Annual Premium</th>
+            <th class="right" style="width:14%;">Prem. Fts</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($rows->values() as $idx => $insured)
+        <tr>
+            <td style="white-space:nowrap; padding-right:4px;">{{ $idx + 1 }}</td>
+            <td style="word-wrap:break-word; overflow-wrap:break-word;">{{ $insured['company']['name'] ?? '—' }}</td>
+            <td>{{ $insured['coverage']['name'] ?? '—' }}</td>
+            <td class="center">{{ $insured['company']['country']['name'] ?? '—' }}</td>
+            <td class="right">{{ number_format(($insured['allocation_percent'] ?? 0) * 100, 2) }}%</td>
+            <td class="right">${{ number_format($insured['premium'] ?? 0, 2) }}</td>
+            <td class="right">${{ number_format($insured['premium_fts'] ?? 0, 2) }}</td>
+        </tr>
+        @endforeach
+        <tr style="background:#f1efea;">
+            <td colspan="5" class="right bold muted" style="font-size:7px;">Totals:</td>
+            <td class="right bold">${{ number_format($rows->sum('premium'), 2) }}</td>
+            <td class="right bold">${{ number_format($rows->sum(fn($i) => $i['premium_fts'] ?? 0), 2) }}</td>
+        </tr>
+    </tbody>
+</table>
+@endforeach
+@endif
+
+{{-- Costs Breakdown --}}
+@if ($groupedNodes->isNotEmpty())
+<div style="background:#374151; color:#f1efea; padding:4px 8px; font-weight:600; font-size:7px; margin-bottom:4px; display:table; width:100%;">
+    <span>Costs Breakdown</span>
+    <span style="float:right; color:#9ca3af; font-weight:400;">Total deductions: -${{ number_format($grandDeductOrig, 2) }}</span>
+</div>
+<table style="margin-bottom:8px; table-layout:fixed; width:100%;">
+    <thead>
+        <tr>
+            <th style="width:40%;">Partner</th>
+            <th style="width:18%;">Concept</th>
+            <th class="right" style="width:14%;">Rate</th>
+            <th class="right" style="width:14%;">Orig. Curr.</th>
+            <th class="right" style="width:14%;">USD</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($groupedNodes as $group)
+            @foreach ($group['nodes'] as $node)
+            @php
+                $nOrig = (float)($node['deduction_amount'] ?? 0);
+                $nUsd  = (float)($node['deduction_usd']    ?? 0);
+                if ($nUsd == 0 && $nOrig > 0) { $nUsd = $nOrig * $convRatioDoc; }
+            @endphp
+            <tr>
+                <td><span class="muted" style="font-size:7px;">{{ $node['index'] }}.</span> {{ $node['partner'] ?? '—' }}</td>
+                <td>{{ $node['deduction'] ?? '—' }}</td>
+                <td class="right">{{ number_format($node['value'] * 100, 2) }}%</td>
+                <td class="right" style="color:#dc2626;">-${{ number_format($nOrig, 2) }}</td>
+                <td class="right" style="color:#dc2626;">-${{ number_format($nUsd, 2) }}</td>
+            </tr>
+            @endforeach
+            @php
+                $gOrig = (float)($group['subtotal_orig'] ?? 0);
+                $gUsd  = $gOrig * $convRatioDoc;
+            @endphp
+            <tr style="background:#f1efea;">
+                <td colspan="3" class="right muted" style="font-size:7px;">Share {{ number_format($group['share'] * 100, 2) }}% subtotal:</td>
+                <td class="right bold">-${{ number_format($gOrig, 2) }}</td>
+                <td class="right bold">-${{ number_format($gUsd, 2) }}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
+
+{{-- Financial Summary --}}
+<table style="margin-bottom:8px; table-layout:fixed; width:100%;">
+    <thead>
+        <tr>
+            <th style="width:72%;"></th>
+            <th class="right" style="width:14%;">Orig. Curr. ({{ $currency }})</th>
+            <th class="right" style="width:14%;">US Dollars</th>
         </tr>
     </thead>
     <tbody>
@@ -151,48 +343,12 @@
             <td class="right" style="color:#dc2626;">-${{ number_format($grandDeductUsd, 2) }}</td>
         </tr>
         <tr style="border-top:2px solid #1f262a;">
-            <td class="bold" style="font-size:11px;">Net Underwritten Premium</td>
-            <td class="right bold" style="font-size:11px;">${{ number_format($netOrig, 2) }}</td>
-            <td class="right bold" style="font-size:11px;">${{ number_format($netUsd, 2) }}</td>
+            <td class="bold" style="font-size:9px;">Net Underwritten Premium</td>
+            <td class="right bold" style="font-size:9px;">${{ number_format($netOrig, 2) }}</td>
+            <td class="right bold" style="font-size:9px;">${{ number_format($netUsd, 2) }}</td>
         </tr>
     </tbody>
 </table>
-
-{{-- Deductions detail --}}
-@if ($groupedNodes->isNotEmpty())
-<h3>Costs Breakdown</h3>
-<table style="margin-bottom:8px;">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Partner</th>
-            <th>Concept</th>
-            <th class="right">Rate</th>
-            <th class="right">Orig. Curr.</th>
-            <th class="right">USD</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($groupedNodes as $group)
-            @foreach ($group['nodes'] as $node)
-            <tr>
-                <td>{{ $node['index'] }}</td>
-                <td>{{ $node['partner'] ?? '—' }}</td>
-                <td>{{ $node['deduction'] ?? '—' }}</td>
-                <td class="right">{{ number_format($node['value'] * 100, 2) }}%</td>
-                <td class="right" style="color:#dc2626;">-${{ number_format($node['deduction_amount'], 2) }}</td>
-                <td class="right" style="color:#dc2626;">-${{ number_format($node['deduction_usd'], 2) }}</td>
-            </tr>
-            @endforeach
-            <tr style="background:#f1efea;">
-                <td colspan="4" class="right muted" style="font-size:9px;">Share {{ number_format($group['share'] * 100, 2) }}% subtotal:</td>
-                <td class="right bold">-${{ number_format($group['subtotal_orig'], 2) }}</td>
-                <td class="right bold">-${{ number_format($group['subtotal_usd'], 2) }}</td>
-            </tr>
-        @endforeach
-    </tbody>
-</table>
-@endif
 
 {{-- Installments --}}
 @if ($transactions->isNotEmpty())
@@ -246,9 +402,9 @@
     $pPct    = ($pRaw > 1 ? $pRaw : $pRaw * 100);
     $txnLogs = $txnId ? collect($logsByTxn[$txnId] ?? []) : collect();
 @endphp
-<div style="margin-top:6px; margin-bottom:4px; font-weight:700; font-size:10px; background:#e8e6e1; padding:3px 6px;">
+<div style="margin-top:6px; margin-bottom:4px; font-weight:700; font-size:8px; background:#e8e6e1; padding:3px 6px;">
     Installment {{ $txn['index'] ?? ($tIdx + 1) }}
-    <span style="font-weight:400; color:#6b7280; font-size:9px;">
+    <span style="font-weight:400; color:#6b7280; font-size:7px;">
         — {{ number_format($pPct, 2) }}% · Rate: {{ number_format((float)($txn['exch_rate'] ?? 0), 4) }}
         · Due: {{ isset($txn['due_date']) ? \Carbon\Carbon::parse($txn['due_date'])->format('d/m/Y') : '—' }}
     </span>
@@ -300,7 +456,7 @@
 {{-- ══ CONSOLIDATED TOTALS ════════════════════════════════════════════════ --}}
 @if (count($summaries) > 0)
 <div class="totals-box">
-    <div style="font-size:12px; font-weight:700; color:#db4a2b; margin-bottom:8px;">
+    <div style="font-size:10px; font-weight:700; color:#db4a2b; margin-bottom:8px;">
         Consolidated Totals — All Documents
     </div>
     <table>
@@ -322,10 +478,10 @@
                 </td>
             </tr>
             <tr>
-                <td style="border-bottom:none; color:#f1efea; font-weight:700; font-size:12px;">
+                <td style="border-bottom:none; color:#f1efea; font-weight:700; font-size:10px;">
                     Net Underwritten Premium
                 </td>
-                <td class="right bold" style="border-bottom:none; color:#86efac; font-size:12px;">
+                <td class="right bold" style="border-bottom:none; color:#86efac; font-size:10px;">
                     ${{ number_format($totalNet, 2) }}
                 </td>
             </tr>
@@ -333,6 +489,25 @@
     </table>
 </div>
 @endif
+
+<script type="text/php">
+    if (isset($pdf)) {
+        $pdf->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+            $font  = $fontMetrics->get_font('DejaVu Sans', 'normal');
+            $size  = 7;
+            $text  = "Page $pageNumber of $pageCount";
+            $w     = $canvas->get_width();
+            $h     = $canvas->get_height();
+            $tw    = $fontMetrics->get_text_width($text, $font, $size);
+            $x     = ($w - $tw) / 2;
+            $y     = $h - 22;
+            $gray  = [0.61, 0.64, 0.67];
+            $light = [0.898, 0.886, 0.875];
+            $canvas->line(40, $y - 6, $w - 40, $y - 6, $light, 0.5);
+            $canvas->text($x, $y, $text, $font, $size, $gray);
+        });
+    }
+</script>
 
 </body>
 </html>

@@ -1363,15 +1363,15 @@ class BusinessResource extends Resource
                         ]),
 
                     Action::make('technical_result')
-                        ->label('Technical result')
+                        ->label('Business Summary')
                         ->icon('heroicon-m-calculator')
                         ->color('primary')
                         ->disabled(fn () => ! Gate::allows('Business:TechnicalResult'))
                         ->tooltip(fn () => Gate::allows('Business:TechnicalResult')
-                            ? 'View technical result'
-                            : 'You do not have permission to access Technical Result'
+                            ? 'View business summary'
+                            : 'You do not have permission to access Business Summary'
                         )
-                        ->modalHeading(fn (Business $record) => "Technical Result — {$record->business_code}")
+                        ->modalHeading(fn (Business $record) => "Business Summary — {$record->business_code}")
                         ->modalContent(function (Business $record): \Illuminate\Contracts\View\View {
                             $data = app(BusinessTechnicalResultService::class)->build($record);
                             return view('filament.resources.business.technical-result', $data);

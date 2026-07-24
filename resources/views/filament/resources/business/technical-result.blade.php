@@ -31,7 +31,27 @@
     };
 @endphp
 
-<div style="
+<style>
+    .tr-report details > summary {
+        list-style: none;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+    }
+    .tr-report details > summary::-webkit-details-marker { display: none; }
+    .tr-report details > summary::before {
+        content: "▶";
+        flex-shrink: 0;
+        font-size: 9px;
+        opacity: 0.75;
+    }
+    .tr-report details[open] > summary::before {
+        content: "▼";
+    }
+    .tr-report details > summary > span:last-child {
+        margin-left: auto;
+    }
+</style>
+<div class="tr-report" style="
     background-color: #f1efea;
     color: #1f262a;
     padding: 24px;
@@ -45,7 +65,7 @@
 {{-- ══ TOP BAR ══════════════════════════════════════════════════════════════ --}}
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:2px solid #db4a2b; padding-bottom:10px;">
     <div>
-        <span style="font-size:18px; font-weight:700; color:#db4a2b;">Technical Result</span>
+        <span style="font-size:18px; font-weight:700; color:#db4a2b;">Business Summary</span>
         <span style="margin-left:12px; color:#6b7280; font-size:12px;">
             Generated: {{ Carbon::parse($generatedAt)->format('d/m/Y H:i') }}
         </span>
@@ -131,6 +151,25 @@
     $logsByTxn      = collect($summary['logsByTxn']      ?? []);
     $groupedNodes   = collect($summary['groupedCostNodes'] ?? []);
     $nodesFlat      = $groupedNodes->flatMap(fn($g) => $g['nodes'] ?? [])->sortBy('index')->values();
+
+    // USD fallback: when exch_rate=0 on transactions, totalConvertedPremium is 0.
+    // Use roe_fs from the document as conversion basis.
+    $docRoeFs       = (float) ($summary['roe_fs'] ?? 0);
+    $convPremDoc    = (float) ($summary['totalConvertedPremium'] ?? 0);
+    if ($convPremDoc <= 0 && $docRoeFs > 0) {
+        $convPremDoc = $fts / $docRoeFs;
+    } elseif ($convPremDoc <= 0) {
+        $convPremDoc = $fts;
+    }
+    $convRatioDoc   = $fts > 0 ? $convPremDoc / $fts : 1.0;
+
+    $docSchemes     = collect($summary['costSchemes'] ?? []);
+    $docInsureds    = collect($summary['insureds']    ?? []);
+    $docSchemeMeta  = $docSchemes->mapWithKeys(function ($s) {
+        $key = $s['cscheme_id'] ?? $s['id'] ?? null;
+        return $key ? [$key => ['label' => $s['id'] ?? '—', 'share' => (float)($s['share'] ?? 0)]] : [];
+    });
+    $docInsuredsGrouped = $docInsureds->groupBy(fn ($i) => $i['cscheme_id'] ?? $i['cost_scheme_id'] ?? '—');
 @endphp
 
 <details open style="margin-bottom:16px; border:1px solid #d1cec9; border-radius:6px; overflow:hidden;">
@@ -154,12 +193,211 @@
 
     <div style="padding:16px; background:#faf9f7;">
 
+        {{-- General Details --}}
+        <details open style="margin-bottom:10px; border:1px solid #d1cec9; border-radius:6px; overflow:hidden;">
+            <summary style="background:#374151; color:#f1efea; padding:6px 12px; cursor:pointer; font-weight:600; font-size:11px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                General Details
+                <span style="color:#9ca3af; font-weight:400;">{{ $summary['premiumType'] ?? '—' }} · {{ $currency }}</span>
+            </summary>
+            <div style="padding:10px 12px; background:#ffffff;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <tbody>
+                        <tr>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280; width:22%;">Document type:</td>
+                            <td style="padding:4px 6px; width:28%; border-bottom:1px solid #f0eeeb;">{{ $docType }}</td>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280; width:22%;">Creation date:</td>
+                            <td style="padding:4px 6px; border-bottom:1px solid #f0eeeb;">{{ isset($summary['createdAt']) ? \Carbon\Carbon::parse($summary['createdAt'])->format('d/m/Y') : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280;">Premium type:</td>
+                            <td style="padding:4px 6px; border-bottom:1px solid #f0eeeb;">{{ $summary['premiumType'] ?? '—' }}</td>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280;">Period:</td>
+                            <td style="padding:4px 6px; border-bottom:1px solid #f0eeeb;">
+                                {{ $inceptionDate ? \Carbon\Carbon::parse($inceptionDate)->format('d/m/Y') : '—' }}
+                                to
+                                {{ $expirationDate ? \Carbon\Carbon::parse($expirationDate)->format('d/m/Y') : '—' }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280;">Original currency:</td>
+                            <td style="padding:4px 6px; border-bottom:1px solid #f0eeeb;">{{ $currency }}</td>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280;">Coverage days:</td>
+                            <td style="padding:4px 6px; border-bottom:1px solid #f0eeeb;">{{ $summary['coverageDays'] ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; font-weight:600; color:#6b7280;">RoE for Reference:</td>
+                            <td style="padding:4px 6px;" colspan="3">{{ $docRoeFs > 0 ? number_format($docRoeFs, 8) : '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        {{-- Placement Schemes --}}
+        @if ($docSchemes->isNotEmpty())
+        <details open style="margin-bottom:10px; border:1px solid #d1cec9; border-radius:6px; overflow:hidden;">
+            <summary style="background:#374151; color:#f1efea; padding:6px 12px; cursor:pointer; font-weight:600; font-size:11px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                Placement Schemes
+                <span style="color:#9ca3af; font-weight:400;">{{ $docSchemes->count() }} scheme(s)</span>
+            </summary>
+            <div style="padding:10px 12px; background:#ffffff;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #d1cec9;">
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">#</th>
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">ID</th>
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">Description</th>
+                            <th style="text-align:center; padding:3px 6px; color:#6b7280;">Share (%)</th>
+                            <th style="text-align:center; padding:3px 6px; color:#6b7280;">Agreement Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($docSchemes as $idx => $scheme)
+                        <tr style="border-bottom:1px solid #f0eeeb;">
+                            <td style="padding:3px 6px;">{{ $idx + 1 }}</td>
+                            <td style="padding:3px 6px; font-family:monospace; font-size:11px;">{{ $scheme['id'] ?? '—' }}</td>
+                            <td style="padding:3px 6px;">{{ $scheme['description'] ?? '—' }}</td>
+                            <td style="padding:3px 6px; text-align:center; font-weight:600;">{{ number_format(($scheme['share'] ?? 0) * 100, 2) }}%</td>
+                            <td style="padding:3px 6px; text-align:center;">{{ $scheme['agreement_type'] ?? '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        @endif
+
+        {{-- Insureds --}}
+        @if ($docInsureds->isNotEmpty())
+        <details open style="margin-bottom:10px; border:1px solid #d1cec9; border-radius:6px; overflow:hidden;">
+            <summary style="background:#374151; color:#f1efea; padding:6px 12px; cursor:pointer; font-weight:600; font-size:11px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                Insureds
+                <span style="color:#9ca3af; font-weight:400;">{{ $docInsureds->count() }} member(s)</span>
+            </summary>
+            <div style="padding:10px 12px; background:#ffffff; overflow-x:auto;">
+                @foreach ($docInsuredsGrouped as $schemeId => $rows)
+                @php
+                    $sMeta  = $docSchemeMeta[$schemeId] ?? null;
+                    $sLabel = $sMeta['label'] ?? $schemeId;
+                    $sShare = (float)($sMeta['share'] ?? 0);
+                @endphp
+                <div style="font-weight:600; font-size:11px; color:#db4a2b; margin:6px 0 3px; border-bottom:1px solid #d1cec9; padding-bottom:2px;">
+                    Placement Scheme: {{ $sLabel }} ({{ number_format($sShare * 100, 2) }}%)
+                </div>
+                <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px; margin-bottom:8px;">
+                    <colgroup>
+                        <col style="width:3%;">
+                        <col style="width:29%;">
+                        <col style="width:18%;">
+                        <col style="width:12%;">
+                        <col style="width:10%;">
+                        <col style="width:14%;">
+                        <col style="width:14%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="border-bottom:1px solid #d1cec9;">
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">#</th>
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">Insured</th>
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">Coverage</th>
+                            <th style="text-align:center; padding:3px 6px; color:#6b7280;">Country</th>
+                            <th style="text-align:right; padding:3px 6px; color:#6b7280;">Allocation</th>
+                            <th style="text-align:right; padding:3px 6px; color:#6b7280;">Annual Premium</th>
+                            <th style="text-align:right; padding:3px 6px; color:#6b7280;">Prem. Fts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($rows->values() as $idx => $insured)
+                        <tr style="border-bottom:1px solid #f0eeeb;">
+                            <td style="padding:3px 6px;">{{ $idx + 1 }}</td>
+                            <td style="padding:3px 6px; word-wrap:break-word; overflow-wrap:break-word;" title="{{ $insured['company']['name'] ?? '—' }}">{{ $insured['company']['name'] ?? '—' }}</td>
+                            <td style="padding:3px 6px;">{{ $insured['coverage']['name'] ?? '—' }}</td>
+                            <td style="padding:3px 6px; text-align:center;">{{ $insured['company']['country']['name'] ?? '—' }}</td>
+                            <td style="padding:3px 6px; text-align:right;">{{ number_format(($insured['allocation_percent'] ?? 0) * 100, 2) }}%</td>
+                            <td style="padding:3px 6px; text-align:right; white-space:nowrap;">${{ number_format($insured['premium'] ?? 0, 2) }}</td>
+                            <td style="padding:3px 6px; text-align:right; white-space:nowrap;">${{ number_format($insured['premium_fts'] ?? 0, 2) }}</td>
+                        </tr>
+                        @endforeach
+                        <tr style="background:#f5f4f2; border-top:1px solid #d1cec9;">
+                            <td colspan="5" style="padding:3px 6px; text-align:right; font-weight:600; color:#6b7280; font-size:11px;">Totals:</td>
+                            <td style="padding:3px 6px; text-align:right; font-weight:700; white-space:nowrap;">${{ number_format($rows->sum('premium'), 2) }}</td>
+                            <td style="padding:3px 6px; text-align:right; font-weight:700; white-space:nowrap;">${{ number_format($rows->sum(fn($i) => $i['premium_fts'] ?? 0), 2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                @endforeach
+            </div>
+        </details>
+        @endif
+
+        {{-- Costs Breakdown --}}
+        @if ($groupedNodes->isNotEmpty())
+        <details open style="margin-bottom:10px; border:1px solid #d1cec9; border-radius:6px; overflow:hidden;">
+            <summary style="background:#374151; color:#f1efea; padding:6px 12px; cursor:pointer; font-weight:600; font-size:11px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                Costs Breakdown
+                <span style="color:#9ca3af; font-weight:400;">Total deductions: -${{ number_format($groupedNodes->sum('subtotal_orig'), 2) }}</span>
+            </summary>
+            <div style="padding:10px 12px; background:#ffffff;">
+                <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
+                    <colgroup>
+                        <col style="width:3%;">
+                        <col style="width:35%;">
+                        <col style="width:22%;">
+                        <col style="width:12%;">
+                        <col style="width:14%;">
+                        <col style="width:14%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="border-bottom:1px solid #d1cec9;">
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">#</th>
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">Partner</th>
+                            <th style="text-align:left; padding:3px 6px; color:#6b7280;">Concept</th>
+                            <th style="text-align:right; padding:3px 6px; color:#6b7280;">Rate</th>
+                            <th style="text-align:right; padding:3px 6px; color:#6b7280;">Orig. Curr.</th>
+                            <th style="text-align:right; padding:3px 6px; color:#6b7280;">USD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($groupedNodes as $group)
+                            @foreach ($group['nodes'] as $node)
+                            @php
+                                $nOrig = (float)($node['deduction_amount'] ?? 0);
+                                $nUsd  = (float)($node['deduction_usd']    ?? 0);
+                                if ($nUsd == 0 && $nOrig > 0) { $nUsd = $nOrig * $convRatioDoc; }
+                            @endphp
+                            <tr style="border-bottom:1px solid #f0eeeb;">
+                                <td style="padding:3px 6px;">{{ $node['index'] }}</td>
+                                <td style="padding:3px 6px;">{{ $node['partner'] ?? '—' }}</td>
+                                <td style="padding:3px 6px;">{{ $node['deduction'] ?? '—' }}</td>
+                                <td style="padding:3px 6px; text-align:right;">{{ number_format($node['value'] * 100, 2) }}%</td>
+                                <td style="padding:3px 6px; text-align:right; color:#dc2626;">-${{ number_format($nOrig, 2) }}</td>
+                                <td style="padding:3px 6px; text-align:right; color:#dc2626;">-${{ number_format($nUsd, 2) }}</td>
+                            </tr>
+                            @endforeach
+                            @php
+                                $gOrig = (float)($group['subtotal_orig'] ?? 0);
+                                $gUsd  = (float)($group['subtotal_usd']  ?? 0);
+                                if ($gUsd == 0 && $gOrig > 0) { $gUsd = $gOrig * $convRatioDoc; }
+                            @endphp
+                            <tr style="background:#f5f4f2; border-bottom:1px solid #d1cec9;">
+                                <td colspan="4" style="padding:3px 6px; text-align:right; font-weight:600; font-size:11px; color:#6b7280;">
+                                    Share {{ number_format($group['share'] * 100, 2) }}% subtotal:
+                                </td>
+                                <td style="padding:3px 6px; text-align:right; font-weight:600;">-${{ number_format($gOrig, 2) }}</td>
+                                <td style="padding:3px 6px; text-align:right; font-weight:600;">-${{ number_format($gUsd, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        @endif
+
         {{-- Financial Summary --}}
-        <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:16px;">
+        <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px; margin-bottom:16px;">
             <colgroup>
-                <col style="width:60%;">
-                <col style="width:20%;">
-                <col style="width:20%;">
+                <col style="width:72%;">
+                <col style="width:14%;">
+                <col style="width:14%;">
             </colgroup>
             <thead>
                 <tr style="border-bottom:1px solid #100f0d;">
@@ -172,9 +410,15 @@
                 <tr>
                     <td style="padding:5px 8px; font-weight:600; color:#1f262a;">Gross Underwritten Premium</td>
                     <td style="padding:5px 8px; text-align:right;">${{ number_format($fts, 2) }}</td>
-                    <td style="padding:5px 8px; text-align:right;">${{ number_format((float)($summary['totalConvertedPremium'] ?? 0), 2) }}</td>
+                    <td style="padding:5px 8px; text-align:right;">${{ number_format($convPremDoc, 2) }}</td>
                 </tr>
-                @php $grandDeductOrig = collect($groupedNodes)->sum('subtotal_orig'); $grandDeductUsd = collect($groupedNodes)->sum('subtotal_usd'); @endphp
+                @php
+                    $grandDeductOrig = $groupedNodes->sum('subtotal_orig');
+                    $grandDeductUsd  = $groupedNodes->sum(function ($g) use ($convRatioDoc) {
+                        $usd = (float)($g['subtotal_usd'] ?? 0);
+                        return $usd != 0 ? $usd : ((float)($g['subtotal_orig'] ?? 0)) * $convRatioDoc;
+                    });
+                @endphp
                 <tr>
                     <td style="padding:5px 8px; font-weight:600; color:#1f262a;">Total Deductions</td>
                     <td style="padding:5px 8px; text-align:right; color:#dc2626;">-${{ number_format($grandDeductOrig, 2) }}</td>
@@ -183,52 +427,10 @@
                 <tr style="border-top:2px solid #1f262a;">
                     <td style="padding:6px 8px; font-weight:700; color:#1f262a;">Net Underwritten Premium</td>
                     <td style="padding:6px 8px; text-align:right; font-weight:700;">${{ number_format($fts - $grandDeductOrig, 2) }}</td>
-                    <td style="padding:6px 8px; text-align:right; font-weight:700;">${{ number_format((float)($summary['totalConvertedPremium'] ?? 0) - $grandDeductUsd, 2) }}</td>
+                    <td style="padding:6px 8px; text-align:right; font-weight:700;">${{ number_format($convPremDoc - $grandDeductUsd, 2) }}</td>
                 </tr>
             </tbody>
         </table>
-
-        {{-- Deductions breakdown --}}
-        @if ($groupedNodes->isNotEmpty())
-        <details style="margin-bottom:12px;">
-            <summary style="cursor:pointer; font-weight:600; font-size:12px; color:#db4a2b; padding:4px 0; list-style:none;">
-                ▶ Costs Breakdown
-            </summary>
-            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:8px;">
-                <thead>
-                    <tr style="border-bottom:1px solid #d1cec9;">
-                        <th style="text-align:left; padding:3px 6px; color:#6b7280;">#</th>
-                        <th style="text-align:left; padding:3px 6px; color:#6b7280;">Partner</th>
-                        <th style="text-align:left; padding:3px 6px; color:#6b7280;">Concept</th>
-                        <th style="text-align:right; padding:3px 6px; color:#6b7280;">Rate</th>
-                        <th style="text-align:right; padding:3px 6px; color:#6b7280;">Orig. Curr.</th>
-                        <th style="text-align:right; padding:3px 6px; color:#6b7280;">USD</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($groupedNodes as $group)
-                        @foreach ($group['nodes'] as $node)
-                        <tr style="border-bottom:1px solid #ede9e4;">
-                            <td style="padding:3px 6px;">{{ $node['index'] }}</td>
-                            <td style="padding:3px 6px;">{{ $node['partner'] ?? '—' }}</td>
-                            <td style="padding:3px 6px;">{{ $node['deduction'] ?? '—' }}</td>
-                            <td style="padding:3px 6px; text-align:right;">{{ number_format($node['value'] * 100, 2) }}%</td>
-                            <td style="padding:3px 6px; text-align:right; color:#dc2626;">-${{ number_format($node['deduction_amount'], 2) }}</td>
-                            <td style="padding:3px 6px; text-align:right; color:#dc2626;">-${{ number_format($node['deduction_usd'], 2) }}</td>
-                        </tr>
-                        @endforeach
-                        <tr style="background:#f1efea; border-bottom:1px solid #d1cec9;">
-                            <td colspan="4" style="padding:3px 6px; text-align:right; font-weight:600; font-size:11px; color:#6b7280;">
-                                Share {{ number_format($group['share'] * 100, 2) }}% subtotal:
-                            </td>
-                            <td style="padding:3px 6px; text-align:right; font-weight:600;">-${{ number_format($group['subtotal_orig'], 2) }}</td>
-                            <td style="padding:3px 6px; text-align:right; font-weight:600;">-${{ number_format($group['subtotal_usd'], 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </details>
-        @endif
 
         {{-- Installments --}}
         @if ($transactions->isNotEmpty())

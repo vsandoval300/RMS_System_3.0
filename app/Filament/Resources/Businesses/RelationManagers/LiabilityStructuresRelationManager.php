@@ -13,17 +13,13 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms;
 use Filament\Tables\Grouping\Group;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -81,8 +77,8 @@ class LiabilityStructuresRelationManager extends RelationManager
 
                                 return Country::query()
                                     ->where('region_id', $business->region_id)
-                                    ->orderBy('alpha_3')
-                                    ->pluck('alpha_3', 'id');
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
                             })
 
                             ->getSearchResultsUsing(function (string $search) {
@@ -91,15 +87,17 @@ class LiabilityStructuresRelationManager extends RelationManager
                                 return Country::query()
                                     ->where('region_id', $business->region_id)
                                     ->where(function ($query) use ($search) {
-                                        $query->where('alpha_3', 'like', "%{$search}%")
-                                            ->orWhere('name', 'like', "%{$search}%");
+                                        $query->where('name', 'like', "%{$search}%")
+                                            ->orWhere('alpha_3', 'like', "%{$search}%");
                                     })
-                                    ->orderBy('alpha_3')
-                                    ->pluck('alpha_3', 'id');
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
                             })
 
                             ->searchable()
                             ->preload()
+                            ->optionsLimit(300)
+                            ->required()
                             ->columnSpan(4),
 
                         //Section::make()
@@ -107,12 +105,14 @@ class LiabilityStructuresRelationManager extends RelationManager
                             Radio::make('cls')
                             ->label('CSL')
                             ->options([
-                                true => 'Yes',
-                                false => 'No',
+                                '1' => 'Yes',
+                                '0' => 'No',
                             ])
                             ->helperText('Combined Single Limit')
-                            ->inline() // horizontal
-                            ->default(false) // "No" preseleccionado
+                            ->inline()
+                            ->default('0')
+                            ->formatStateUsing(fn ($state) => $state ? '1' : '0')
+                            ->dehydrateStateUsing(fn ($state) => $state === '1')
                             ->required()
                         //])
                         ->columnSpan(3)

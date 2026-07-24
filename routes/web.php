@@ -63,14 +63,15 @@ Route::get('/admin/business/{businessCode}/technical-result.pdf', function (stri
     $options = new \Dompdf\Options();
     $options->set('isRemoteEnabled', false);
     $options->set('isHtml5ParserEnabled', true);
+    $options->set('isPhpEnabled', true);
     $options->set('defaultFont', 'DejaVu Sans');
 
     $pdf = new \Dompdf\Dompdf($options);
     $pdf->loadHtml($html);
-    $pdf->setPaper('A4', 'landscape');
+    $pdf->setPaper('letter', 'portrait');
     $pdf->render();
 
-    $filename = 'technical-result-' . $businessCode . '.pdf';
+    $filename = 'business-summary-' . $businessCode . '.pdf';
 
     return response()->streamDownload(
         fn () => print($pdf->output()),
@@ -78,3 +79,32 @@ Route::get('/admin/business/{businessCode}/technical-result.pdf', function (stri
         ['Content-Type' => 'application/pdf']
     );
 })->name('business.technical-result.pdf')->middleware(['web', 'auth']);
+
+// === Operative Document Overview PDF ===
+Route::get('/admin/operative-doc/{docId}/overview.pdf', function (string $docId) {
+    abort_unless(auth()->check(), 403);
+
+    \App\Models\OperativeDoc::withoutTrashed()->findOrFail($docId);
+
+    $data = app(\App\Services\OperativeDocSummaryV2Service::class)->build($docId);
+
+    $html = view('filament.resources.business.operative-doc-summary-pdf', $data)->render();
+
+    $options = new \Dompdf\Options();
+    $options->set('isRemoteEnabled', false);
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('defaultFont', 'DejaVu Sans');
+
+    $pdf = new \Dompdf\Dompdf($options);
+    $pdf->loadHtml($html);
+    $pdf->setPaper('A4', 'portrait');
+    $pdf->render();
+
+    $filename = 'operative-doc-' . $docId . '.pdf';
+
+    return response()->streamDownload(
+        fn () => print($pdf->output()),
+        $filename,
+        ['Content-Type' => 'application/pdf']
+    );
+})->name('operative-doc.overview.pdf')->middleware(['web', 'auth']);

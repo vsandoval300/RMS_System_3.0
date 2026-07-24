@@ -311,6 +311,7 @@ class OperativeDocSummaryV2Service
             'totalDeductionOrig' => $totalDeductionOrig,
             'totalDeductionUsd' => $totalDeductionUsd,
             'totalShare' => $totalShare,
+            'roe_fs' => (float) ($doc->roe_fs ?? 0),
 
             'transactions' => $transactions->toArray(),
             'logsByTxn' => $logsByTxn,
