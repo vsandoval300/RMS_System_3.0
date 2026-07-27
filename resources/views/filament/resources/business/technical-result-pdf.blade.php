@@ -107,9 +107,10 @@
 {{-- ══ PER-DOC SUMMARIES ════════════════════════════════════════════════════ --}}
 @foreach ($summaries as $sIdx => $summary)
 @php
-    $docId       = $summary['id']               ?? '—';
-    $docType     = $summary['documentType']     ?? '—';
-    $inception   = $summary['inceptionDate']    ?? null;
+    $docId          = $summary['id']               ?? '—';
+    $docType        = $summary['documentType']     ?? '—';
+    $docDescription = $summary['description']      ?? null;
+    $inception      = $summary['inceptionDate']    ?? null;
     $expiry      = $summary['expirationDate']   ?? null;
     $currency    = $summary['originalCurrency'] ?? '—';
     $premiumType = $summary['premiumType']      ?? '—';
@@ -148,6 +149,9 @@
         </span>
     @endif
     <span style="float:right; color:#db4a2b; font-size:7px; font-weight:400;">Net: ${{ number_format($netOrig, 2) }} {{ $currency }}</span>
+    @if ($docDescription)
+        <div style="font-weight:400; color:#9ca3af; font-size:7px; margin-top:2px;">{{ $docDescription }}</div>
+    @endif
 </div>
 
 {{-- General Details --}}

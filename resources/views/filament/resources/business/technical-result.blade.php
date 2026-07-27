@@ -154,6 +154,7 @@
 @php
     $docId          = $summary['id']             ?? '—';
     $docType        = $summary['documentType']   ?? '—';
+    $docDescription = $summary['description']    ?? null;
     $inceptionDate  = $summary['inceptionDate']  ?? null;
     $expirationDate = $summary['expirationDate'] ?? null;
     $currency       = $summary['originalCurrency'] ?? '—';
@@ -185,17 +186,22 @@
         cursor:pointer; font-weight:600; font-size:13px; list-style:none;
         display:flex; justify-content:space-between; align-items:center;
     ">
-        <span>
-            {{ sprintf('%02d', $sIdx + 1) }}. {{ $docId }} — {{ $docType }}
-            @if ($inceptionDate && $expirationDate)
-                <span style="font-weight:400; color:#9ca3af; font-size:12px; margin-left:10px;">
-                    {{ Carbon::parse($inceptionDate)->format('d/m/Y') }}
-                    →
-                    {{ Carbon::parse($expirationDate)->format('d/m/Y') }}
-                </span>
+        <span style="display:flex; flex-direction:column; gap:2px;">
+            <span>
+                {{ sprintf('%02d', $sIdx + 1) }}. {{ $docId }} — {{ $docType }}
+                @if ($inceptionDate && $expirationDate)
+                    <span style="font-weight:400; color:#9ca3af; font-size:12px; margin-left:10px;">
+                        {{ Carbon::parse($inceptionDate)->format('d/m/Y') }}
+                        →
+                        {{ Carbon::parse($expirationDate)->format('d/m/Y') }}
+                    </span>
+                @endif
+            </span>
+            @if ($docDescription)
+                <span style="font-weight:400; color:#9ca3af; font-size:13px;">{{ $docDescription }}</span>
             @endif
         </span>
-        <span style="color:#db4a2b; font-size:12px; font-weight:400;">Net: ${{ number_format($net, 2) }} {{ $currency }}</span>
+        <span style="color:#db4a2b; font-size:12px; font-weight:400; white-space:nowrap; align-self:flex-start;">Net: ${{ number_format($net, 2) }} {{ $currency }}</span>
     </summary>
 
     <div style="padding:16px; background:#faf9f7;">

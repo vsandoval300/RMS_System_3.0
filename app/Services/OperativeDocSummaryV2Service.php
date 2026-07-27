@@ -295,6 +295,7 @@ class OperativeDocSummaryV2Service
             'id' => $doc->id,
             'createdAt' => $doc->created_at,
             'documentType' => $doc->docType?->name ?? '-',
+            'description' => $doc->description ?? null,
             'inceptionDate' => $doc->inception_date,
             'expirationDate' => $doc->expiration_date,
             'premiumType' => $doc->business?->premium_type ?? '-',
