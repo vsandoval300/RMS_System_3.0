@@ -742,21 +742,23 @@ class BusinessResource extends Resource
                                 ->hiddenLabel()
                                 ->state(fn ($record) => new HtmlString(
                                     '<div style="display:flex;align-items:center;gap:8px;">'
-                                    . '<span style="font-weight:600;">Approval Status:</span>'
+                                    . '<span style="font-weight:600;">Approval status:</span>'
                                     . self::approvalStatusBadgeHtml($record?->approval_status)
                                     . '</div>'
                                 ))
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(2),
 
                             TextEntry::make('approval_date_entry')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
-                                    $value = $record->approval_status_updated_at?->format('Y-m-d') ?: '—';
+                                    $value = $record->approval_status_updated_at?->format('d/m/Y') ?: '—';
 
                                     return new HtmlString(
-                                        "<strong>Approval date:</strong> {$value}"
+                                        "<strong>Approval date:</strong>&nbsp;{$value}"
                                     );
                                 })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(2),
 
                             TextEntry::make('lifecycle_status_entry')
@@ -776,33 +778,35 @@ class BusinessResource extends Resource
                                         default     => ['light-dark(#f3f4f6,#374151)', 'light-dark(#374151,#d1d5db)'],
                                     };
 
-                                    $badge = "<span style=\"display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:14px;font-weight:500;background-color:{$bg};color:{$text}\">{$value}</span>";
+                                    $badge = "<span style=\"display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:14px;font-weight:500;background-color:{$bg};color:{$text};margin-left:6px;\">{$value}</span>";
 
                                     return new HtmlString("<strong>Lifecycle status:</strong> {$badge}");
                                 })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(2),
 
                             TextEntry::make('created_at_entry')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
-                                    $value = $record->created_at?->format('Y-m-d H:i') ?: '—';
+                                    $value = $record->created_at?->format('d/m/Y H:i') ?: '—';
 
                                     return new HtmlString(
-                                        "<strong>Created at:</strong> {$value}"
+                                        "<strong>Created at:</strong>&nbsp;{$value}"
                                     );
                                 })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(3),
 
                             TextEntry::make('created_by_user')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
                                         $value = $record->user?->name ?? '-';
-                                        
 
                                         return new HtmlString(
-                                            "<strong>Created by:</strong> {$value}"
+                                            "<strong>Created by:</strong>&nbsp;{$value}"
                                         );
                                     })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(3)    
 
 

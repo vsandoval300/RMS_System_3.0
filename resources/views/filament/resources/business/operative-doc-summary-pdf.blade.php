@@ -8,16 +8,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 10px;
+            font-size: 8px;
             color: #1f262a;
             background: #ffffff;
-            padding: 20px 24px;
+            padding: 16px 20px;
         }
-        h1 { font-size: 15px; color: #db4a2b; font-weight: 700; }
-        h3 { font-size: 11px; color: #db4a2b; font-weight: 600; margin: 10px 0 4px; }
-        table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        th { text-align: left; padding: 3px 5px; border-bottom: 1px solid #1f262a; font-weight: 600; color: #6b7280; }
-        td { padding: 3px 5px; border-bottom: 1px solid #d1cec9; }
+        h1 { font-size: 12px; color: #db4a2b; font-weight: 700; }
+        h3 { font-size: 9px; color: #db4a2b; font-weight: 600; margin: 8px 0 3px; }
+        table { width: 100%; border-collapse: collapse; font-size: 8px; }
+        th { text-align: left; padding: 2px 4px; border-bottom: 1px solid #1f262a; font-weight: 600; color: #6b7280; }
+        td { padding: 2px 4px; border-bottom: 1px solid #d1cec9; }
         .right { text-align: right; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
@@ -25,22 +25,22 @@
         .section-header {
             background-color: #1f262a;
             color: #f1efea;
-            padding: 5px 10px;
+            padding: 4px 8px;
             font-weight: 700;
-            font-size: 11px;
-            margin-top: 12px;
-            margin-bottom: 5px;
+            font-size: 9px;
+            margin-top: 10px;
+            margin-bottom: 4px;
         }
         .section-box {
             border: 1px solid #d1cec9;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
         }
         .summary-box {
             background-color: #1f262a;
             color: #f1efea;
-            padding: 10px 14px;
-            margin-bottom: 12px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
         }
         .summary-box td { border-bottom: 1px solid #374151; color: #d1d5db; }
     </style>
@@ -83,8 +83,8 @@
     <tr>
         <td style="border:none;">
             <h1>Operative Document Overview</h1>
-            <div style="font-size:11px; font-weight:700; color:#1f262a; margin-top:2px;">{{ $id ?? '—' }}</div>
-            <span class="muted" style="font-size:9px;">Generated: {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}</span>
+            <div style="font-size:9px; font-weight:700; color:#1f262a; margin-top:2px;">{{ $id ?? '—' }}</div>
+            <span class="muted" style="font-size:7px;">Generated: {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}</span>
         </td>
         <td style="text-align:right; vertical-align:top; border:none;">
             <div style="font-size:9px; color:#6b7280;">RMS-System</div>
@@ -125,7 +125,7 @@
 
 {{-- ══ FINANCIAL SUMMARY ════════════════════════════════════════════════════ --}}
 <div class="summary-box">
-    <div style="font-size:10px; font-weight:700; color:#db4a2b; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.04em;">
+    <div style="font-size:8px; font-weight:700; color:#db4a2b; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.04em;">
         Financial Summary
     </div>
     <table>
@@ -150,9 +150,9 @@
                 <td class="right bold" style="color:#fca5a5; border-bottom:1px solid #374151;">-${{ number_format($grandDeductU, 2) }}</td>
             </tr>
             <tr>
-                <td style="color:#f1efea; font-weight:700; font-size:11px; border-bottom:none;">Net Underwritten Premium</td>
-                <td class="right bold" style="color:#86efac; font-size:11px; border-bottom:none;">${{ number_format($netOrig, 2) }}</td>
-                <td class="right bold" style="color:#86efac; font-size:11px; border-bottom:none;">${{ number_format($netUsd, 2) }}</td>
+                <td style="color:#f1efea; font-weight:700; font-size:9px; border-bottom:none;">Net Underwritten Premium</td>
+                <td class="right bold" style="color:#86efac; font-size:9px; border-bottom:none;">${{ number_format($netOrig, 2) }}</td>
+                <td class="right bold" style="color:#86efac; font-size:9px; border-bottom:none;">${{ number_format($netUsd, 2) }}</td>
             </tr>
         </tbody>
     </table>
@@ -292,9 +292,9 @@
             <td class="right bold" style="color:#dc2626;">-${{ number_format($grandDeductU, 2) }}</td>
         </tr>
         <tr>
-            <td colspan="4" class="right bold" style="font-size:11px;">Net Underwritten Premium:</td>
-            <td class="right bold" style="font-size:11px;">${{ number_format($netOrig, 2) }}</td>
-            <td class="right bold" style="font-size:11px;">${{ number_format($netUsd, 2) }}</td>
+            <td colspan="4" class="right bold">Net Underwritten Premium:</td>
+            <td class="right bold">${{ number_format($netOrig, 2) }}</td>
+            <td class="right bold">${{ number_format($netUsd, 2) }}</td>
         </tr>
     </tbody>
 </table>
@@ -302,7 +302,7 @@
 
 {{-- ══ INSTALLMENTS ══════════════════════════════════════════════════════════ --}}
 @if ($txnsColl->isNotEmpty())
-<div class="section-header">Installments</div>
+<div class="section-header">Instalments</div>
 <table style="margin-bottom:10px;">
     <thead>
         <tr>
@@ -352,9 +352,9 @@
     $pPct    = ($pRaw > 1 ? $pRaw : $pRaw * 100);
     $txnLogs = $txnId ? collect($logsColl[$txnId] ?? []) : collect();
 @endphp
-<div style="margin-top:6px; margin-bottom:3px; font-weight:700; font-size:10px; background:#e8e6e1; padding:3px 6px;">
-    Installment {{ $txn['index'] ?? ($tIdx + 1) }}
-    <span style="font-weight:400; color:#6b7280; font-size:9px;">
+<div style="margin-top:5px; margin-bottom:2px; font-weight:700; font-size:8px; background:#e8e6e1; padding:2px 5px;">
+    Instalment {{ $txn['index'] ?? ($tIdx + 1) }}
+    <span style="font-weight:400; color:#6b7280; font-size:7px;">
         — {{ number_format($pPct, 2) }}% · Rate: {{ number_format((float)($txn['exch_rate'] ?? 0), 4) }}
         · Due: {{ isset($txn['due_date']) ? \Carbon\Carbon::parse($txn['due_date'])->format('d/m/Y') : '—' }}
     </span>
@@ -366,6 +366,9 @@
             <th>Concept</th>
             <th>From</th>
             <th>To</th>
+            <th class="center">Due Date</th>
+            <th class="center">Sent Date</th>
+            <th class="center">Received Date</th>
             <th class="right">Gross</th>
             <th class="right">Discount</th>
             <th class="right">Banking</th>
@@ -385,6 +388,9 @@
             <td>{{ $node['deduction'] ?? '—' }}</td>
             <td>{{ $node['partner_short'] ?? $node['partner'] ?? '—' }}</td>
             <td>{{ $logRow['to_short'] ?? ($node['partner_short'] ?? '—') }}</td>
+            <td class="center">{{ isset($logRow['due_date']) && $logRow['due_date'] ? \Carbon\Carbon::parse($logRow['due_date'])->format('d/m/Y') : '—' }}</td>
+            <td class="center">{{ isset($logRow['sent_date']) && $logRow['sent_date'] ? \Carbon\Carbon::parse($logRow['sent_date'])->format('d/m/Y') : '—' }}</td>
+            <td class="center">{{ isset($logRow['received_date']) && $logRow['received_date'] ? \Carbon\Carbon::parse($logRow['received_date'])->format('d/m/Y') : '—' }}</td>
             <td class="right">{{ $logRow['gross'] !== null ? '$'.number_format((float)$logRow['gross'],2) : '—' }}</td>
             <td class="right">{{ $logRow['discount'] !== null ? '$'.number_format((float)$logRow['discount'],2) : '—' }}</td>
             <td class="right">{{ $logRow['banking'] !== null ? '$'.number_format((float)$logRow['banking'],2) : '—' }}</td>

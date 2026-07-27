@@ -19,6 +19,15 @@ class ListTransactions extends ListRecords
 {
     protected static string $resource = TransactionResource::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        if ($docId = request()->query('op_document_id')) {
+            $this->tableFilters = ['op_document_id' => ['value' => $docId]];
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [

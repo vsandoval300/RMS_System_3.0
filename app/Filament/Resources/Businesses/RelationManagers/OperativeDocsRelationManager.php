@@ -2159,36 +2159,7 @@ class OperativeDocsRelationManager extends RelationManager
                         $data = app(OperativeDocSummaryV2Service::class)->build($record->id);
 
                         return view('filament.resources.business.operative-doc-summary_v2', $data);
-                    })
-                    
-                    ->modalFooterActions([
-                        Action::make('print')
-                            ->label('Print')
-                            ->icon('heroicon-o-printer')
-                            ->color('primary')
-                            ->extraAttributes([
-                                'type' => 'button',
-                                'class' => 'no-print',
-                            ])
-                            ->alpineClickHandler("
-                                (() => {
-                                    const oldTitle = document.title;
-                                    document.title = 'Summary';
-
-                                    const restore = () => {
-                                        document.title = oldTitle;
-                                        window.removeEventListener('afterprint', restore);
-                                    };
-
-                                    window.addEventListener('afterprint', restore);
-
-                                    window.print();
-                                })()
-                            "),
-                    ]),
-
-
-
+                    }),
 
 
 
@@ -2299,14 +2270,9 @@ class OperativeDocsRelationManager extends RelationManager
                             return;
                         }
 
-                        // ✅ Redirige al listado con filtro aplicado (Filament v3)
                         redirect()->to(
-                            TransactionResource::getUrl('index', [
-                                'tableFilters' => [
-                                    'op_document_id' => [
-                                        'value' => $record->id,
-                                    ],
-                                ],
+                            TransactionResource::getUrl('index') . '?' . http_build_query([
+                                'op_document_id' => $record->id,
                             ])
                         );
                     }),

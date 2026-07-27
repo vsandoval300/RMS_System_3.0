@@ -22,6 +22,7 @@
         ->groupBy(fn ($i) => $i['cscheme_id'] ?? $i['cost_scheme_id'] ?? '—');
 @endphp
 
+
 <div id="summary-print-root" style="
     background: #f1efea;
     color: #1f262a;
@@ -247,9 +248,9 @@
             <tbody>
                 {{-- Gross row --}}
                 <tr>
-                    <td colspan="4" style="padding:5px 8px; font-weight:700; text-align:right; color:#1f262a;">Gross Underwritten Premium</td>
-                    <td style="padding:5px 8px; text-align:right; font-weight:700; border-bottom:1px solid #d1cec9;">${{ number_format($totalPremiumFts ?? 0, 2) }}</td>
-                    <td style="padding:5px 8px; text-align:right; font-weight:700; border-bottom:1px solid #d1cec9;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td>
+                    <td colspan="4" style="padding:5px 8px; font-weight:700; font-size:12px; text-align:right; color:#1f262a;">Gross Underwritten Premium</td>
+                    <td style="padding:5px 8px; text-align:right; font-weight:700; font-size:12px; border-bottom:1px solid #d1cec9;">${{ number_format($totalPremiumFts ?? 0, 2) }}</td>
+                    <td style="padding:5px 8px; text-align:right; font-weight:700; font-size:12px; border-bottom:1px solid #d1cec9;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td>
                 </tr>
                 <tr><td colspan="4" style="padding:2px 0;"></td>
                     <td style="text-align:right; padding:2px 8px; color:#6b7280; font-size:11px;">Orig. Curr.</td>
@@ -295,10 +296,10 @@
                     <td style="padding:5px 8px; text-align:right; font-weight:700; color:#dc2626;">-${{ number_format($totalDeductUsd, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="padding:6px 8px; font-weight:700; text-align:right; font-size:14px; color:#1f262a;">Net Underwritten Premium:</td>
+                    <td colspan="3" style="padding:6px 8px; font-weight:700; text-align:right; font-size:12px; color:#1f262a;">Net Underwritten Premium:</td>
                     <td></td>
-                    <td style="padding:6px 8px; text-align:right; font-weight:700; font-size:14px; color:#166534; border-top:1px solid #d1cec9;">${{ number_format($netFts, 2) }}</td>
-                    <td style="padding:6px 8px; text-align:right; font-weight:700; font-size:14px; color:#166534; border-top:1px solid #d1cec9;">${{ number_format($netUsd, 2) }}</td>
+                    <td style="padding:6px 8px; text-align:right; font-weight:700; font-size:12px; color:#166534; border-top:1px solid #d1cec9;">${{ number_format($netFts, 2) }}</td>
+                    <td style="padding:6px 8px; text-align:right; font-weight:700; font-size:12px; color:#166534; border-top:1px solid #d1cec9;">${{ number_format($netUsd, 2) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -394,6 +395,9 @@
                     <th style="padding:3px 6px; text-align:left; color:#6b7280;">Deduction</th>
                     <th style="padding:3px 6px; text-align:left; color:#6b7280;">Source</th>
                     <th style="padding:3px 6px; text-align:left; color:#6b7280;">Destination</th>
+                    <th style="padding:3px 6px; text-align:center; color:#6b7280; white-space:nowrap;">Due Date</th>
+                    <th style="padding:3px 6px; text-align:center; color:#6b7280; white-space:nowrap;">Sent Date</th>
+                    <th style="padding:3px 6px; text-align:center; color:#6b7280; white-space:nowrap;">Received Date</th>
                     <th style="padding:3px 6px; text-align:right; color:#6b7280; white-space:nowrap;">Exch. Rate</th>
                     <th style="padding:3px 6px; text-align:right; color:#6b7280; white-space:nowrap;">Gross Amount</th>
                     <th style="padding:3px 6px; text-align:right; color:#6b7280;">Discount</th>
@@ -426,6 +430,15 @@
                     <td style="padding:3px 6px;">{{ $node['deduction'] ?? '—' }}</td>
                     <td style="padding:3px 6px;">{{ $node['partner_short'] ?? $node['partner'] ?? '—' }}</td>
                     <td style="padding:3px 6px;">{{ $dest }}</td>
+                    <td style="padding:3px 6px; text-align:center; color:#6b7280;">
+                        {{ isset($logRow['due_date']) && $logRow['due_date'] ? \Carbon\Carbon::parse($logRow['due_date'])->format('d/m/Y') : '—' }}
+                    </td>
+                    <td style="padding:3px 6px; text-align:center; color:#6b7280;">
+                        {{ isset($logRow['sent_date']) && $logRow['sent_date'] ? \Carbon\Carbon::parse($logRow['sent_date'])->format('d/m/Y') : '—' }}
+                    </td>
+                    <td style="padding:3px 6px; text-align:center; color:#6b7280;">
+                        {{ isset($logRow['received_date']) && $logRow['received_date'] ? \Carbon\Carbon::parse($logRow['received_date'])->format('d/m/Y') : '—' }}
+                    </td>
                     <td style="padding:3px 6px; text-align:right;">
                         {{ $logRate !== null ? number_format((float)$logRate, 5) : '—' }}
                     </td>

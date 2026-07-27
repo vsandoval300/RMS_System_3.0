@@ -276,6 +276,10 @@ class OperativeDocSummaryV2Service
                                 'banking'   => $log->banking_fee,
                                 'net'       => $log->net_amount,
                                 'status'    => $log->status,
+
+                                'due_date'      => $log->due_date,
+                                'sent_date'     => $log->sent_date,
+                                'received_date' => $log->received_date,
                             ],
                         ];
                     });

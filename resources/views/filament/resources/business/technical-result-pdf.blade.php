@@ -131,15 +131,10 @@
     });
     $docInsuredsGrouped = $docInsureds->groupBy(fn ($i) => $i['cscheme_id'] ?? $i['cost_scheme_id'] ?? '—');
 
-    // USD fallback: use roe_fs when exch_rate=0 causes totalConvertedPremium=0
-    $docRoeFs = (float) ($summary['roe_fs'] ?? 0);
-    $convPrem = (float) ($summary['totalConvertedPremium'] ?? 0);
-    if ($convPrem <= 0 && $docRoeFs > 0) {
-        $convPrem = $fts / $docRoeFs;
-    } elseif ($convPrem <= 0) {
-        $convPrem = $fts;
-    }
-    $convRatioDoc    = $fts > 0 ? $convPrem / $fts : 1.0;
+    // Always use roe_fs for USD conversion (stable reference rate, avoids transaction exch_rate quality issues).
+    $docRoeFs     = (float) ($summary['roe_fs'] ?? 0);
+    $convPrem     = $docRoeFs > 0 ? $fts / $docRoeFs : $fts;
+    $convRatioDoc = $fts > 0 ? $convPrem / $fts : 1.0;
     $grandDeductUsd  = $grandDeductOrig * $convRatioDoc;
     $netOrig = $fts - $grandDeductOrig;
     $netUsd  = $convPrem - $grandDeductUsd;
@@ -246,12 +241,14 @@
     <thead>
         <tr>
             <th style="width:1%; white-space:nowrap; padding-right:4px;">#</th>
-            <th style="width:31%;">Insured</th>
-            <th style="width:18%;">Coverage</th>
-            <th class="center" style="width:12%;">Country</th>
-            <th class="right" style="width:10%;">Allocation</th>
-            <th class="right" style="width:14%;">Annual Premium</th>
-            <th class="right" style="width:14%;">Prem. Fts</th>
+            <th style="width:18%;">Insured</th>
+            <th style="width:26%;">Coverage</th>
+            <th class="right" style="width:7%;">Share</th>
+            <th class="center" style="width:10%;">Country</th>
+            <th class="right" style="width:8%;">Allocation</th>
+            <th class="right" style="width:10%;">Annual Premium</th>
+            <th class="right" style="width:10%;">Prem. Ftp</th>
+            <th class="right" style="width:10%;">Prem. Fts</th>
         </tr>
     </thead>
     <tbody>
@@ -260,15 +257,18 @@
             <td style="white-space:nowrap; padding-right:4px;">{{ $idx + 1 }}</td>
             <td style="word-wrap:break-word; overflow-wrap:break-word;">{{ $insured['company']['name'] ?? '—' }}</td>
             <td>{{ $insured['coverage']['name'] ?? '—' }}</td>
+            <td class="right">{{ number_format(($insured['scheme_share'] ?? 0) * 100, 2) }}%</td>
             <td class="center">{{ $insured['company']['country']['name'] ?? '—' }}</td>
             <td class="right">{{ number_format(($insured['allocation_percent'] ?? 0) * 100, 2) }}%</td>
             <td class="right">${{ number_format($insured['premium'] ?? 0, 2) }}</td>
+            <td class="right">${{ number_format($insured['premium_ftp'] ?? 0, 2) }}</td>
             <td class="right">${{ number_format($insured['premium_fts'] ?? 0, 2) }}</td>
         </tr>
         @endforeach
         <tr style="background:#f1efea;">
-            <td colspan="5" class="right bold muted" style="font-size:7px;">Totals:</td>
+            <td colspan="6" class="right bold muted" style="font-size:7px;">Totals:</td>
             <td class="right bold">${{ number_format($rows->sum('premium'), 2) }}</td>
+            <td class="right bold">${{ number_format($rows->sum(fn($i) => $i['premium_ftp'] ?? 0), 2) }}</td>
             <td class="right bold">${{ number_format($rows->sum(fn($i) => $i['premium_fts'] ?? 0), 2) }}</td>
         </tr>
     </tbody>
@@ -276,20 +276,24 @@
 @endforeach
 @endif
 
-{{-- Costs Breakdown --}}
-@if ($groupedNodes->isNotEmpty())
+{{-- Costs Breakdown + Financial Summary (unified) --}}
 <div style="background:#374151; color:#f1efea; padding:4px 8px; font-weight:600; font-size:7px; margin-bottom:4px; display:table; width:100%;">
     <span>Costs Breakdown</span>
     <span style="float:right; color:#9ca3af; font-weight:400;">Total deductions: -${{ number_format($grandDeductOrig, 2) }}</span>
 </div>
 <table style="margin-bottom:8px; table-layout:fixed; width:100%;">
     <thead>
+        <tr style="border-bottom:2px solid #1f262a;">
+            <td colspan="3" class="right bold">Gross Underwritten Premium</td>
+            <td class="right bold">${{ number_format($fts, 2) }}</td>
+            <td class="right bold">${{ number_format($convPrem, 2) }}</td>
+        </tr>
         <tr>
             <th style="width:40%;">Partner</th>
             <th style="width:18%;">Concept</th>
             <th class="right" style="width:14%;">Rate</th>
             <th class="right" style="width:14%;">Orig. Curr.</th>
-            <th class="right" style="width:14%;">USD</th>
+            <th class="right" style="width:14%;">US Dollars</th>
         </tr>
     </thead>
     <tbody>
@@ -297,8 +301,7 @@
             @foreach ($group['nodes'] as $node)
             @php
                 $nOrig = (float)($node['deduction_amount'] ?? 0);
-                $nUsd  = (float)($node['deduction_usd']    ?? 0);
-                if ($nUsd == 0 && $nOrig > 0) { $nUsd = $nOrig * $convRatioDoc; }
+                $nUsd  = $nOrig * $convRatioDoc;
             @endphp
             <tr>
                 <td><span class="muted" style="font-size:7px;">{{ $node['index'] }}.</span> {{ $node['partner'] ?? '—' }}</td>
@@ -314,45 +317,28 @@
             @endphp
             <tr style="background:#f1efea;">
                 <td colspan="3" class="right muted" style="font-size:7px;">Share {{ number_format($group['share'] * 100, 2) }}% subtotal:</td>
-                <td class="right bold">-${{ number_format($gOrig, 2) }}</td>
-                <td class="right bold">-${{ number_format($gUsd, 2) }}</td>
+                <td class="right bold" style="color:#dc2626;">-${{ number_format($gOrig, 2) }}</td>
+                <td class="right bold" style="color:#dc2626;">-${{ number_format($gUsd, 2) }}</td>
             </tr>
         @endforeach
-    </tbody>
-</table>
-@endif
-
-{{-- Financial Summary --}}
-<table style="margin-bottom:8px; table-layout:fixed; width:100%;">
-    <thead>
-        <tr>
-            <th style="width:72%;"></th>
-            <th class="right" style="width:14%;">Orig. Curr. ({{ $currency }})</th>
-            <th class="right" style="width:14%;">US Dollars</th>
+        {{-- Total Deductions --}}
+        <tr style="border-top:1px solid #d1cec9;">
+            <td colspan="3" class="right bold">Total Deductions:</td>
+            <td class="right bold" style="color:#dc2626;">-${{ number_format($grandDeductOrig, 2) }}</td>
+            <td class="right bold" style="color:#dc2626;">-${{ number_format($grandDeductUsd, 2) }}</td>
         </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td class="bold">Gross Underwritten Premium</td>
-            <td class="right">${{ number_format($fts, 2) }}</td>
-            <td class="right">${{ number_format($convPrem, 2) }}</td>
-        </tr>
-        <tr>
-            <td class="bold">Total Deductions</td>
-            <td class="right" style="color:#dc2626;">-${{ number_format($grandDeductOrig, 2) }}</td>
-            <td class="right" style="color:#dc2626;">-${{ number_format($grandDeductUsd, 2) }}</td>
-        </tr>
+        {{-- Net Underwritten Premium --}}
         <tr style="border-top:2px solid #1f262a;">
-            <td class="bold" style="font-size:9px;">Net Underwritten Premium</td>
-            <td class="right bold" style="font-size:9px;">${{ number_format($netOrig, 2) }}</td>
-            <td class="right bold" style="font-size:9px;">${{ number_format($netUsd, 2) }}</td>
+            <td colspan="3" class="right bold">Net Underwritten Premium:</td>
+            <td class="right bold">${{ number_format($netOrig, 2) }}</td>
+            <td class="right bold">${{ number_format($netUsd, 2) }}</td>
         </tr>
     </tbody>
 </table>
 
-{{-- Installments --}}
+{{-- Instalments --}}
 @if ($transactions->isNotEmpty())
-<h3>Installments</h3>
+<h3>Instalments</h3>
 <table style="margin-bottom:8px;">
     <thead>
         <tr>
@@ -403,7 +389,7 @@
     $txnLogs = $txnId ? collect($logsByTxn[$txnId] ?? []) : collect();
 @endphp
 <div style="margin-top:6px; margin-bottom:4px; font-weight:700; font-size:8px; background:#e8e6e1; padding:3px 6px;">
-    Installment {{ $txn['index'] ?? ($tIdx + 1) }}
+    Instalment {{ $txn['index'] ?? ($tIdx + 1) }}
     <span style="font-weight:400; color:#6b7280; font-size:7px;">
         — {{ number_format($pPct, 2) }}% · Rate: {{ number_format((float)($txn['exch_rate'] ?? 0), 4) }}
         · Due: {{ isset($txn['due_date']) ? \Carbon\Carbon::parse($txn['due_date'])->format('d/m/Y') : '—' }}
@@ -416,6 +402,9 @@
             <th>Concept</th>
             <th>From</th>
             <th>To</th>
+            <th class="center">Due Date</th>
+            <th class="center">Sent Date</th>
+            <th class="center">Received Date</th>
             <th class="right">Gross</th>
             <th class="right">Discount</th>
             <th class="right">Banking</th>
@@ -435,6 +424,9 @@
             <td>{{ $node['deduction'] ?? '—' }}</td>
             <td>{{ $node['partner_short'] ?? $node['partner'] ?? '—' }}</td>
             <td>{{ $logRow['to_short'] ?? ($node['partner_short'] ?? '—') }}</td>
+            <td class="center">{{ isset($logRow['due_date']) && $logRow['due_date'] ? \Carbon\Carbon::parse($logRow['due_date'])->format('d/m/Y') : '—' }}</td>
+            <td class="center">{{ isset($logRow['sent_date']) && $logRow['sent_date'] ? \Carbon\Carbon::parse($logRow['sent_date'])->format('d/m/Y') : '—' }}</td>
+            <td class="center">{{ isset($logRow['received_date']) && $logRow['received_date'] ? \Carbon\Carbon::parse($logRow['received_date'])->format('d/m/Y') : '—' }}</td>
             <td class="right">{{ $logRow['gross'] !== null ? '$'.number_format((float)$logRow['gross'],2) : '—' }}</td>
             <td class="right">{{ $logRow['discount'] !== null ? '$'.number_format((float)$logRow['discount'],2) : '—' }}</td>
             <td class="right">{{ $logRow['banking'] !== null ? '$'.number_format((float)$logRow['banking'],2) : '—' }}</td>

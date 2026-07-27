@@ -47,12 +47,13 @@ Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
 })->name('pdf.viewer');
 
 Route::get('/reports/download/{file}', function ($file) {
-    return Storage::disk('s3')->download('uw-reports/' . $file);
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('s3');
+    return $disk->download('uw-reports/' . $file);
 });
 
 // === Technical Result PDF for Business ===
 Route::get('/admin/business/{businessCode}/technical-result.pdf', function (string $businessCode) {
-    abort_unless(auth()->check(), 403);
 
     $business = \App\Models\Business::withoutTrashed()->findOrFail($businessCode);
 
@@ -82,7 +83,6 @@ Route::get('/admin/business/{businessCode}/technical-result.pdf', function (stri
 
 // === Operative Document Overview PDF ===
 Route::get('/admin/operative-doc/{docId}/overview.pdf', function (string $docId) {
-    abort_unless(auth()->check(), 403);
 
     \App\Models\OperativeDoc::withoutTrashed()->findOrFail($docId);
 
