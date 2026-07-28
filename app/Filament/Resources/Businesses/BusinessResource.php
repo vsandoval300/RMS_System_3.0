@@ -58,6 +58,7 @@ use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group as ComponentsGroup;
 use App\Enums\ApprovalStatus;
+use Filament\Schemas\Components\Utilities\Get;
 
 class BusinessResource extends Resource
 {
@@ -108,9 +109,12 @@ class BusinessResource extends Resource
                 'renewedFrom:id,business_code',
                 'user:id,name',
             ])
-            ->withCount([
-                'operativeDocs',
-            ]);
+            ->withCount(['operativeDocs'])
+            ->withExists([
+                'operativeDocs as has_cancellation_doc' => fn ($q) => $q->where('operative_doc_type_id', 5),
+            ])
+            ->withExists('renewals as has_renewals')
+            ->withMax('operativeDocs', 'expiration_date');
     }
 
 
@@ -998,6 +1002,23 @@ class BusinessResource extends Resource
                             default     => 'secondary',
                         };
                     })
+                    ->description(function ($record): ?string {
+                        if ($record->operativeDocs()->where('operative_doc_type_id', 5)->exists()) {
+                            return null;
+                        }
+                        if ($record->renewals()->exists()) {
+                            return null;
+                        }
+                        $maxExp = $record->operativeDocs()->max('expiration_date');
+                        if (! $maxExp) {
+                            return null;
+                        }
+                        $expDate = \Carbon\Carbon::parse($maxExp);
+                        if (! now()->between($expDate->copy()->subDays(45), $expDate->copy()->addDays(45))) {
+                            return null;
+                        }
+                        return '↻ Ready to renew';
+                    })
                     ->searchable()
                     ->sortable(),
 
@@ -1021,27 +1042,71 @@ class BusinessResource extends Resource
                     ->searchable()
                     ->preload(),
 
-                // 🔹 Filtro por rango de fechas (created_at)
-                Filter::make('created_at')
-                    ->label('Created date')
+                // 🔹 Filtro por intervalo de tiempo (created_at)
+                Filter::make('date_interval')
+                    ->label('Time interval')
                     ->schema([
+                        Select::make('interval')
+                            ->label('Time interval')
+                            ->options([
+                                '30'     => 'Last 30 days',
+                                '90'     => 'Last 3 months',
+                                '180'    => 'Last 6 months',
+                                '365'    => 'Last 12 months',
+                                'custom' => 'Custom',
+                            ])
+                            ->default('30')
+                            ->placeholder('All time')
+                            ->live(),
                         DatePicker::make('from')
-                            ->label('From date'),
+                            ->label('From')
+                            ->visible(fn (Get $get) => $get('interval') === 'custom')
+                            ->displayFormat('d/m/Y'),
                         DatePicker::make('until')
-                            ->label('To date'),
+                            ->label('To')
+                            ->visible(fn (Get $get) => $get('interval') === 'custom')
+                            ->displayFormat('d/m/Y'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['from'] ?? null,
-                                fn (Builder $query, $date) =>
-                                    $query->whereDate('created_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['until'] ?? null,
-                                fn (Builder $query, $date) =>
-                                    $query->whereDate('created_at', '<=', $date),
-                            );
+                        $interval = $data['interval'] ?? null;
+                        if (! $interval) {
+                            return $query;
+                        }
+                        if ($interval === 'custom') {
+                            return $query
+                                ->when(
+                                    $data['from'] ?? null,
+                                    fn ($q, $date) => $q->whereDate('created_at', '>=', $date)
+                                )
+                                ->when(
+                                    $data['until'] ?? null,
+                                    fn ($q, $date) => $q->whereDate('created_at', '<=', $date)
+                                );
+                        }
+                        return $query->where('created_at', '>=', now()->subDays((int) $interval));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $interval = $data['interval'] ?? null;
+                        if (! $interval) {
+                            return [];
+                        }
+                        $labels = [
+                            '30'     => 'Last 30 days',
+                            '90'     => 'Last 3 months',
+                            '180'    => 'Last 6 months',
+                            '365'    => 'Last 12 months',
+                            'custom' => 'Custom',
+                        ];
+                        $indicators = ['Time interval: ' . ($labels[$interval] ?? $interval)];
+                        if ($interval === 'custom') {
+                            if ($data['from'] ?? null) {
+                                $indicators[] = 'From: ' . Carbon::parse($data['from'])->format('d/m/Y');
+                            }
+                            if ($data['until'] ?? null) {
+                                $indicators[] = 'To: ' . Carbon::parse($data['until'])->format('d/m/Y');
+                            }
+                        }
+                        return $indicators;
                     }),
             ])
 
@@ -1389,6 +1454,27 @@ class BusinessResource extends Resource
                         ->label('Renewal')
                         ->icon('heroicon-m-arrow-path')
                         ->color('primary')
+                        ->visible(function (Business $record): bool {
+                            // Never show if there is a cancellation document (type 5)
+                            if ($record->operativeDocs()->where('operative_doc_type_id', 5)->exists()) {
+                                return false;
+                            }
+                            // Never show if this business has already been renewed
+                            if ($record->renewals()->exists()) {
+                                return false;
+                            }
+                            // Only show within ±45 days of the latest operative doc expiration date
+                            $maxExp = $record->operativeDocs()->max('expiration_date');
+                            if (! $maxExp) {
+                                return false;
+                            }
+                            $expDate = \Carbon\Carbon::parse($maxExp);
+                            $now = now();
+                            return $now->between(
+                                $expDate->copy()->subDays(45),
+                                $expDate->copy()->addDays(45)
+                            );
+                        })
                         ->disabled(fn () => ! \Illuminate\Support\Facades\Gate::allows('Business:Renewal'))
                         ->tooltip(fn () => \Illuminate\Support\Facades\Gate::allows('Business:Renewal')
                             ? 'Renew this business'
@@ -1489,6 +1575,17 @@ class BusinessResource extends Resource
                 ])
 
 
+            ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.business.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -1,8 +1,18 @@
 @php
-    $totalDeductOrig  = collect($groupedCostNodes ?? [])->sum('subtotal_orig');
-    $totalDeductUsd   = collect($groupedCostNodes ?? [])->sum('subtotal_usd');
-    $netFts           = ($totalPremiumFts ?? 0) - $totalDeductOrig;
-    $netUsd           = ($totalConvertedPremium ?? 0) - $totalDeductUsd;
+    $roeFs        = (float)($roe_fs ?? 0);
+    $fts          = (float)($totalPremiumFts ?? 0);
+    $convPremBase = (float)($totalConvertedPremium ?? 0);
+    if ($convPremBase <= 0 && $roeFs > 0) {
+        $convPremBase = $fts / $roeFs;
+    } elseif ($convPremBase <= 0) {
+        $convPremBase = $fts;
+    }
+    $convRatio    = $fts > 0 ? $convPremBase / $fts : 1.0;
+
+    $grandDeductO = collect($groupedCostNodes ?? [])->sum('subtotal_orig');
+    $grandDeductU = $grandDeductO * $convRatio;
+    $netFts       = $fts - $grandDeductO;
+    $netUsd       = $convPremBase - $grandDeductU;
 
     $nodesFlat        = collect($groupedCostNodes ?? [])
         ->flatMap(fn ($g) => $g['nodes'] ?? [])
@@ -77,12 +87,12 @@
             <tr>
                 <td style="padding:4px 8px; color:#d1d5db;">Gross Underwritten Premium (FTS)</td>
                 <td style="padding:4px 8px; text-align:right; font-weight:600;">${{ number_format($totalPremiumFts ?? 0, 2) }}</td>
-                <td style="padding:4px 8px; text-align:right; font-weight:600;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td>
+                <td style="padding:4px 8px; text-align:right; font-weight:600;">${{ number_format($convPremBase, 2) }}</td>
             </tr>
             <tr>
                 <td style="padding:4px 8px; color:#d1d5db;">Total Deductions</td>
-                <td style="padding:4px 8px; text-align:right; color:#fca5a5;">-${{ number_format($totalDeductOrig, 2) }}</td>
-                <td style="padding:4px 8px; text-align:right; color:#fca5a5;">-${{ number_format($totalDeductUsd, 2) }}</td>
+                <td style="padding:4px 8px; text-align:right; color:#fca5a5;">-${{ number_format($grandDeductO, 2) }}</td>
+                <td style="padding:4px 8px; text-align:right; color:#fca5a5;">-${{ number_format($grandDeductU, 2) }}</td>
             </tr>
             <tr style="border-top:1px solid #374151;">
                 <td style="padding:6px 8px; font-weight:700; color:#f1efea; font-size:14px;">Net Underwritten Premium</td>
@@ -122,9 +132,13 @@
                 </tr>
                 <tr>
                     <td style="padding:5px 8px; font-weight:600; color:#6b7280;">Original currency:</td>
-                    <td style="padding:5px 8px;">{{ $originalCurrency ?? '—' }}</td>
+                    <td style="padding:5px 8px; border-bottom:1px solid #e8e6e1;">{{ $originalCurrency ?? '—' }}</td>
                     <td style="padding:5px 8px; font-weight:600; color:#6b7280;">Coverage days:</td>
-                    <td style="padding:5px 8px;">{{ $coverageDays ?? '—' }}</td>
+                    <td style="padding:5px 8px; border-bottom:1px solid #e8e6e1;">{{ $coverageDays ?? '—' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:5px 8px; font-weight:600; color:#6b7280;">RoE for Reference:</td>
+                    <td style="padding:5px 8px;" colspan="3">{{ $roeFs > 0 ? number_format($roeFs, 8) : '—' }}</td>
                 </tr>
             </tbody>
         </table>
@@ -238,7 +252,7 @@
 <details open style="margin-bottom:10px; border:1px solid #d1cec9; border-radius:6px; overflow:hidden;">
     <summary style="background:#1f262a; color:#f1efea; padding:8px 14px; cursor:pointer; font-weight:600; font-size:12px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
         Costs Breakdown
-        <span style="color:#9ca3af; font-size:11px; font-weight:400;">Total deductions: -${{ number_format($totalDeductOrig, 2) }}</span>
+        <span style="color:#9ca3af; font-size:11px; font-weight:400;">Total deductions: -${{ number_format($grandDeductO, 2) }}</span>
     </summary>
     <div style="padding:12px 14px; background:#faf9f7;">
         <table style="width:100%; border-collapse:collapse; font-size:12px;">
@@ -249,8 +263,8 @@
                 {{-- Gross row --}}
                 <tr>
                     <td colspan="4" style="padding:5px 8px; font-weight:700; font-size:12px; text-align:right; color:#1f262a;">Gross Underwritten Premium</td>
-                    <td style="padding:5px 8px; text-align:right; font-weight:700; font-size:12px; border-bottom:1px solid #d1cec9;">${{ number_format($totalPremiumFts ?? 0, 2) }}</td>
-                    <td style="padding:5px 8px; text-align:right; font-weight:700; font-size:12px; border-bottom:1px solid #d1cec9;">${{ number_format($totalConvertedPremium ?? 0, 2) }}</td>
+                    <td style="padding:5px 8px; text-align:right; font-weight:700; font-size:12px; border-bottom:1px solid #d1cec9;">${{ number_format($fts, 2) }}</td>
+                    <td style="padding:5px 8px; text-align:right; font-weight:700; font-size:12px; border-bottom:1px solid #d1cec9;">${{ number_format($convPremBase, 2) }}</td>
                 </tr>
                 <tr><td colspan="4" style="padding:2px 0;"></td>
                     <td style="text-align:right; padding:2px 8px; color:#6b7280; font-size:11px;">Orig. Curr.</td>
@@ -274,7 +288,7 @@
                         <td style="padding:3px 8px;">{{ $node['deduction'] ?? '—' }}</td>
                         <td style="padding:3px 8px; text-align:right;">{{ number_format(($node['value'] ?? 0) * 100, 2) }}%</td>
                         <td style="padding:3px 8px; text-align:right; color:#dc2626;">-${{ number_format($node['deduction_amount'] ?? 0, 2) }}</td>
-                        <td style="padding:3px 8px; text-align:right; color:#dc2626;">-${{ number_format($node['deduction_usd'] ?? 0, 2) }}</td>
+                        <td style="padding:3px 8px; text-align:right; color:#dc2626;">-${{ number_format(($node['deduction_amount'] ?? 0) * $convRatio, 2) }}</td>
                     </tr>
                     @endforeach
                     <tr style="background:#f1efea;">
@@ -283,7 +297,7 @@
                         </td>
                         <td></td>
                         <td style="padding:3px 8px; text-align:right; font-weight:600;">-${{ number_format($group['subtotal_orig'] ?? 0, 2) }}</td>
-                        <td style="padding:3px 8px; text-align:right; font-weight:600;">-${{ number_format($group['subtotal_usd'] ?? 0, 2) }}</td>
+                        <td style="padding:3px 8px; text-align:right; font-weight:600;">-${{ number_format(($group['subtotal_orig'] ?? 0) * $convRatio, 2) }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="6" style="padding:10px 8px; text-align:center; color:#9ca3af;">No cost nodes available</td></tr>
@@ -292,8 +306,8 @@
                 <tr style="border-top:2px solid #1f262a;">
                     <td colspan="3" style="padding:5px 8px; font-weight:700; text-align:right; color:#1f262a;">Total Deductions:</td>
                     <td></td>
-                    <td style="padding:5px 8px; text-align:right; font-weight:700; color:#dc2626;">-${{ number_format($totalDeductOrig, 2) }}</td>
-                    <td style="padding:5px 8px; text-align:right; font-weight:700; color:#dc2626;">-${{ number_format($totalDeductUsd, 2) }}</td>
+                    <td style="padding:5px 8px; text-align:right; font-weight:700; color:#dc2626;">-${{ number_format($grandDeductO, 2) }}</td>
+                    <td style="padding:5px 8px; text-align:right; font-weight:700; color:#dc2626;">-${{ number_format($grandDeductU, 2) }}</td>
                 </tr>
                 <tr>
                     <td colspan="3" style="padding:6px 8px; font-weight:700; text-align:right; font-size:12px; color:#1f262a;">Net Underwritten Premium:</td>
@@ -313,7 +327,7 @@
         <span style="color:#9ca3af; font-size:11px; font-weight:400;">{{ $transactionsColl->count() }} installment(s)</span>
     </summary>
     <div style="padding:12px 14px; background:#faf9f7;">
-        @php $netPrem = ($totalPremiumFts ?? 0) - $totalDeductOrig; $grandOrig = 0; $grandUsd = 0; @endphp
+        @php $netPrem = $fts - $grandDeductO; $grandOrig = 0; $grandUsd = 0; @endphp
         <table style="width:100%; border-collapse:collapse; font-size:12px;">
             <thead>
                 <tr style="border-bottom:1px solid #d1cec9;">

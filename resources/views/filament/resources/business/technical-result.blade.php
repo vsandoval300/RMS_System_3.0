@@ -582,27 +582,52 @@
 
 {{-- ══ CONSOLIDATED TOTALS ════════════════════════════════════════════════ --}}
 @if (count($summaries) > 0)
+@php
+    $consFtsUsd    = 0.0;
+    $consDeductUsd = 0.0;
+    foreach ($summaries as $s) {
+        $sFts    = (float) ($s['totalPremiumFts']    ?? 0);
+        $sRoeFs  = (float) ($s['roe_fs']             ?? 0);
+        $sDeduct = (float) ($s['totalDeductionOrig'] ?? 0);
+        $sConv   = $sRoeFs > 0 ? $sFts / $sRoeFs : $sFts;
+        $sRatio  = $sFts > 0 ? $sConv / $sFts : 1.0;
+        $consFtsUsd    += $sConv;
+        $consDeductUsd += $sDeduct * $sRatio;
+    }
+    $consNetUsd = $consFtsUsd - $consDeductUsd;
+@endphp
 <div style="background:#1f262a; border-radius:6px; padding:16px 20px; margin-top:8px;">
     <div style="font-size:14px; font-weight:700; color:#db4a2b; margin-bottom:12px;">
         Consolidated Totals — All Documents
     </div>
     <table style="width:100%; border-collapse:collapse; font-size:13px; color:#f1efea;">
         <colgroup>
-            <col style="width:60%;">
-            <col style="width:40%;">
+            <col style="width:72%;">
+            <col style="width:14%;">
+            <col style="width:14%;">
         </colgroup>
+        <thead>
+            <tr style="border-bottom:1px solid #374151;">
+                <th style="padding:3px 6px; font-weight:400;"></th>
+                <th style="padding:3px 6px; text-align:right; color:#9ca3af; font-size:13px; font-weight:700;">Orig. Curr.</th>
+                <th style="padding:3px 6px; text-align:right; color:#9ca3af; font-size:13px; font-weight:700;">US Dollars</th>
+            </tr>
+        </thead>
         <tbody>
             <tr>
-                <td style="padding:5px 8px; color:#9ca3af;">Total Gross Underwritten Premium (FTS)</td>
-                <td style="padding:5px 8px; text-align:right; font-weight:600;">${{ number_format($totalFts, 2) }}</td>
+                <td style="padding:5px 6px; color:#9ca3af;">Total Gross Underwritten Premium (FTS)</td>
+                <td style="padding:5px 6px; text-align:right; font-weight:600;">${{ number_format($totalFts, 2) }}</td>
+                <td style="padding:5px 6px; text-align:right; font-weight:600;">${{ number_format($consFtsUsd, 2) }}</td>
             </tr>
             <tr>
-                <td style="padding:5px 8px; color:#9ca3af;">Total Deductions</td>
-                <td style="padding:5px 8px; text-align:right; font-weight:600; color:#fca5a5;">-${{ number_format($totalDeductions, 2) }}</td>
+                <td style="padding:5px 6px; color:#9ca3af;">Total Deductions</td>
+                <td style="padding:5px 6px; text-align:right; font-weight:600; color:#fca5a5;">-${{ number_format($totalDeductions, 2) }}</td>
+                <td style="padding:5px 6px; text-align:right; font-weight:600; color:#fca5a5;">-${{ number_format($consDeductUsd, 2) }}</td>
             </tr>
             <tr style="border-top:1px solid #374151;">
-                <td style="padding:7px 8px; font-weight:700; color:#f1efea; font-size:14px;">Net Underwritten Premium</td>
-                <td style="padding:7px 8px; text-align:right; font-weight:700; font-size:14px; color:#86efac;">${{ number_format($totalNet, 2) }}</td>
+                <td style="padding:7px 6px; font-weight:700; color:#f1efea; font-size:14px;">Net Underwritten Premium</td>
+                <td style="padding:7px 6px; text-align:right; font-weight:700; font-size:14px; color:#86efac;">${{ number_format($totalNet, 2) }}</td>
+                <td style="padding:7px 6px; text-align:right; font-weight:700; font-size:14px; color:#86efac;">${{ number_format($consNetUsd, 2) }}</td>
             </tr>
         </tbody>
     </table>

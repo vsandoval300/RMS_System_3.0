@@ -2177,10 +2177,11 @@ class OperativeDocsRelationManager extends RelationManager
 
                 // ──────  ADD TRANSACTION  ─────────────────────────
                 Action::make('addTransaction')
-                    ->label('Add transaction')
+                    ->label('Add Instalment')
                     ->color('primary')
                     ->outlined()
                     ->icon('heroicon-o-plus-circle')
+                    ->hidden(fn ($record): bool => (int) ($record?->operative_doc_type_id ?? 0) === 4)
                     ->disabled(function (): bool {
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
@@ -2219,7 +2220,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                 // ──────  GO TO TRANSACTIONs  ─────────────────────────
                 Action::make('viewTransactions')
-                    ->label('View transactions')
+                    ->label('View Instalments')
                     ->color('primary')
                     ->outlined()
                     ->icon('heroicon-o-queue-list')
