@@ -147,8 +147,8 @@ class BankAccountsResource extends Resource
                                 ->label('Beneficiary Account Number')
                                 ->inlineLabel()
                                 ->placeholder('Please provide account number.')
-                                ->maxLength(255)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_no', ucwords(strtolower($state)))),
+                                ->maxLength(255),
+                                //->afterStateUpdated(fn ($state, callable $set) => $set('beneficiary_acct_no', ucwords(strtolower($state)))),
                         ])
                         ->columns(1)
                         ->collapsible(),
