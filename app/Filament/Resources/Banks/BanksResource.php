@@ -10,6 +10,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\Banks\Pages\ListBanks;
@@ -291,6 +292,17 @@ class BanksResource extends Resource
 
 
 
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.banks.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

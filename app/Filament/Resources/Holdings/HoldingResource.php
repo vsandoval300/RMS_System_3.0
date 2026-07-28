@@ -275,6 +275,17 @@ class HoldingResource extends Resource
                     DeleteAction::make(),
                 ])
             ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.holdings.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

@@ -417,6 +417,17 @@ class DirectorResource extends Resource
                 TextColumn::make('deleted_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('name', 'asc')
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.directors.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+            ])
             ->recordActions([
                 ActionGroup::make([
                     Action::make('viewPage')
