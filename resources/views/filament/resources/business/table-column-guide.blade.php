@@ -89,9 +89,9 @@
 {{-- Language toggle --}}
 <div class="tg-lang-toggle">
     <div class="tg-lang-btn-wrap">
-        <button class="tg-lang-btn" @click="lang = 'en'"
+        <button type="button" class="tg-lang-btn" @click="lang = 'en'"
             :style="lang === 'en' ? 'background:#41A2C3; color:#ffffff;' : ''">EN</button>
-        <button class="tg-lang-btn" @click="lang = 'es'"
+        <button type="button" class="tg-lang-btn" @click="lang = 'es'"
             :style="lang === 'es' ? 'background:#41A2C3; color:#ffffff;' : ''">ES</button>
     </div>
 </div>
