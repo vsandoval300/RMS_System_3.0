@@ -575,6 +575,18 @@
 
 @endif
 
+{{-- ── Backdrop ─────────────────────────────────────────────────────────── --}}
+<div x-show="helpOpen"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     @click="helpOpen = false"
+     style="position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:49;"
+     x-cloak></div>
+
 {{-- ── Guide panel ─────────────────────────────────────────────────────── --}}
 <div x-show="helpOpen"
      x-transition:enter="transition ease-out duration-250"
