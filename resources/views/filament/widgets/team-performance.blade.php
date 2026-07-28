@@ -1,4 +1,4 @@
-<div class="tp-wrap">
+<div class="tp-wrap" x-data="{ lang: 'en', helpOpen: false }">
 <style>
     .tp-wrap {
         --tp-card:       light-dark(#ffffff, #18181B);
@@ -204,7 +204,18 @@
         Custom
     </button>
 
-    <span class="tp-period-label">{{ $periodLabel }}</span>
+    <div style="display:flex; align-items:center; gap:0.6rem; margin-left:auto; flex-shrink:0;">
+        <span style="font-size:0.8rem; color:var(--tp-text-muted); white-space:nowrap;">{{ $periodLabel }}</span>
+        <button type="button" @click="helpOpen = true"
+            style="display:inline-flex; align-items:center; gap:0.35rem; font-size:0.78rem; font-weight:600; padding:0.3rem 0.75rem; border-radius:9999px; border:1px solid var(--tp-border); background:transparent; color:var(--tp-text-muted); cursor:pointer; white-space:nowrap; transition:all .15s;"
+            onmouseover="this.style.borderColor='#41A2C3'; this.style.color='#41A2C3';"
+            onmouseout="this.style.borderColor=''; this.style.color='';">
+            <svg style="width:13px;height:13px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Guide
+        </button>
+    </div>
 </div>
 
 {{-- Custom date range panel --}}
@@ -563,4 +574,311 @@
     @endif
 
 @endif
+
+{{-- ── Guide panel ─────────────────────────────────────────────────────── --}}
+<div x-show="helpOpen"
+     x-transition:enter="transition ease-out duration-250"
+     x-transition:enter-start="transform translate-x-full"
+     x-transition:enter-end="transform translate-x-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="transform translate-x-0"
+     x-transition:leave-end="transform translate-x-full"
+     style="position:fixed; top:0; right:0; bottom:0; width:440px; max-width:92vw; z-index:50;"
+     x-cloak>
+    <div style="display:flex; flex-direction:column; height:100%; background:light-dark(#ffffff,#18181b); border-left:1px solid light-dark(#e5e7eb,#27272a); box-shadow:-8px 0 32px rgba(0,0,0,0.18);">
+
+        {{-- Header --}}
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid light-dark(#e5e7eb,#27272a); flex-shrink:0; gap:12px;">
+            <div style="font-size:15px; font-weight:700; color:light-dark(#111827,#f4f4f5); display:flex; align-items:center; gap:8px;">
+                <svg style="width:16px;height:16px;color:#41A2C3; flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span x-text="lang === 'en' ? 'Team Performance Guide' : 'Guía de Team Performance'"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                {{-- EN/ES toggle --}}
+                <div style="display:flex; border:1px solid light-dark(#d1d5db,#374151); border-radius:999px; overflow:hidden;">
+                    <button type="button" @click="lang = 'en'"
+                        style="padding:3px 11px; font-size:11px; font-weight:700; letter-spacing:0.05em; border:none; cursor:pointer; transition:all .15s; background:transparent; color:light-dark(#6b7280,#9ca3af);"
+                        :style="lang === 'en' ? 'background:#41A2C3; color:#ffffff;' : ''">EN</button>
+                    <button type="button" @click="lang = 'es'"
+                        style="padding:3px 11px; font-size:11px; font-weight:700; letter-spacing:0.05em; border:none; cursor:pointer; transition:all .15s; background:transparent; color:light-dark(#6b7280,#9ca3af);"
+                        :style="lang === 'es' ? 'background:#41A2C3; color:#ffffff;' : ''">ES</button>
+                </div>
+                {{-- Close --}}
+                <button type="button" @click="helpOpen = false"
+                    style="display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; border:none; background:light-dark(#f3f4f6,#27272a); color:light-dark(#6b7280,#9ca3af); cursor:pointer;">
+                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Scrollable body --}}
+        <div style="flex:1; min-height:0; overflow-y:auto; padding:20px;">
+
+            {{-- Styles scoped to guide --}}
+            <style>
+            .tpg-section { margin-bottom:22px; }
+            .tpg-section:last-child { margin-bottom:0; }
+            .tpg-section-title {
+                font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+                color:light-dark(#9ca3af,#6b7280);
+                padding-bottom:6px; border-bottom:1px solid light-dark(#e5e7eb,#27272a);
+                margin-bottom:10px;
+            }
+            .tpg-body { font-size:12.5px; line-height:1.6; color:light-dark(#4b5563,#9ca3af); }
+            .tpg-body strong { color:light-dark(#1f2937,#e5e7eb); }
+            .tpg-row { display:flex; gap:10px; padding:7px 0; border-bottom:1px solid light-dark(#f3f4f6,#1f2937); align-items:flex-start; }
+            .tpg-row:last-child { border-bottom:none; }
+            .tpg-row-label { flex:0 0 130px; font-weight:600; font-size:12px; color:light-dark(#1f2937,#e5e7eb); padding-top:1px; }
+            .tpg-row-desc { flex:1; font-size:12px; line-height:1.55; color:light-dark(#4b5563,#9ca3af); }
+            .tpg-questions {
+                margin-top:10px; padding:10px 12px;
+                background:light-dark(#eff6ff,#0d1926);
+                border-left:3px solid #41A2C3;
+                border-radius:0 6px 6px 0;
+            }
+            .tpg-q-label { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#41A2C3; margin-bottom:6px; }
+            .tpg-q { font-size:12px; line-height:1.5; color:light-dark(#1e3a5f,#60c4e8); font-style:italic; margin-bottom:3px; }
+            .tpg-q:last-child { margin-bottom:0; }
+            </style>
+
+            {{-- ── Period Filter ──────────────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Period Filter' : 'Filtro de Período'"></div>
+                <div class="tpg-body" x-show="lang === 'en'">
+                    Use the filter bar at the top to control the time window for all sections simultaneously.
+                    <strong>This Month</strong> and <strong>This Year</strong> show rolling windows relative to today.
+                    <strong>Q1–Q4</strong> let you compare specific quarters. <strong>All Time</strong> removes any date restriction.
+                    The <strong>Custom</strong> option lets you set a month-to-month range for ad-hoc analysis.
+                </div>
+                <div class="tpg-body" x-show="lang === 'es'">
+                    Usa la barra de filtros en la parte superior para controlar la ventana de tiempo de todas las secciones simultáneamente.
+                    <strong>This Month</strong> y <strong>This Year</strong> muestran ventanas dinámicas relativas al día de hoy.
+                    <strong>Q1–Q4</strong> permiten comparar trimestres específicos. <strong>All Time</strong> elimina cualquier restricción de fecha.
+                    La opción <strong>Custom</strong> permite definir un rango mes a mes para análisis puntuales.
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? How did the team perform last quarter compared to this one?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cómo se desempeñó el equipo el trimestre pasado comparado con este?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? What was the total production for a specific custom date range?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cuál fue la producción total para un rango de fechas específico?</div>
+                </div>
+            </div>
+
+            {{-- ── KPI Summary Cards ──────────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'KPI Summary Cards' : 'Tarjetas de Resumen KPI'"></div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label" x-text="lang === 'en' ? 'Team Members' : 'Miembros del equipo'"></div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Total count of users who report (directly or indirectly) to you across all hierarchy levels.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Conteo total de usuarios que te reportan (directa o indirectamente) en todos los niveles jerárquicos.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label" x-text="lang === 'en' ? 'Pending My Review' : 'Pendientes de revisión'"></div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Businesses submitted by your <em>direct</em> reports that are awaiting your approval decision. This is always absolute — it ignores the period filter.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Negocios enviados por tus reportes <em>directos</em> que están esperando tu decisión de aprobación. Siempre es un valor absoluto — ignora el filtro de período.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label" x-text="lang === 'en' ? 'Registered This Month' : 'Registrados este mes'"></div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Total businesses created by your entire team during the selected period, regardless of approval status.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Total de negocios creados por todo tu equipo durante el período seleccionado, sin importar el estado de aprobación.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label" x-text="lang === 'en' ? 'Approved This Month' : 'Aprobados este mes'"></div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Businesses that reached <strong>Approved</strong> status within the selected period. The approval rate percentage below shows approved ÷ total registered.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Negocios que alcanzaron el estado <strong>Aprobado</strong> dentro del período seleccionado. El porcentaje de aprobación muestra aprobados ÷ total registrados.</div>
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? How large is my team and how productive is it this month?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Qué tan grande es mi equipo y qué tan productivo está siendo este mes?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? What is the team's current approval rate?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cuál es la tasa de aprobación actual del equipo?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? How many businesses are waiting for my review right now?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cuántos negocios están esperando mi revisión en este momento?</div>
+                </div>
+            </div>
+
+            {{-- ── Top Performer ──────────────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Top Performer' : 'Mejor Desempeño'"></div>
+                <div class="tpg-body" x-show="lang === 'en'">
+                    Highlights the team member with the highest number of businesses registered during the selected period.
+                    The spotlight updates dynamically as the period filter changes — a different person may lead in a different month or quarter.
+                    Only shown when at least one team member has registered a business.
+                </div>
+                <div class="tpg-body" x-show="lang === 'es'">
+                    Destaca al miembro del equipo con el mayor número de negocios registrados durante el período seleccionado.
+                    El spotlight se actualiza dinámicamente al cambiar el filtro de período — una persona diferente puede liderar en un mes o trimestre diferente.
+                    Solo se muestra cuando al menos un miembro del equipo ha registrado un negocio.
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Who is leading production on my team this month?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Quién lidera la producción en mi equipo este mes?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Does the same person consistently top performance across quarters?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿La misma persona lidera consistentemente el desempeño en diferentes trimestres?</div>
+                </div>
+            </div>
+
+            {{-- ── Team Performance Table ─────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Team Performance Table' : 'Tabla de Desempeño del Equipo'"></div>
+                <div class="tpg-body" style="margin-bottom:8px;" x-show="lang === 'en'">
+                    Shows each team member's production breakdown for the selected period. Members are displayed in your reporting hierarchy — <strong>L1</strong> are your direct reports, <strong>L2</strong> are their direct reports, and so on.
+                </div>
+                <div class="tpg-body" style="margin-bottom:8px;" x-show="lang === 'es'">
+                    Muestra el desglose de producción de cada miembro del equipo para el período seleccionado. Los miembros se muestran en tu jerarquía de reporte — <strong>L1</strong> son tus reportes directos, <strong>L2</strong> son sus reportes directos, y así sucesivamente.
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Activity dot</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'"><strong style="color:#16a34a;">●</strong> Green = active ≤7 days · <strong style="color:#d97706;">●</strong> Amber = active ≤30 days · <strong style="color:#dc2626;">●</strong> Red = inactive >30 days.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'"><strong style="color:#16a34a;">●</strong> Verde = activo ≤7 días · <strong style="color:#d97706;">●</strong> Ámbar = activo ≤30 días · <strong style="color:#dc2626;">●</strong> Rojo = inactivo >30 días.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Draft</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Businesses saved as draft — not yet submitted for approval.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Negocios guardados como borrador — aún no enviados para aprobación.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Pending</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Businesses submitted and awaiting a review decision (approval or revision request).</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Negocios enviados y en espera de una decisión de revisión (aprobación o solicitud de corrección).</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Approved</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Businesses that completed the approval process and are now operative.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Negocios que completaron el proceso de aprobación y ahora son operativos.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Revision</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Businesses sent back to the member for correction — they need to be updated and resubmitted.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Negocios devueltos al miembro para corrección — deben actualizarse y reenviarse.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Total</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">All businesses created by this member in the selected period, across all statuses.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Todos los negocios creados por este miembro en el período seleccionado, sin importar el estado.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Completion</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Approved ÷ Total — the share of the member's registered businesses that have reached final approval. Higher is better.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Aprobados ÷ Total — la proporción de negocios registrados por el miembro que han alcanzado la aprobación final. A mayor porcentaje, mejor.</div>
+                </div>
+                <div class="tpg-row">
+                    <div class="tpg-row-label">Trend</div>
+                    <div class="tpg-row-desc" x-show="lang === 'en'">Change in total count vs. the equivalent previous period (prior month, quarter, or year). Not shown for All Time or Custom ranges.</div>
+                    <div class="tpg-row-desc" x-show="lang === 'es'">Cambio en el conteo total respecto al período equivalente anterior (mes, trimestre o año previo). No se muestra para All Time ni rangos Custom.</div>
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Which team member has the most businesses stuck in Revision?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Qué miembro del equipo tiene más negocios atascados en Revision?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Who improved the most compared to the previous period?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Quién mejoró más comparado con el período anterior?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Is anyone inactive for more than 30 days?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Hay algún miembro inactivo por más de 30 días?</div>
+                </div>
+            </div>
+
+            {{-- ── Businesses by Reinsurer ────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Businesses by Reinsurer' : 'Negocios por Reasegurador'"></div>
+                <div class="tpg-body" x-show="lang === 'en'">
+                    Horizontal bar chart ranking the top 8 reinsurers by number of businesses your team placed with them during the selected period.
+                    Bar length is relative to the highest-count reinsurer. This reveals your team's reinsurer concentration and placement patterns.
+                </div>
+                <div class="tpg-body" x-show="lang === 'es'">
+                    Gráfico de barras horizontal que clasifica los 8 principales reaseguradores por número de negocios que tu equipo colocó con ellos durante el período seleccionado.
+                    La longitud de la barra es relativa al reasegurador con mayor conteo. Esto revela la concentración de reaseguradores y los patrones de colocación de tu equipo.
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Which reinsurer receives the most business from my team?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Qué reasegurador recibe más negocios de mi equipo?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Is there a healthy distribution across reinsurers or is there high concentration in one?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Hay una distribución saludable entre reaseguradores o hay alta concentración en uno?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Did the reinsurer mix change between this quarter and last quarter?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cambió la mezcla de reaseguradores entre este trimestre y el anterior?</div>
+                </div>
+            </div>
+
+            {{-- ── Team Registrations ─────────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Team Registrations — Last 6 Months' : 'Registros del Equipo — Últimos 6 Meses'"></div>
+                <div class="tpg-body" x-show="lang === 'en'">
+                    Fixed 6-month bar chart showing total team registrations per calendar month, always relative to today regardless of the period filter.
+                    Bar height is relative to the busiest month. This chart reveals seasonality and production momentum at a glance.
+                </div>
+                <div class="tpg-body" x-show="lang === 'es'">
+                    Gráfico de barras fijo de 6 meses que muestra el total de registros del equipo por mes calendario, siempre relativo al día de hoy independientemente del filtro de período.
+                    La altura de la barra es relativa al mes más activo. Este gráfico revela la estacionalidad y el impulso de producción de un vistazo.
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Is the team's production growing, stable, or declining month over month?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿La producción del equipo está creciendo, estable o decayendo mes a mes?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Which month in the last 6 had the highest volume?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Qué mes de los últimos 6 tuvo el mayor volumen?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Is this month on track to beat or fall short of recent months?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Este mes está en camino de superar o quedar por debajo de los meses recientes?</div>
+                </div>
+            </div>
+
+            {{-- ── Reinsurer × Team Matrix ────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Businesses by Reinsurer × Team Member' : 'Negocios por Reasegurador × Miembro'"></div>
+                <div class="tpg-body" x-show="lang === 'en'">
+                    Heat-map cross-table with reinsurers as rows and team members as columns. Each cell shows how many businesses that member placed with that reinsurer.
+                    Cell color intensity indicates volume relative to that row's maximum:
+                    <strong>High</strong> (dark blue fill) · <strong>Mid</strong> (medium blue) · <strong>Low</strong> (light blue) · <strong>—</strong> (none).
+                    The Total column sums the row; the Total footer row sums each member's column.
+                </div>
+                <div class="tpg-body" x-show="lang === 'es'">
+                    Tabla cruzada de mapa de calor con reaseguradores como filas y miembros del equipo como columnas. Cada celda muestra cuántos negocios colocó ese miembro con ese reasegurador.
+                    La intensidad del color indica el volumen relativo al máximo de esa fila:
+                    <strong>High</strong> (relleno azul oscuro) · <strong>Mid</strong> (azul medio) · <strong>Low</strong> (azul claro) · <strong>—</strong> (ninguno).
+                    La columna Total suma la fila; la fila Total del pie suma la columna de cada miembro.
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Does each team member cover a diverse set of reinsurers or specialize in one?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cada miembro del equipo cubre un conjunto diverso de reaseguradores o se especializa en uno?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Which team member contributes most to the top reinsurer relationship?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Qué miembro del equipo contribuye más a la relación con el principal reasegurador?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Are there reinsurers that only one person works with — a key-person risk?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Hay reaseguradores con los que solo trabaja una persona — un riesgo de dependencia?</div>
+                </div>
+            </div>
+
+            {{-- ── Pending My Review ──────────────────────── --}}
+            <div class="tpg-section">
+                <div class="tpg-section-title" x-text="lang === 'en' ? 'Pending My Review' : 'Pendientes de Mi Revisión'"></div>
+                <div class="tpg-body" x-show="lang === 'en'">
+                    Queue of up to 5 businesses submitted by your <em>direct</em> reports that are currently in <strong>Pending</strong> status — oldest first.
+                    Click <strong>Review</strong> to open the business record and approve or request revisions.
+                    This list is period-independent and always reflects the current backlog.
+                </div>
+                <div class="tpg-body" x-show="lang === 'es'">
+                    Cola de hasta 5 negocios enviados por tus reportes <em>directos</em> que están actualmente en estado <strong>Pending</strong> — los más antiguos primero.
+                    Haz clic en <strong>Review</strong> para abrir el registro del negocio y aprobar o solicitar correcciones.
+                    Esta lista es independiente del período y siempre refleja el backlog actual.
+                </div>
+                <div class="tpg-questions">
+                    <div class="tpg-q-label" x-text="lang === 'en' ? '? Questions it helps answer' : '? Preguntas que ayuda a responder'"></div>
+                    <div class="tpg-q" x-show="lang === 'en'">? Which businesses have been waiting the longest for my review?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Qué negocios llevan más tiempo esperando mi revisión?</div>
+                    <div class="tpg-q" x-show="lang === 'en'">? How many days has each submission been pending?</div>
+                    <div class="tpg-q" x-show="lang === 'es'">? ¿Cuántos días lleva pendiente cada envío?</div>
+                </div>
+            </div>
+
+        </div>{{-- /scrollable body --}}
+    </div>{{-- /inner flex --}}
+</div>{{-- /guide panel --}}
+
 </div>
