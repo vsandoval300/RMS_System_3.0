@@ -1492,8 +1492,9 @@ class BusinessResource extends Resource
                                     ->label('New Business Code')
                                     ->default(fn () => $service->suggestBusinessCode($record))
                                     ->required()
+                                    ->readOnly()
                                     ->unique(Business::class, 'business_code')
-                                    ->helperText('Auto-suggested based on the original code and new inception year. You can edit it.'),
+                                    ->helperText('Auto-generated based on the original code and new inception year.'),
 
                                 DatePicker::make('new_inception_date')
                                     ->label('New Slip — Inception Date')
