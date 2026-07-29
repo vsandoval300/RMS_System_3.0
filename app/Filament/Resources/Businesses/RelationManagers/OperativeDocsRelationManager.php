@@ -2187,10 +2187,15 @@ class OperativeDocsRelationManager extends RelationManager
                                 'document_path',
                                 'import_batch_id',
                             ]);
-                            $newDoc->id               = (string) Str::uuid();
-                            $newDoc->document_path    = null;
-                            $newDoc->import_batch_id  = null;
-                            $newDoc->created_by_user  = Filament::auth()->id();
+
+                            // ID follows the same pattern as CreateAction: business_code + zero-padded suffix
+                            $lastSuffix = OperativeDoc::withTrashed()
+                                ->where('business_code', $record->business_code)
+                                ->get()
+                                ->map(fn ($doc) => (int) substr($doc->id, -2))
+                                ->max();
+                            $newDoc->id              = $record->business_code . '-' . str_pad(($lastSuffix ?? 0) + 1, 2, '0', STR_PAD_LEFT);
+                            $newDoc->created_by_user = Filament::auth()->id();
                             $newDoc->save();
 
                             $newDocId = $newDoc->id;
