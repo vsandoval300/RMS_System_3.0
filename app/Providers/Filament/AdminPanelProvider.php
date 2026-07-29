@@ -112,8 +112,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->maxContentWidth('screen-2xl') // <----Cambio para hacer mas ancho el CRUD
             ->brandName('RMS-System') // ← aquí se define el título
-            ->brandLogo(asset('images/logo5.png'))
-            ->brandLogoHeight('55px')   // ⬅︎ más alto que el default (~20 px)
+            ->brandLogo(view('filament.components.brand-logo'))
+            ->brandLogoHeight('48px')
             ->favicon(asset('images/result_favicon2.png'))  // ← AQUÍ
             ->renderHook(
                     'panels::sidebar.footer',               // 👈 Hook válido en todas las v3
