@@ -9,6 +9,7 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\Partners\Pages\ListPartners;
 use App\Filament\Resources\Partners\Pages\CreatePartners;
@@ -260,6 +261,17 @@ class PartnersResource extends Resource
                     EditAction::make(),
                     DeleteAction::make(),
                 ])
+            ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.partners.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
