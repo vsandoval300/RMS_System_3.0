@@ -1,9 +1,5 @@
-<div x-data="{ lang: 'en' }">
 <style>
 .cg-wrap { font-family:inherit; font-size:13px; line-height:1.6; }
-.cg-lang-toggle { display:flex; justify-content:flex-end; margin-bottom:16px; }
-.cg-lang-btn-wrap { display:flex; border:1px solid light-dark(#d1d5db,#374151); border-radius:999px; overflow:hidden; }
-.cg-lang-btn { padding:4px 12px; font-size:11px; font-weight:700; letter-spacing:0.05em; border:none; cursor:pointer; transition:all .15s; background:transparent; color:light-dark(#6b7280,#9ca3af); }
 .cg-section-title { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:light-dark(#9ca3af,#6b7280); padding:16px 0 8px; border-bottom:1px solid light-dark(#e5e7eb,#374151); margin-bottom:10px; }
 .cg-section-title:first-of-type { padding-top:0; }
 .cg-para { color:light-dark(#4b5563,#9ca3af); margin-bottom:10px; }
@@ -18,16 +14,8 @@
 .cg-questions li::before { content:"→"; color:#41A2C3; flex-shrink:0; font-weight:700; }
 </style>
 
-<div class="cg-lang-toggle">
-    <div class="cg-lang-btn-wrap">
-        <button type="button" class="cg-lang-btn" @click="lang = 'en'" :style="lang === 'en' ? 'background:#41A2C3; color:#ffffff;' : ''">EN</button>
-        <button type="button" class="cg-lang-btn" @click="lang = 'es'" :style="lang === 'es' ? 'background:#41A2C3; color:#ffffff;' : ''">ES</button>
-    </div>
-</div>
-
 <div class="cg-wrap">
 
-    {{-- What this chart shows --}}
     <div class="cg-section-title" x-text="lang === 'en' ? 'What this chart shows' : 'Qué muestra este gráfico'"></div>
 
     <div x-show="lang === 'en'" class="cg-para">
@@ -37,7 +25,6 @@
         Un <strong>gráfico de barras apiladas</strong> que agrupa todos los contratos de negocio por el año extraído de su Código de Negocio, y desglosa cada año según el estado de ciclo de vida actual de cada contrato. La altura de cada segmento de color representa la cantidad de negocios en ese estado para ese año.
     </div>
 
-    {{-- How to read it --}}
     <div class="cg-section-title" x-text="lang === 'en' ? 'How to read it' : 'Cómo leerlo'"></div>
 
     <div x-show="lang === 'en'" class="cg-para">
@@ -47,7 +34,6 @@
         Cada barra en el eje X representa un <strong>año</strong> (los primeros 4 caracteres del Código de Negocio). La altura total de la barra es el total de negocios registrados en ese año. El número sobre la barra es ese total. Cada segmento de color dentro de la barra muestra cuántos contratos están actualmente en cada estado de ciclo de vida.
     </div>
 
-    {{-- Lifecycle status colors --}}
     <div class="cg-section-title" x-text="lang === 'en' ? 'Lifecycle status colors' : 'Colores de estado de ciclo de vida'"></div>
 
     <ul class="cg-status-list">
@@ -83,7 +69,6 @@
         </li>
     </ul>
 
-    {{-- Questions it helps answer --}}
     <div class="cg-section-title" x-text="lang === 'en' ? 'Questions it helps answer' : 'Preguntas que ayuda a responder'"></div>
 
     <ul x-show="lang === 'en'" class="cg-questions">
@@ -104,5 +89,4 @@
     <div class="cg-tip" x-show="lang === 'en'">The year in each bar comes from the first 4 characters of the <strong>Business Code</strong> (e.g. <em>2025</em>-ENE053-001), not from any date field. This reflects when the business was originally registered in the system.</div>
     <div class="cg-tip" x-show="lang === 'es'">El año de cada barra proviene de los primeros 4 caracteres del <strong>Código de Negocio</strong> (ej. <em>2025</em>-ENE053-001), no de ningún campo de fecha. Esto refleja cuándo fue registrado originalmente el negocio en el sistema.</div>
 
-</div>
 </div>
