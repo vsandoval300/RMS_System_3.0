@@ -1,0 +1,45 @@
+<style>
+.cg-wrap{font-family:inherit;font-size:13px;line-height:1.6;}
+.cg-section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:light-dark(#9ca3af,#6b7280);padding:14px 0 7px;border-bottom:1px solid light-dark(#e5e7eb,#374151);margin-bottom:10px;}
+.cg-section-title:first-of-type{padding-top:0;}
+.cg-col-list{list-style:none;padding:0;margin:0 0 4px;display:flex;flex-direction:column;gap:10px;}
+.cg-col-item{display:flex;flex-direction:column;gap:2px;}
+.cg-col-name{font-weight:700;font-size:12.5px;color:light-dark(#111827,#f9fafb);}
+.cg-col-desc{color:light-dark(#6b7280,#9ca3af);font-size:12px;}
+</style>
+
+<div class="cg-wrap" x-data="{ lang: $store.cgLang ?? 'en' }">
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <div style="display:flex;border:1px solid light-dark(#d1d5db,#374151);border-radius:999px;overflow:hidden;">
+            <button type="button" @click="lang='en'" :style="lang==='en'?'background:#41A2C3;color:#fff;':''" style="padding:3px 12px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:transparent;color:light-dark(#6b7280,#9ca3af);transition:all .15s;">EN</button>
+            <button type="button" @click="lang='es'" :style="lang==='es'?'background:#41A2C3;color:#fff;':''" style="padding:3px 12px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:transparent;color:light-dark(#6b7280,#9ca3af);transition:all .15s;">ES</button>
+        </div>
+    </div>
+
+    <div class="cg-section-title" x-text="lang==='en'?'Table Columns':'Columnas de la tabla'"></div>
+
+    <ul class="cg-col-list">
+        <li class="cg-col-item">
+            <span class="cg-col-name">ID</span>
+            <span class="cg-col-desc" x-show="lang==='en'">Unique numeric identifier for the partner type record.</span>
+            <span class="cg-col-desc" x-show="lang==='es'">Identificador numérico único del registro de tipo de socio.</span>
+        </li>
+        <li class="cg-col-item">
+            <span class="cg-col-name" x-text="lang==='en'?'Name':'Nombre'"></span>
+            <span class="cg-col-desc" x-show="lang==='en'">Full name of the partner type that classifies the role a partner plays in the reinsurance chain (e.g., Reinsurer, Broker, Cedant).</span>
+            <span class="cg-col-desc" x-show="lang==='es'">Nombre completo del tipo de socio que clasifica el rol que juega un socio en la cadena de reaseguro (ej. Reasegurador, Corredor, Cedente).</span>
+        </li>
+        <li class="cg-col-item">
+            <span class="cg-col-name">Acronym</span>
+            <span class="cg-col-desc" x-show="lang==='en'">Short code for the partner type used as a compact reference in reports and cost scheme nodes.</span>
+            <span class="cg-col-desc" x-show="lang==='es'">Código corto del tipo de socio usado como referencia compacta en informes y nodos de esquemas de costos.</span>
+        </li>
+        <li class="cg-col-item">
+            <span class="cg-col-name" x-text="lang==='en'?'Description':'Descripción'"></span>
+            <span class="cg-col-desc" x-show="lang==='en'">Detailed explanation of what the partner type represents and the responsibilities associated with it in the reinsurance process.</span>
+            <span class="cg-col-desc" x-show="lang==='es'">Explicación detallada de lo que representa el tipo de socio y las responsabilidades asociadas a él en el proceso de reaseguro.</span>
+        </li>
+    </ul>
+
+</div>
