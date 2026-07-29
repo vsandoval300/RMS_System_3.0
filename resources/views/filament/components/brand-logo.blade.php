@@ -8,6 +8,6 @@
     <img
         src="{{ asset('images/Integrity.png') }}"
         alt="Integrity"
-        style="height:34px; object-fit:contain; object-position:right center; flex-shrink:0; opacity:0.9;"
+        style="height:40px; object-fit:contain; object-position:right center; flex-shrink:0; opacity:0.9;"
     >
 </div>
