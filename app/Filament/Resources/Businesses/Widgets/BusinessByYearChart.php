@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Businesses\Widgets;
 
 use App\Enums\BusinessLifecycleStatus;
 use App\Models\Business;
+use Filament\Actions\Action;
 use Filament\Widgets\ChartWidget;
 
 class BusinessByYearChart extends ChartWidget
@@ -19,6 +20,21 @@ class BusinessByYearChart extends ChartWidget
         'Expired'   => ['rgba(8,103,136,0.85)',   '#086788'],  // Cerulean       – Expired
         'Cancelled' => ['rgba(221,28,26,0.85)',   '#DD1C1A'],  // Racing Red     – Cancelled
     ];
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('chart_guide')
+                ->label('Guide')
+                ->icon('heroicon-o-question-mark-circle')
+                ->color('gray')
+                ->slideOver()
+                ->modalHeading('Understanding This Chart')
+                ->modalContent(view('filament.resources.businesses.chart-guide'))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close'),
+        ];
+    }
 
     protected function getData(): array
     {
