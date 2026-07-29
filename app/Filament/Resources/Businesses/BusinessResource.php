@@ -1595,7 +1595,9 @@ class BusinessResource extends Resource
                         ->modalDescription('Are you sure you want to delete the selected businesses? This action can be undone by restoring the records.')
                         ->modalSubmitActionLabel('Yes, delete'),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(25)
+            ->paginationPageOptions([5, 10, 25, 50]);
     }
 
     public static function getRelations(): array
