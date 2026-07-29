@@ -12,9 +12,11 @@ use App\Filament\Resources\Roles\Pages\ViewRole;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
 use BezhanSalleh\PluginEssentials\Concerns\Resource as Essentials;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -122,6 +124,41 @@ class RoleResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+
+                Action::make('cloneRole')
+                    ->label('Clone')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('gray')
+                    ->modalHeading(fn ($record) => 'Clone — ' . Str::headline($record->name))
+                    ->modalDescription('A new role will be created with all the same permissions. Only the name changes.')
+                    ->modalIcon('heroicon-o-document-duplicate')
+                    ->modalWidth('md')
+                    ->form([
+                        TextInput::make('name')
+                            ->label('New Role Name')
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(table: Utils::getRoleModel(), column: 'name')
+                            ->default(fn ($record) => $record->name . ' Copy')
+                            ->helperText('Must be unique. All permissions from the original role will be copied.'),
+                    ])
+                    ->action(function ($record, array $data): void {
+                        $roleModel = Utils::getRoleModel();
+
+                        $newRole = $roleModel::create([
+                            'name'       => $data['name'],
+                            'guard_name' => $record->guard_name,
+                        ]);
+
+                        $newRole->syncPermissions($record->permissions);
+
+                        Notification::make()
+                            ->title('Role cloned')
+                            ->body(""{$data['name']}" created with {$record->permissions->count()} permissions.")
+                            ->success()
+                            ->send();
+                    }),
+
                 DeleteAction::make(),
             ])
             ->toolbarActions([
