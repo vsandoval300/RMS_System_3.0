@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             fn (): string => '
                 <style>
                     .rms-small-desc .fi-ta-text-description {
-                        font-size: 0.68rem;
+                        font-size: 0.75rem;
                         line-height: 1.3;
                     }
                 </style>
