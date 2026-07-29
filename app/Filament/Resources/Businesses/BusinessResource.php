@@ -1017,7 +1017,7 @@ class BusinessResource extends Resource
                         if (! now()->between($expDate->copy()->subDays(45), $expDate->copy()->addDays(45))) {
                             return null;
                         }
-                        return new \Illuminate\Support\HtmlString('<span style="font-size:10px;">↻ Ready to renew</span>');
+                        return '↻ Ready to renew';
                     })
                     ->searchable()
                     ->sortable(),
