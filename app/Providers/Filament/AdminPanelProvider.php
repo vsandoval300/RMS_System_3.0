@@ -31,6 +31,18 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): string => '
+                <style>
+                    .rms-small-desc .fi-ta-text-description {
+                        font-size: 0.68rem;
+                        line-height: 1.3;
+                    }
+                </style>
+            ',
+        );
+
+        FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
             fn (): string => view('filament.components.login-version')->render(),
         );

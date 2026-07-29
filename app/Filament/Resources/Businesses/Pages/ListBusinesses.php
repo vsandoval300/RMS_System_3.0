@@ -9,8 +9,10 @@ use App\Filament\Resources\Businesses\BusinessResource;
 use App\Filament\Resources\Businesses\Widgets\BusinessByYearChart;
 use App\Filament\Resources\Businesses\Widgets\BusinessStatsOverview;
 use App\Jobs\GenerateOperativeDocsReport;
+use App\Jobs\GenerateMissingPdfsReport;
 use App\Jobs\NotifyReportReady;
 use App\Models\OperativeDoc;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Actions\Action;
@@ -44,15 +46,17 @@ class ListBusinesses extends ListRecords
                     ->options([
                         'operative_docs'      => 'Underwritten – By Inception Date',
                         'underwritten_report' => 'Underwritten – By Underwriting Month',
+                        'missing_pdfs'        => 'Missing PDFs – Documents without file',
                     ])
                     ->default('operative_docs')
                     ->required()
                     ->live()
                     ->helperText(function ($get) {
                         return match ($get('report_type')) {
-                            'operative_docs' => '📅 Retrieves information for businesses whose operative documents fall within the selected date range based on their Inception Date.',
+                            'operative_docs'      => '📅 Retrieves information for businesses whose operative documents fall within the selected date range based on their Inception Date.',
                             'underwritten_report' => '📊 Retrieves information for businesses whose operative documents fall within the selected date range based on their Underwriting Month.',
-                            default => null,
+                            'missing_pdfs'        => '📋 Lists all operative documents that have no PDF file uploaded, optionally filtered by date range, reinsurer, and responsible user.',
+                            default               => null,
                         };
                     }),
 
@@ -67,6 +71,13 @@ class ListBusinesses extends ListRecords
                     ->searchable()
                     ->preload()
                     ->multiple(),
+
+                Select::make('missing_pdfs_user_id')
+                    ->label('Created by (user)')
+                    ->placeholder('All users')
+                    ->options(fn () => User::orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->visible(fn ($get) => $get('report_type') === 'missing_pdfs'),
 
                 Hidden::make('user_timezone')
                     ->default('America/Mexico_City')
@@ -112,7 +123,21 @@ class ListBusinesses extends ListRecords
                     ->closeOnDateSelection()
                     ->live(),
 
-                  
+                // =========================
+                // Missing PDFs date range (by doc created_at) — optional
+                // =========================
+                DatePicker::make('missing_from')
+                    ->label('Doc created from')
+                    ->placeholder('All time')
+                    ->visible(fn ($get) => $get('report_type') === 'missing_pdfs')
+                    ->native(false),
+
+                DatePicker::make('missing_to')
+                    ->label('Doc created to')
+                    ->placeholder('All time')
+                    ->visible(fn ($get) => $get('report_type') === 'missing_pdfs')
+                    ->native(false),
+
             ])
             ->action(function (array $data) {
                 $report = $data['report_type'] ?? null;
@@ -129,8 +154,42 @@ class ListBusinesses extends ListRecords
                 $reportLabels = [
                     'operative_docs'      => 'OperativeDocs_report',
                     'underwritten_report' => 'Underwritten_report',
+                    'missing_pdfs'        => 'MissingPDFs_report',
                 ];
                 $reportLabel = $reportLabels[$report] ?? ($report ?? 'report');
+
+                $userTimezone = $data['user_timezone'] ?? config('app.timezone');
+                $timestamp    = Carbon::now($userTimezone)->format('Ymd_His');
+
+                // ── Missing PDFs report (handled separately) ──────────────────
+                if ($report === 'missing_pdfs') {
+                    $dateFrom = isset($data['missing_from']) && $data['missing_from']
+                        ? Carbon::parse($data['missing_from'])->startOfDay()->toDateTimeString()
+                        : null;
+
+                    $dateTo = isset($data['missing_to']) && $data['missing_to']
+                        ? Carbon::parse($data['missing_to'])->endOfDay()->toDateTimeString()
+                        : null;
+
+                    $filename = sprintf('MissingPDFs_report_(%s).xlsx', $timestamp);
+
+                    GenerateMissingPdfsReport::dispatch(
+                        $dateFrom,
+                        $dateTo,
+                        $reinsurerIds,
+                        $data['missing_pdfs_user_id'] ?? null,
+                        $filename,
+                        auth()->id()
+                    );
+
+                    Notification::make()
+                        ->title('Missing PDFs report is being generated')
+                        ->body('You will receive a notification with the download link when it is ready.')
+                        ->success()
+                        ->send();
+
+                    return;
+                }
 
                 // -----------------------------
                 // Determine date range & column
@@ -195,23 +254,19 @@ class ListBusinesses extends ListRecords
                 // -----------------------------
                 // Filename
                 // -----------------------------
-                $userTimezone = $data['user_timezone'] ?? config('app.timezone');
-
-                $timestamp = Carbon::now($userTimezone)->format('Ymd');
-
                 if ($report === 'underwritten_report') {
                     $filename = sprintf(
                         'UW-ByUnderwritingMonth_(between_%s_to_%s)_(%s).xlsx',
                         $rangeLabelFrom,
                         $rangeLabelTo,
-                        $timestamp
+                        Carbon::now($userTimezone)->format('Ymd')
                     );
                 } else {
                     $filename = sprintf(
                         'UW-ByInceptionDate_(between_%s_to_%s)_(%s).xlsx',
                         $rangeLabelFrom,
                         $rangeLabelTo,
-                        $timestamp
+                        Carbon::now($userTimezone)->format('Ymd')
                     );
                 }
 

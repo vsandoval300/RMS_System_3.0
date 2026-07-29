@@ -986,6 +986,7 @@ class BusinessResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('business_lifecycle_status')
+                    ->extraAttributes(['class' => 'rms-small-desc'])
                     ->label('Lifecycle')
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state?->value ?? $state)
@@ -1024,11 +1025,17 @@ class BusinessResource extends Resource
 
                 TextColumn::make('operative_docs_count')
                     ->counts('operativeDocs')
+                    ->extraAttributes(['class' => 'rms-small-desc'])
                     ->label('Documents')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => "$state document" . ($state === 1 ? '' : 's')) // 👈 esto agrega el texto
+                    ->formatStateUsing(fn ($state) => "$state document" . ($state === 1 ? '' : 's'))
                     ->badge()
-                    ->color(fn (int $state): string => $state > 0 ? 'primary' : 'gray'),
+                    ->color(fn (int $state): string => $state > 0 ? 'primary' : 'gray')
+                    ->description(function ($record): ?string {
+                        $missing = $record->missing_pdf_count ?? 0;
+                        if ($missing <= 0) return null;
+                        return "⚠ {$missing} missing pdf" . ($missing === 1 ? '' : 's');
+                    }),
 
 
 
@@ -1598,7 +1605,10 @@ class BusinessResource extends Resource
                 ]),
             ])
             ->defaultPaginationPageOption(25)
-            ->paginationPageOptions([5, 10, 25, 50]);
+            ->paginationPageOptions([5, 10, 25, 50])
+            ->modifyQueryUsing(fn ($query) => $query->withCount([
+                'operativeDocs as missing_pdf_count' => fn ($q) => $q->whereNull('document_path'),
+            ]));
     }
 
     public static function getRelations(): array
