@@ -6,7 +6,7 @@ use App\Models\TransactionLog;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class TransactionslogCellMayabSeeder extends Seeder
+class TransactionsLogCellMayabSeeder extends Seeder
 {
     /**
      * Run the database seeds.

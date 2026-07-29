@@ -152,9 +152,10 @@ class RoleResource extends Resource
 
                         $newRole->syncPermissions($record->permissions);
 
+                        $permCount = $record->permissions->count();
                         Notification::make()
                             ->title('Role cloned')
-                            ->body(""{$data['name']}" created with {$record->permissions->count()} permissions.")
+                            ->body('"' . $data['name'] . "\" created with {$permCount} permissions.")
                             ->success()
                             ->send();
                     }),

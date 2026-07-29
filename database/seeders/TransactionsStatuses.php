@@ -6,7 +6,7 @@ use App\Models\TransactionStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class transactionsStatuses extends Seeder
+class TransactionsStatuses extends Seeder
 {
     /**
      * Run the database seeds.

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Schemas\Schema;
-use App\Filament\Resources\StaticsDashboardResource\Widgets\UserStatistics;
+use App\Filament\User\Widgets\UserStatistics;
 use App\Filament\Resources\StaticsDashboardResource\Pages;
 use App\Filament\Resources\StaticsDashboardResource\RelationManagers;
 use App\Models\User;
@@ -59,12 +59,9 @@ class StaticsDashboardResource extends Resource
 
     public static function getPages(): array
     {
-        // return [
-        //     'index' => Pages\ListStaticsDashboards::route('/'),
-        //     'create' => Pages\CreateStaticsDashboard::route('/create'),
-        //     'view' => Pages\ViewStaticsDashboard::route('/{record}'),
-        //     'edit' => Pages\EditStaticsDashboard::route('/{record}/edit'),
-        // ];
+        return [
+            'index' => Pages\ListStaticsDashboards::route('/'),
+        ];
     }
 
     public static function getWidgets(): array
