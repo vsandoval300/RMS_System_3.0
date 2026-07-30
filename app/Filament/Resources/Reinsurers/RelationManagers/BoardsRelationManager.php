@@ -26,6 +26,11 @@ class BoardsRelationManager extends RelationManager
     protected static string $relationship = 'boards';
     protected static string | \BackedEnum | null $icon = 'heroicon-o-user-group';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_reinsurer');
+    }
+
     public function form(Schema $schema): Schema
     {
         

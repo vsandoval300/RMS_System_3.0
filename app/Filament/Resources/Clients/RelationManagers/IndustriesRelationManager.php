@@ -21,6 +21,11 @@ class IndustriesRelationManager extends RelationManager
     protected static string $relationship = 'industries';
     protected static ?string $recordTitleAttribute = 'name';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_client');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema

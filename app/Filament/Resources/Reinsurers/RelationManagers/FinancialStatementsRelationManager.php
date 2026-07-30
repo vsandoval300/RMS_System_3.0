@@ -30,6 +30,11 @@ class FinancialStatementsRelationManager extends RelationManager
     protected static ?string $recordTitleAttribute = 'start_date';
     protected static string | \BackedEnum | null $icon = 'heroicon-o-presentation-chart-line';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_reinsurer');
+    }
+
     /* ==========  TABLA  ========== */
     public function table(Table $table): Table
     {

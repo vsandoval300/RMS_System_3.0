@@ -30,6 +30,11 @@ class DocsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'description';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_treaty');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components([

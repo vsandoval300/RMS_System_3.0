@@ -24,6 +24,11 @@ class ReinsurerBankAccountsRelationManager extends RelationManager
     protected static ?string $title       = 'Bank Accounts';
     protected static string | \BackedEnum | null $icon = 'heroicon-o-banknotes';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_reinsurer');
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

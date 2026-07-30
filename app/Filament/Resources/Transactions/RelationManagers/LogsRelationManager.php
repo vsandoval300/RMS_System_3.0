@@ -33,6 +33,11 @@ use Livewire\Attributes\On;
 class LogsRelationManager extends RelationManager
 {
     protected static string $relationship = 'logs';
+
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_transaction');
+    }
     protected static ?string $title = 'Lifecycle Premium Payment';
     protected static string|\BackedEnum|null $icon = 'heroicon-o-arrow-path';
 

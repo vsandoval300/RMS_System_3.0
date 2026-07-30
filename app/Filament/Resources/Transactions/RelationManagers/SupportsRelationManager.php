@@ -26,6 +26,11 @@ class SupportsRelationManager extends RelationManager
     protected static ?string $title = 'Premium Payment Support';
     protected static string|\BackedEnum|null $icon = 'heroicon-o-paper-clip';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_transaction');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components([

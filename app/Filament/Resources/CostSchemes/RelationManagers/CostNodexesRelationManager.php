@@ -27,6 +27,11 @@ class CostNodexesRelationManager extends RelationManager
     protected static ?string $pluralModelLabel = 'Cost Nodes';
     protected static ?string $modelLabel = 'Cost Node';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_cost_scheme');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components([
