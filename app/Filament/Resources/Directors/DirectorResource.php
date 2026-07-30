@@ -15,6 +15,7 @@ use App\Filament\Resources\Directors\Pages\CreateDirector;
 use App\Filament\Resources\Directors\Pages\ViewDirector;
 use App\Filament\Resources\Directors\Pages\EditDirector;
 use App\Filament\Resources\DirectorResource\Pages;
+use App\Enums\DirectorStatus;
 use App\Models\Country;
 use App\Models\Director;
 use Filament\Forms;
@@ -74,6 +75,18 @@ class DirectorResource extends Resource
                                 'Female' => 'Female',
                             ])
                             ->inline()
+                            ->required(),
+
+                        ToggleButtons::make('status')
+                            ->label('Status')
+                            ->options(DirectorStatus::options())
+                            ->colors([
+                                'Active'   => 'success',
+                                'On Leave' => 'warning',
+                                'Inactive' => 'gray',
+                            ])
+                            ->inline()
+                            ->default(DirectorStatus::ACTIVE->value)
                             ->required(),
 
                         TextInput::make('email')
@@ -297,6 +310,24 @@ class DirectorResource extends Resource
                                         ->state(fn ($record) => $record->occupation ?? '—')
                                         ->columnSpan(9),
                                 ]),
+
+                            // Status
+                            Grid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('status_label')
+                                        ->hiddenLabel()
+                                        ->state('Status:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('status')
+                                        ->hiddenLabel()
+                                        ->badge()
+                                        ->color(fn ($state) => $state instanceof DirectorStatus ? $state->color() : 'gray')
+                                        ->formatStateUsing(fn ($state) => $state instanceof DirectorStatus ? $state->label() : ($state ?? '—'))
+                                        ->columnSpan(9),
+                                ]),
                         ]),
 
                     // Col 3: foto
@@ -411,6 +442,14 @@ class DirectorResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('occupation')->searchable(),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn ($state) => $state instanceof DirectorStatus ? $state->color() : 'gray')
+                    ->formatStateUsing(fn ($state) => $state instanceof DirectorStatus ? $state->label() : ($state ?? '—'))
+                    ->sortable(),
+
                 TextColumn::make('country.alpha_3')->label('Country')->sortable()->searchable(),
                 TextColumn::make('created_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),

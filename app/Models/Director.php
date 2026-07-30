@@ -7,17 +7,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Occupation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Enums\DirectorStatus;
 use App\Models\Traits\HasAuditLogs;
-use App\Models\Country; 
+use App\Models\Country;
 
 class Director extends Model
 {
-    //
-    use SoftDeletes,HasAuditLogs;
+    use SoftDeletes, HasAuditLogs;
 
     protected $fillable = [
-        'name','surname','gender','email','phone','address',
-        'occupation','image','country_id',
+        'name', 'surname', 'gender', 'email', 'phone', 'address',
+        'occupation', 'status', 'image', 'country_id',
+    ];
+
+    protected $casts = [
+        'status' => DirectorStatus::class,
     ];
 
     public function boards(): BelongsToMany
@@ -53,7 +57,8 @@ class Director extends Model
 
         return match ($field) {
             'country_id' => Country::find($value)?->name ?? $value,
-            default       => $value,
+            'status'     => $value instanceof DirectorStatus ? $value->label() : $value,
+            default      => $value,
         };
     }
                            
