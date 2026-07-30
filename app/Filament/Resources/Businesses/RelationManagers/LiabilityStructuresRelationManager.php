@@ -28,6 +28,11 @@ use Filament\Forms\Components\Textarea;
 class LiabilityStructuresRelationManager extends RelationManager
 {
     protected static string $relationship = 'LiabilityStructures';
+
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_business');
+    }
     protected static string | \BackedEnum | null $icon = 'heroicon-o-shield-check';
 
     public static function getCreateFormHeading(): string

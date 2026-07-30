@@ -74,6 +74,11 @@ class OperativeDocsRelationManager extends RelationManager
     protected static string | \BackedEnum | null $icon = 'heroicon-o-document-text';
     protected static ?string $recordTitleAttribute = 'description';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_business');
+    }
+
      public static function getCreateFormHeading(): string
     {
         return 'New Operative Document';
@@ -2169,7 +2174,10 @@ class OperativeDocsRelationManager extends RelationManager
                     ->label('Clone Document')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
-                    ->visible(fn ($record): bool => in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8]))
+                    ->visible(fn ($record): bool =>
+                        auth()->user()?->can('update_business') &&
+                        in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8])
+                    )
                     ->requiresConfirmation()
                     ->modalHeading(fn ($record) => 'Clone — ' . ($record->docType->name ?? 'Document') . ' #' . $record->index)
                     ->modalDescription(fn ($record) => (int) ($record?->operative_doc_type_id ?? 0) === 1
