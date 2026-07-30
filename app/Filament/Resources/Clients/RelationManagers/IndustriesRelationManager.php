@@ -23,7 +23,7 @@ class IndustriesRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return ! auth()->user()?->can('update_client');
+        return ! auth()->user()?->can('update_clients');
     }
 
     public function form(Schema $schema): Schema

@@ -36,7 +36,7 @@ class DocumentsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return ! auth()->user()?->can('update_reinsurer');
+        return ! auth()->user()?->can('update_reinsurers');
     }
     protected static string | \BackedEnum | null $icon = 'heroicon-o-document-text';
 

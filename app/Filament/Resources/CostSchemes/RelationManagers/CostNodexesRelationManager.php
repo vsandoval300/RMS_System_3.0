@@ -29,7 +29,7 @@ class CostNodexesRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return ! auth()->user()?->can('update_cost_scheme');
+        return ! auth()->user()?->can('update_cost::scheme');
     }
 
     public function form(Schema $schema): Schema

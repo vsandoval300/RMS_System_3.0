@@ -32,7 +32,7 @@ class FinancialStatementsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return ! auth()->user()?->can('update_reinsurer');
+        return ! auth()->user()?->can('update_reinsurers');
     }
 
     /* ==========  TABLA  ========== */

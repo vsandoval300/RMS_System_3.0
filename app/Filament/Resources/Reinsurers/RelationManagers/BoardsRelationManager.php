@@ -28,7 +28,7 @@ class BoardsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return ! auth()->user()?->can('update_reinsurer');
+        return ! auth()->user()?->can('update_reinsurers');
     }
 
     public function form(Schema $schema): Schema
