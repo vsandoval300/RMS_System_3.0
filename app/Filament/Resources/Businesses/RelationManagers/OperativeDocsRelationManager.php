@@ -232,12 +232,16 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 modifyQueryUsing: function (Builder $query) {
                                                                     $query->orderBy('id');
 
-                                                                    // CREATE solamente
                                                                     $record = $this->getMountedTableActionRecord();
                                                                     if ($record) {
+                                                                        // In edit mode: exclude type 1 unless this record IS the Slip
+                                                                        if ((int) ($record->operative_doc_type_id ?? 0) !== 1) {
+                                                                            $query->where('id', '!=', 1);
+                                                                        }
                                                                         return;
                                                                     }
 
+                                                                    // In create mode: exclude type 1 if a Slip already exists
                                                                     $business = $this->getOwnerRecord();
 
                                                                     $slipExists = $business?->operativeDocs()
@@ -311,7 +315,8 @@ class OperativeDocsRelationManager extends RelationManager
                                                             })
                                                             ->disabled(function ($record) {
                                                                 if ($record) {
-                                                                    return true;
+                                                                    // In edit mode: lock only when this record IS the Slip (type 1)
+                                                                    return (int) ($record->operative_doc_type_id ?? 0) === 1;
                                                                 }
 
                                                                 $business = $this->getOwnerRecord();
@@ -2120,9 +2125,11 @@ class OperativeDocsRelationManager extends RelationManager
 
                     ->mutateDataUsing(function (array $data, $livewire, $record) {
 
-                        // ✅ CAMBIO A4: si el record es Slip, no permitas cambiar el tipo
+                        // Slip always stays Slip; non-Slip cannot be changed to type 1
                         if ((int) ($record->operative_doc_type_id ?? 0) === 1) {
-                            $data['operative_doc_type_id'] = 1; // fuerza Slip
+                            $data['operative_doc_type_id'] = 1;
+                        } elseif ((int) ($data['operative_doc_type_id'] ?? 0) === 1) {
+                            $data['operative_doc_type_id'] = $record->operative_doc_type_id;
                         }
 
                         return $data;
@@ -2176,13 +2183,16 @@ class OperativeDocsRelationManager extends RelationManager
                     ->color('warning')
                     ->visible(fn ($record): bool =>
                         auth()->user()?->can('update_business') &&
-                        in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8])
+                        in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8]) &&
+                        ! $this->getOwnerRecord()->operativeDocs()
+                            ->where('operative_doc_type_id', 5)
+                            ->exists()
                     )
                     ->requiresConfirmation()
                     ->modalHeading(fn ($record) => 'Clone — ' . ($record->docType->name ?? 'Document') . ' #' . $record->index)
                     ->modalDescription(fn ($record) => (int) ($record?->operative_doc_type_id ?? 0) === 1
-                        ? 'A copy of document ' . $record->id . ' will be created as an Endorsement B (type 4). Schemes will be duplicated and all insured premiums will be set to 0. Transactions are not included.'
-                        : 'A copy of document ' . $record->id . ' will be created with the next available index for this business. Schemes and insureds will be duplicated. Transactions are not included.'
+                        ? 'A copy of document ' . $record->id . ' will be created as an Endorsement B (type 4) with insured premiums set to 0. After cloning, you can edit the document type (types 2+) and all other fields. Transactions are not included.'
+                        : 'A copy of document ' . $record->id . ' will be created with type "' . ($record->docType->name ?? 'same') . '". After cloning, you can edit the document type (types 2+) and all other fields. Transactions are not included.'
                     )
                     ->modalSubmitActionLabel('Clone')
                     ->modalIcon('heroicon-o-document-duplicate')
