@@ -49,4 +49,42 @@ class GraphMessage
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'subject' => $this->subject,
+
+            'body' => [
+                'contentType' => $this->html ? 'HTML' : 'Text',
+                'content' => $this->html ?? $this->text ?? '',
+            ],
+
+            'toRecipients' => $this->mapAddresses($this->to),
+
+            'ccRecipients' => $this->mapAddresses($this->cc),
+
+            'bccRecipients' => $this->mapAddresses($this->bcc),
+
+            'replyTo' => $this->mapAddresses($this->replyTo),
+
+            'attachments' => collect($this->attachments)
+                ->map(fn ($attachment) => $attachment->toArray())
+                ->values()
+                ->all(),
+        ];
+    }
+
+    private function mapAddresses(array $addresses): array
+    {
+        return collect($addresses)
+            ->map(fn ($address) => [
+                'emailAddress' => array_filter([
+                    'address' => $address['email'],
+                    'name' => $address['name'],
+                ]),
+            ])
+            ->values()
+            ->all();
+    }
 }

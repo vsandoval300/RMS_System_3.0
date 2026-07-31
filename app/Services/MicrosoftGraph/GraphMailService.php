@@ -23,26 +23,10 @@ class GraphMailService
                 config('services.graph.from')
             ),
             [
-                'message' => $message,
-                'saveToSentItems' => true,
+                'message' => $message->toArray(),
+                'saveToSentItems' => $message->saveToSentItems,
             ]
         )
         ->throw();
-    }
-
-    protected function mapRecipients(string|array $emails): array
-    {
-        $emails = is_array($emails)
-            ? $emails
-            : [$emails];
-
-        return collect($emails)
-            ->map(fn ($email) => [
-                'emailAddress' => [
-                    'address' => $email,
-                ],
-            ])
-            ->values()
-            ->all();
     }
 }
