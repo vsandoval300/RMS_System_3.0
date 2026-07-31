@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Mail\Graph;
+namespace App\Services\MicrosoftGraph;
 
+use App\Mail\Graph\GraphMessageFactory;
+use App\Mail\Graph\GraphTransport;
 use App\Services\MicrosoftGraph\GraphMailService;
 
 class GraphTransportFactory
