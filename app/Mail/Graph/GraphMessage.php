@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mail\Graph\MicrosoftGraph;
+namespace App\Mail\Graph;
 
 class GraphMessage
 {

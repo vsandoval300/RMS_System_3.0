@@ -2,7 +2,7 @@
 
 namespace App\Services\MicrosoftGraph;
 
-use App\Mail\Graph\MicrosoftGraph\GraphMessage;
+use App\Mail\Graph\GraphMessage;
 use Illuminate\Support\Facades\Http;
 
 class GraphMailService
