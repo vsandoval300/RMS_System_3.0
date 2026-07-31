@@ -4,7 +4,7 @@ namespace App\Mail\Graph;
 
 use App\Mail\Graph\GraphAttachment as GraphGraphAttachment;
 use App\Mail\Graph\MicrosoftGraph\GraphMessage;
-use App\Services\MicrosoftGraph\GraphAttachment;
+use App\Mail\Graph\GraphAttachment;
 use Symfony\Component\Mime\Email;
 
 class GraphMessageFactory
