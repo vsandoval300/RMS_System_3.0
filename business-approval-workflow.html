@@ -1,0 +1,859 @@
+<title>Business Approval Workflow — RMS Platform 4</title>
+<style>
+  :root {
+    --bg:       #F0F4F8;
+    --surface:  #FFFFFF;
+    --border:   #DDE3EC;
+    --text:     #0F172A;
+    --muted:    #60748A;
+    --accent:   #2563EB;
+    --draft:    #64748B;
+    --pending:  #C27A0A;
+    --approved: #05875E;
+    --rejected: #C8303A;
+    --cancelled:#94A3B8;
+    --batch:    #6D28D9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:      #0C1117;
+      --surface: #151D2B;
+      --border:  #243044;
+      --text:    #E8EEF6;
+      --muted:   #7A90A8;
+      --accent:  #4A8BF5;
+      --draft:   #8FA0B5;
+      --pending: #EDA336;
+      --approved:#22C78B;
+      --rejected:#F26672;
+      --batch:   #A78BFA;
+    }
+  }
+  :root[data-theme="dark"]  { --bg:#0C1117;--surface:#151D2B;--border:#243044;--text:#E8EEF6;--muted:#7A90A8;--accent:#4A8BF5;--draft:#8FA0B5;--pending:#EDA336;--approved:#22C78B;--rejected:#F26672;--batch:#A78BFA; }
+  :root[data-theme="light"] { --bg:#F0F4F8;--surface:#FFFFFF;--border:#DDE3EC;--text:#0F172A;--muted:#60748A;--accent:#2563EB;--draft:#64748B;--pending:#C27A0A;--approved:#05875E;--rejected:#C8303A;--batch:#6D28D9; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2.25rem 2rem;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+
+  /* —— Header —— */
+  .hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2rem; padding-bottom:1.25rem; border-bottom:2px solid var(--accent); }
+  .hdr-left h1 { font-size:1.6rem; font-weight:800; letter-spacing:-0.025em; }
+  .hdr-left p  { color:var(--muted); font-size:0.8rem; margin-top:0.25rem; }
+  .hdr-right   { text-align:right; }
+  .hdr-tag     { display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent); border-radius:4px; padding:0.2rem 0.55rem; }
+
+  /* —— Cards —— */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:0.75rem; padding:1.35rem 1.5rem; }
+  .section-label {
+    font-size:0.66rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* —— Camino headers —— */
+  .camino-hdr {
+    display:flex; align-items:center; gap:0.75rem;
+    margin-bottom:1rem; padding:0.65rem 1rem;
+    border-radius:0.5rem; border-left:3px solid;
+  }
+  .camino-hdr.c1 { border-color:var(--accent); background:rgba(37,99,235,.05); }
+  .camino-hdr.c2 { border-color:var(--batch);  background:rgba(109,40,217,.05); }
+  .camino-hdr .c-num {
+    width:28px; height:28px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.8rem; font-weight:800; flex-shrink:0;
+  }
+  .camino-hdr.c1 .c-num { background:rgba(37,99,235,.15); color:var(--accent); }
+  .camino-hdr.c2 .c-num { background:rgba(109,40,217,.15); color:var(--batch); }
+  .camino-hdr .c-title { font-weight:700; font-size:0.92rem; }
+  .camino-hdr .c-sub   { font-size:0.75rem; color:var(--muted); }
+
+  /* —— Overview grid —— */
+  .overview-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem;
+  }
+  .overview-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:0.75rem;
+    padding:1.1rem 1.25rem; position:relative; overflow:hidden;
+  }
+  .overview-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  }
+  .overview-card.c1::before { background:var(--accent); }
+  .overview-card.c2::before { background:var(--batch); }
+  .overview-card h3 { font-size:0.88rem; font-weight:700; margin-bottom:0.25rem; }
+  .overview-card p  { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+  .overview-tag {
+    display:inline-block; font-size:0.68rem; font-weight:700; letter-spacing:0.06em;
+    text-transform:uppercase; padding:0.15rem 0.5rem; border-radius:4px; margin-bottom:0.5rem;
+  }
+  .overview-card.c1 .overview-tag { background:rgba(37,99,235,.1); color:var(--accent); }
+  .overview-card.c2 .overview-tag { background:rgba(109,40,217,.1); color:var(--batch); }
+
+  /* —— State machine container —— */
+  .diagram-wrap { margin-bottom:0; }
+  .diagram-wrap svg { display:block; width:100%; max-width:820px; margin:0 auto; }
+
+  /* —— Grid layouts —— */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-bottom:1.25rem; }
+
+  /* —— Badges —— */
+  .badge {
+    display:inline-flex; align-items:center; gap:0.3rem;
+    padding:0.22rem 0.6rem; border-radius:99px;
+    font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+  }
+  .b-draft    { color:var(--draft);    background:rgba(100,116,139,.12); }
+  .b-pending  { color:var(--pending);  background:rgba(217,119,6,.12); }
+  .b-approved { color:var(--approved); background:rgba(5,135,94,.12); }
+  .b-rejected { color:var(--rejected); background:rgba(200,48,58,.12); }
+  .b-cancelled{ color:var(--cancelled);background:rgba(148,163,184,.1); }
+  .b-batch    { color:var(--batch);    background:rgba(109,40,217,.12); }
+  .b-dot { width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0; }
+
+  /* —— Actor cards —— */
+  .actor-head { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.85rem; }
+  .actor-avatar {
+    width:38px; height:38px; border-radius:0.5rem;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; flex-shrink:0;
+  }
+  .actor-avatar.creator  { background:rgba(37,99,235,.12); }
+  .actor-avatar.manager  { background:rgba(5,135,94,.12); }
+  .actor-avatar.importer { background:rgba(109,40,217,.12); }
+  .actor-name  { font-weight:700; font-size:0.95rem; }
+  .actor-role  { font-size:0.76rem; color:var(--muted); }
+  .action-list { list-style:none; display:flex; flex-direction:column; gap:0.4rem; }
+  .action-item {
+    display:flex; align-items:flex-start; gap:0.6rem;
+    padding:0.5rem 0.65rem; border-radius:0.45rem;
+    border:1px solid var(--border); font-size:0.8rem;
+  }
+  .action-icon { font-size:0.85rem; flex-shrink:0; margin-top:0.05rem; }
+  .action-text { flex:1; }
+  .action-when { font-size:0.72rem; color:var(--muted); margin-top:0.1rem; }
+
+  /* —— Notification table —— */
+  .notif-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+  .notif-table th {
+    text-align:left; font-size:0.67rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--muted); padding:0.45rem 0.75rem;
+    border-bottom:2px solid var(--border);
+  }
+  .notif-table td { padding:0.65rem 0.75rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  .notif-table tr:last-child td { border-bottom:none; }
+  .notif-table tr:hover td { background:rgba(37,99,235,.03); }
+  .camino-stripe-c1 td:first-child { border-left:3px solid var(--accent); }
+  .camino-stripe-c2 td:first-child { border-left:3px solid var(--batch); }
+
+  /* —— Channel chips —— */
+  .ch-wrap { display:flex; gap:0.3rem; flex-wrap:wrap; }
+  .ch {
+    font-size:0.67rem; font-weight:700; letter-spacing:0.04em;
+    padding:0.12rem 0.45rem; border-radius:4px; white-space:nowrap;
+  }
+  .ch-db     { background:rgba(37,99,235,.12);  color:var(--accent); }
+  .ch-mail   { background:rgba(217,119,6,.12);   color:var(--pending); }
+  .ch-digest { background:rgba(109,40,217,.12);  color:var(--batch); }
+  .ch-none   { background:rgba(100,116,139,.1);  color:var(--muted); }
+
+  /* —— Timing chip —— */
+  .timing-imm { font-size:0.72rem; color:var(--approved); font-weight:600; }
+  .timing-wk  { font-size:0.72rem; color:var(--batch);    font-weight:600; }
+
+  /* —— DB Schema —— */
+  .schema { width:100%; border-collapse:collapse; font-size:0.8rem; }
+  .schema th {
+    text-align:left; font-size:0.67rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--muted); padding:0.45rem 0.75rem;
+    border-bottom:2px solid var(--border);
+  }
+  .schema td { padding:0.55rem 0.75rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  .schema tr:last-child td { border-bottom:none; }
+  .schema tr:hover td { background:rgba(37,99,235,.04); }
+  .col-n { font-family:'Fira Code','Consolas',monospace; font-size:0.76rem; color:var(--accent); }
+  .col-n.batch { color:var(--batch); }
+  .col-t { font-family:monospace; font-size:0.75rem; color:var(--muted); }
+  .col-d { font-size:0.78rem; }
+  .col-when { font-size:0.74rem; color:var(--muted); }
+
+  /* —— UI Locations —— */
+  .ui-pills { display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .ui-pill {
+    display:inline-flex; align-items:center; gap:0.45rem;
+    padding:0.35rem 0.8rem; border:1px solid var(--border);
+    border-radius:0.5rem; font-size:0.78rem;
+  }
+  .ui-dot   { width:7px; height:7px; border-radius:50%; background:var(--accent); }
+  .ui-dot-b { width:7px; height:7px; border-radius:50%; background:var(--batch); }
+
+  /* —— Policy rules —— */
+  .rule { display:flex; gap:0.75rem; align-items:flex-start; padding:0.5rem 0; border-bottom:1px solid var(--border); }
+  .rule:last-child { border-bottom:none; }
+  .rule-badge { flex-shrink:0; margin-top:0.1rem; }
+  .rule-text { font-size:0.8rem; }
+  .rule-cond { font-size:0.74rem; color:var(--muted); margin-top:0.1rem; font-style:italic; }
+
+  /* —— Digest callout box —— */
+  .digest-box {
+    background:rgba(109,40,217,.06); border:1px solid rgba(109,40,217,.25);
+    border-radius:0.6rem; padding:1rem 1.1rem; margin-top:1.25rem;
+  }
+  .digest-box .d-title {
+    font-size:0.78rem; font-weight:700; color:var(--batch); margin-bottom:0.4rem;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .digest-box p { font-size:0.77rem; color:var(--muted); line-height:1.55; }
+  .digest-box ul { margin-top:0.5rem; padding-left:1rem; font-size:0.77rem; color:var(--muted); display:flex; flex-direction:column; gap:0.25rem; }
+
+  /* —— Section divider —— */
+  .section-block { margin-bottom:1.25rem; }
+  .section-block .card { margin-bottom:0; }
+
+  .spacer { margin-bottom:1.25rem; }
+  code { font-family:'Fira Code','Consolas',monospace; font-size:0.78em; background:rgba(37,99,235,.08); padding:0.1em 0.35em; border-radius:3px; }
+</style>
+
+<!-- —— HEADER ——————————————————————————————————————————————————————— -->
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>Business Approval Workflow</h1>
+    <p>RMS Platform 4 · Underwritten Module · app/Filament/Resources/Businesses/</p>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-tag">upgrade/filament-v4</div>
+    <div style="font-size:0.73rem;color:var(--muted);margin-top:0.4rem;">Migrations: 2026_07_09 · 2026_07_13</div>
+  </div>
+</div>
+
+<!-- —— OVERVIEW: DOS CAMINOS ————————————————————————————————————————— -->
+<div class="overview-grid spacer">
+  <div class="overview-card c1">
+    <div class="overview-tag">Camino 1</div>
+    <h3>Alta Manual</h3>
+    <p>El usuario registra el negocio uno a uno desde el admin panel. El ciclo completo DFT → PND → APR se recorre negocio por negocio. Las acciones están en las páginas <strong>Edit</strong> y <strong>View</strong> de cada Business.</p>
+  </div>
+  <div class="overview-card c2">
+    <div class="overview-tag">Camino 2</div>
+    <h3>Carga Masiva por Batch Import</h3>
+    <p>El usuario sube un archivo Excel con múltiples negocios. Se crea un <strong>Import Batch</strong> (IMP-YYYY-NNNN) que agrupa todos los registros. El Manager aprueba o rechaza el batch completo. Sin ciclo por negocio individual.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- CAMINO 1: ALTA MANUAL                                             -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+
+<div class="spacer">
+  <div class="camino-hdr c1">
+    <div class="c-num">1</div>
+    <div>
+      <div class="c-title">Alta Manual — Ciclo de Aprobación Individual</div>
+      <div class="c-sub">app/Filament/Resources/Businesses/Pages/EditBusiness.php · ViewBusiness.php</div>
+    </div>
+  </div>
+
+  <!-- State machine C1 -->
+  <div class="card diagram-wrap spacer">
+    <div class="section-label">Estado approval_status · Camino 1</div>
+    <svg viewBox="0 0 820 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah-g" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" fill="var(--muted)" opacity="0.55"/>
+        </marker>
+        <marker id="ah-d" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" fill="var(--muted)" opacity="0.4"/>
+        </marker>
+      </defs>
+
+      <!-- DRAFT → PENDING -->
+      <line x1="162" y1="94" x2="238" y2="94" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah-g)"/>
+      <!-- PENDING → APPROVED -->
+      <line x1="388" y1="94" x2="478" y2="94" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah-g)"/>
+      <!-- PENDING → REJECTED -->
+      <line x1="313" y1="118" x2="313" y2="212" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah-g)"/>
+      <!-- REJECTED → PENDING (curved, dashed) -->
+      <path d="M 228 236 C 110 236 110 94 236 94" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ah-d)"/>
+
+      <!-- labels -->
+      <text x="200" y="77" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Submit for Review</text>
+      <text x="200" y="90" text-anchor="middle" font-size="9.5" fill="var(--muted)">Creator</text>
+      <text x="433" y="77" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Approve</text>
+      <text x="433" y="90" text-anchor="middle" font-size="9.5" fill="var(--muted)">Manager</text>
+      <text x="340" y="155" text-anchor="start" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Request</text>
+      <text x="340" y="167" text-anchor="start" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Revision</text>
+      <text x="340" y="180" text-anchor="start" font-size="9.5" fill="var(--muted)">Manager</text>
+      <text x="98" y="160" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.65">Re-submit</text>
+      <text x="98" y="173" text-anchor="middle" font-size="9.5" fill="var(--muted)">Creator</text>
+      <text x="98" y="186" text-anchor="middle" font-size="8.5" fill="var(--muted)" opacity="0.6">⟳ loop</text>
+
+      <!-- DRAFT -->
+      <rect x="22" y="72" width="140" height="44" rx="9" fill="rgba(100,116,139,.09)" stroke="var(--draft)" stroke-width="1.75"/>
+      <text x="92" y="91" text-anchor="middle" font-size="11" font-weight="800" fill="var(--draft)" letter-spacing="0.06em">DRAFT</text>
+      <text x="92" y="107" text-anchor="middle" font-size="9.5" fill="var(--draft)" opacity="0.7">DFT · initial default</text>
+
+      <!-- PENDING -->
+      <rect x="240" y="72" width="148" height="44" rx="9" fill="rgba(217,119,6,.09)" stroke="var(--pending)" stroke-width="1.75"/>
+      <text x="314" y="91" text-anchor="middle" font-size="11" font-weight="800" fill="var(--pending)" letter-spacing="0.06em">PENDING</text>
+      <text x="314" y="107" text-anchor="middle" font-size="9.5" fill="var(--pending)" opacity="0.7">PND · awaiting review</text>
+
+      <!-- APPROVED -->
+      <rect x="480" y="72" width="158" height="44" rx="9" fill="rgba(5,135,94,.09)" stroke="var(--approved)" stroke-width="1.75"/>
+      <text x="559" y="91" text-anchor="middle" font-size="11" font-weight="800" fill="var(--approved)" letter-spacing="0.06em">APPROVED</text>
+      <text x="559" y="107" text-anchor="middle" font-size="9.5" fill="var(--approved)" opacity="0.7">APR · terminal ✓</text>
+
+      <!-- REJECTED -->
+      <rect x="228" y="214" width="170" height="46" rx="9" fill="rgba(200,48,58,.09)" stroke="var(--rejected)" stroke-width="1.75"/>
+      <text x="313" y="234" text-anchor="middle" font-size="11" font-weight="800" fill="var(--rejected)" letter-spacing="0.06em">REJECTED</text>
+      <text x="313" y="250" text-anchor="middle" font-size="9.5" fill="var(--rejected)" opacity="0.75">REJ · "Needs Revision"</text>
+
+      <!-- CANCELLED (ghost) -->
+      <rect x="486" y="214" width="144" height="46" rx="9" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <text x="558" y="234" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--muted)" opacity="0.45" letter-spacing="0.06em">CANCELLED</text>
+      <text x="558" y="250" text-anchor="middle" font-size="9" fill="var(--muted)" opacity="0.4">CAN · no UI action yet</text>
+      <text x="558" y="272" text-anchor="middle" font-size="8.5" fill="var(--muted)" opacity="0.35">enum exists · DB column exists</text>
+
+      <!-- revision_notes callout -->
+      <rect x="650" y="218" width="158" height="38" rx="6" fill="rgba(200,48,58,.06)" stroke="rgba(200,48,58,.3)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="659" y="233" font-size="9" fill="var(--rejected)" opacity="0.8" font-weight="600">+ revision_notes (textarea)</text>
+      <text x="659" y="247" font-size="8.5" fill="var(--rejected)" opacity="0.6">stored on REJECTED transition</text>
+      <line x1="650" y1="237" x2="400" y2="237" stroke="var(--rejected)" stroke-width="0.8" stroke-opacity="0.25" stroke-dasharray="3 2"/>
+    </svg>
+  </div>
+
+  <!-- Actors C1 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-label">Actores · Camino 1</div>
+      <div style="margin-bottom:1.25rem;">
+        <div class="actor-head">
+          <div class="actor-avatar creator">🤝</div>
+          <div>
+            <div class="actor-name">Creator (Dueño del Negocio)</div>
+            <div class="actor-role">El usuario que registró el Business · <code>created_by_user</code></div>
+          </div>
+        </div>
+        <ul class="action-list">
+          <li class="action-item">
+            <span class="action-icon">📤</span>
+            <div class="action-text">
+              <strong>Submit for Review</strong>
+              <div class="action-when">Cuando status = <span class="badge b-draft"><span class="b-dot"></span>DRAFT</span> o <span class="badge b-rejected"><span class="b-dot"></span>REJECTED</span></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:0.75rem 0;">
+      <div>
+        <div class="actor-head">
+          <div class="actor-avatar manager">🏢</div>
+          <div>
+            <div class="actor-name">Manager (Directo del Creator)</div>
+            <div class="actor-role"><code>users.manager_id</code> del creador · auto-detectado</div>
+          </div>
+        </div>
+        <ul class="action-list">
+          <li class="action-item">
+            <span class="action-icon">✅</span>
+            <div class="action-text">
+              <strong>Approve</strong>
+              <div class="action-when">Solo cuando status = <span class="badge b-pending"><span class="b-dot"></span>PENDING</span></div>
+            </div>
+          </li>
+          <li class="action-item">
+            <span class="action-icon">📝</span>
+            <div class="action-text">
+              <strong>Request Revision</strong>
+              <div class="action-when">Solo cuando status = <span class="badge b-pending"><span class="b-dot"></span>PENDING</span> · abre modal con textarea</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div style="margin-top:1rem;padding:0.65rem 0.85rem;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:0.5rem;font-size:0.77rem;color:var(--muted);">
+        ⚠ Si el Creator no tiene <code>manager_id</code> asignado, la notificación se omite silenciosamente pero la transición de estado sí ocurre.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Policy Gates · Camino 1 (BusinessPolicy)</div>
+      <div class="rule">
+        <div class="rule-badge"><span class="badge b-pending" style="font-size:0.65rem;">submitForReview</span></div>
+        <div class="rule-text">
+          Solo si <code>auth()->id() == created_by_user</code>
+          <div class="rule-cond">Y status es DRAFT o REJECTED</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="rule-badge"><span class="badge b-approved" style="font-size:0.65rem;">approveBusiness</span></div>
+        <div class="rule-text">
+          Solo si <code>auth()->id() == createdByUser->manager_id</code>
+          <div class="rule-cond">Y status es PENDING</div>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="rule-badge"><span class="badge b-rejected" style="font-size:0.65rem;">requestRevision</span></div>
+        <div class="rule-text">
+          Solo si <code>auth()->id() == createdByUser->manager_id</code>
+          <div class="rule-cond">Y status es PENDING</div>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:0.85rem 0;">
+      <div class="section-label" style="margin-bottom:0.65rem;">UI · Dónde aparecen las acciones</div>
+      <div class="ui-pills" style="margin-bottom:0.75rem;">
+        <div class="ui-pill"><span class="ui-dot"></span>ViewBusiness (header)</div>
+        <div class="ui-pill"><span class="ui-dot"></span>EditBusiness (header)</div>
+      </div>
+      <p style="font-size:0.77rem;color:var(--muted);">Las 3 acciones están duplicadas en ambas páginas. El botón solo aparece si el usuario cumple la condición de la policy.</p>
+      <div style="margin-top:0.75rem;font-size:0.77rem;color:var(--muted);"><strong style="color:var(--text);">Alerta de revisión</strong> — cuando status = REJECTED con <code>revision_notes</code>, el formulario de edición muestra un bloque naranja con las notas del manager, su nombre y la fecha.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- CAMINO 2: BATCH IMPORT                                            -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+
+<div class="spacer">
+  <div class="camino-hdr c2">
+    <div class="c-num">2</div>
+    <div>
+      <div class="c-title">Carga Masiva por Batch Import — Aprobación de Grupo</div>
+      <div class="c-sub">app/Filament/Resources/ImportBatches/ · app/Filament/Resources/Businesses/Pages/ImportBusinesses.php</div>
+    </div>
+  </div>
+
+  <!-- State machine C2 -->
+  <div class="card diagram-wrap spacer">
+    <div class="section-label">Estado del Import Batch + approval_status de Business · Camino 2</div>
+    <svg viewBox="0 0 820 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah-b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" fill="var(--batch)" opacity="0.7"/>
+        </marker>
+        <marker id="ah-r2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" fill="var(--rejected)" opacity="0.7"/>
+        </marker>
+        <marker id="ah-a2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" fill="var(--approved)" opacity="0.7"/>
+        </marker>
+      </defs>
+
+      <!-- Upload → Batch pending_review -->
+      <line x1="130" y1="94" x2="210" y2="94" stroke="var(--batch)" stroke-width="1.5" marker-end="url(#ah-b)"/>
+      <!-- Batch pending → Approved -->
+      <line x1="430" y1="80" x2="520" y2="80" stroke="var(--approved)" stroke-width="1.5" marker-end="url(#ah-a2)"/>
+      <!-- Batch pending → Rejected -->
+      <line x1="430" y1="108" x2="520" y2="175" stroke="var(--rejected)" stroke-width="1.5" marker-end="url(#ah-r2)"/>
+
+      <!-- Business DFT annotation arrows -->
+      <line x1="320" y1="130" x2="320" y2="165" stroke="var(--approved)" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#ah-a2)"/>
+      <line x1="320" y1="130" x2="556" y2="165" stroke="var(--rejected)" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#ah-r2)"/>
+
+      <!-- Labels on arrows -->
+      <text x="170" y="77" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Upload Excel</text>
+      <text x="170" y="90" text-anchor="middle" font-size="9.5" fill="var(--muted)">Importer</text>
+      <text x="475" y="68" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Approve Batch</text>
+      <text x="475" y="81" text-anchor="middle" font-size="9.5" fill="var(--muted)">Manager</text>
+      <text x="498" y="138" text-anchor="start" font-size="10.5" font-weight="700" fill="var(--text)" opacity="0.75">Reject Batch</text>
+      <text x="498" y="151" text-anchor="start" font-size="9.5" fill="var(--muted)">Manager</text>
+
+      <!-- Upload box -->
+      <rect x="22" y="72" width="108" height="44" rx="9" fill="rgba(109,40,217,.08)" stroke="var(--batch)" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <text x="76" y="91" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--batch)">Excel File</text>
+      <text x="76" y="106" text-anchor="middle" font-size="9" fill="var(--batch)" opacity="0.65">N businesses</text>
+
+      <!-- ImportBatch: pending_review -->
+      <rect x="212" y="62" width="218" height="64" rx="9" fill="rgba(109,40,217,.09)" stroke="var(--batch)" stroke-width="1.75"/>
+      <text x="321" y="83" text-anchor="middle" font-size="10" font-weight="800" fill="var(--batch)" letter-spacing="0.06em">IMPORT BATCH</text>
+      <text x="321" y="98" text-anchor="middle" font-size="9.5" fill="var(--batch)" opacity="0.8">pending_review</text>
+      <text x="321" y="114" text-anchor="middle" font-size="8.5" fill="var(--muted)">Businesses: DFT · batch_id asignado</text>
+
+      <!-- Approved terminal -->
+      <rect x="522" y="56" width="158" height="56" rx="9" fill="rgba(5,135,94,.09)" stroke="var(--approved)" stroke-width="1.75"/>
+      <text x="601" y="76" text-anchor="middle" font-size="10" font-weight="800" fill="var(--approved)" letter-spacing="0.06em">BATCH APPROVED</text>
+      <text x="601" y="91" text-anchor="middle" font-size="9" fill="var(--approved)" opacity="0.8">batch.status = approved</text>
+      <text x="601" y="105" text-anchor="middle" font-size="8.5" fill="var(--approved)" opacity="0.7">businesses → APR ✓</text>
+
+      <!-- Rejected terminal -->
+      <rect x="522" y="168" width="160" height="56" rx="9" fill="rgba(200,48,58,.09)" stroke="var(--rejected)" stroke-width="1.75"/>
+      <text x="602" y="188" text-anchor="middle" font-size="10" font-weight="800" fill="var(--rejected)" letter-spacing="0.06em">BATCH REJECTED</text>
+      <text x="602" y="203" text-anchor="middle" font-size="9" fill="var(--rejected)" opacity="0.8">batch.status = rejected</text>
+      <text x="602" y="217" text-anchor="middle" font-size="8.5" fill="var(--rejected)" opacity="0.7">businesses → soft deleted ✗</text>
+
+      <!-- Business APR outcome box -->
+      <rect x="236" y="168" width="166" height="40" rx="7" fill="rgba(5,135,94,.07)" stroke="rgba(5,135,94,.3)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="319" y="183" text-anchor="middle" font-size="9" fill="var(--approved)" font-weight="700">businesses.approval_status</text>
+      <text x="248" y="198" font-size="8.5" fill="var(--approved)" opacity="0.75">APR (approve)</text>
+      <text x="375" y="198" font-size="8.5" fill="var(--rejected)" opacity="0.75" text-anchor="end">soft-deleted (reject)</text>
+
+      <!-- Transaction note -->
+      <rect x="22" y="168" width="198" height="56" rx="7" fill="rgba(37,99,235,.05)" stroke="rgba(37,99,235,.2)" stroke-width="1"/>
+      <text x="32" y="184" font-size="9" fill="var(--accent)" font-weight="700">DB::transaction atómica</text>
+      <text x="32" y="198" font-size="8.5" fill="var(--muted)">Approve: batch + businesses en</text>
+      <text x="32" y="211" font-size="8.5" fill="var(--muted)">una sola tx. Sin aprobaciones parciales.</text>
+    </svg>
+  </div>
+
+  <!-- Actors C2 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-label">Actores · Camino 2</div>
+      <div style="margin-bottom:1.25rem;">
+        <div class="actor-head">
+          <div class="actor-avatar importer">📥</div>
+          <div>
+            <div class="actor-name">Importer</div>
+            <div class="actor-role">El usuario que carga el archivo Excel · <code>import_batches.imported_by</code></div>
+          </div>
+        </div>
+        <ul class="action-list">
+          <li class="action-item">
+            <span class="action-icon">📤</span>
+            <div class="action-text">
+              <strong>Upload Excel → Confirmar Import</strong>
+              <div class="action-when">Crea el ImportBatch en status <span class="badge b-batch"><span class="b-dot"></span>pending_review</span> + businesses en DFT</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:0.75rem 0;">
+      <div>
+        <div class="actor-head">
+          <div class="actor-avatar manager">🏢</div>
+          <div>
+            <div class="actor-name">Manager (Directo del Importer)</div>
+            <div class="actor-role"><code>Auth::user()->manager</code> del importer · auto-detectado</div>
+          </div>
+        </div>
+        <ul class="action-list">
+          <li class="action-item">
+            <span class="action-icon">✅</span>
+            <div class="action-text">
+              <strong>Approve Batch</strong>
+              <div class="action-when">En ViewImportBatch (header action) · Promueve todos los businesses a APR</div>
+            </div>
+          </li>
+          <li class="action-item">
+            <span class="action-icon">❌</span>
+            <div class="action-text">
+              <strong>Reject Batch</strong>
+              <div class="action-when">En ViewImportBatch · Abre modal con textarea de notas · Soft-delete en cascada</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Comportamiento del Reject · Cascade</div>
+      <p style="font-size:0.79rem;color:var(--muted);margin-bottom:0.85rem;">Al rechazar un batch, se aplica soft-delete en orden inverso de dependencias:</p>
+      <ol style="font-size:0.79rem;color:var(--text);padding-left:1.1rem;display:flex;flex-direction:column;gap:0.35rem;">
+        <li><code>businessdoc_schemes</code></li>
+        <li><code>businessdoc_insureds</code></li>
+        <li><code>operative_docs</code></li>
+        <li><code>liability_structures</code></li>
+        <li><code>cost_nodesx</code></li>
+        <li><code>cost_schemes</code></li>
+        <li><code>businesses</code></li>
+      </ol>
+      <div style="margin-top:0.85rem;padding:0.65rem 0.85rem;background:rgba(200,48,58,.06);border:1px solid rgba(200,48,58,.2);border-radius:0.5rem;font-size:0.77rem;color:var(--muted);">
+        Todos los registros tienen <code>import_batch_id</code> asignado al momento del import, lo que permite identificar y eliminar el grupo completo sin ambigüedad.
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:0.85rem 0;">
+      <div class="section-label" style="margin-bottom:0.65rem;">UI · Dónde aparecen las acciones</div>
+      <div class="ui-pills">
+        <div class="ui-pill"><span class="ui-dot-b"></span>Import Batches → List</div>
+        <div class="ui-pill"><span class="ui-dot-b"></span>Import Batches → View (header)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- NOTIFICACIONES: AMBOS CAMINOS                                     -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+
+<div class="card spacer">
+  <div class="section-label">Sistema de Notificaciones — Ambos Caminos</div>
+
+  <div style="overflow-x:auto;">
+    <table class="notif-table">
+      <thead>
+        <tr>
+          <th style="width:8px;">Camino</th>
+          <th>Evento disparador</th>
+          <th>Notification class</th>
+          <th>Destinatario</th>
+          <th>🔔 Campanita</th>
+          <th>📧 Correo</th>
+          <th>Timing</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- CAMINO 1 -->
+        <tr class="camino-stripe-c1">
+          <td><span class="badge b-draft" style="font-size:0.62rem;writing-mode:initial;white-space:nowrap;">C1</span></td>
+          <td style="font-size:0.8rem;font-weight:600;">Creator → Submit for Review</td>
+          <td><code style="font-size:0.73rem;">BusinessSubmittedForReview</code></td>
+          <td style="font-size:0.79rem;"><strong>Manager</strong> del creator</td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-db">database ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Inmediato · campanita en plataforma</div>
+          </td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-digest">digest semanal</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">No individual · incluido en resumen</div>
+          </td>
+          <td><span class="timing-imm">Inmediato</span> (bell)<br><span class="timing-wk">Lun 8am</span> (mail)</td>
+        </tr>
+        <tr class="camino-stripe-c1">
+          <td><span class="badge b-draft" style="font-size:0.62rem;white-space:nowrap;">C1</span></td>
+          <td style="font-size:0.8rem;font-weight:600;">Manager → Approve Business</td>
+          <td><code style="font-size:0.73rem;">BusinessReviewDecision<br>('approved')</code></td>
+          <td style="font-size:0.79rem;"><strong>Creator</strong> del negocio</td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-db">database ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Campanita verde · "Approved"</div>
+          </td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-mail">mail inmediato ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Asunto: [business_code] Approved</div>
+          </td>
+          <td><span class="timing-imm">Inmediato</span></td>
+        </tr>
+        <tr class="camino-stripe-c1">
+          <td><span class="badge b-draft" style="font-size:0.62rem;white-space:nowrap;">C1</span></td>
+          <td style="font-size:0.8rem;font-weight:600;">Manager → Request Revision</td>
+          <td><code style="font-size:0.73rem;">BusinessReviewDecision<br>('revision')</code></td>
+          <td style="font-size:0.79rem;"><strong>Creator</strong> del negocio</td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-db">database ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Campanita naranja · "Needs Revision"</div>
+          </td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-mail">mail inmediato ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Incluye revision_notes del manager</div>
+          </td>
+          <td><span class="timing-imm">Inmediato</span></td>
+        </tr>
+
+        <!-- SEPARADOR -->
+        <tr>
+          <td colspan="7" style="padding:0;border-bottom:2px solid var(--border);"></td>
+        </tr>
+
+        <!-- CAMINO 2 -->
+        <tr class="camino-stripe-c2">
+          <td><span class="badge b-batch" style="font-size:0.62rem;white-space:nowrap;">C2</span></td>
+          <td style="font-size:0.8rem;font-weight:600;">Importer → Upload & Confirm batch</td>
+          <td><code style="font-size:0.73rem;">BatchImportedNotification</code></td>
+          <td style="font-size:0.79rem;"><strong>Manager</strong> del importer</td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-db">database ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Campanita amarilla · "Pending Review"<br>Botón: "Review Batch" → ViewImportBatch</div>
+          </td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-digest">digest semanal</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">No individual · incluido en resumen</div>
+          </td>
+          <td><span class="timing-imm">Inmediato</span> (bell)<br><span class="timing-wk">Lun 8am</span> (mail)</td>
+        </tr>
+        <tr class="camino-stripe-c2">
+          <td><span class="badge b-batch" style="font-size:0.62rem;white-space:nowrap;">C2</span></td>
+          <td style="font-size:0.8rem;font-weight:600;">Manager → Approve Batch</td>
+          <td><code style="font-size:0.73rem;">BatchReviewDecisionNotification<br>('approved')</code></td>
+          <td style="font-size:0.79rem;"><strong>Importer</strong></td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-db">database ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Campanita verde · "Batch Approved"</div>
+          </td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-mail">mail inmediato ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Asunto: [IMP-YYYY-NNNN] Approved<br>Incluye: total records, reviewer name</div>
+          </td>
+          <td><span class="timing-imm">Inmediato</span></td>
+        </tr>
+        <tr class="camino-stripe-c2">
+          <td><span class="badge b-batch" style="font-size:0.62rem;white-space:nowrap;">C2</span></td>
+          <td style="font-size:0.8rem;font-weight:600;">Manager → Reject Batch</td>
+          <td><code style="font-size:0.73rem;">BatchReviewDecisionNotification<br>('rejected')</code></td>
+          <td style="font-size:0.79rem;"><strong>Importer</strong></td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-db">database ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Campanita roja · "Batch Rejected"</div>
+          </td>
+          <td>
+            <div class="ch-wrap"><span class="ch ch-mail">mail inmediato ✓</span></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Incluye: notes_reviewer del manager</div>
+          </td>
+          <td><span class="timing-imm">Inmediato</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Weekly digest callout -->
+  <div class="digest-box">
+    <div class="d-title">📬 Digest Semanal — PendingApprovalsDigestMail</div>
+    <p>Para evitar saturar la bandeja del Manager con correos individuales, todos los avisos al Manager (<em>pending items</em>) se consolidan en un solo correo semanal por aprobador.</p>
+    <ul>
+      <li><strong>Comando:</strong> <code>rms:send-approvals-digest</code> · Scheduled: lunes 8:00am · <code>withoutOverlapping()</code></li>
+      <li><strong>Destinatario:</strong> un correo por Manager, agrupando todo lo que le corresponde revisar</li>
+      <li><strong>Contenido Camino 1:</strong> listado de businesses en status PND — código, descripción, creador, tiempo esperando</li>
+      <li><strong>Contenido Camino 2:</strong> listado de Import Batches en status pending_review — código, total records, importer, tiempo esperando</li>
+      <li><strong>Si el manager no tiene email:</strong> se omite silenciosamente (sin error)</li>
+      <li><strong>Campanita:</strong> sigue siendo inmediata en ambos caminos — el digest solo aplica al canal mail</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- DB SCHEMA                                                         -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+
+<div class="grid-2">
+  <!-- businesses columns -->
+  <div class="card">
+    <div class="section-label">Columnas clave · tabla businesses</div>
+    <div style="overflow-x:auto;">
+      <table class="schema">
+        <thead>
+          <tr>
+            <th>Columna</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Se escribe cuando…</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="col-n">approval_status</span></td>
+            <td><span class="col-t">enum DFT/PND/APR/REJ/CAN</span></td>
+            <td><span class="col-t">'DFT'</span></td>
+            <td class="col-when">En cada transición · Cast a <code>ApprovalStatus</code></td>
+          </tr>
+          <tr>
+            <td><span class="col-n">approval_status_updated_at</span></td>
+            <td><span class="col-t">timestamp nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">Junto con cada cambio de status</td>
+          </tr>
+          <tr>
+            <td><span class="col-n">created_by_user</span></td>
+            <td><span class="col-t">FK → users.id</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">Al crear (manual o import)</td>
+          </tr>
+          <tr>
+            <td><span class="col-n">reviewed_by_user_id</span></td>
+            <td><span class="col-t">FK → users.id nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">En Approve / Request Revision (C1)</td>
+          </tr>
+          <tr>
+            <td><span class="col-n">revision_notes</span></td>
+            <td><span class="col-t">text nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">En Request Revision · limpiado en Approve</td>
+          </tr>
+          <tr>
+            <td><span class="col-n">import_batch_id</span></td>
+            <td><span class="col-t">FK → import_batches.id nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">Al importar via Excel (C2) · NULL en altas manuales</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- import_batches columns -->
+  <div class="card">
+    <div class="section-label">Columnas clave · tabla import_batches</div>
+    <div style="overflow-x:auto;">
+      <table class="schema">
+        <thead>
+          <tr>
+            <th>Columna</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Se escribe cuando…</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="col-n batch">batch_code</span></td>
+            <td><span class="col-t">string · IMP-YYYY-NNNN</span></td>
+            <td><span class="col-t">auto</span></td>
+            <td class="col-when">Al crear el batch (auto-generado)</td>
+          </tr>
+          <tr>
+            <td><span class="col-n batch">status</span></td>
+            <td><span class="col-t">pending_review / approved / rejected</span></td>
+            <td><span class="col-t">pending_review</span></td>
+            <td class="col-when">Al aprobar o rechazar en ViewImportBatch</td>
+          </tr>
+          <tr>
+            <td><span class="col-n batch">imported_by</span></td>
+            <td><span class="col-t">FK → users.id</span></td>
+            <td><span class="col-t">Auth::id()</span></td>
+            <td class="col-when">Al crear el batch</td>
+          </tr>
+          <tr>
+            <td><span class="col-n batch">reviewed_by</span></td>
+            <td><span class="col-t">FK → users.id nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">Al aprobar o rechazar</td>
+          </tr>
+          <tr>
+            <td><span class="col-n batch">notes_reviewer</span></td>
+            <td><span class="col-t">text nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">Al rechazar · notas del manager</td>
+          </tr>
+          <tr>
+            <td><span class="col-n batch">summary_json</span></td>
+            <td><span class="col-t">json nullable</span></td>
+            <td><span class="col-t">null</span></td>
+            <td class="col-when">Post-import · stats de inserted/updated/skipped</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:1rem;padding:0.65rem 0.85rem;background:rgba(109,40,217,.06);border:1px solid rgba(109,40,217,.2);border-radius:0.5rem;font-size:0.77rem;color:var(--muted);">
+      <strong style="color:var(--batch);">FK en 7 tablas:</strong> además de <code>businesses</code>, las tablas <code>cost_schemes</code>, <code>cost_nodesx</code>, <code>liability_structures</code>, <code>operative_docs</code>, <code>businessdoc_insureds</code> y <code>businessdoc_schemes</code> tienen <code>import_batch_id</code> para permitir el cascade delete en reject.
+    </div>
+  </div>
+</div>
+
+<!-- User hierarchy note -->
+<div class="card">
+  <div class="section-label">Jerarquía de Usuarios (manager_id) — Aplica a Ambos Caminos</div>
+  <div class="grid-2" style="margin-bottom:0;gap:1.5rem;">
+    <div>
+      <div style="font-size:0.82rem;margin-bottom:0.75rem;">La relación Manager → Creator/Importer es una <strong>auto-referencia</strong> en la tabla <code>users</code>:</div>
+      <div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:0.5rem;padding:0.75rem 1rem;font-family:monospace;font-size:0.78rem;line-height:1.7;">
+        users.id → users.manager_id<br>
+        <span style="color:var(--muted);">// self-referential FK, nullable</span><br>
+        <span style="color:var(--accent);">manager()</span>     → belongsTo(User, 'manager_id')<br>
+        <span style="color:var(--accent);">subordinates()</span> → hasMany(User, 'manager_id')
+      </div>
+    </div>
+    <div style="font-size:0.8rem;color:var(--muted);display:flex;flex-direction:column;gap:0.6rem;">
+      <div><strong style="color:var(--text);">Camino 1:</strong> el manager se resuelve como <code>createdByUser->manager</code> al momento de Submit for Review.</div>
+      <div><strong style="color:var(--text);">Camino 2:</strong> el manager se resuelve como <code>Auth::user()->manager</code> (importer's manager) al momento de confirmar el import.</div>
+      <div><strong style="color:var(--text);">Digest semanal:</strong> el comando agrupa los pendientes (PND businesses + pending_review batches) por <code>manager_id</code> y envía un correo por manager. Si un manager no tiene email registrado, se omite silenciosamente.</div>
+    </div>
+  </div>
+</div>

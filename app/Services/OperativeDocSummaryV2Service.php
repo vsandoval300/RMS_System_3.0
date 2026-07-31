@@ -276,6 +276,10 @@ class OperativeDocSummaryV2Service
                                 'banking'   => $log->banking_fee,
                                 'net'       => $log->net_amount,
                                 'status'    => $log->status,
+
+                                'due_date'      => $log->due_date,
+                                'sent_date'     => $log->sent_date,
+                                'received_date' => $log->received_date,
                             ],
                         ];
                     });
@@ -291,6 +295,7 @@ class OperativeDocSummaryV2Service
             'id' => $doc->id,
             'createdAt' => $doc->created_at,
             'documentType' => $doc->docType?->name ?? '-',
+            'description' => $doc->description ?? null,
             'inceptionDate' => $doc->inception_date,
             'expirationDate' => $doc->expiration_date,
             'premiumType' => $doc->business?->premium_type ?? '-',
@@ -311,6 +316,7 @@ class OperativeDocSummaryV2Service
             'totalDeductionOrig' => $totalDeductionOrig,
             'totalDeductionUsd' => $totalDeductionUsd,
             'totalShare' => $totalShare,
+            'roe_fs' => (float) ($doc->roe_fs ?? 0),
 
             'transactions' => $transactions->toArray(),
             'logsByTxn' => $logsByTxn,

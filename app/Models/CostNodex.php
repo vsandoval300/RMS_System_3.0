@@ -10,7 +10,7 @@ use App\Models\Traits\HasAuditLogs;
 
 class CostNodex extends Model
 {
-    use HasFactory, HasAuditLogs;
+    use HasFactory, SoftDeletes, HasAuditLogs;
 
     protected $table = 'cost_nodesx';
     protected $primaryKey = 'id';
@@ -29,6 +29,7 @@ class CostNodex extends Model
         'partner_source_id',
         'partner_destination_id',
         'cscheme_id',
+        'import_batch_id',
     ];
 
     // ✅ Recomendado: casteo a boolean

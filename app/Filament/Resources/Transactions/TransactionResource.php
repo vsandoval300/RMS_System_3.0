@@ -71,11 +71,11 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $navigationLabel  = 'Instalments';
-    protected static ?string $modelLabel       = 'Instalment';
-    protected static ?string $pluralModelLabel = 'Instalments';
+    protected static ?string $navigationLabel  = 'Premium Payment Tracker';
+    protected static ?string $modelLabel       = 'Premium Payment';
+    protected static ?string $pluralModelLabel = 'Premium Payment Tracker';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
     protected static string | \UnitEnum | null $navigationGroup = 'Transactions';
     protected static ?int    $navigationSort  = 1;   // aparecerá primero
 
@@ -95,6 +95,7 @@ class TransactionResource extends Resource
             ->join('businesses', 'operative_docs.business_id', '=', 'businesses.id')
             ->join('reinsurers', 'businesses.reinsurer_id', '=', 'reinsurers.id')
             ->select('transactions.*')
+            ->with('logs')
             ->orderBy('reinsurers.name')
             ->orderBy('transactions.op_document_id')
             ->orderBy('transactions.index');
@@ -136,19 +137,32 @@ class TransactionResource extends Resource
                     ->default([])
                     ->dehydrated(false),
 
-                Section::make('Installment Settings')
+                Section::make('Premium Settings')
                     ->description(fn (string $operation) => match ($operation) {
-                        'edit' => 'Review the transaction details and update only the transaction lifecycle records as needed.',
+                        'edit' => 'Review and update the premium payment details and its lifecycle records as needed.',
                         default => 'Select the document and specify the number of installments to be created.',
                     })
                     ->columns(8)
                     ->columnSpanFull()
                     ->schema([
 
+                        TextInput::make('index_display')
+                            ->label('Index')
+                            ->visibleOn('edit')
+                            ->readOnly()
+                            ->dehydrated(false)
+                            ->formatStateUsing(function (?Transaction $record): string {
+                                if (! $record?->exists) return '—';
+                                $total = Transaction::where('op_document_id', $record->op_document_id)
+                                    ->whereNull('deleted_at')
+                                    ->count();
+                                return "{$record->index} of {$total}";
+                            })
+                            ->columnSpan(1),
+
                         Select::make('op_document_id')
                             ->label('Document')
                             ->placeholder('Select document.')
-                            //->helperText('Choose the document to be used for transaction generation.')
                             ->relationship('operativeDoc', 'id')
                             ->searchable()
                             ->disabled(fn (?Transaction $record) => $record?->exists)
@@ -157,7 +171,7 @@ class TransactionResource extends Resource
                             ->optionsLimit(10000)
                             ->required()
                             ->live()
-                            ->columnSpan(2)
+                            ->columnSpan(fn (string $operation) => $operation === 'edit' ? 2 : 2)
                             ->default(fn () => request()->query('op_document_id'))
                             ->afterStateHydrated(function ($state, Get $get, Set $set, ?Transaction $record) {
                                 if ($record?->exists || blank($state)) {
@@ -211,10 +225,23 @@ class TransactionResource extends Resource
                             ->columnSpan(1),
 
 
+                        DatePicker::make('due_date')
+                            ->label('Due Date')
+                            ->visibleOn('edit')
+                            ->dehydrated(fn (string $operation) => $operation === 'edit')
+                            ->columnSpan(1),
+
+                        TextInput::make('exch_rate')
+                            ->label('Exchange Rate')
+                            ->visibleOn('edit')
+                            ->numeric()
+                            ->dehydrated(fn (string $operation) => $operation === 'edit')
+                            ->columnSpan(1),
+
                         TextInput::make('proportion_display')
                             ->label('Proportion')
                             ->visibleOn('edit')
-                            //->readOnly()
+                            ->readOnly()
                             ->dehydrated(false)
                             ->suffix('%')
                             ->formatStateUsing(fn (?Transaction $record) =>
@@ -222,15 +249,32 @@ class TransactionResource extends Resource
                                     ? number_format(((float) $record->proportion) * 100, 2)
                                     : null
                             )
-                            ->columnSpan(1),    
+                            ->columnSpan(1),
 
 
-                        View::make('filament.components.transaction-progress-bar')
+                        \Filament\Schemas\Components\Grid::make(8)
                             ->visibleOn('edit')
-                            ->viewData(fn (?Transaction $record) => [
-                                'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
+                            ->columnSpanFull()
+                            ->extraAttributes([
+                                'style' => '
+                                    border-top:1px solid light-dark(#e5e7eb, rgba(255,255,255,0.12));
+                                    padding:12px 0;
+                                    margin-top:8px;
+                                ',
                             ])
-                            ->columnSpan(4),    
+                            ->schema([
+                                Placeholder::make('lifecycle_progress_label')
+                                    ->hiddenLabel()
+                                    ->content('Lifecycle progress:')
+                                    ->extraAttributes(['style' => 'font-weight:600; text-align:left; padding-top:2px;'])
+                                    ->columnSpan(1),
+
+                                View::make('filament.components.transaction-progress-bar-inline')
+                                    ->viewData(fn (?Transaction $record) => [
+                                        'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
+                                    ])
+                                    ->columnSpan(3),
+                            ]),
 
 
                         TextInput::make('installment_number')
@@ -471,7 +515,7 @@ protected static function buildTransactionsBatch(string $opDocumentId, int $coun
 
     $currencyId = $opDoc?->business?->currency_id;
 
-    $exchRate = ((int) $currencyId === 157) ? 1 : null;
+    $exchRate = ((int) $currencyId === 157) ? 1 : ($opDoc?->roe_fs ?? null);
     $exchangeRateLocked = ((int) $currencyId === 157);
 
     $schemes = CostScheme::query()
@@ -645,7 +689,7 @@ protected static function applyDocumentDefaults(?string $opDocumentId, Get $get,
         $set('exchange_rate_locked', false);
 
         if ($currentRate === null || $currentRate === '' || (float) $currentRate === 1.0) {
-            $set('exch_rate', null);
+            $set('exch_rate', $opDoc?->roe_fs ?? null);
         }
     }
 
@@ -661,210 +705,108 @@ protected static function applyDocumentDefaults(?string $opDocumentId, Get $get,
 public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
-        Section::make('Transaction Profile')
+        Section::make('Premium Payment Information')
+            ->icon('heroicon-o-banknotes')
             ->columnSpanFull()
             ->schema([
-                \Filament\Schemas\Components\Grid::make()
-                    ->columns([
-                        'default' => 1,
-                        'md' => 2,
-                    ])
-                    ->extraAttributes(['style' => 'column-gap:24px;'])
-                    ->schema([
 
-                        /* ───────────── LEFT COLUMN ───────────── */
-                        \Filament\Schemas\Components\Grid::make(1)
-                            ->columnSpan([
-                                'default' => 1,
-                                'md' => 1,
-                            ])
-                            ->extraAttributes(['style' => 'row-gap:0;'])
-                            ->schema([
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('id_label')->hiddenLabel()
-                                            ->state('Id transaction:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(3),
-
-                                        TextEntry::make('id')->hiddenLabel()
-                                            ->state(fn ($record) => $record->id ?: '—')
-                                            ->columnSpan(9),
-                                    ]),
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('index_label')->hiddenLabel()
-                                            ->state('Index:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(3),
-
-                                        TextEntry::make('index')->hiddenLabel()
-                                            ->state(fn ($record) => $record->index ?: '—')
-                                            ->columnSpan(9),
-                                    ]),
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('document_label')->hiddenLabel()
-                                            ->state('Document:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(3),
-
-                                        TextEntry::make('op_document_id')->hiddenLabel()
-                                            ->state(fn ($record) => $record->op_document_id ?: '—')
-                                            ->columnSpan(9),
-                                    ]),
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('type_label')->hiddenLabel()
-                                            ->state('Transaction type:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(3),
-
-                                        TextEntry::make('type.description')->hiddenLabel()
-                                            ->state(fn ($record) => $record->type?->description ?? '—')
-                                            ->columnSpan(9),
-                                    ]),
-                            ]),
-
-                        /* ───────────── RIGHT COLUMN ───────────── */
-                        \Filament\Schemas\Components\Grid::make(1)
-                            ->columnSpan([
-                                'default' => 1,
-                                'md' => 1,
-                            ])
-                            ->extraAttributes(['style' => 'row-gap:0;'])
-                            ->schema([
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('status_label')->hiddenLabel()
-                                            ->state('Transaction status:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(4),
-
-                                        TextEntry::make('status.transaction_status')->hiddenLabel()
-                                            ->state(fn ($record) => $record->status?->transaction_status ?? '—')
-                                            ->columnSpan(8),
-                                    ]),
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('remmitance_label')->hiddenLabel()
-                                            ->state('Remittance code:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(4),
-
-                                        TextEntry::make('remmitanceCode.remmitance_code')->hiddenLabel()
-                                            ->state(fn ($record) => $record->remmitanceCode?->remmitance_code ?? '—')
-                                            ->columnSpan(8),
-                                    ]),
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('duedate_label')->hiddenLabel()
-                                            ->state('Due date:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(4),
-
-                                        TextEntry::make('due_date')->hiddenLabel()
-                                            ->state(fn ($record) =>
-                                                $record->due_date
-                                                    ? $record->due_date->format('M j, Y')
-                                                    : '—'
-                                            )
-                                            ->columnSpan(8),
-                                    ]),
-
-                                \Filament\Schemas\Components\Grid::make(12)
-                                    ->extraAttributes([
-                                        'style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;',
-                                    ])
-                                    ->schema([
-                                        TextEntry::make('proportion_label')->hiddenLabel()
-                                            ->state('Proportion:')
-                                            ->weight('bold')
-                                            ->alignment('right')
-                                            ->columnSpan(4),
-
-                                        TextEntry::make('proportion')->hiddenLabel()
-                                            ->state(fn ($record) =>
-                                                $record->proportion !== null
-                                                    ? number_format(((float) $record->proportion) * 100, 2) . '%'
-                                                    : '—'
-                                            )
-                                            ->columnSpan(8),
-                                    ]),
-
-                                
-
-
-
-
-
-
-                                    
-                            ]),
-
-                            
-                    ]),
-
+                /* ── Full-width: Index · Id Transaction · Document ── */
+                Section::make()->compact()->schema([
                     \Filament\Schemas\Components\Grid::make(12)
-                    ->extraAttributes([
-                        'style' => '
-                            border-bottom:1px solid rgba(255,255,255,0.12);
-                            padding:12px 0;
-                        ',
-                    ])
-                    ->schema([
+                        ->extraAttributes(['style' => 'padding:2px 0;'])
+                        ->schema([
+                            TextEntry::make('index_combined')->hiddenLabel()
+                                ->state(function ($record) {
+                                    if (! $record?->index) return '<strong>Index:</strong> —';
+                                    $total = Transaction::where('op_document_id', $record->op_document_id)
+                                        ->whereNull('deleted_at')->count();
+                                    return "<strong>Index:</strong> {$record->index} of {$total}";
+                                })
+                                ->html()
+                                ->columnSpan(2),
 
-                        TextEntry::make('lifecycle_progress_label')
-                            ->hiddenLabel()
-                            ->state('Lifecycle progress:')
-                            ->weight('bold')
-                            ->alignment('right')
-                            ->columnSpan(2),
+                            TextEntry::make('id_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Id Transaction:</strong> ' . ($record->id ?: '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'white-space:nowrap;'])
+                                ->columnSpan(5),
 
-                        ViewEntry::make('lifecycle_progress')
-                            ->hiddenLabel()
-                            ->view('filament.components.transaction-progress-bar-inline')
-                            ->viewData(fn ($record) => [
-                                'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
-                            ])
-                            ->columnSpan(10),
+                            TextEntry::make('doc_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Document:</strong> ' . ($record->op_document_id ?: '—'))
+                                ->html()
+                                ->columnSpan(3),
 
-                    ]),
+                            TextEntry::make('top_row_spacer')->hiddenLabel()
+                                ->state('')
+                                ->columnSpan(2),
+                        ]),
+                ]),
+
+                /* ── 3-column grid ── */
+                Section::make()->compact()->schema([
+                    \Filament\Schemas\Components\Grid::make(3)
+                        ->extraAttributes(['style' => 'column-gap:24px;'])
+                        ->schema([
+                            /* Row 1 */
+                            TextEntry::make('status_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Transaction status:</strong> ' . ($record->status?->transaction_status ?? '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'padding:2px 0;'])
+                                ->columnSpan(1),
+
+                            TextEntry::make('exch_rate_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Exchange rate:</strong> ' . ($record->exch_rate !== null ? number_format((float) $record->exch_rate, 4) : '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'padding:2px 0;'])
+                                ->columnSpan(1),
+
+                            TextEntry::make('duedate_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Due date:</strong> ' . ($record->due_date ? $record->due_date->format('M j, Y') : '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'padding:2px 0;'])
+                                ->columnSpan(1),
+
+                            /* Row 2 */
+                            TextEntry::make('type_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Transaction type:</strong> ' . ($record->type?->description ?? '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'padding:2px 0;'])
+                                ->columnSpan(1),
+
+                            TextEntry::make('proportion_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Proportion:</strong> ' . ($record->proportion !== null ? number_format(((float) $record->proportion) * 100, 2) . '%' : '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'padding:2px 0;'])
+                                ->columnSpan(1),
+
+                            TextEntry::make('remmitance_combined')->hiddenLabel()
+                                ->state(fn ($record) => '<strong>Remittance code:</strong> ' . ($record->remmitanceCode?->remmitance_code ?? '—'))
+                                ->html()
+                                ->extraAttributes(['style' => 'padding:2px 0;'])
+                                ->columnSpan(1),
+                        ]),
+                ]),
+
+                /* ── Lifecycle progress ── */
+                Section::make()->compact()->schema([
+                    \Filament\Schemas\Components\Grid::make(12)
+                        ->extraAttributes(['style' => 'padding:4px 0;'])
+                        ->schema([
+                            TextEntry::make('lifecycle_progress_label')
+                                ->hiddenLabel()
+                                ->state('<span style="display:block;text-align:right;font-weight:bold;padding-top:7px;">Lifecycle progress:</span>')
+                                ->html()
+                                ->columnSpan(2),
+
+                            ViewEntry::make('lifecycle_progress')
+                                ->hiddenLabel()
+                                ->view('filament.components.transaction-progress-bar-inline')
+                                ->viewData(fn ($record) => [
+                                    'progress' => $record?->fresh()?->lifecycleProgressPercentage() ?? 0,
+                                ])
+                                ->columnSpan(5),
+                        ]),
+                ]),
 
 
             ])
@@ -953,7 +895,7 @@ public static function infolist(Schema $schema): Schema
                                 ->whereNull('deleted_at')
                                 ->count();
                         }
-                        return "{$state} / {$countCache[$docId]}";
+                        return "{$state} of {$countCache[$docId]}";
                     }),
 
                 TextColumn::make('proportion')
@@ -980,7 +922,15 @@ public static function infolist(Schema $schema): Schema
                             ? 'heroicon-m-exclamation-triangle'
                             : null
                     )
-                    ->iconColor('danger'),
+                    ->iconColor('danger')
+                    ->description(fn (Transaction $record): ?string =>
+                        $record->due_date && $record->status?->transaction_status !== 'Completed'
+                            ? (function () use ($record) {
+                                $days = (int) now()->startOfDay()->diffInDays($record->due_date->startOfDay(), false);
+                                return $days >= 0 ? "+{$days} days" : "{$days} days";
+                            })()
+                            : null
+                    ),
 
                 TextColumn::make('remmitance_code')
                     ->label('Remittance')

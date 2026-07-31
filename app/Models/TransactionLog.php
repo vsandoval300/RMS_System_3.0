@@ -30,6 +30,7 @@ class TransactionLog extends Model
         'deduction_type',
         'from_entity',
         'to_entity',
+        'due_date',
         'sent_date',
         'received_date',
         'exch_rate',
@@ -49,6 +50,7 @@ class TransactionLog extends Model
     ];
 
     protected $casts = [
+        'due_date'      => 'date',
         'sent_date'     => 'date',
         'received_date' => 'date',
 

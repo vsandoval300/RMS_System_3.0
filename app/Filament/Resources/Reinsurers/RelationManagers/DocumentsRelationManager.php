@@ -33,6 +33,11 @@ class DocumentsRelationManager extends RelationManager
     protected static ?string $title = 'Corporate Documents';
     /** ← NUEVO: etiqueta del botón */
     protected static ?string $createButtonLabel = 'New corporate doc';
+
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_reinsurers');
+    }
     protected static string | \BackedEnum | null $icon = 'heroicon-o-document-text';
 
 

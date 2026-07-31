@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Reinsurer;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 
 class UnderwrittenBusinessAnual extends ChartWidget
 {
@@ -13,6 +14,12 @@ class UnderwrittenBusinessAnual extends ChartWidget
 
     public ?int $reinsurer = null;
     protected static bool $isLazy = false;
+
+    #[On('reinsurer-filter-changed')]
+    public function updateReinsurer(?int $reinsurer): void
+    {
+        $this->reinsurer = $reinsurer;
+    }
     protected ?string $maxHeight = '300px';
 
     protected function getData(): array
@@ -28,7 +35,9 @@ class UnderwrittenBusinessAnual extends ChartWidget
         }
         $rows = $query
             ->selectRaw("DATE_PART('year', od.rep_date) AS year, COUNT(*) AS total")
-            ->where('od.operative_doc_type_id', '1') 
+            ->where('od.operative_doc_type_id', '1')
+            ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->groupBy('year')
             ->orderBy('year')
             ->get();

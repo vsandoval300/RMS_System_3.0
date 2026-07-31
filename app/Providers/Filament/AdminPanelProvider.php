@@ -31,6 +31,18 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): string => '
+                <style>
+                    .rms-small-desc .fi-ta-text-description {
+                        font-size: 0.75rem;
+                        line-height: 1.3;
+                    }
+                </style>
+            ',
+        );
+
+        FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
             fn (): string => view('filament.components.login-version')->render(),
         );
@@ -66,21 +78,54 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             
             ->navigationGroups([
-                NavigationGroup::make('Resources')->collapsed(),
-                NavigationGroup::make('Banks')->collapsed(),
-                NavigationGroup::make('Customers')->collapsed(),
-                NavigationGroup::make('Compliance')->collapsed(),
-                NavigationGroup::make('Reinsurers')->collapsed(),
-                NavigationGroup::make('Underwritten')->collapsed(),
-                NavigationGroup::make('Transactions')->collapsed(),
+                NavigationGroup::make('Security')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Resources')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Banks')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Customers')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Compliance')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Reinsurers')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Underwritten')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
+                NavigationGroup::make('Transactions')
+                    ->collapsed()
+                    ->extraSidebarAttributes([
+                        'style' => 'border-top:1px solid light-dark(rgba(0,0,0,0.12), rgba(255,255,255,0.15)); margin-top:8px; padding-top:8px;',
+                    ]),
                 NavigationGroup::make('Filament Shield')
                     ->collapsed(),
             ])
             ->default()
             ->maxContentWidth('screen-2xl') // <----Cambio para hacer mas ancho el CRUD
             ->brandName('RMS-System') // ← aquí se define el título
-            ->brandLogo(asset('images/logo5.png'))
-            ->brandLogoHeight('55px')   // ⬅︎ más alto que el default (~20 px)
+            ->brandLogo(view('filament.components.brand-logo'))
+            ->brandLogoHeight('48px')
             ->favicon(asset('images/result_favicon2.png'))  // ← AQUÍ
             ->renderHook(
                     'panels::sidebar.footer',               // 👈 Hook válido en todas las v3

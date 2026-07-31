@@ -11,12 +11,15 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\Businesses\RelationManagers\LiabilityStructuresRelationManager;
 use App\Filament\Resources\Businesses\RelationManagers\OperativeDocsRelationManager;
 use App\Filament\Resources\Businesses\Pages\ListBusinesses;
 use App\Filament\Resources\Businesses\Pages\CreateBusiness;
 use App\Filament\Resources\Businesses\Pages\EditBusiness;
 use App\Filament\Resources\Businesses\Pages\ViewBusiness;
+use App\Filament\Resources\Businesses\Pages\ImportBusinesses;
 use App\Filament\Resources\Businesses\Widgets\BusinessStatsOverview;
 use App\Filament\Resources\BusinessResource\Pages;
 use App\Filament\Resources\BusinessResource\RelationManagers;
@@ -28,7 +31,6 @@ use Filament\Forms;
 use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Select;
@@ -44,15 +46,19 @@ use App\Models\OperativeDoc;
 use Filament\Pages\SubNavigationPosition;     
 use Filament\Resources\Pages\Page; 
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\View as ViewField;
 use Filament\Facades\Filament;
 use App\Models\User;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Support\HtmlString;
+use App\Services\BusinessRenewalService;
+use App\Services\BusinessTechnicalResultService;
+use Illuminate\Support\Facades\Gate;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group as ComponentsGroup;
+use App\Enums\ApprovalStatus;
+use Filament\Schemas\Components\Utilities\Get;
 
 class BusinessResource extends Resource
 {
@@ -60,8 +66,32 @@ class BusinessResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 10;   // aparecerá primero
-    
+    protected static ?int    $navigationSort  = 18;
+
+    // ── Shared badge renderer for approval_status ──────────────────────────────
+    public static function approvalStatusBadgeHtml(mixed $status): string
+    {
+        $value = $status?->value ?? ($status instanceof \BackedEnum ? $status->value : $status);
+
+        [$label, $bg, $color] = match ($value) {
+            'DFT'   => ['Draft',          'light-dark(#f3f4f6,#27272a)', 'light-dark(#374151,#9ca3af)'],
+            'PND'   => ['Pending Review', 'light-dark(#fef9c3,#1c1a0e)', 'light-dark(#854d0e,#fbbf24)'],
+            'APR'   => ['Approved',       'light-dark(#dcfce7,#052e16)', 'light-dark(#166534,#86efac)'],
+            'REJ'   => ['Needs Revision', 'light-dark(#fee2e2,#1c0a0a)', 'light-dark(#991b1b,#fca5a5)'],
+            'CAN'   => ['Cancelled',      'light-dark(#f3f4f6,#27272a)', 'light-dark(#6b7280,#9ca3af)'],
+            default => ['—',              'light-dark(#f3f4f6,#27272a)', 'light-dark(#6b7280,#9ca3af)'],
+        };
+
+        return "<span style=\"
+            display:inline-flex; align-items:center; gap:0.35rem;
+            background:{$bg}; color:{$color};
+            font-size:0.78rem; font-weight:600;
+            padding:0.2rem 0.65rem; border-radius:9999px;
+            letter-spacing:0.03em;
+        \">{$label}</span>";
+    }
+
+
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
     public static function getNavigationBadge(): ?string
@@ -79,9 +109,12 @@ class BusinessResource extends Resource
                 'renewedFrom:id,business_code',
                 'user:id,name',
             ])
-            ->withCount([
-                'operativeDocs',
-            ]);
+            ->withCount(['operativeDocs'])
+            ->withExists([
+                'operativeDocs as has_cancellation_doc' => fn ($q) => $q->where('operative_doc_type_id', 5),
+            ])
+            ->withExists('renewals as has_renewals')
+            ->withMax('operativeDocs', 'expiration_date');
     }
 
 
@@ -92,6 +125,43 @@ class BusinessResource extends Resource
     {
         return $schema
             ->schema([
+
+                // ── Revision notes alert (visible only when status = REJ) ──────────
+                Placeholder::make('revision_alert')
+                    ->hiddenLabel()
+                    ->columnSpanFull()
+                    ->visible(fn ($record) =>
+                        $record?->approval_status === ApprovalStatus::REJECTED &&
+                        filled($record?->revision_notes)
+                    )
+                    ->content(fn ($record) => new HtmlString('
+                        <div style="
+                            background: light-dark(#fff7ed, #1c1206);
+                            border: 1px solid light-dark(#fb923c, #c2410c);
+                            border-radius: 0.6rem;
+                            padding: 1rem 1.25rem;
+                            display: flex;
+                            gap: 0.75rem;
+                            align-items: flex-start;
+                        ">
+                            <svg style="flex-shrink:0;width:20px;height:20px;color:light-dark(#ea580c,#fb923c);margin-top:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                            </svg>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:0.9rem; color:light-dark(#9a3412,#fb923c); margin-bottom:0.35rem;">
+                                    Revision Required
+                                </div>
+                                <div style="font-size:0.875rem; color:light-dark(#7c2d12,#fed7aa); white-space:pre-wrap; line-height:1.5;">
+                                    ' . e($record?->revision_notes) . '
+                                </div>
+                                <div style="font-size:0.775rem; color:light-dark(#c2410c,#fb923c); margin-top:0.5rem;">
+                                    Reviewed by: <strong>' . e($record?->reviewer?->name ?? '—') . '</strong>
+                                    &nbsp;·&nbsp;
+                                    ' . ($record?->approval_status_updated_at?->format('M d, Y') ?? '') . '
+                                </div>
+                            </div>
+                        </div>
+                    ')),
 
                 Section::make()
                     ->columnSpan('full')
@@ -260,14 +330,6 @@ class BusinessResource extends Resource
                                             ->default(157)
                                             ->required(),
 
-                                        Select::make('region_id')
-                                            ->label('Region')
-                                            ->relationship('region', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->default(2)
-                                            ->required(),
-
                                         Select::make('producer_id')
                                             ->label('Producer')
                                             ->relationship('producer', 'name')
@@ -303,14 +365,37 @@ class BusinessResource extends Resource
                                     ->searchable()
                                     ->disabled(),
 
-                                TextInput::make('approval_status')
-                                    ->disabled()
-                                    ->default('DFT'),
+                                Placeholder::make('approval_status_badge')
+                                    ->label('Approval Status')
+                                    ->content(fn ($record) => new HtmlString(
+                                        self::approvalStatusBadgeHtml($record?->approval_status)
+                                    )),
 
                                 DatePicker::make('approval_status_updated_at')
                                     ->label('Approval Date')
                                     ->disabled(),
                             ]),
+                    ]),
+
+                Section::make('Territorial Coverage')
+                    ->columnSpan('full')
+                    ->description('Geographic scope of this business contract.')
+                    ->schema([
+                        Select::make('region_id')
+                            ->label('Region')
+                            ->relationship('region', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->default(2)
+                            ->required()
+                            ->live(),
+
+                        Placeholder::make('region_map')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->content(fn () => new HtmlString(
+                                view('filament.components.region-map')->render()
+                            )),
                     ]),
             ]);
     }
@@ -330,6 +415,44 @@ class BusinessResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
+
+            // ── Revision notes alert (visible only when status = REJ) ──────────
+            TextEntry::make('revision_alert')
+                ->hiddenLabel()
+                ->columnSpanFull()
+                ->visible(fn ($record) =>
+                    $record?->approval_status === ApprovalStatus::REJECTED &&
+                    filled($record?->revision_notes)
+                )
+                ->html()
+                ->state(fn ($record) => '
+                    <div style="
+                        background: light-dark(#fff7ed, #1c1206);
+                        border: 1px solid light-dark(#fb923c, #c2410c);
+                        border-radius: 0.6rem;
+                        padding: 1rem 1.25rem;
+                        display: flex;
+                        gap: 0.75rem;
+                        align-items: flex-start;
+                    ">
+                        <svg style="flex-shrink:0;width:20px;height:20px;color:light-dark(#ea580c,#fb923c);margin-top:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                        </svg>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:0.9rem; color:light-dark(#9a3412,#fb923c); margin-bottom:0.35rem;">
+                                Revision Required
+                            </div>
+                            <div style="font-size:0.875rem; color:light-dark(#7c2d12,#fed7aa); white-space:pre-wrap; line-height:1.5;">
+                                ' . e($record?->revision_notes) . '
+                            </div>
+                            <div style="font-size:0.775rem; color:light-dark(#c2410c,#fb923c); margin-top:0.5rem;">
+                                Reviewed by: <strong>' . e($record?->reviewer?->name ?? '—') . '</strong>
+                                &nbsp;·&nbsp;
+                                ' . ($record?->approval_status_updated_at?->format('M d, Y') ?? '') . '
+                            </div>
+                        </div>
+                    </div>
+                '),
 
             Section::make() // o InfoSection::make('Business Details')
             ->columnSpan('full')
@@ -621,74 +744,73 @@ class BusinessResource extends Resource
         
                            TextEntry::make('approval_status_entry')
                                 ->hiddenLabel()
-                                ->state(function ($record) {
-                                    $status = $record->approval_status;
-
-                                    $value = $status === null
-                                        ? '—'
-                                        : (method_exists($status, 'label')
-                                            ? $status->label()
-                                            : ($status->value ?? $status->name));
-
-                                    $value = e($value);
-
-                                    return new HtmlString(
-                                        "<strong>Approval status:</strong> {$value}"
-                                    );
-                                })
+                                ->state(fn ($record) => new HtmlString(
+                                    '<div style="display:flex;align-items:center;gap:8px;">'
+                                    . '<span style="font-weight:600;">Approval status:</span>'
+                                    . self::approvalStatusBadgeHtml($record?->approval_status)
+                                    . '</div>'
+                                ))
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(2),
 
                             TextEntry::make('approval_date_entry')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
-                                    $value = $record->approval_status_updated_at?->format('Y-m-d') ?: '—';
+                                    $value = $record->approval_status_updated_at?->format('d/m/Y') ?: '—';
 
                                     return new HtmlString(
-                                        "<strong>Approval date:</strong> {$value}"
+                                        "<strong>Approval date:</strong>&nbsp;{$value}"
                                     );
                                 })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(2),
 
                             TextEntry::make('lifecycle_status_entry')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
                                     $status = $record->business_lifecycle_status;
+                                    $value  = $status?->value ?? null;
 
-                                    $value = $status === null
-                                        ? '—'
-                                        : (method_exists($status, 'label')
-                                            ? $status->label()
-                                            : ($status->value ?? $status->name));
+                                    if (! $value) {
+                                        return new HtmlString('<strong>Lifecycle status:</strong> —');
+                                    }
 
-                                    $value = e($value);
+                                    [$bg, $text] = match ($value) {
+                                        'In Force'  => ['light-dark(#dcfce7,#14532d)', 'light-dark(#166534,#86efac)'],
+                                        'To Expire' => ['light-dark(#fef9c3,#713f12)', 'light-dark(#854d0e,#fde047)'],
+                                        'Expired'   => ['light-dark(#fee2e2,#7f1d1d)', 'light-dark(#991b1b,#fca5a5)'],
+                                        default     => ['light-dark(#f3f4f6,#374151)', 'light-dark(#374151,#d1d5db)'],
+                                    };
 
-                                    return new HtmlString(
-                                        "<strong>Lifecycle status:</strong> {$value}"
-                                    );
+                                    $badge = "<span style=\"display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:14px;font-weight:500;background-color:{$bg};color:{$text};margin-left:6px;\">{$value}</span>";
+
+                                    return new HtmlString("<strong>Lifecycle status:</strong> {$badge}");
                                 })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(2),
 
                             TextEntry::make('created_at_entry')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
-                                    $value = $record->created_at?->format('Y-m-d H:i') ?: '—';
+                                    $value = $record->created_at?->format('d/m/Y H:i') ?: '—';
 
                                     return new HtmlString(
-                                        "<strong>Created at:</strong> {$value}"
+                                        "<strong>Created at:</strong>&nbsp;{$value}"
                                     );
                                 })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(3),
 
                             TextEntry::make('created_by_user')
                                 ->hiddenLabel()
                                 ->state(function ($record) {
                                         $value = $record->user?->name ?? '-';
-                                        
 
                                         return new HtmlString(
-                                            "<strong>Created by:</strong> {$value}"
+                                            "<strong>Created by:</strong>&nbsp;{$value}"
                                         );
                                     })
+                                ->extraAttributes(['style' => 'display:flex;align-items:center;'])
                                 ->columnSpan(3)    
 
 
@@ -842,7 +964,29 @@ class BusinessResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('approval_status')
+                    ->label('Approval')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => match ($state?->value ?? $state) {
+                        'DFT' => 'Draft',
+                        'PND' => 'Pending Review',
+                        'APR' => 'Approved',
+                        'REJ' => 'Needs Revision',
+                        'CAN' => 'Cancelled',
+                        default => $state?->value ?? '—',
+                    })
+                    ->color(fn ($state) => match ($state?->value ?? $state) {
+                        'DFT' => 'gray',
+                        'PND' => 'warning',
+                        'APR' => 'success',
+                        'REJ' => 'danger',
+                        'CAN' => 'gray',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+
                 TextColumn::make('business_lifecycle_status')
+                    ->extraAttributes(['class' => 'rms-small-desc'])
                     ->label('Lifecycle')
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state?->value ?? $state)
@@ -859,16 +1003,39 @@ class BusinessResource extends Resource
                             default     => 'secondary',
                         };
                     })
+                    ->description(function ($record): ?string {
+                        if ($record->operativeDocs()->where('operative_doc_type_id', 5)->exists()) {
+                            return null;
+                        }
+                        if ($record->renewals()->exists()) {
+                            return null;
+                        }
+                        $maxExp = $record->operativeDocs()->max('expiration_date');
+                        if (! $maxExp) {
+                            return null;
+                        }
+                        $expDate = \Carbon\Carbon::parse($maxExp);
+                        if (! now()->between($expDate->copy()->subDays(45), $expDate->copy()->addDays(45))) {
+                            return null;
+                        }
+                        return '↻ Ready to renew';
+                    })
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('operative_docs_count')
                     ->counts('operativeDocs')
+                    ->extraAttributes(['class' => 'rms-small-desc'])
                     ->label('Documents')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => "$state document" . ($state === 1 ? '' : 's')) // 👈 esto agrega el texto
+                    ->formatStateUsing(fn ($state) => "$state document" . ($state === 1 ? '' : 's'))
                     ->badge()
-                    ->color(fn (int $state): string => $state > 0 ? 'primary' : 'gray'),
+                    ->color(fn (int $state): string => $state > 0 ? 'primary' : 'gray')
+                    ->description(function ($record): ?string {
+                        $missing = $record->missing_pdf_count ?? 0;
+                        if ($missing <= 0) return null;
+                        return "⚠ {$missing} missing pdf" . ($missing === 1 ? '' : 's');
+                    }),
 
 
 
@@ -882,27 +1049,71 @@ class BusinessResource extends Resource
                     ->searchable()
                     ->preload(),
 
-                // 🔹 Filtro por rango de fechas (created_at)
-                Filter::make('created_at')
-                    ->label('Created date')
+                // 🔹 Filtro por intervalo de tiempo (created_at)
+                Filter::make('date_interval')
+                    ->label('Time interval')
                     ->schema([
+                        Select::make('interval')
+                            ->label('Time interval')
+                            ->options([
+                                '30'     => 'Last 30 days',
+                                '90'     => 'Last 3 months',
+                                '180'    => 'Last 6 months',
+                                '365'    => 'Last 12 months',
+                                'custom' => 'Custom',
+                            ])
+                            ->default('30')
+                            ->placeholder('All time')
+                            ->live(),
                         DatePicker::make('from')
-                            ->label('From date'),
+                            ->label('From')
+                            ->visible(fn (Get $get) => $get('interval') === 'custom')
+                            ->displayFormat('d/m/Y'),
                         DatePicker::make('until')
-                            ->label('To date'),
+                            ->label('To')
+                            ->visible(fn (Get $get) => $get('interval') === 'custom')
+                            ->displayFormat('d/m/Y'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['from'] ?? null,
-                                fn (Builder $query, $date) =>
-                                    $query->whereDate('created_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['until'] ?? null,
-                                fn (Builder $query, $date) =>
-                                    $query->whereDate('created_at', '<=', $date),
-                            );
+                        $interval = $data['interval'] ?? null;
+                        if (! $interval) {
+                            return $query;
+                        }
+                        if ($interval === 'custom') {
+                            return $query
+                                ->when(
+                                    $data['from'] ?? null,
+                                    fn ($q, $date) => $q->whereDate('created_at', '>=', $date)
+                                )
+                                ->when(
+                                    $data['until'] ?? null,
+                                    fn ($q, $date) => $q->whereDate('created_at', '<=', $date)
+                                );
+                        }
+                        return $query->where('created_at', '>=', now()->subDays((int) $interval));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $interval = $data['interval'] ?? null;
+                        if (! $interval) {
+                            return [];
+                        }
+                        $labels = [
+                            '30'     => 'Last 30 days',
+                            '90'     => 'Last 3 months',
+                            '180'    => 'Last 6 months',
+                            '365'    => 'Last 12 months',
+                            'custom' => 'Custom',
+                        ];
+                        $indicators = ['Time interval: ' . ($labels[$interval] ?? $interval)];
+                        if ($interval === 'custom') {
+                            if ($data['from'] ?? null) {
+                                $indicators[] = 'From: ' . Carbon::parse($data['from'])->format('d/m/Y');
+                            }
+                            if ($data['until'] ?? null) {
+                                $indicators[] = 'To: ' . Carbon::parse($data['until'])->format('d/m/Y');
+                            }
+                        }
+                        return $indicators;
                     }),
             ])
 
@@ -1228,82 +1439,133 @@ class BusinessResource extends Resource
                         ]),
 
                     Action::make('technical_result')
-                        ->label('Technical result')
+                        ->label('Business Summary')
                         ->icon('heroicon-m-calculator')
                         ->color('primary')
-                        ->disabled(function (): bool {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            return ! ($user?->can('Business:TechnicalResult') ?? false);
+                        ->disabled(fn () => ! Gate::allows('Business:TechnicalResult'))
+                        ->tooltip(fn () => Gate::allows('Business:TechnicalResult')
+                            ? 'View business summary'
+                            : 'You do not have permission to access Business Summary'
+                        )
+                        ->modalHeading(fn (Business $record) => "Business Summary — {$record->business_code}")
+                        ->modalContent(function (Business $record): \Illuminate\Contracts\View\View {
+                            $data = app(BusinessTechnicalResultService::class)->build($record);
+                            return view('filament.resources.business.technical-result', $data);
                         })
-                        ->tooltip(function (): string {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            return ($user?->can('Business:TechnicalResult') ?? false)
-                                ? 'View technical result'
-                                : 'You do not have permission to access Technical Result';
-                        })
-                        ->action(function (): void {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            if (! ($user?->can('Business:TechnicalResult') ?? false)) {
-                                Notification::make()
-                                    ->title('Permission denied')
-                                    ->body('You do not have permission to access Technical Result.')
-                                    ->danger()
-                                    ->send();
-
-                                return;
-                            }
-
-                            Notification::make()
-                                ->title('Technical result')
-                                ->body('This feature is coming soon.')
-                                ->info()
-                                ->send();
-                        }),
+                        ->modalWidth('7xl')
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Close'),
 
 
                     Action::make('renewal')
                         ->label('Renewal')
                         ->icon('heroicon-m-arrow-path')
                         ->color('primary')
-                        ->disabled(function (): bool {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            return ! ($user?->can('Business:Renewal') ?? false);
+                        ->visible(function (Business $record): bool {
+                            // Never show if there is a cancellation document (type 5)
+                            if ($record->operativeDocs()->where('operative_doc_type_id', 5)->exists()) {
+                                return false;
+                            }
+                            // Never show if this business has already been renewed
+                            if ($record->renewals()->exists()) {
+                                return false;
+                            }
+                            // Only show within ±45 days of the latest operative doc expiration date
+                            $maxExp = $record->operativeDocs()->max('expiration_date');
+                            if (! $maxExp) {
+                                return false;
+                            }
+                            $expDate = \Carbon\Carbon::parse($maxExp);
+                            $now = now();
+                            return $now->between(
+                                $expDate->copy()->subDays(45),
+                                $expDate->copy()->addDays(45)
+                            );
                         })
-                        ->tooltip(function (): string {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
+                        ->disabled(fn () => ! \Illuminate\Support\Facades\Gate::allows('Business:Renewal'))
+                        ->tooltip(fn () => \Illuminate\Support\Facades\Gate::allows('Business:Renewal')
+                            ? 'Renew this business'
+                            : 'You do not have permission to renew this business'
+                        )
+                        ->modalHeading('Renew Business')
+                        ->modalDescription('A new business will be created as a renewal of the current one. Review the details below before confirming.')
+                        ->modalWidth('lg')
+                        ->form(function (Business $record): array {
+                            $service = app(BusinessRenewalService::class);
+                            $dates   = $service->previewSlipDates($record);
 
-                            return ($user?->can('Business:Renewal') ?? false)
-                                ? 'Renew this business'
-                                : 'You do not have permission to renew this business';
+                            return [
+                                TextInput::make('new_business_code')
+                                    ->label('New Business Code')
+                                    ->default(fn () => $service->suggestBusinessCode($record))
+                                    ->required()
+                                    ->readOnly()
+                                    ->unique(Business::class, 'business_code')
+                                    ->helperText('Auto-generated based on the original code and new inception year.'),
+
+                                DatePicker::make('new_inception_date')
+                                    ->label('New Slip — Inception Date')
+                                    ->default($dates ? $dates['inception']->toDateString() : null)
+                                    ->required(fn () => $dates !== null)
+                                    ->hidden(fn () => $dates === null),
+
+                                DatePicker::make('new_expiration_date')
+                                    ->label('New Slip — Expiration Date')
+                                    ->default($dates ? $dates['expiration']->toDateString() : null)
+                                    ->required(fn () => $dates !== null)
+                                    ->hidden(fn () => $dates === null)
+                                    ->after('new_inception_date'),
+
+                                Placeholder::make('no_slip_warning')
+                                    ->label('')
+                                    ->content(new HtmlString(
+                                        '<span style="color:#f87171;">⚠ No Slip document found. Operative document will not be created.</span>'
+                                    ))
+                                    ->hidden(fn () => $dates !== null),
+
+                                Placeholder::make('original_info')
+                                    ->label('Renewing from')
+                                    ->content(new HtmlString(
+                                        '<strong>' . $record->business_code . '</strong>'
+                                        . ' — ' . e($record->description ?? '')
+                                    )),
+                            ];
                         })
-                        ->action(function (): void {
-                            /** @var User|null $user */
-                            $user = Filament::auth()->user();
-
-                            if (! ($user?->can('Business:Renewal') ?? false)) {
+                        ->action(function (Business $record, array $data): void {
+                            if (! \Illuminate\Support\Facades\Gate::allows('Business:Renewal')) {
                                 Notification::make()
                                     ->title('Permission denied')
                                     ->body('You do not have permission to renew this business.')
                                     ->danger()
                                     ->send();
-
                                 return;
                             }
 
-                            Notification::make()
-                                ->title('Renewal')
-                                ->body('This feature is coming soon.')
-                                ->info()
-                                ->send();
+                            try {
+                                $newBusiness = app(BusinessRenewalService::class)
+                                    ->renew(
+                                        $record,
+                                        $data['new_business_code'],
+                                        $data['new_inception_date'] ?? null,
+                                        $data['new_expiration_date'] ?? null,
+                                    );
+
+                                Notification::make()
+                                    ->title('Business renewed successfully')
+                                    ->body("Business {$newBusiness->business_code} has been created as a renewal of {$record->business_code}.")
+                                    ->success()
+                                    ->send();
+
+                                redirect(self::getUrl('view', ['record' => $newBusiness->business_code]));
+
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Renewal failed')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                            }
                         }),
 
 
@@ -1321,12 +1583,32 @@ class BusinessResource extends Resource
                 ])
 
 
-            ]);
-            //->bulkActions([
-                    //Tables\Actions\BulkActionGroup::make([
-                    //Tables\Actions\DeleteBulkAction::make(),
-             //   ]),
-            //]);
+            ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.business.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete selected businesses')
+                        ->modalDescription('Are you sure you want to delete the selected businesses? This action can be undone by restoring the records.')
+                        ->modalSubmitActionLabel('Yes, delete'),
+                ]),
+            ])
+            ->defaultPaginationPageOption(25)
+            ->paginationPageOptions([5, 10, 25, 50])
+            ->modifyQueryUsing(fn ($query) => $query->withCount([
+                'operativeDocs as missing_pdf_count' => fn ($q) => $q->whereNull('document_path'),
+            ]));
     }
 
     public static function getRelations(): array
@@ -1343,10 +1625,11 @@ class BusinessResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListBusinesses::route('/'),
+            'index'  => ListBusinesses::route('/'),
             'create' => CreateBusiness::route('/create'),
-            'edit' => EditBusiness::route('/{record}/edit'),
-            'view' => ViewBusiness::route('/{record}/view'), // 👈 Asegúrate que esto esté
+            'edit'   => EditBusiness::route('/{record}/edit'),
+            'view'   => ViewBusiness::route('/{record}/view'),
+            'import' => ImportBusinesses::route('/import'),
             
         ];
     }

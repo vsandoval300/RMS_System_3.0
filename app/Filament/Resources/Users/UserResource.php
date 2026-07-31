@@ -103,13 +103,26 @@ class UserResource extends Resource
                     Select::make('position_id')
                         ->label('Position')
                         ->placeholder('Select position')
-                        //->inlineLabel()
                         ->relationship('position', 'position')
                         ->searchable()
                         ->preload()
                         ->required()
                         ->native(false),
-                                
+
+                    Select::make('manager_id')
+                        ->label('Reports To (Manager)')
+                        ->placeholder('No manager assigned')
+                        ->relationship(
+                            'manager',
+                            'name',
+                            fn (Builder $query, ?Model $record) =>
+                                $record ? $query->where('id', '!=', $record->id) : $query
+                        )
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->native(false),
+
                 ])
                 ->columns(2),
             
@@ -246,6 +259,22 @@ public static function infolist(Schema $schema): Schema
                                     TextEntry::make('position_value')
                                         ->hiddenLabel()
                                         ->state(fn ($record) => $record->position?->position ?: '—')
+                                        ->columnSpan(9),
+                                ]),
+
+                            // Reports To
+                            Grid::make(12)
+                                ->extraAttributes(['style' => 'border-bottom:1px solid rgba(255,255,255,0.12); padding:2px 0;'])
+                                ->schema([
+                                    TextEntry::make('manager_label')
+                                        ->hiddenLabel()
+                                        ->state('Reports To:')
+                                        ->weight('bold')
+                                        ->alignment('right')
+                                        ->columnSpan(3),
+                                    TextEntry::make('manager_value')
+                                        ->hiddenLabel()
+                                        ->state(fn ($record) => $record->manager?->name ?: '—')
                                         ->columnSpan(9),
                                 ]),
 
@@ -396,7 +425,7 @@ public static function infolist(Schema $schema): Schema
     public static function table(Table $table): Table
     {
         return $table
-        ->modifyQueryUsing(fn (Builder $query) => $query->with('department'))
+        ->modifyQueryUsing(fn (Builder $query) => $query->with(['department', 'manager']))
         ->columns([
 
             TextColumn::make('id')
@@ -472,7 +501,13 @@ public static function infolist(Schema $schema): Schema
 
             TextColumn::make('department.name')
                 ->label('Department')
-                ->placeholder('-')     // por si viene null
+                ->placeholder('-')
+                ->searchable()
+                ->sortable(),
+
+            TextColumn::make('manager.name')
+                ->label('Reports To')
+                ->placeholder('—')
                 ->searchable()
                 ->sortable(),
 

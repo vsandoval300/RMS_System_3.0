@@ -28,6 +28,7 @@ class BusinessOpDocsInsured extends Model
         'company_id',       // FK → companies.id
         'coverage_id',      // FK → coverages.id
         'premium',
+        'import_batch_id',
     ];
 
     protected $casts = [

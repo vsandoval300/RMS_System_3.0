@@ -32,6 +32,8 @@ class EditTransaction extends EditRecord
     /** @var array<string, mixed> */
     protected array $originalDrivers = [];
 
+    private bool $skipAutoRecalculate = false;
+
     protected function getRecordQuery(): Builder
     {
         return parent::getRecordQuery()->withTrashed();
@@ -53,7 +55,19 @@ class EditTransaction extends EditRecord
 
     protected function afterSave(): void
     {
-        $this->originalDrivers = $this->record->fresh()->only([
+        $fresh = $this->record->fresh();
+
+        if (! $this->skipAutoRecalculate) {
+            $oldRate = (string) ($this->originalDrivers['exch_rate'] ?? '');
+            $newRate = (string) ($fresh->exch_rate ?? '');
+
+            if ($oldRate !== $newRate) {
+                $this->record = $fresh;
+                $this->recalculateLifecycle();
+            }
+        }
+
+        $this->originalDrivers = $fresh->only([
             'op_document_id',
             'transaction_type_id',
             'proportion',
@@ -395,6 +409,22 @@ class EditTransaction extends EditRecord
         ]);
     }
 
+    public function getRelationManagers(): array
+    {
+        $managers = [
+            \App\Filament\Resources\Transactions\RelationManagers\LogsRelationManager::class,
+            \App\Filament\Resources\Transactions\RelationManagers\SupportsRelationManager::class,
+        ];
+
+        $premiumType = $this->record->operativeDoc?->business?->premium_type;
+
+        if (in_array($premiumType, ['Estimated', 'Declared'], true)) {
+            $managers[] = \App\Filament\Resources\Transactions\RelationManagers\RecalculationsRelationManager::class;
+        }
+
+        return $managers;
+    }
+
     public static function canDelete(Model $record): bool
     {
         return false;
@@ -402,7 +432,7 @@ class EditTransaction extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Edit – ' . ($this->record?->name ?? 'Transaction');
+        return 'Edit Premium Payment Record';
     }
 
     protected function getRedirectUrl(): ?string
@@ -531,7 +561,9 @@ class EditTransaction extends EditRecord
                 ->modalSubmitActionLabel('Save & Recalculate')
                 ->visible(fn () => ! $this->record->trashed())
                 ->action(function () {
+                    $this->skipAutoRecalculate = true;
                     $this->save(shouldRedirect: false, shouldSendSavedNotification: false);
+                    $this->skipAutoRecalculate = false;
                     $this->record = $this->record->fresh();
                     $this->recalculateLifecycle();
 

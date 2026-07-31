@@ -2,10 +2,17 @@
 
 namespace App\Filament\Resources\Businesses\Pages;
 
+use App\Enums\ApprovalStatus;
 use App\Filament\Resources\Businesses\BusinessResource;
+use App\Notifications\BusinessReviewDecision;
+use App\Notifications\BusinessSubmittedForReview;
 use Filament\Actions;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Alignment;
 
@@ -22,6 +29,124 @@ class EditBusiness extends EditRecord
             Actions\DeleteAction::make(),
         ];
     } */
+
+    /*--------------------------------------------------------------
+     | Approval workflow actions
+     --------------------------------------------------------------*/
+    protected function getHeaderActions(): array
+    {
+        return [
+            // ── Subordinate: submit for review ────────────────────────────
+            Action::make('submitForReview')
+                ->label('Submit for Review')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Submit for Review')
+                ->modalDescription('This will notify your manager to review this business. Are you sure?')
+                ->modalSubmitActionLabel('Submit')
+                ->authorize(fn () => Gate::allows('submitForReview', $this->record))
+                ->visible(fn () =>
+                    Auth::id() == $this->record->created_by_user &&
+                    in_array($this->record->approval_status, [ApprovalStatus::DRAFT, ApprovalStatus::REJECTED])
+                )
+                ->action(function () {
+                    $business = $this->record;
+                    $manager  = $business->createdByUser?->manager;
+
+                    $business->update([
+                        'approval_status'            => ApprovalStatus::PENDING,
+                        'approval_status_updated_at' => now(),
+                    ]);
+
+                    if ($manager) {
+                        $manager->notify(new BusinessSubmittedForReview($business, Auth::user()->name));
+                    }
+
+                    Notification::make()
+                        ->success()
+                        ->title('Submitted for review')
+                        ->body($manager ? "Your manager {$manager->name} has been notified." : 'Status updated to Pending.')
+                        ->send();
+                }),
+
+            // ── Manager: approve ─────────────────────────────────────────
+            Action::make('approveBusiness')
+                ->label('Approve')
+                ->icon('heroicon-o-check-circle')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalHeading('Approve Business')
+                ->modalDescription('Confirm approval of this business. The submitter will be notified.')
+                ->modalSubmitActionLabel('Approve')
+                ->authorize(fn () => Gate::allows('approveBusiness', $this->record))
+                ->visible(fn () =>
+                    Auth::id() == $this->record->createdByUser?->manager_id &&
+                    $this->record->approval_status === ApprovalStatus::PENDING
+                )
+                ->action(function () {
+                    $business  = $this->record;
+                    $submitter = $business->createdByUser;
+
+                    $business->update([
+                        'approval_status'            => ApprovalStatus::APPROVED,
+                        'approval_status_updated_at' => now(),
+                        'reviewed_by_user_id'        => Auth::id(),
+                        'revision_notes'             => null,
+                    ]);
+
+                    $submitter?->notify(new BusinessReviewDecision($business, 'approved', Auth::user()->name));
+
+                    Notification::make()
+                        ->success()
+                        ->title('Business approved')
+                        ->body('The submitter has been notified.')
+                        ->send();
+                }),
+
+            // ── Manager: request revision ─────────────────────────────────
+            Action::make('requestRevision')
+                ->label('Request Revision')
+                ->icon('heroicon-o-arrow-path')
+                ->color('danger')
+                ->modalHeading('Request Revision')
+                ->modalDescription('Provide your feedback. The submitter will be notified with your notes.')
+                ->modalSubmitActionLabel('Send Revision Request')
+                ->authorize(fn () => Gate::allows('requestRevision', $this->record))
+                ->schema([
+                    Textarea::make('revision_notes')
+                        ->label('Revision Notes')
+                        ->placeholder('Describe the changes required...')
+                        ->required()
+                        ->rows(4),
+                ])
+                ->visible(fn () =>
+                    Auth::id() == $this->record->createdByUser?->manager_id &&
+                    $this->record->approval_status === ApprovalStatus::PENDING
+                )
+                ->action(function (array $data) {
+                    $business  = $this->record;
+                    $submitter = $business->createdByUser;
+
+                    $business->update([
+                        'approval_status'            => ApprovalStatus::REJECTED,
+                        'approval_status_updated_at' => now(),
+                        'reviewed_by_user_id'        => Auth::id(),
+                        'revision_notes'             => $data['revision_notes'],
+                    ]);
+
+                    $submitter?->notify(new BusinessReviewDecision(
+                        $business, 'revision', Auth::user()->name, $data['revision_notes']
+                    ));
+
+                    Notification::make()
+                        ->warning()
+                        ->title('Revision requested')
+                        ->body('The submitter has been notified.')
+                        ->send();
+                }),
+        ];
+    }
 
     /*--------------------------------------------------------------
      | 1. Ocultar el botón Delete

@@ -9,6 +9,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\CostSchemes\Pages\ListCostSchemes;
 use App\Filament\Resources\CostSchemes\Pages\CreateCostScheme;
@@ -63,7 +64,7 @@ class CostSchemeResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 8;   // aparecerá primero
+    protected static ?int    $navigationSort  = 16;   // aparecerá primero
 
 
     protected static ?string $navigationLabel = 'Placement Schemes';
@@ -768,6 +769,17 @@ class CostSchemeResource extends Resource
                         }),
                 ])
 
+            ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.cost-schemes.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()

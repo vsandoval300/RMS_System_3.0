@@ -74,6 +74,11 @@ class OperativeDocsRelationManager extends RelationManager
     protected static string | \BackedEnum | null $icon = 'heroicon-o-document-text';
     protected static ?string $recordTitleAttribute = 'description';
 
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_business');
+    }
+
      public static function getCreateFormHeading(): string
     {
         return 'New Operative Document';
@@ -191,7 +196,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             ->disabled()
                                                             ->dehydrated() //CAMBIO
                                                             ->required()
-                                                            ->columnSpan(8),
+                                                            ->columnSpan(10),
                                                      ]),
                                            /* ])
                                             ->compact(), */
@@ -227,12 +232,16 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 modifyQueryUsing: function (Builder $query) {
                                                                     $query->orderBy('id');
 
-                                                                    // CREATE solamente
                                                                     $record = $this->getMountedTableActionRecord();
                                                                     if ($record) {
+                                                                        // In edit mode: exclude type 1 unless this record IS the Slip
+                                                                        if ((int) ($record->operative_doc_type_id ?? 0) !== 1) {
+                                                                            $query->where('id', '!=', 1);
+                                                                        }
                                                                         return;
                                                                     }
 
+                                                                    // In create mode: exclude type 1 if a Slip already exists
                                                                     $business = $this->getOwnerRecord();
 
                                                                     $slipExists = $business?->operativeDocs()
@@ -261,7 +270,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                                 return $slipExists ? null : 1;
                                                             })
-                                                            ->afterStateHydrated(function (Set $set, $record, $state) {
+                                                            ->afterStateHydrated(function (Set $set,Get $get, $record, $state) {
                                                                 if ($record) {
                                                                     return; // Edit: no tocar
                                                                 }
@@ -277,9 +286,37 @@ class OperativeDocsRelationManager extends RelationManager
                                                                     $set('operative_doc_type_id', 1);
                                                                 }
                                                             })
+                                                            ->afterStateUpdated(function (Set $set, Get $get, $state) {
+
+                                                                logger()->info('Document Type changed', [
+                                                                    'state' => $state,
+                                                                    'insureds' => $get('insureds'),
+                                                                ]);
+
+                                                                $insureds = collect($get('insureds') ?? []);
+
+                                                                if ($insureds->isEmpty()) {
+                                                                    return;
+                                                                }
+
+                                                                $insureds = $insureds
+                                                                    ->map(function ($insured) use ($state) {
+
+                                                                        $insured['premium'] = ((int) $state === 4)
+                                                                            ? 0
+                                                                            : null;
+
+                                                                        return $insured;
+                                                                    })
+                                                                    ->values()
+                                                                    ->all();
+
+                                                                $set('insureds', $insureds);
+                                                            })
                                                             ->disabled(function ($record) {
                                                                 if ($record) {
-                                                                    return true;
+                                                                    // In edit mode: lock only when this record IS the Slip (type 1)
+                                                                    return (int) ($record->operative_doc_type_id ?? 0) === 1;
                                                                 }
 
                                                                 $business = $this->getOwnerRecord();
@@ -386,6 +423,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                                                             // ✅ Hidratar correctamente
                                                             ->afterStateHydrated(function ($component, $state, $record, $livewire) {
+                                                                
 
                                                                 $isUsd = method_exists($livewire, 'getOwnerRecord')
                                                                     && (int) $livewire->getOwnerRecord()?->currency_id === 157;
@@ -1081,6 +1119,48 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 : null
                                                             )
                                                             ->step(0.01)
+                                                            // Si el documento es Endorsement B, al cargar el repeater
+                                                            // el Premium se fuerza a 0.
+                                                            ->afterStateHydrated(function (Get $get, Set $set) {
+
+                                                                $docType = (int) $get('../../operative_doc_type_id');
+
+                                                                // Cambia el 3 por el ID real de Endorsement B
+                                                                if ($docType === 4) {
+                                                                    $set('premium', 0);
+                                                                }
+                                                            })
+
+                                                            // No permitir editar el Premium para Endorsement B
+                                                            ->readOnly(function (Get $get) {
+
+                                                                $docType = (int) $get('../../operative_doc_type_id');
+
+                                                                return $docType === 4;
+                                                            })
+
+                                                            // Validación de servidor
+                                                            ->rule(function (Get $get) {
+
+                                                                return function (string $attribute, $value, \Closure $fail) use ($get) {
+
+                                                                    $docType = (int) $get('../../operative_doc_type_id');
+
+                                                                    if ($docType !== 4) {
+                                                                        return;
+                                                                    }
+
+                                                                    $premium = (float) str_replace(
+                                                                        [',', '$', ' '],
+                                                                        '',
+                                                                        (string) $value
+                                                                    );
+
+                                                                    if ($premium > 0) {
+                                                                        $fail('Premium must be equal to 0 for Endorsement B.');
+                                                                    }
+                                                                };
+                                                            })
                                                             ->required()
                                                             ->columnSpan(2),
                                                     ])
@@ -1194,7 +1274,7 @@ class OperativeDocsRelationManager extends RelationManager
                 // 🟡 SUMMARY Section
                 // ──────────────────────────────────────────────────────────────────────────────
 
-                   Section::make()
+                   /* Section::make()
                     ->schema([
                         Placeholder::make('spacer')
                             ->label('')
@@ -1248,7 +1328,7 @@ class OperativeDocsRelationManager extends RelationManager
                     ])
                     ->columnSpanFull()
                     ->visible(fn (Get $get) => ($get('active_panel') ?? 'tabs') === 'summary')
-                    ->hiddenOn('view'),
+                    ->hiddenOn('view'), */
                         
 
                     Section::make('Overview')
@@ -1919,8 +1999,39 @@ class OperativeDocsRelationManager extends RelationManager
                     $newIndex = $lastIndex ? $lastIndex + 1 : 1;
                     $generatedId = $business->business_code . '-' . str_pad($newIndex, 2, '0', STR_PAD_LEFT);
 
+                    // Buscar el Slip original
+                    $slip = $business->operativeDocs()
+                        ->where('operative_doc_type_id', 1)
+                        ->with([
+                            'schemes',
+                            'insureds',
+                        ])
+                        ->first();
+
+                    $schemes = $slip?->schemes
+                        ->sortBy('index')
+                        ->map(fn ($scheme) => [
+                            'cscheme_id' => $scheme->cscheme_id,
+                        ])
+                        ->values()
+                        ->all() ?? [];
+                    
+                    $insureds = $slip?->insureds
+                        ->map(fn ($insured) => [
+                            'company_id'  => $insured->company_id,
+                            'cscheme_id'  => $insured->cscheme_id,
+                            'coverage_id' => $insured->coverage_id,
+                            'premium'     => null,
+                        ])
+                        ->values()
+                        ->all() ?? [];
+
+
                     $action->fillForm([
                         'id' => $generatedId,
+                        'roe_fs' => number_format((float) ($slip?->roe_fs ?? 1), 8, '.', ''),
+                        'schemes'  => $schemes,
+                        'insureds' => $insureds,
                     ]);
 
 
@@ -2014,9 +2125,11 @@ class OperativeDocsRelationManager extends RelationManager
 
                     ->mutateDataUsing(function (array $data, $livewire, $record) {
 
-                        // ✅ CAMBIO A4: si el record es Slip, no permitas cambiar el tipo
+                        // Slip always stays Slip; non-Slip cannot be changed to type 1
                         if ((int) ($record->operative_doc_type_id ?? 0) === 1) {
-                            $data['operative_doc_type_id'] = 1; // fuerza Slip
+                            $data['operative_doc_type_id'] = 1;
+                        } elseif ((int) ($data['operative_doc_type_id'] ?? 0) === 1) {
+                            $data['operative_doc_type_id'] = $record->operative_doc_type_id;
                         }
 
                         return $data;
@@ -2058,38 +2171,90 @@ class OperativeDocsRelationManager extends RelationManager
                         $data = app(OperativeDocSummaryV2Service::class)->build($record->id);
 
                         return view('filament.resources.business.operative-doc-summary_v2', $data);
-                    })
-                    
-                    ->modalFooterActions([
-                        Action::make('print')
-                            ->label('Print')
-                            ->icon('heroicon-o-printer')
-                            ->color('primary')
-                            ->extraAttributes([
-                                'type' => 'button',
-                                'class' => 'no-print',
-                            ])
-                            ->alpineClickHandler("
-                                (() => {
-                                    const oldTitle = document.title;
-                                    document.title = 'Summary';
-
-                                    const restore = () => {
-                                        document.title = oldTitle;
-                                        window.removeEventListener('afterprint', restore);
-                                    };
-
-                                    window.addEventListener('afterprint', restore);
-
-                                    window.print();
-                                })()
-                            "),
-                    ]),
+                    }),
 
 
 
 
+                // ──────  CLONE DOCUMENT  ─────────────────────────
+                Action::make('cloneDoc')
+                    ->label('Clone Document')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('warning')
+                    ->visible(fn ($record): bool =>
+                        auth()->user()?->can('update_business') &&
+                        in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8]) &&
+                        ! $this->getOwnerRecord()->operativeDocs()
+                            ->where('operative_doc_type_id', 5)
+                            ->exists()
+                    )
+                    ->requiresConfirmation()
+                    ->modalHeading(fn ($record) => 'Clone — ' . ($record->docType->name ?? 'Document') . ' #' . $record->index)
+                    ->modalDescription(fn ($record) => (int) ($record?->operative_doc_type_id ?? 0) === 1
+                        ? 'A copy of document ' . $record->id . ' will be created as an Endorsement B (type 4) with insured premiums set to 0. After cloning, you can edit the document type (types 2+) and all other fields. Transactions are not included.'
+                        : 'A copy of document ' . $record->id . ' will be created with type "' . ($record->docType->name ?? 'same') . '". After cloning, you can edit the document type (types 2+) and all other fields. Transactions are not included.'
+                    )
+                    ->modalSubmitActionLabel('Clone')
+                    ->modalIcon('heroicon-o-document-duplicate')
+                    ->action(function ($record): void {
+                        $isSlip   = (int) ($record->operative_doc_type_id ?? 0) === 1;
+                        $newDocId = null;
+                        $newIndex = null;
 
+                        DB::transaction(function () use ($record, $isSlip, &$newDocId, &$newIndex): void {
+                            // 1. Clone the operative doc (index is auto-assigned by booted()::creating)
+                            $newDoc = $record->replicate([
+                                'id',
+                                'index',
+                                'document_path',
+                                'import_batch_id',
+                            ]);
+
+                            // ID follows the same pattern as CreateAction: business_code + zero-padded suffix
+                            $lastSuffix = OperativeDoc::withTrashed()
+                                ->where('business_code', $record->business_code)
+                                ->get()
+                                ->map(fn ($doc) => (int) substr($doc->id, -2))
+                                ->max();
+                            $newDoc->id              = $record->business_code . '-' . str_pad(($lastSuffix ?? 0) + 1, 2, '0', STR_PAD_LEFT);
+                            $newDoc->created_by_user = Filament::auth()->id();
+
+                            // Slip clone → becomes Endorsement B (type 4)
+                            if ($isSlip) {
+                                $newDoc->operative_doc_type_id = 4;
+                            }
+
+                            $newDoc->save();
+
+                            $newDocId = $newDoc->id;
+                            $newIndex = $newDoc->index;
+
+                            // 2. Clone schemes (UUID auto-generated by booted()::creating)
+                            foreach ($record->schemes()->get() as $scheme) {
+                                $newScheme                 = $scheme->replicate(['id', 'op_document_id', 'import_batch_id']);
+                                $newScheme->op_document_id  = $newDoc->id;
+                                $newScheme->import_batch_id = null;
+                                $newScheme->save();
+                            }
+
+                            // 3. Clone insureds; Slip clone forces premium = 0 per business rule
+                            foreach ($record->insureds()->get() as $insured) {
+                                $newInsured                 = $insured->replicate(['id', 'op_document_id', 'import_batch_id']);
+                                $newInsured->op_document_id  = $newDoc->id;
+                                $newInsured->import_batch_id = null;
+                                if ($isSlip) {
+                                    $newInsured->premium = 0;
+                                }
+                                $newInsured->save();
+                            }
+                        });
+
+                        Notification::make()
+                            ->title('Document cloned')
+                            ->body("Created as index #{$newIndex} — ID: {$newDocId}")
+                            ->success()
+                            ->send();
+                    }),
 
 
                 // ──────  DIVIDER 1  ─────────────────────────
@@ -2105,10 +2270,11 @@ class OperativeDocsRelationManager extends RelationManager
 
                 // ──────  ADD TRANSACTION  ─────────────────────────
                 Action::make('addTransaction')
-                    ->label('Add transaction')
+                    ->label('Add Instalment')
                     ->color('primary')
                     ->outlined()
                     ->icon('heroicon-o-plus-circle')
+                    ->hidden(fn ($record): bool => (int) ($record?->operative_doc_type_id ?? 0) === 4)
                     ->disabled(function (): bool {
                         /** @var User|null $user */
                         $user = Filament::auth()->user();
@@ -2147,7 +2313,7 @@ class OperativeDocsRelationManager extends RelationManager
 
                 // ──────  GO TO TRANSACTIONs  ─────────────────────────
                 Action::make('viewTransactions')
-                    ->label('View transactions')
+                    ->label('View Instalments')
                     ->color('primary')
                     ->outlined()
                     ->icon('heroicon-o-queue-list')
@@ -2198,14 +2364,9 @@ class OperativeDocsRelationManager extends RelationManager
                             return;
                         }
 
-                        // ✅ Redirige al listado con filtro aplicado (Filament v3)
                         redirect()->to(
-                            TransactionResource::getUrl('index', [
-                                'tableFilters' => [
-                                    'op_document_id' => [
-                                        'value' => $record->id,
-                                    ],
-                                ],
+                            TransactionResource::getUrl('index') . '?' . http_build_query([
+                                'op_document_id' => $record->id,
                             ])
                         );
                     }),

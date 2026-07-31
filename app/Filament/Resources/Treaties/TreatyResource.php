@@ -50,7 +50,7 @@ class TreatyResource extends Resource
     protected static ?string $model = Treaty::class;
 
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 9;   // aparecerá primero
+    protected static ?int    $navigationSort  = 17;   // aparecerá primero
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
 
      /* ───── NUEVO: burbuja con el total en el menú ───── */
@@ -525,6 +525,17 @@ class TreatyResource extends Resource
                 ])
             ])
 
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.treaties.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

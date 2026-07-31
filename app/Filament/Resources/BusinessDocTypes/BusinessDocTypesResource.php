@@ -9,6 +9,7 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\BusinessDocTypes\Pages\ListBusinessDocTypes;
 use App\Filament\Resources\BusinessDocTypes\Pages\CreateBusinessDocTypes;
@@ -38,7 +39,7 @@ class BusinessDocTypesResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-minus';
     protected static ?string $navigationLabel = 'Business Document Types';
     protected static string | \UnitEnum | null $navigationGroup = 'Underwritten';
-    protected static ?int    $navigationSort  = 7;   // aparecerá primero
+    protected static ?int    $navigationSort  = 15;   // aparecerá primero
 
     public static function getNavigationBadge(): ?string
     {
@@ -170,6 +171,17 @@ class BusinessDocTypesResource extends Resource
                     EditAction::make(),
                     DeleteAction::make(),
                 ])
+            ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.business-doc-types.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

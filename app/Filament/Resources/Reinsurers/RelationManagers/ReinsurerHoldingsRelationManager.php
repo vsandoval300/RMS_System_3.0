@@ -29,6 +29,11 @@ class ReinsurerHoldingsRelationManager extends RelationManager
     protected static string $relationship = 'reinsurerHoldings';
     protected static ?string $title = 'Holdings';
     protected static string | \BackedEnum | null $icon = 'heroicon-o-building-office';
+
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_reinsurers');
+    }
     
     public function form(Schema $schema): Schema
     {

@@ -31,7 +31,9 @@ class Business extends Model
         'producer_id', 'currency_id', 'region_id',
         'approval_status', 'approval_status_updated_at',
         'business_lifecycle_status', 'business_lifecycle_status_updated_at',
-        'created_by_user', 'source_code'
+        'created_by_user', 'source_code',
+        'reviewed_by_user_id', 'revision_notes',
+        'import_batch_id',
     ];
 
     protected $casts = [
@@ -68,6 +70,16 @@ class Business extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by_user');
+    }
+
+    public function createdByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user');
+    }
+
+    public function reviewer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by_user_id');
     }
 
     /* ---------------------------------------------------
@@ -200,7 +212,15 @@ class Business extends Model
                 : BusinessLifecycleStatus::IN_FORCE;
         }
 
-        // 5) Si no hay vigentes y el último no fue cancelación
+        // 5a) Si el doc más reciente aún no ha iniciado → On Hold (negocio con fechas futuras)
+        if ($latestDoc && $latestDoc->inception_date) {
+            $latestStart = Carbon::parse($latestDoc->inception_date)->startOfDay();
+            if ($latestStart->gt($today)) {
+                return BusinessLifecycleStatus::ON_HOLD;
+            }
+        }
+
+        // 5b) Docs existentes pero todos vencidos y no cancelado → Expired
         return BusinessLifecycleStatus::EXPIRED;
     }
 
@@ -235,6 +255,7 @@ class Business extends Model
                 $business->business_lifecycle_status = BusinessLifecycleStatus::ON_HOLD;
                 $business->business_lifecycle_status_updated_at = now();
             }
+
         });
 
         // Borrado y Restauracion para Liability Structures

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Enums\ApprovalStatus;
 use App\Models\Business;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class BusinessPolicy
 {
@@ -70,6 +71,29 @@ class BusinessPolicy
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('reorder_business');
+    }
+
+    // ── Approval workflow ──────────────────────────────────────────────────────
+
+    // Creator submits their own business when it is Draft or Rejected
+    public function submitForReview(AuthUser $authUser, Business $business): bool
+    {
+        return $authUser->id == $business->created_by_user
+            && in_array($business->approval_status, [ApprovalStatus::DRAFT, ApprovalStatus::REJECTED]);
+    }
+
+    // Direct manager of the creator approves when Pending
+    public function approveBusiness(AuthUser $authUser, Business $business): bool
+    {
+        return $authUser->id == $business->createdByUser?->manager_id
+            && $business->approval_status === ApprovalStatus::PENDING;
+    }
+
+    // Direct manager of the creator requests revision when Pending
+    public function requestRevision(AuthUser $authUser, Business $business): bool
+    {
+        return $authUser->id == $business->createdByUser?->manager_id
+            && $business->approval_status === ApprovalStatus::PENDING;
     }
 
 }

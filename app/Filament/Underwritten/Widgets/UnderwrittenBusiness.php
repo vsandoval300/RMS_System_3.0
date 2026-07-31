@@ -3,9 +3,9 @@
 namespace App\Filament\Underwritten\Widgets;
 
 use App\Models\Business;
-use App\Services\PremiumForPeriodService;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 
 class UnderwrittenBusiness extends ChartWidget
 {
@@ -22,6 +22,13 @@ class UnderwrittenBusiness extends ChartWidget
         return [
             'refreshChart' => '$refresh',
         ];
+    }
+
+    #[On('analytics-filters-updated')]
+    public function updateFromAnalyticsFilters(int $year, ?int $reinsurer): void
+    {
+        $this->reinsurer = $reinsurer;
+        $this->years     = [$year];
     }
 
     protected function getData(): array
@@ -49,8 +56,9 @@ class UnderwrittenBusiness extends ChartWidget
                 EXTRACT(MONTH FROM od.rep_date) as month,
                 COUNT(DISTINCT od.business_code) as total
             ')
-            ->where('od.operative_doc_type_id', '1') 
+            ->where('od.operative_doc_type_id', '1')
             ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->whereIn(DB::raw('EXTRACT(YEAR FROM od.rep_date)'), $this->years)
             ->groupByRaw('
                 EXTRACT(YEAR FROM od.rep_date),

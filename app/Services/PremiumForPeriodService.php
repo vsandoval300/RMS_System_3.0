@@ -23,6 +23,7 @@ class PremiumForPeriodService
                 'insureds.coverage'
             ])
 
+            ->whereHas('business', fn($b) => $b->where('approval_status', 'APR'))
              // filtra solo si $reinsurerId tiene valor
             ->when($reinsurerId, fn($q) => $q->whereHas('business', fn($b) => $b->where('reinsurer_id', $reinsurerId)))
             // filtra solo si $year tiene valor
@@ -142,6 +143,8 @@ class PremiumForPeriodService
             ')
 
             ->whereIn(DB::raw('EXTRACT(YEAR FROM d.rep_date)'), $years)
+            ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
 
             ->when($reinsurerId, fn($q) =>
                 $q->where('b.reinsurer_id',$reinsurerId)
@@ -234,6 +237,8 @@ class PremiumForPeriodService
                 SUM(i.premium) as total_business
             ')
             ->whereIn(DB::raw('EXTRACT(YEAR FROM d.rep_date)'), $years)
+            ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->when($reinsurerId, fn($q) =>
                 $q->where('b.reinsurer_id', $reinsurerId)
             )
@@ -353,6 +358,8 @@ class PremiumForPeriodService
                 ) as fts_piece
             ')
             ->whereIn(DB::raw('EXTRACT(YEAR FROM d.rep_date)'), $years)
+            ->whereNull('b.deleted_at')
+            ->where('b.approval_status', 'APR')
             ->when($reinsurerId, fn($q) =>
                 $q->where('b.reinsurer_id', $reinsurerId)
             );
@@ -446,6 +453,7 @@ class PremiumForPeriodService
             'schemes.costScheme',
             'insureds',
             ])
+            ->whereHas('business', fn($b) => $b->where('approval_status', 'APR'))
             ->when($reinsurerId, fn($q) =>
                 $q->whereHas('business', fn($b) =>
                 $b->where('reinsurer_id', $reinsurerId)

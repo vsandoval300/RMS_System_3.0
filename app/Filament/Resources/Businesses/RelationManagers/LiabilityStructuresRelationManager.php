@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Businesses\RelationManagers;
 
+use App\Models\Country;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
@@ -12,17 +13,13 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms;
 use Filament\Tables\Grouping\Group;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -31,6 +28,11 @@ use Filament\Forms\Components\Textarea;
 class LiabilityStructuresRelationManager extends RelationManager
 {
     protected static string $relationship = 'LiabilityStructures';
+
+    public function isReadOnly(): bool
+    {
+        return ! auth()->user()?->can('update_business');
+    }
     protected static string | \BackedEnum | null $icon = 'heroicon-o-shield-check';
 
     public static function getCreateFormHeading(): string
@@ -70,23 +72,56 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->preload()
                             ->optionsLimit(300)
                             ->required()
-                            ->columnSpan(6),
+                            ->columnSpan(5),
 
-                        Section::make()
-                        ->schema([
+                        Select::make('country_id')
+                            ->label('Country')
+
+                            ->options(function () {
+                                $business = $this->getOwnerRecord();
+
+                                return Country::query()
+                                    ->where('region_id', $business->region_id)
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
+                            })
+
+                            ->getSearchResultsUsing(function (string $search) {
+                                $business = $this->getOwnerRecord();
+
+                                return Country::query()
+                                    ->where('region_id', $business->region_id)
+                                    ->where(function ($query) use ($search) {
+                                        $query->where('name', 'like', "%{$search}%")
+                                            ->orWhere('alpha_3', 'like', "%{$search}%");
+                                    })
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
+                            })
+
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(300)
+                            ->required()
+                            ->columnSpan(4),
+
+                        //Section::make()
+                        //->schema([
                             Radio::make('cls')
                             ->label('CSL')
                             ->options([
-                                true => 'Yes',
-                                false => 'No',
+                                '1' => 'Yes',
+                                '0' => 'No',
                             ])
                             ->helperText('Combined Single Limit')
-                            ->inline() // horizontal
-                            ->default(false) // "No" preseleccionado
+                            ->inline()
+                            ->default('0')
+                            ->formatStateUsing(fn ($state) => $state ? '1' : '0')
+                            ->dehydrateStateUsing(fn ($state) => $state === '1')
                             ->required()
-                        ])
-                        ->columnSpan(6)
-                        ->compact()
+                        //])
+                        ->columnSpan(3)
+                        //->compact()
                         ->extraAttributes(['class' => 'h-full flex items-center justify-center bg-gray-800 rounded-lg'])
                     ]),
                 ])
@@ -200,6 +235,15 @@ class LiabilityStructuresRelationManager extends RelationManager
                     ->verticalAlignment(VerticalAlignment::Start) 
                     ->sortable()
                     ->searchable(),
+
+                TextColumn::make('country.alpha_3')
+                    ->verticalAlignment(VerticalAlignment::Start)
+                    ->label('Country')
+                    ->badge()
+                    ->color('info')
+                    ->sortable()
+                    ->searchable()
+                    ->tooltip(fn ($record) => $record->country?->name),
 
                 TextColumn::make('coverage.name')
                     ->label('Coverage')

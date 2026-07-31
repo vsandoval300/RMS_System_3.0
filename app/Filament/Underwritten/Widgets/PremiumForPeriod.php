@@ -4,6 +4,7 @@ namespace App\Filament\Underwritten\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use App\Services\PremiumForPeriodService;
+use Livewire\Attributes\On;
 
 class PremiumForPeriod extends ChartWidget
 {
@@ -13,6 +14,12 @@ class PremiumForPeriod extends ChartWidget
 
     public ?int $reinsurer = null;
     protected static bool $isLazy = false;
+
+    #[On('reinsurer-filter-changed')]
+    public function updateReinsurer(?int $reinsurer): void
+    {
+        $this->reinsurer = $reinsurer;
+    }
 
     protected function getData(): array
     {

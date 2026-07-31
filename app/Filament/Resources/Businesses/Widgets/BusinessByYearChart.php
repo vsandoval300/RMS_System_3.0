@@ -10,6 +10,7 @@ class BusinessByYearChart extends ChartWidget
 {
     protected ?string $heading = 'Businesses by Year and Lifecycle Status';
     protected ?string $maxHeight = '320px';
+    protected string $view = 'filament.widgets.business-by-year-chart';
     protected int|string|array $columnSpan = 'full';
 
     private array $statusColors = [

@@ -1,0 +1,712 @@
+<title>Alta Manual de Negocio — RMS Platform 4</title>
+<style>
+  :root {
+    --bg:      #EEF2F7;
+    --surface: #FFFFFF;
+    --border:  #D8E0EC;
+    --text:    #0D1829;
+    --muted:   #5A6A80;
+    --faint:   #F4F7FB;
+
+    --s1: #1D4ED8; /* Business       — blue   */
+    --s2: #6D28D9; /* Cost Scheme     — violet */
+    --s3: #0E7490; /* Liability       — cyan   */
+    --s4: #047857; /* Operative Doc   — emerald*/
+    --s5: #B45309; /* Transactions    — amber  */
+    --s6: #15803D; /* Approval        — green  */
+
+    --line: #CBD5E8;
+    --tag-bg: rgba(255,255,255,0.7);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:      #0B1120;
+      --surface: #131E30;
+      --border:  #1E2E46;
+      --text:    #E2EAF4;
+      --muted:   #7A91AC;
+      --faint:   #0F1A2A;
+      --s1: #60A5FA;
+      --s2: #A78BFA;
+      --s3: #22D3EE;
+      --s4: #34D399;
+      --s5: #FBB F24;
+      --s6: #4ADE80;
+      --line: #1E2E46;
+      --tag-bg: rgba(19,30,48,0.9);
+    }
+  }
+  :root[data-theme="dark"]  {
+    --bg:#0B1120;--surface:#131E30;--border:#1E2E46;--text:#E2EAF4;--muted:#7A91AC;
+    --faint:#0F1A2A;--s1:#60A5FA;--s2:#A78BFA;--s3:#22D3EE;--s4:#34D399;
+    --s5:#FBBF24;--s6:#4ADE80;--line:#1E2E46;--tag-bg:rgba(19,30,48,0.9);
+  }
+  :root[data-theme="light"] {
+    --bg:#EEF2F7;--surface:#FFFFFF;--border:#D8E0EC;--text:#0D1829;--muted:#5A6A80;
+    --faint:#F4F7FB;--s1:#1D4ED8;--s2:#6D28D9;--s3:#0E7490;--s4:#047857;
+    --s5:#B45309;--s6:#15803D;--line:#CBD5E8;--tag-bg:rgba(255,255,255,0.7);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1.5rem;
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* —— Header —— */
+  .doc-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc-header h1 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+  }
+  .doc-header .sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .doc-header .sub span { display: flex; align-items: center; gap: 0.3rem; }
+  .tag {
+    display: inline-block;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  /* —— Timeline —— */
+  .timeline {
+    position: relative;
+    padding-left: 52px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: var(--line);
+  }
+
+  /* —— Step —— */
+  .step {
+    position: relative;
+    margin-bottom: 1.75rem;
+  }
+  .step:last-child { margin-bottom: 0; }
+
+  .step-num {
+    position: absolute;
+    left: -52px;
+    top: 18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #fff;
+    z-index: 1;
+    box-shadow: 0 0 0 3px var(--bg);
+  }
+
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  /* —— Card header —— */
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-head-left h2 {
+    font-size: 0.97rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+  .card-head-left .desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .nav-path {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--faint);
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .nav-path .sep { opacity: 0.45; margin: 0 0.1rem; }
+
+  /* —— Card body —— */
+  .card-body { padding: 1rem 1.25rem; }
+
+  /* —— Field groups —— */
+  .field-groups { display: flex; flex-direction: column; gap: 0.9rem; }
+  .field-group-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.76rem;
+    padding: 0.22rem 0.55rem;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--faint);
+  }
+  .field.req { font-weight: 600; }
+  .field.opt { color: var(--muted); font-style: italic; }
+  .field-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* —— Tabs inside step —— */
+  .tab-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 0.6rem;
+  }
+  .tab-item {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  .tab-head {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--faint);
+    font-size: 0.79rem;
+    font-weight: 700;
+  }
+  .tab-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.67rem; font-weight: 800;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .tab-body {
+    padding: 0.65rem 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* —— Result bar —— */
+  .result-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    background: var(--faint);
+  }
+  .result-bar .r-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .result-bar .r-value { font-weight: 600; }
+
+  /* —— Warning / note boxes —— */
+  .note {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: 0.77rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 0.45rem;
+    margin-top: 0.75rem;
+    border: 1px solid;
+  }
+  .note-icon { font-size: 0.85rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .note.info  { background: rgba(37,99,235,.05); border-color: rgba(37,99,235,.2); color: var(--muted); }
+  .note.warn  { background: rgba(180,83,9,.05);  border-color: rgba(180,83,9,.2);  color: var(--muted); }
+  .note.success { background: rgba(4,120,87,.05); border-color: rgba(4,120,87,.2); color: var(--muted); }
+
+  /* —— Auto badge —— */
+  .auto-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem; border-radius: 4px;
+    background: rgba(4,120,87,.1); color: var(--s4);
+    vertical-align: middle;
+  }
+
+  /* —— Status badge —— */
+  .status {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
+    padding: 0.2rem 0.6rem; border-radius: 99px;
+  }
+  .s-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* —— Prereq chip —— */
+  .prereq {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.73rem; font-weight: 600;
+    padding: 0.2rem 0.6rem; border-radius: 5px;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.75rem 0;
+  }
+
+  code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8em;
+    background: rgba(37,99,235,.08);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+
+  strong { font-weight: 700; }
+</style>
+
+<!-- HEADER -->
+<div class="doc-header">
+  <h1>Alta Manual de Negocio</h1>
+  <div class="sub">
+    <span>📍 RMS Platform 4 · Underwritten Module</span>
+    <span><span class="tag" style="background:rgba(29,78,216,.1);color:var(--s1);">Camino 1</span> Alta individual por interfaz gráfica</span>
+    <span style="color:var(--muted);">6 pasos · flujo secuencial</span>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline">
+
+  <!-- ══ STEP 1 ══ -->
+  <div class="step">
+    <div class="step-num" style="background:var(--s1);">1</div>
+    <div class="step-card">
+      <div class="card-head" style="border-left:3px solid var(--s1);">
+        <div class="card-head-left">
+          <h2>Crear el Negocio (Business)</h2>
+          <div class="desc">Registro principal del contrato de reaseguro. Es la raíz de toda la jerarquía.</div>
+        </div>
+        <div class="nav-path">
+          Businesses <span class="sep">›</span> <strong>+ New Business</strong>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-groups">
+          <div>
+            <div class="field-group-label">Identificación</div>
+            <div class="fields">
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>business_code</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>description</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>index</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>source_code</span>
+            </div>
+          </div>
+          <div>
+            <div class="field-group-label">Contraparte &amp; Alcance</div>
+            <div class="fields">
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>reinsurer</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>producer</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>currency</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>region</span>
+            </div>
+          </div>
+          <div>
+            <div class="field-group-label">Atributos del Contrato</div>
+            <div class="fields">
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>reinsurance_type</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>risk_covered</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>business_type</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>premium_type</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>purpose</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s1)"></span>claims_type</span>
+            </div>
+          </div>
+          <div>
+            <div class="field-group-label">Vínculos opcionales</div>
+            <div class="fields">
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>parent (treaty)</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>renewed_from</span>
+            </div>
+          </div>
+        </div>
+        <div class="note info" style="margin-top:0.75rem;">
+          <span class="note-icon">ℹ️</span>
+          <span><strong>premium_type</strong> define el comportamiento del ciclo financiero: <em>Fixed</em> = monto fijo; <em>Estimated / Declared</em> = requiere recalculaciones periódicas por bordereaux.</span>
+        </div>
+      </div>
+      <div class="result-bar" style="border-left:3px solid var(--s1);">
+        <span class="r-label">Resultado</span>
+        <span class="r-value">Registro <code>businesses</code> creado</span>
+        <span style="font-size:0.77rem;color:var(--muted);">·</span>
+        <span class="status" style="color:#64748B;background:rgba(100,116,139,.1);"><span class="s-dot"></span>approval_status = DFT</span>
+        <span style="font-size:0.77rem;color:var(--muted);">·</span>
+        <span class="status" style="color:#0E7490;background:rgba(14,116,144,.1);"><span class="s-dot"></span>lifecycle = On Hold</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2 ══ -->
+  <div class="step">
+    <div class="step-num" style="background:var(--s2);">2</div>
+    <div class="step-card">
+      <div class="card-head" style="border-left:3px solid var(--s2);">
+        <div class="card-head-left">
+          <h2>Crear Cost Scheme (Estructura de Costos)</h2>
+          <div class="desc">Define cómo fluye la prima entre las partes y qué deducciones aplican. Puede reutilizarse en varios negocios.</div>
+        </div>
+        <div class="nav-path">
+          Cost Schemes <span class="sep">›</span> <strong>+ New</strong>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-groups">
+          <div>
+            <div class="field-group-label">Encabezado del Scheme</div>
+            <div class="fields">
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>scheme_id</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>agreement_type</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>share (%)</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>index</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>description</span>
+            </div>
+          </div>
+          <hr class="divider">
+          <div>
+            <div class="field-group-label">Cost Nodes (Repeater — dentro del mismo form)</div>
+            <div class="fields" style="margin-bottom:0.45rem;">
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>deduction concept</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>partner source</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>partner destination</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s2)"></span>value</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>apply to gross</span>
+            </div>
+            <div style="font-size:0.76rem;color:var(--muted);">Agrega un nodo por cada tramo del flujo premium → comisión → neto. El total de <code>value</code> de todos los nodos debe sumar 100%.</div>
+          </div>
+        </div>
+        <div class="note warn">
+          <span class="note-icon">⚠️</span>
+          <span>El Cost Scheme es <strong>independiente</strong> del Business. Se vincula al Operative Doc en el Paso 4 (tab "Doc Schemes") y a cada Insured también en el Paso 4.</span>
+        </div>
+      </div>
+      <div class="result-bar" style="border-left:3px solid var(--s2);">
+        <span class="r-label">Resultado</span>
+        <span class="r-value">Registro <code>cost_schemes</code> + N registros <code>cost_nodesx</code></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3 ══ -->
+  <div class="step">
+    <div class="step-num" style="background:var(--s3);">3</div>
+    <div class="step-card">
+      <div class="card-head" style="border-left:3px solid var(--s3);">
+        <div class="card-head-left">
+          <h2>Agregar Liability Structures (Coberturas)</h2>
+          <div class="desc">Define los límites de cobertura del negocio. Una fila por tipo de cobertura.</div>
+        </div>
+        <div class="nav-path">
+          Business <span class="sep">›</span> Edit <span class="sep">›</span> Tab <strong>"Liability Structures"</strong> <span class="sep">›</span> + Add
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prereq">⬆ Requiere: Business creado (Paso 1)</div>
+        <div class="field-groups">
+          <div>
+            <div class="field-group-label">Por cada cobertura</div>
+            <div class="fields">
+              <span class="field req"><span class="field-dot" style="background:var(--s3)"></span>coverage</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s3)"></span>limit</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s3)"></span>limit description</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>CLS (Yes/No)</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>sublimit</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>sublimit desc</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>deductible</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>deductible desc</span>
+            </div>
+          </div>
+        </div>
+        <div class="note info">
+          <span class="note-icon">ℹ️</span>
+          <span><strong>CLS</strong> = Combined Limit with Sublimit. Activarlo indica que el sublímite está contenido dentro del límite principal, no es adicional.</span>
+        </div>
+      </div>
+      <div class="result-bar" style="border-left:3px solid var(--s3);">
+        <span class="r-label">Resultado</span>
+        <span class="r-value">N registros <code>liability_structures</code> vinculados al Business</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4 ══ -->
+  <div class="step">
+    <div class="step-num" style="background:var(--s4);">4</div>
+    <div class="step-card">
+      <div class="card-head" style="border-left:3px solid var(--s4);">
+        <div class="card-head-left">
+          <h2>Agregar Operative Document</h2>
+          <div class="desc">El documento operativo es la póliza concreta del negocio. El modal tiene 4 pestañas que deben llenarse en orden.</div>
+        </div>
+        <div class="nav-path">
+          Business <span class="sep">›</span> Edit <span class="sep">›</span> Tab <strong>"Operative Documents"</strong> <span class="sep">›</span> + Add
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prereq">⬆ Requiere: Business (Paso 1) + Cost Scheme (Paso 2)</div>
+
+        <div class="tab-list">
+
+          <!-- Tab 1 -->
+          <div class="tab-item">
+            <div class="tab-head">
+              <div class="tab-num" style="background:var(--s4);">1</div>
+              <span>Document Details</span>
+              <span style="font-size:0.72rem;color:var(--muted);font-weight:400;margin-left:auto;">Datos generales del documento</span>
+            </div>
+            <div class="tab-body">
+              <div class="fields">
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>document ID</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>description</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>document type</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>AF/MF</span>
+                <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>ROE/FS</span>
+                <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>rep date</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2 -->
+          <div class="tab-item">
+            <div class="tab-head">
+              <div class="tab-num" style="background:var(--s4);">2</div>
+              <span>Coverage Period</span>
+              <span style="font-size:0.72rem;color:var(--muted);font-weight:400;margin-left:auto;">Vigencia de la cobertura</span>
+            </div>
+            <div class="tab-body">
+              <div class="fields">
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>inception date</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>expiration date</span>
+              </div>
+              <div style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;">El sistema calcula automáticamente la duración en días.</div>
+            </div>
+          </div>
+
+          <!-- Tab 3 -->
+          <div class="tab-item">
+            <div class="tab-head">
+              <div class="tab-num" style="background:var(--s4);">3</div>
+              <span>Insured Members</span>
+              <span style="font-size:0.72rem;color:var(--muted);font-weight:400;margin-left:auto;">Asegurados y sus primas</span>
+            </div>
+            <div class="tab-body">
+              <div style="font-size:0.77rem;color:var(--muted);margin-bottom:0.5rem;">Repeater — un renglón por asegurado:</div>
+              <div class="fields">
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>company (asegurado)</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>coverage</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>cost scheme</span>
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>premium</span>
+              </div>
+              <div class="note info" style="margin-top:0.55rem;">
+                <span class="note-icon">ℹ️</span>
+                <span>El <strong>cost scheme</strong> seleccionado aquí por cada insured es el que usará <code>TransactionLogsPreviewService</code> para calcular los logs financieros al crear una transacción.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 4 -->
+          <div class="tab-item">
+            <div class="tab-head">
+              <div class="tab-num" style="background:var(--s4);">4</div>
+              <span>Doc Schemes</span>
+              <span style="font-size:0.72rem;color:var(--muted);font-weight:400;margin-left:auto;">Asignación del scheme al documento</span>
+            </div>
+            <div class="tab-body">
+              <div style="font-size:0.77rem;color:var(--muted);margin-bottom:0.5rem;">Vincula el Cost Scheme a este Operative Doc (tabla <code>businessdoc_schemes</code>):</div>
+              <div class="fields">
+                <span class="field req"><span class="field-dot" style="background:var(--s4)"></span>cost scheme</span>
+              </div>
+              <div style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;">El scheme aquí define la estructura de distribución a nivel documento. Normalmente coincide con el del insured.</div>
+            </div>
+          </div>
+
+        </div><!-- /tab-list -->
+      </div>
+      <div class="result-bar" style="border-left:3px solid var(--s4);">
+        <span class="r-label">Resultado</span>
+        <span class="r-value"><code>operative_docs</code> + <code>businessdoc_insureds</code> + <code>businessdoc_schemes</code></span>
+        <span style="font-size:0.77rem;color:var(--muted);">· lifecycle → <strong>In Force</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5 ══ -->
+  <div class="step">
+    <div class="step-num" style="background:var(--s5);">5</div>
+    <div class="step-card">
+      <div class="card-head" style="border-left:3px solid var(--s5);">
+        <div class="card-head-left">
+          <h2>Agregar Transacciones</h2>
+          <div class="desc">Cada installment financiero del documento. Al guardarse, genera automáticamente los TransactionLogs por partida.</div>
+        </div>
+        <div class="nav-path">
+          Operative Doc <span class="sep">›</span> View <span class="sep">›</span> <strong>+ New Transaction</strong>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prereq">⬆ Requiere: Operative Doc completo (Paso 4)</div>
+        <div class="field-groups">
+          <div>
+            <div class="field-group-label">Por cada installment</div>
+            <div class="fields">
+              <span class="field req"><span class="field-dot" style="background:var(--s5)"></span>transaction type</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s5)"></span>due date</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s5)"></span>amount</span>
+              <span class="field req"><span class="field-dot" style="background:var(--s5)"></span>proportion (%)</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>exchange rate</span>
+              <span class="field opt"><span class="field-dot" style="background:var(--muted)"></span>remittance code</span>
+            </div>
+          </div>
+        </div>
+        <div class="note success">
+          <span class="note-icon">⚡</span>
+          <div>
+            Al guardar la transacción, <code>TransactionLogsPreviewService</code> se dispara automáticamente y genera los <strong>Transaction Logs</strong> (una línea por partida por contraparte según el Cost Scheme de cada insured). <span class="auto-badge">⚙ auto-generado</span>
+          </div>
+        </div>
+      </div>
+      <div class="result-bar" style="border-left:3px solid var(--s5);">
+        <span class="r-label">Resultado</span>
+        <span class="r-value"><code>transactions</code> + <code>transaction_logs</code></span>
+        <span style="font-size:0.77rem;color:var(--muted);">· status inicial = Pending</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6 ══ -->
+  <div class="step">
+    <div class="step-num" style="background:var(--s6);">6</div>
+    <div class="step-card">
+      <div class="card-head" style="border-left:3px solid var(--s6);">
+        <div class="card-head-left">
+          <h2>Someter a Revisión y Aprobar</h2>
+          <div class="desc">Cuando el negocio esté completo, el Creator lo envía al Manager para su aprobación. Solo los negocios APR aparecen en dashboards y reportes.</div>
+        </div>
+        <div class="nav-path">
+          Business <span class="sep">›</span> Edit / View <span class="sep">›</span> <strong>"Submit for Review"</strong>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prereq">⬆ Solo disponible cuando status = DFT o REJ</div>
+
+        <div style="display:flex;flex-direction:column;gap:0.55rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.85rem;border:1px solid var(--border);border-radius:0.45rem;font-size:0.8rem;">
+            <span style="font-size:1rem;">1️⃣</span>
+            <div>
+              <strong>Creator</strong> presiona <em>"Submit for Review"</em>
+              <div style="font-size:0.73rem;color:var(--muted);">status DFT → PND · notificación campanita al Manager (inmediata)</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.85rem;border:1px solid var(--border);border-radius:0.45rem;font-size:0.8rem;">
+            <span style="font-size:1rem;">2️⃣</span>
+            <div>
+              <strong>Manager</strong> recibe resumen semanal por correo (lunes 8am) o revisa la campanita
+              <div style="font-size:0.73rem;color:var(--muted);">Entra a Business → View/Edit → acción en header</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.85rem;border:1px solid var(--border);border-radius:0.45rem;font-size:0.8rem;">
+            <span style="font-size:1rem;">3️⃣</span>
+            <div>
+              <strong>Opción A — Approve:</strong> status PND → APR · correo inmediato al Creator
+              <div style="font-size:0.73rem;color:var(--muted);">El Business aparece en dashboards, reportes y <code>PremiumForPeriodService</code></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.85rem;border:1px solid var(--border);border-radius:0.45rem;font-size:0.8rem;">
+            <span style="font-size:1rem;">4️⃣</span>
+            <div>
+              <strong>Opción B — Request Revision:</strong> status PND → REJ · correo con <em>revision_notes</em> al Creator
+              <div style="font-size:0.73rem;color:var(--muted);">Creator corrige y vuelve a "Submit for Review" (loop hasta Approve)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="result-bar" style="border-left:3px solid var(--s6);">
+        <span class="r-label">Terminal</span>
+        <span class="status" style="color:#15803D;background:rgba(21,128,61,.1);"><span class="s-dot"></span>approval_status = APR</span>
+        <span style="font-size:0.77rem;color:var(--muted);">· visible en Underwritten Dashboard y todos los reportes</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /timeline -->
+
+<!-- LEGEND -->
+<div style="margin-top:2rem;padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:0.75rem;">
+  <div style="font-size:0.66rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);margin-bottom:0.65rem;">Convenciones</div>
+  <div style="display:flex;flex-wrap:wrap;gap:0.85rem;font-size:0.77rem;">
+    <span style="display:flex;align-items:center;gap:0.35rem;">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--s1)"></span>Campo <strong>obligatorio</strong>
+    </span>
+    <span style="display:flex;align-items:center;gap:0.35rem;">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--muted)"></span><em>Campo opcional</em>
+    </span>
+    <span class="auto-badge">⚙ auto-generado</span>
+    <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.77rem;padding:0.2rem 0.55rem;border:1px dashed var(--border);border-radius:5px;color:var(--muted);">⬆ prerequisito del paso anterior</span>
+  </div>
+</div>

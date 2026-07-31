@@ -14,7 +14,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Widget;
 
-use function Illuminate\Support\years;
+use Livewire\Attributes\On;
 
 class UnderwrittenProfile extends Widget implements HasForms, HasActions
 {
@@ -26,10 +26,19 @@ class UnderwrittenProfile extends Widget implements HasForms, HasActions
     protected ?string $maxHeight = '300px';
 
 
-    public ?int $reinsurer = null;
-    public array $years = [];
+    public ?int  $reinsurer    = null;
+    public array $years        = [];
+    public bool  $hideFilters  = false;
 
     protected $listeners = ['refreshChart' => '$refresh'];
+
+    #[On('analytics-filters-updated')]
+    public function updateFromAnalyticsFilters(int $year, ?int $reinsurer): void
+    {
+        $this->reinsurer = $reinsurer;
+        $this->years     = [$year];
+        $this->dispatch('refreshChart');
+    }
 
     protected function getFormSchema(): array
     {

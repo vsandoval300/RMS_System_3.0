@@ -17,14 +17,9 @@ class ViewTransaction extends ViewRecord
 {
     protected static string $resource = TransactionResource::class;
     
-    public function getMaxContentWidth(): ?string
+public function getTitle(): string
     {
-        return '7xl';
-    }
-
-    public function getTitle(): string
-    {
-        return 'View – ' . ($this->record?->name ?? 'Transaction');
+        return 'View Premium Payment Record';
     }
 
     protected function getRecordQuery(): Builder
@@ -52,6 +47,22 @@ class ViewTransaction extends ViewRecord
                 ->url(static::getResource()::getUrl('index')),    
         ];
     } */
+
+    public function getRelationManagers(): array
+    {
+        $managers = [
+            \App\Filament\Resources\Transactions\RelationManagers\LogsRelationManager::class,
+            \App\Filament\Resources\Transactions\RelationManagers\SupportsRelationManager::class,
+        ];
+
+        $premiumType = $this->record->operativeDoc?->business?->premium_type;
+
+        if (in_array($premiumType, ['Estimated', 'Declared'], true)) {
+            $managers[] = \App\Filament\Resources\Transactions\RelationManagers\RecalculationsRelationManager::class;
+        }
+
+        return $managers;
+    }
 
     protected function getHeaderActions(): array
     {
