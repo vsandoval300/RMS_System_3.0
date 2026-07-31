@@ -39,4 +39,11 @@ return [
         'webhook' => env('TEAMS_WEBHOOK_URL'),
     ],
 
+    'graph' => [
+        'tenant'       => env('AZURE_TENANT_ID'),
+        'client_id'    => env('AZURE_CLIENT_ID'),
+        'client_secret'=> env('AZURE_CLIENT_SECRET'),
+        'from'         => env('GRAPH_FROM'),
+    ],
+
 ];

@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Responses\CustomLoginResponse;
-
+use App\Mail\Graph\GraphTransportFactory;
+use Illuminate\Mail\MailManager;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -57,5 +58,13 @@ class AppServiceProvider extends ServiceProvider
                     };
             }
         );
+
+        $this->app->make(MailManager::class)
+        ->extend('graph', function () {
+
+            return app(GraphTransportFactory::class)
+                ->create();
+
+        });
     }
 }
