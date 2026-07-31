@@ -73,12 +73,12 @@ class BanksResource extends Resource
                                 modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
                             )
                             ->maxLength(255),
-
+                            
                         Textarea::make('address')
                             ->label('Address')
                             ->placeholder('Please provide bank address')
                             ->required(),
-
+                            
                         TextInput::make('aba_number')
                             ->label('ABA number')
                             ->placeholder('Please provide ABA number.')
