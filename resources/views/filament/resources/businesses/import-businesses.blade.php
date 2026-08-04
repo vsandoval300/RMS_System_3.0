@@ -88,6 +88,30 @@
     .pill.success  { background:light-dark(#dcfce7,#052e16); color:light-dark(#15803d,#86efac); }
     .pill.sheet    { background:light-dark(#f3f4f6,#27272a); color:var(--bc-text-muted); font-size:0.68rem; }
 
+    /* ── Progress bars ── */
+    .progress-track {
+        width: 100%; height: 5px;
+        background: light-dark(#e5e7eb,#27272a);
+        border-radius: 9999px; overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; border-radius: 9999px;
+        background: #41A2C3;
+        transition: width 0.4s ease;
+    }
+    .progress-fill.indeterminate {
+        width: 40% !important;
+        animation: indeterminate-slide 1.4s ease-in-out infinite;
+    }
+    @keyframes indeterminate-slide {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+
     /* ── Error list inside cell ── */
     .err-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.25rem; }
     .err-list li::before { content:'• '; color:var(--bc-danger); }
@@ -252,7 +276,7 @@
             </div>
             <div class="biz-alert info" style="margin-top:1rem;">
                 <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                <span>Only new records will be inserted. Existing records (by primary key) are skipped silently. All inserts run inside a single database transaction — if anything fails, no data is committed. The batch will be created with status <strong>Pending Review</strong> and must be approved by a manager before it takes effect.</span>
+                <span>Only new records will be inserted. Existing records (by primary key) are skipped silently. Each sheet is imported sequentially — progress is shown in real time. The batch will be created with status <strong>Pending Review</strong> and must be approved by a manager before it takes effect.</span>
             </div>
         </div>
         <div class="biz-import-footer">
@@ -264,6 +288,57 @@
                 </span>
                 <span wire:loading wire:target="confirmMasterImport">Importing all sheets…</span>
             </button>
+        </div>
+        @endif
+
+        {{-- ── Importing state (per-sheet real progress) ── --}}
+        @if($masterState === 'importing')
+        <div x-data @process-master-next-sheet.window="$wire.processMasterNextSheet()">
+            <div class="biz-sub-header">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <svg style="width:18px;height:18px;color:#41A2C3;flex-shrink:0;animation:spin 1s linear infinite;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">
+                        Importing {{ $masterCurrentSheetName }}… ({{ $masterSheetIdx }}/{{ count(\App\Filament\Resources\Businesses\Pages\ImportBusinesses::MASTER_SHEET_NAMES) }})
+                    </span>
+                </div>
+                <span style="font-size:0.8rem; font-weight:700; color:#41A2C3;">{{ $masterProgress }}%</span>
+            </div>
+            <div class="biz-import-body">
+                {{-- Progress bar --}}
+                <div class="progress-track" style="margin-bottom:1.25rem;">
+                    <div class="progress-fill" style="width:{{ $masterProgress }}%;"></div>
+                </div>
+                {{-- Per-sheet checklist --}}
+                <div style="display:flex; flex-direction:column; gap:0.45rem;">
+                    @foreach(\App\Filament\Resources\Businesses\Pages\ImportBusinesses::MASTER_SHEET_NAMES as $sIdx => $sName)
+                    @php
+                        $isDone    = isset($masterStats[$sName]);
+                        $isCurrent = ($sIdx === $masterSheetIdx);
+                        $isPending = ($sIdx > $masterSheetIdx);
+                    @endphp
+                    <div style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; {{ $isPending ? 'opacity:0.4;' : '' }}">
+                        @if($isDone)
+                            <svg style="width:16px;height:16px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        @elseif($isCurrent)
+                            <svg style="width:16px;height:16px;color:#41A2C3;flex-shrink:0;animation:spin 1s linear infinite;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        @else
+                            <svg style="width:16px;height:16px;color:var(--bc-border);flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                        @endif
+                        <span style="font-weight:{{ $isCurrent ? '700' : '500' }}; color:{{ $isDone ? 'var(--bc-text-muted)' : ($isCurrent ? 'var(--bc-text)' : 'var(--bc-text-muted)') }};">
+                            {{ $sName }}
+                        </span>
+                        @if($isDone)
+                        <span style="margin-left:auto; font-size:0.75rem; color:var(--bc-text-muted); font-variant-numeric:tabular-nums;">
+                            {{ $masterStats[$sName]['inserted'] }} inserted
+                            @if($masterStats[$sName]['skipped'] > 0)· {{ $masterStats[$sName]['skipped'] }} skipped@endif
+                        </span>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
         @endif
 
@@ -445,6 +520,7 @@
             </div>
         </div>
         <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
             <button wire:click="resetState" class="btn-cancel">← Cancel</button>
             <button wire:click="confirmImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
                 <span wire:loading.remove wire:target="confirmImport"><svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm Import — {{ count($previewRows) }} records</span>
@@ -636,6 +712,7 @@
             @endif
         </div>
         <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmCostSchemeImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
             <button wire:click="resetCostSchemeState" class="btn-cancel">← Cancel</button>
             <button wire:click="confirmCostSchemeImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
                 <span wire:loading.remove wire:target="confirmCostSchemeImport"><svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm Import — {{ count($csPreviewSchemes) }} schemes · {{ count($csPreviewNodes) }} nodes</span>
@@ -796,6 +873,7 @@
             </div>
         </div>
         <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmLiabilityStructureImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
             <button wire:click="resetLiabilityStructureState" class="btn-cancel">← Cancel</button>
             <button wire:click="confirmLiabilityStructureImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
                 <span wire:loading.remove wire:target="confirmLiabilityStructureImport"><svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm Import — {{ count($lsPreviewRows) }} records</span>
@@ -950,6 +1028,7 @@
             </div>
         </div>
         <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmOperativeDocImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
             <button wire:click="resetOperativeDocState" class="btn-cancel">← Cancel</button>
             <button wire:click="confirmOperativeDocImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
                 <span wire:loading.remove wire:target="confirmOperativeDocImport"><svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm Import — {{ count($odPreviewRows) }} records</span>
@@ -1102,6 +1181,7 @@
             </div>
         </div>
         <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmInsuredImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
             <button wire:click="resetInsuredState" class="btn-cancel">← Cancel</button>
             <button wire:click="confirmInsuredImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
                 <span wire:loading.remove wire:target="confirmInsuredImport"><svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm Import — {{ count($biPreviewRows) }} records</span>
@@ -1247,6 +1327,7 @@
             </div>
         </div>
         <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmDocSchemeImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
             <button wire:click="resetDocSchemeState" class="btn-cancel">← Cancel</button>
             <button wire:click="confirmDocSchemeImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" class="btn-primary">
                 <span wire:loading.remove wire:target="confirmDocSchemeImport"><svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm Import — {{ count($dsPreviewRows) }} records</span>
@@ -1278,6 +1359,381 @@
 
     </div>{{-- end collapsible --}}
 </div>{{-- end Step 6 card --}}
+
+<div style="display:flex; align-items:center; gap:0.75rem; padding:0.25rem 0; margin:0.25rem 0;">
+    <div style="flex:1; height:1px; background:var(--bc-border);"></div>
+    <span style="font-size:0.72rem; font-weight:600; color:var(--bc-text-muted); letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap;">— independent tables —</span>
+    <div style="flex:1; height:1px; background:var(--bc-border);"></div>
+</div>
+
+{{-- ════════════════════════════════════════════════════════════════
+     STEP 7 — Companies
+════════════════════════════════════════════════════════════════ --}}
+<div class="biz-import-card">
+
+    {{-- Accordion trigger --}}
+    <button type="button" class="biz-accordion-btn" :class="{ 'biz-accordion-btn--open': openStep === 7 }" @click="openStep = 7">
+        <svg style="width:20px;height:20px;flex-shrink:0;color:#41A2C3;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <div style="flex:1; min-width:0;">
+            <div style="font-size:1rem; font-weight:700; color:#41A2C3; line-height:1.2;">Step 7 &nbsp;·&nbsp; Companies</div>
+            <div style="font-size:0.8rem; color:var(--bc-text-muted); margin-top:0.1rem;">Import insured companies from Excel</div>
+        </div>
+        @if($coState === 'errors')
+            <span class="pill error" style="flex-shrink:0;">✗ {{ count($coErrorRows) }} error{{ count($coErrorRows) !== 1 ? 's' : '' }}</span>
+        @elseif($coState === 'preview')
+            <span class="pill new" style="flex-shrink:0;">{{ count($coPreviewRows) }} ready</span>
+        @elseif($coState === 'imported')
+            <span class="pill success" style="flex-shrink:0;">✓ Imported</span>
+        @endif
+        <svg class="biz-accordion-chevron" :class="{ 'is-open': openStep === 7 }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+
+    {{-- Collapsible content --}}
+    <div x-show="openStep === 7">
+
+        @if($coState === 'idle')
+        <div class="biz-import-body" style="display:flex; flex-direction:column; gap:1.5rem;">
+            <div>
+                <div class="biz-section-title">
+                    <span class="biz-step-badge active">1</span>
+                    Download the Excel Template
+                </div>
+                <div class="biz-alert info" style="margin-bottom:0.85rem;">
+                    <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <span>The template includes one data sheet: <strong>Companies</strong> (name, acronym, activity, webpage, country, industry). Plus reference sheets REF_Countries, REF_Industries, and README. <code>acronym</code> is the upsert key — existing records are updated, new ones are inserted.</span>
+                </div>
+                <button wire:click="downloadCompanyTemplate" class="btn-primary">
+                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
+                    Download Template
+                </button>
+            </div>
+            <div style="border-top:1px solid var(--bc-border);"></div>
+            <div>
+                <div class="biz-section-title">
+                    <span class="biz-step-badge active">2</span>
+                    Upload Completed File (.xlsx)
+                </div>
+                <div class="biz-upload-zone" x-data="{ dragging: false }"
+                     @dragover.prevent="dragging=true" @dragleave.prevent="dragging=false"
+                     @drop.prevent="dragging=false; $refs.coFileInput.files=$event.dataTransfer.files; $refs.coFileInput.dispatchEvent(new Event('change'));"
+                     :style="dragging ? 'border-color:#41A2C3;' : ''">
+                    <input type="file" x-ref="coFileInput" wire:model="coImportFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="co-file-input">
+                    <label for="co-file-input">
+                        <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
+                        Click to select or drag & drop a .xlsx file
+                    </label>
+                    <div class="biz-upload-hint">Only .xlsx files. Must use the template format.</div>
+                    <div wire:loading wire:target="coImportFile" style="margin-top:0.6rem; font-size:0.82rem; color:#41A2C3;">Validating file…</div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        @if($coState === 'errors')
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#dc2626;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                <div style="font-size:0.9rem; font-weight:700; color:light-dark(#b91c1c,#fca5a5);">{{ count($coErrorRows) }} validation {{ count($coErrorRows) === 1 ? 'error' : 'errors' }} — import aborted</div>
+            </div>
+            <button wire:click="resetCompanyState" class="btn-cancel">← Upload New File</button>
+        </div>
+        <div class="biz-import-body">
+            <div class="biz-tbl-wrap">
+                <table class="biz-tbl">
+                    <thead><tr><th style="width:5rem;">Row</th><th style="width:10rem;">Acronym</th><th style="width:20rem;">Name</th><th>Errors</th></tr></thead>
+                    <tbody>
+                        @foreach($coErrorRows as $row)
+                        <tr>
+                            <td class="center muted">{{ $row['row'] }}</td>
+                            <td class="mono">{{ $row['acronym'] ?? '—' }}</td>
+                            <td>{{ $row['name'] ?? '—' }}</td>
+                            <td><ul class="err-list">@foreach($row['errors'] as $err)<li>{{ $err }}</li>@endforeach</ul></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        @if($coState === 'preview')
+        @php
+            $coNewCount   = collect($coPreviewRows)->where('_action', 'insert')->count();
+            $coUpdCount   = collect($coPreviewRows)->where('_action', 'update')->count();
+            $coFuzzyCount = collect($coPreviewRows)->filter(fn($r) => !empty($r['_fuzzy_match']))->count();
+            $coEffective  = count($coPreviewRows) - count($coSkippedRows);
+        @endphp
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                <svg style="width:18px;height:18px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">{{ count($coPreviewRows) }} {{ count($coPreviewRows) === 1 ? 'record' : 'records' }} ready</span>
+                <span class="pill new">{{ $coNewCount }} new</span>
+                <span class="pill update">{{ $coUpdCount }} update</span>
+                @if($coFuzzyCount > 0)
+                    <span class="pill" style="background:light-dark(#fef3c7,#2d1f00); color:light-dark(#92400e,#fcd34d);">⚠ {{ $coFuzzyCount }} possible {{ $coFuzzyCount === 1 ? 'duplicate' : 'duplicates' }}</span>
+                @endif
+            </div>
+        </div>
+        @if($coFuzzyCount > 0)
+        <div class="biz-alert" style="background:light-dark(#fffbeb,#2d1f00); border-color:light-dark(#fde68a,#78350f); margin:0 1.25rem 0; border-radius:6px; padding:0.6rem 0.85rem;">
+            <svg style="flex-shrink:0;width:16px;height:16px;color:light-dark(#92400e,#fcd34d);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <span style="font-size:0.8rem; color:light-dark(#92400e,#fcd34d);">{{ $coFuzzyCount }} {{ $coFuzzyCount === 1 ? 'row has a' : 'rows have' }} a possible name match against existing companies (≥ 80% similarity). Review and check <strong>Skip</strong> on any rows you don't want to import.</span>
+        </div>
+        @endif
+        <div class="biz-import-body">
+            <div class="biz-tbl-wrap">
+                <table class="biz-tbl">
+                    <thead><tr><th style="width:4rem;">Row</th><th style="width:9rem;">Acronym</th><th>Name</th><th>Activity</th><th style="width:12rem;">Country</th><th style="width:12rem;">Industry</th><th style="width:6rem;">Action</th><th style="width:5rem; text-align:center;">Skip</th></tr></thead>
+                    <tbody>
+                        @foreach($coPreviewRows as $idx => $row)
+                        <tr @if(in_array($idx, $coSkippedRows)) style="opacity:0.35; text-decoration:line-through;" @endif>
+                            <td class="center muted">{{ $row['row'] }}</td>
+                            <td class="mono">{{ $row['acronym'] }}</td>
+                            <td>
+                                {{ $row['name'] }}
+                                @if(!empty($row['_fuzzy_match']))
+                                <div style="display:flex; align-items:center; gap:0.3rem; margin-top:0.2rem; font-size:0.72rem; color:light-dark(#92400e,#fcd34d); font-style:italic;">
+                                    <svg style="width:11px;height:11px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                    Similar to: "{{ $row['_fuzzy_match']['name'] }}" ({{ $row['_fuzzy_match']['pct'] }}%)
+                                </div>
+                                @endif
+                            </td>
+                            <td class="muted" style="max-width:12rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ $row['activity'] }}">{{ $row['activity'] ?? '—' }}</td>
+                            <td>{{ $row['_country_name'] ?: '—' }}</td>
+                            <td class="muted">{{ $row['_industry_name'] ?: '—' }}</td>
+                            <td>@if($row['_action'] === 'insert')<span class="pill new">New</span>@else<span class="pill update">Update</span>@endif</td>
+                            <td style="text-align:center;">
+                                @if(!empty($row['_fuzzy_match']))
+                                <input type="checkbox" wire:model.live="coSkippedRows" value="{{ $idx }}" style="accent-color:#f59e0b; width:15px; height:15px; cursor:pointer;">
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmCompanyImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
+            <button wire:click="resetCompanyState" class="btn-cancel">← Cancel</button>
+            <button wire:click="confirmCompanyImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" @if($coEffective === 0) disabled @endif class="btn-primary">
+                <span wire:loading.remove wire:target="confirmCompanyImport">
+                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Confirm Import — {{ $coEffective }} {{ $coEffective === 1 ? 'record' : 'records' }}@if(count($coSkippedRows) > 0) &nbsp;({{ count($coSkippedRows) }} skipped)@endif
+                </span>
+                <span wire:loading wire:target="confirmCompanyImport">Importing…</span>
+            </button>
+        </div>
+        @endif
+
+        @if($coState === 'imported')
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">Import Completed</span>
+            </div>
+        </div>
+        <div class="biz-import-body">
+            <div class="biz-alert success" style="margin-bottom:1.5rem;">
+                <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span>{{ $coInsertedCount }} {{ $coInsertedCount === 1 ? 'company' : 'companies' }} inserted · {{ $coUpdatedCount }} updated successfully.</span>
+            </div>
+            <div class="biz-stats">
+                <div class="biz-stat"><div class="biz-stat-val" style="color:#16a34a;">{{ $coInsertedCount }}</div><div class="biz-stat-lbl">Records inserted</div></div>
+                <div class="biz-stat"><div class="biz-stat-val" style="color:#2563eb;">{{ $coUpdatedCount }}</div><div class="biz-stat-lbl">Records updated</div></div>
+            </div>
+        </div>
+        <div class="biz-import-footer">
+            <button wire:click="resetCompanyState" class="btn-cancel">Import Another File</button>
+        </div>
+        @endif
+
+    </div>{{-- end collapsible --}}
+</div>{{-- end Step 7 card --}}
+
+{{-- ════════════════════════════════════════════════════════════════
+     STEP 8 — Partners
+════════════════════════════════════════════════════════════════ --}}
+<div class="biz-import-card">
+
+    {{-- Accordion trigger --}}
+    <button type="button" class="biz-accordion-btn" :class="{ 'biz-accordion-btn--open': openStep === 8 }" @click="openStep = 8">
+        <svg style="width:20px;height:20px;flex-shrink:0;color:#41A2C3;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <div style="flex:1; min-width:0;">
+            <div style="font-size:1rem; font-weight:700; color:#41A2C3; line-height:1.2;">Step 8 &nbsp;·&nbsp; Partners</div>
+            <div style="font-size:0.8rem; color:var(--bc-text-muted); margin-top:0.1rem;">Import intermediaries and partners from Excel</div>
+        </div>
+        @if($paState === 'errors')
+            <span class="pill error" style="flex-shrink:0;">✗ {{ count($paErrorRows) }} error{{ count($paErrorRows) !== 1 ? 's' : '' }}</span>
+        @elseif($paState === 'preview')
+            <span class="pill new" style="flex-shrink:0;">{{ count($paPreviewRows) }} ready</span>
+        @elseif($paState === 'imported')
+            <span class="pill success" style="flex-shrink:0;">✓ Imported</span>
+        @endif
+        <svg class="biz-accordion-chevron" :class="{ 'is-open': openStep === 8 }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+
+    {{-- Collapsible content --}}
+    <div x-show="openStep === 8">
+
+        @if($paState === 'idle')
+        <div class="biz-import-body" style="display:flex; flex-direction:column; gap:1.5rem;">
+            <div>
+                <div class="biz-section-title">
+                    <span class="biz-step-badge active">1</span>
+                    Download the Excel Template
+                </div>
+                <div class="biz-alert info" style="margin-bottom:0.85rem;">
+                    <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <span>The template includes one data sheet: <strong>Partners</strong> (name, short_name, acronym, partner_type, country). Plus reference sheets REF_PartnerTypes, REF_Countries, and README. <code>name</code> is the upsert key — existing records are updated, new ones are inserted.</span>
+                </div>
+                <button wire:click="downloadPartnerTemplate" class="btn-primary">
+                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
+                    Download Template
+                </button>
+            </div>
+            <div style="border-top:1px solid var(--bc-border);"></div>
+            <div>
+                <div class="biz-section-title">
+                    <span class="biz-step-badge active">2</span>
+                    Upload Completed File (.xlsx)
+                </div>
+                <div class="biz-upload-zone" x-data="{ dragging: false }"
+                     @dragover.prevent="dragging=true" @dragleave.prevent="dragging=false"
+                     @drop.prevent="dragging=false; $refs.paFileInput.files=$event.dataTransfer.files; $refs.paFileInput.dispatchEvent(new Event('change'));"
+                     :style="dragging ? 'border-color:#41A2C3;' : ''">
+                    <input type="file" x-ref="paFileInput" wire:model="paImportFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="pa-file-input">
+                    <label for="pa-file-input">
+                        <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
+                        Click to select or drag & drop a .xlsx file
+                    </label>
+                    <div class="biz-upload-hint">Only .xlsx files. Must use the template format.</div>
+                    <div wire:loading wire:target="paImportFile" style="margin-top:0.6rem; font-size:0.82rem; color:#41A2C3;">Validating file…</div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        @if($paState === 'errors')
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#dc2626;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                <div style="font-size:0.9rem; font-weight:700; color:light-dark(#b91c1c,#fca5a5);">{{ count($paErrorRows) }} validation {{ count($paErrorRows) === 1 ? 'error' : 'errors' }} — import aborted</div>
+            </div>
+            <button wire:click="resetPartnerState" class="btn-cancel">← Upload New File</button>
+        </div>
+        <div class="biz-import-body">
+            <div class="biz-tbl-wrap">
+                <table class="biz-tbl">
+                    <thead><tr><th style="width:5rem;">Row</th><th>Name</th><th>Errors</th></tr></thead>
+                    <tbody>
+                        @foreach($paErrorRows as $row)
+                        <tr>
+                            <td class="center muted">{{ $row['row'] }}</td>
+                            <td>{{ $row['name'] ?? '—' }}</td>
+                            <td><ul class="err-list">@foreach($row['errors'] as $err)<li>{{ $err }}</li>@endforeach</ul></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        @if($paState === 'preview')
+        @php
+            $paNewCount   = collect($paPreviewRows)->where('_action', 'insert')->count();
+            $paUpdCount   = collect($paPreviewRows)->where('_action', 'update')->count();
+            $paFuzzyCount = collect($paPreviewRows)->filter(fn($r) => !empty($r['_fuzzy_match']))->count();
+            $paEffective  = count($paPreviewRows) - count($paSkippedRows);
+        @endphp
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                <svg style="width:18px;height:18px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">{{ count($paPreviewRows) }} {{ count($paPreviewRows) === 1 ? 'record' : 'records' }} ready</span>
+                <span class="pill new">{{ $paNewCount }} new</span>
+                <span class="pill update">{{ $paUpdCount }} update</span>
+                @if($paFuzzyCount > 0)
+                    <span class="pill" style="background:light-dark(#fef3c7,#2d1f00); color:light-dark(#92400e,#fcd34d);">⚠ {{ $paFuzzyCount }} possible {{ $paFuzzyCount === 1 ? 'duplicate' : 'duplicates' }}</span>
+                @endif
+            </div>
+        </div>
+        @if($paFuzzyCount > 0)
+        <div class="biz-alert" style="background:light-dark(#fffbeb,#2d1f00); border-color:light-dark(#fde68a,#78350f); margin:0 1.25rem 0; border-radius:6px; padding:0.6rem 0.85rem;">
+            <svg style="flex-shrink:0;width:16px;height:16px;color:light-dark(#92400e,#fcd34d);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <span style="font-size:0.8rem; color:light-dark(#92400e,#fcd34d);">{{ $paFuzzyCount }} {{ $paFuzzyCount === 1 ? 'row has a' : 'rows have' }} a possible name match against existing partners (≥ 80% similarity). Review and check <strong>Skip</strong> on any rows you don't want to import.</span>
+        </div>
+        @endif
+        <div class="biz-import-body">
+            <div class="biz-tbl-wrap">
+                <table class="biz-tbl">
+                    <thead><tr><th style="width:4rem;">Row</th><th>Name</th><th style="width:14rem;">Short Name</th><th style="width:8rem;">Acronym</th><th style="width:14rem;">Partner Type</th><th style="width:12rem;">Country</th><th style="width:6rem;">Action</th><th style="width:5rem; text-align:center;">Skip</th></tr></thead>
+                    <tbody>
+                        @foreach($paPreviewRows as $idx => $row)
+                        <tr @if(in_array($idx, $paSkippedRows)) style="opacity:0.35; text-decoration:line-through;" @endif>
+                            <td class="center muted">{{ $row['row'] }}</td>
+                            <td>
+                                {{ $row['name'] }}
+                                @if(!empty($row['_fuzzy_match']))
+                                <div style="display:flex; align-items:center; gap:0.3rem; margin-top:0.2rem; font-size:0.72rem; color:light-dark(#92400e,#fcd34d); font-style:italic;">
+                                    <svg style="width:11px;height:11px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                    Similar to: "{{ $row['_fuzzy_match']['name'] }}" ({{ $row['_fuzzy_match']['pct'] }}%)
+                                </div>
+                                @endif
+                            </td>
+                            <td class="muted">{{ $row['short_name'] ?? '—' }}</td>
+                            <td class="mono muted">{{ $row['acronym'] ?? '—' }}</td>
+                            <td>{{ $row['_partner_type_name'] ?: '—' }}</td>
+                            <td class="muted">{{ $row['_country_name'] ?: '—' }}</td>
+                            <td>@if($row['_action'] === 'insert')<span class="pill new">New</span>@else<span class="pill update">Update</span>@endif</td>
+                            <td style="text-align:center;">
+                                @if(!empty($row['_fuzzy_match']))
+                                <input type="checkbox" wire:model.live="paSkippedRows" value="{{ $idx }}" style="accent-color:#f59e0b; width:15px; height:15px; cursor:pointer;">
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="biz-import-footer">
+            <div wire:loading wire:target="confirmPartnerImport" class="progress-track" style="width:100%; margin-bottom:0.1rem; order:-1; flex-basis:100%;"><div class="progress-fill indeterminate"></div></div>
+            <button wire:click="resetPartnerState" class="btn-cancel">← Cancel</button>
+            <button wire:click="confirmPartnerImport" wire:loading.attr="disabled" wire:loading.class="opacity-50" @if($paEffective === 0) disabled @endif class="btn-primary">
+                <span wire:loading.remove wire:target="confirmPartnerImport">
+                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Confirm Import — {{ $paEffective }} {{ $paEffective === 1 ? 'record' : 'records' }}@if(count($paSkippedRows) > 0) &nbsp;({{ count($paSkippedRows) }} skipped)@endif
+                </span>
+                <span wire:loading wire:target="confirmPartnerImport">Importing…</span>
+            </button>
+        </div>
+        @endif
+
+        @if($paState === 'imported')
+        <div class="biz-sub-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <svg style="width:18px;height:18px;color:#16a34a;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--bc-text);">Import Completed</span>
+            </div>
+        </div>
+        <div class="biz-import-body">
+            <div class="biz-alert success" style="margin-bottom:1.5rem;">
+                <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                <span>{{ $paInsertedCount }} {{ $paInsertedCount === 1 ? 'partner' : 'partners' }} inserted · {{ $paUpdatedCount }} updated successfully.</span>
+            </div>
+            <div class="biz-stats">
+                <div class="biz-stat"><div class="biz-stat-val" style="color:#16a34a;">{{ $paInsertedCount }}</div><div class="biz-stat-lbl">Records inserted</div></div>
+                <div class="biz-stat"><div class="biz-stat-val" style="color:#2563eb;">{{ $paUpdatedCount }}</div><div class="biz-stat-lbl">Records updated</div></div>
+            </div>
+        </div>
+        <div class="biz-import-footer">
+            <button wire:click="resetPartnerState" class="btn-cancel">Import Another File</button>
+        </div>
+        @endif
+
+    </div>{{-- end collapsible --}}
+</div>{{-- end Step 8 card --}}
 
 
 </div>

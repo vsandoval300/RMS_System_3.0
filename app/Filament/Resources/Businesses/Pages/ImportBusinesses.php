@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Businesses\Pages;
 
 use App\Exports\BusinessTemplateExport;
+use App\Exports\CompanyTemplateExport;
 use App\Exports\CostSchemeTemplateExport;
+use App\Exports\PartnerTemplateExport;
 use App\Exports\DocSchemeTemplateExport;
 use App\Exports\InsuredTemplateExport;
 use App\Exports\LiabilityStructureTemplateExport;
@@ -18,14 +20,17 @@ use App\Models\BusinessDocType;
 use App\Models\BusinessOpDocsInsured;
 use App\Models\BusinessOpDocsScheme;
 use App\Models\Company;
+use App\Models\Country;
 use App\Models\CostNodex;
 use App\Models\CostScheme;
 use App\Models\Coverage;
 use App\Models\Currency;
 use App\Models\Deduction;
+use App\Models\Industry;
 use App\Models\LiabilityStructure;
 use App\Models\OperativeDoc;
 use App\Models\Partner;
+use App\Models\PartnerType;
 use App\Models\Region;
 use App\Models\Reinsurer;
 use App\Models\Treaty;
@@ -57,6 +62,12 @@ class ImportBusinesses extends Page
 
     // ── Enum constraints — Cost Schemes ────────────────────────────────────────
     private const AGREEMENT_TYPES   = ['Quota Share', 'Surplus', 'Excess of Loss', 'Stop Loss'];
+
+    // ── Master Import sheet order ───────────────────────────────────────────────
+    public const MASTER_SHEET_NAMES = [
+        'Businesses', 'CostSchemes', 'CostNodesx',
+        'LiabilityStructures', 'OperativeDocs', 'Insureds', 'DocSchemes',
+    ];
 
     // ── Step 1 state ───────────────────────────────────────────────────────────
     // idle | errors | preview | imported
@@ -126,11 +137,45 @@ class ImportBusinesses extends Page
 
     public int $dsInsertedCount  = 0;
 
-    // ── Master Import state ────────────────────────────────────────────────────
+    // ── Step 7 state ───────────────────────────────────────────────────────────
     // idle | errors | preview | imported
-    public string $masterState       = 'idle';
-    public mixed  $masterImportFile  = null;
-    public string $masterBatchCode   = '';
+    public string $coState       = 'idle';
+    public mixed  $coImportFile  = null;
+
+    /** @var array<int, array<string,mixed>> */
+    public array $coPreviewRows  = [];
+
+    /** @var array<int, array<string,mixed>> */
+    public array $coErrorRows    = [];
+
+    public int $coInsertedCount  = 0;
+    public int $coUpdatedCount   = 0;
+    public array $coSkippedRows  = [];
+
+    // ── Step 8 state ───────────────────────────────────────────────────────────
+    // idle | errors | preview | imported
+    public string $paState       = 'idle';
+    public mixed  $paImportFile  = null;
+
+    /** @var array<int, array<string,mixed>> */
+    public array $paPreviewRows  = [];
+
+    /** @var array<int, array<string,mixed>> */
+    public array $paErrorRows    = [];
+
+    public int $paInsertedCount  = 0;
+    public int $paUpdatedCount   = 0;
+    public array $paSkippedRows  = [];
+
+    // ── Master Import state ────────────────────────────────────────────────────
+    // idle | errors | preview | importing | imported
+    public string $masterState            = 'idle';
+    public mixed  $masterImportFile       = null;
+    public string $masterBatchCode        = '';
+    public int    $masterBatchId          = 0;
+    public int    $masterSheetIdx         = 0;
+    public int    $masterProgress         = 0;
+    public string $masterCurrentSheetName = '';
 
     /** @var array<string, array<int, array<string,mixed>>> grouped by sheet name */
     public array $masterErrorsBySheet   = [];
@@ -407,6 +452,7 @@ class ImportBusinesses extends Page
 
     public function confirmImport(): void
     {
+        set_time_limit(600);
         if ($this->state !== 'preview' || empty($this->previewRows)) {
             return;
         }
@@ -717,6 +763,7 @@ class ImportBusinesses extends Page
 
     public function confirmCostSchemeImport(): void
     {
+        set_time_limit(600);
         if ($this->csState !== 'preview') {
             return;
         }
@@ -942,6 +989,7 @@ class ImportBusinesses extends Page
 
     public function confirmLiabilityStructureImport(): void
     {
+        set_time_limit(600);
         if ($this->lsState !== 'preview' || empty($this->lsPreviewRows)) {
             return;
         }
@@ -1138,6 +1186,7 @@ class ImportBusinesses extends Page
 
     public function confirmOperativeDocImport(): void
     {
+        set_time_limit(600);
         if ($this->odState !== 'preview' || empty($this->odPreviewRows)) {
             return;
         }
@@ -1333,6 +1382,7 @@ class ImportBusinesses extends Page
 
     public function confirmInsuredImport(): void
     {
+        set_time_limit(600);
         if ($this->biState !== 'preview' || empty($this->biPreviewRows)) {
             return;
         }
@@ -1470,6 +1520,7 @@ class ImportBusinesses extends Page
 
     public function confirmDocSchemeImport(): void
     {
+        set_time_limit(600);
         if ($this->dsState !== 'preview' || empty($this->dsPreviewRows)) {
             return;
         }
@@ -1504,6 +1555,412 @@ class ImportBusinesses extends Page
         $this->dsPreviewRows   = [];
         $this->dsErrorRows     = [];
         $this->dsInsertedCount = 0;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // STEP 7 — Companies
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function downloadCompanyTemplate(): StreamedResponse|BinaryFileResponse
+    {
+        return Excel::download(
+            CompanyTemplateExport::build(),
+            'step7_companies_import_template.xlsx'
+        );
+    }
+
+    public function updatedCoImportFile(): void
+    {
+        $this->processCompanyFile();
+    }
+
+    public function processCompanyFile(): void
+    {
+        if (! $this->coImportFile) {
+            return;
+        }
+
+        $countries = Country::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
+            ->toArray();
+
+        $industries = Industry::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
+            ->toArray();
+
+        // Pre-load acronyms for O(1) upsert detection — replaces N per-row DB queries with 1
+        $existingAcronymSet   = Company::pluck('acronym')
+            ->mapWithKeys(fn ($a) => [mb_strtolower(trim($a)) => true])
+            ->toArray();
+
+        // Pre-load names for fuzzy matching + 2-char prefix index to limit comparisons
+        $existingCoNames      = Company::pluck('name')->toArray();
+        $existingCoNamesLower = array_map(fn ($n) => mb_strtolower(trim($n)), $existingCoNames);
+        $coPrefixIndex        = [];
+        foreach ($existingCoNamesLower as $eIdx => $lower) {
+            $coPrefixIndex[mb_substr($lower, 0, 2)][] = $eIdx;
+        }
+
+        $path = $this->coImportFile->getRealPath();
+        $data = Excel::toArray(null, $path, null, \Maatwebsite\Excel\Excel::XLSX);
+
+        if (empty($data[0])) {
+            $this->coState     = 'errors';
+            $this->coErrorRows = [['row' => '—', 'acronym' => '—', 'name' => '—', 'errors' => ['The uploaded file appears to be empty or could not be read.']]];
+            return;
+        }
+
+        $dataRows = array_slice($data[0], 1); // skip header row
+
+        $this->coPreviewRows = [];
+        $this->coErrorRows   = [];
+
+        foreach ($dataRows as $i => $row) {
+            $lineNo = $i + 2;
+            $row    = array_pad((array) $row, 5, null);
+
+            $name         = trim((string) ($row[0] ?? ''));
+            $acronym      = trim((string) ($row[1] ?? ''));
+            $activity     = trim((string) ($row[2] ?? ''));
+            $countryName  = trim((string) ($row[3] ?? ''));
+            $industryName = trim((string) ($row[4] ?? ''));
+
+            if ($name === '' && $acronym === '') {
+                continue;
+            }
+
+            $errors = [];
+
+            if ($name === '') {
+                $errors[] = 'name is required.';
+            }
+
+            if ($acronym === '') {
+                $errors[] = 'acronym is required (upsert key).';
+            }
+
+            $countryId = null;
+            if ($countryName !== '') {
+                $countryId = $countries[mb_strtolower($countryName)] ?? null;
+                if ($countryId === null) {
+                    $errors[] = "Country not found: '{$countryName}'. Check the REF_Countries sheet.";
+                }
+            }
+
+            $industryId = null;
+            if ($industryName !== '') {
+                $industryId = $industries[mb_strtolower($industryName)] ?? null;
+                if ($industryId === null) {
+                    $errors[] = "Industry not found: '{$industryName}'. Check the REF_Industries sheet.";
+                }
+            }
+
+            $action = ($acronym !== '' && isset($existingAcronymSet[mb_strtolower($acronym)]))
+                ? 'update'
+                : 'insert';
+
+            $fuzzyMatch = null;
+            if ($action === 'insert' && $name !== '') {
+                $nameLower  = mb_strtolower($name);
+                $candidates = $coPrefixIndex[mb_substr($nameLower, 0, 2)] ?? [];
+                foreach ($candidates as $eIdx) {
+                    similar_text($nameLower, $existingCoNamesLower[$eIdx], $pct);
+                    if ($pct >= 80) {
+                        $fuzzyMatch = ['name' => $existingCoNames[$eIdx], 'pct' => round($pct)];
+                        break;
+                    }
+                }
+            }
+
+            $rowData = [
+                'row'            => $lineNo,
+                'name'           => $name,
+                'acronym'        => $acronym,
+                'activity'       => $activity !== '' ? $activity : null,
+                'country_id'     => $countryId,
+                'industry_id'    => $industryId,
+                '_country_name'  => $countryName,
+                '_industry_name' => $industryName,
+                '_action'        => $action,
+                '_fuzzy_match'   => $fuzzyMatch,
+            ];
+
+            if (! empty($errors)) {
+                $rowData['errors'] = $errors;
+                $this->coErrorRows[] = $rowData;
+            } else {
+                $this->coPreviewRows[] = $rowData;
+            }
+        }
+
+        if (! empty($this->coErrorRows)) {
+            $this->coState = 'errors';
+        } elseif (! empty($this->coPreviewRows)) {
+            $this->coState = 'preview';
+        } else {
+            $this->coState     = 'errors';
+            $this->coErrorRows = [['row' => '—', 'acronym' => '—', 'name' => '—', 'errors' => ['No data rows found. Make sure you filled the Companies sheet.']]];
+        }
+    }
+
+    public function confirmCompanyImport(): void
+    {
+        set_time_limit(600);
+        if ($this->coState !== 'preview' || empty($this->coPreviewRows)) {
+            return;
+        }
+
+        $inserted = 0;
+        $updated  = 0;
+
+        DB::transaction(function () use (&$inserted, &$updated) {
+            foreach ($this->coPreviewRows as $idx => $row) {
+                if (in_array($idx, $this->coSkippedRows)) {
+                    continue;
+                }
+                $data = [
+                    'name'        => $row['name'],
+                    'activity'    => $row['activity'],
+                    'country_id'  => $row['country_id'],
+                    'industry_id' => $row['industry_id'],
+                ];
+
+                $existing = Company::withTrashed()->where('acronym', $row['acronym'])->first();
+
+                if ($existing) {
+                    if ($existing->trashed()) {
+                        $existing->restore();
+                    }
+                    $existing->update($data);
+                    $updated++;
+                } else {
+                    Company::create(array_merge($data, ['acronym' => $row['acronym']]));
+                    $inserted++;
+                }
+            }
+        });
+
+        $this->coInsertedCount = $inserted;
+        $this->coUpdatedCount  = $updated;
+        $this->coState         = 'imported';
+
+        $skipped = count($this->coSkippedRows);
+        Notification::make()
+            ->success()
+            ->title('Companies import completed')
+            ->body("{$inserted} inserted · {$updated} updated" . ($skipped > 0 ? " · {$skipped} skipped" : '') . '.')
+            ->send();
+    }
+
+    public function resetCompanyState(): void
+    {
+        $this->coState         = 'idle';
+        $this->coImportFile    = null;
+        $this->coPreviewRows   = [];
+        $this->coErrorRows     = [];
+        $this->coInsertedCount = 0;
+        $this->coUpdatedCount  = 0;
+        $this->coSkippedRows   = [];
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // STEP 8 — Partners
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function downloadPartnerTemplate(): StreamedResponse|BinaryFileResponse
+    {
+        return Excel::download(
+            PartnerTemplateExport::build(),
+            'step8_partners_import_template.xlsx'
+        );
+    }
+
+    public function updatedPaImportFile(): void
+    {
+        $this->processPartnerFile();
+    }
+
+    public function processPartnerFile(): void
+    {
+        if (! $this->paImportFile) {
+            return;
+        }
+
+        $partnerTypes = PartnerType::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
+            ->toArray();
+
+        $countries = Country::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
+            ->toArray();
+
+        // Pre-load names for O(1) upsert detection — replaces N per-row DB queries with 1
+        $existingNameSet      = Partner::pluck('name')
+            ->mapWithKeys(fn ($n) => [mb_strtolower(trim($n)) => true])
+            ->toArray();
+
+        // Pre-load names for fuzzy matching + 2-char prefix index to limit comparisons
+        $existingPaNames      = Partner::pluck('name')->toArray();
+        $existingPaNamesLower = array_map(fn ($n) => mb_strtolower(trim($n)), $existingPaNames);
+        $paPrefixIndex        = [];
+        foreach ($existingPaNamesLower as $eIdx => $lower) {
+            $paPrefixIndex[mb_substr($lower, 0, 2)][] = $eIdx;
+        }
+
+        $path = $this->paImportFile->getRealPath();
+        $data = Excel::toArray(null, $path, null, \Maatwebsite\Excel\Excel::XLSX);
+
+        if (empty($data[0])) {
+            $this->paState     = 'errors';
+            $this->paErrorRows = [['row' => '—', 'name' => '—', 'errors' => ['The uploaded file appears to be empty or could not be read.']]];
+            return;
+        }
+
+        $dataRows = array_slice($data[0], 1); // skip header row
+
+        $this->paPreviewRows = [];
+        $this->paErrorRows   = [];
+
+        foreach ($dataRows as $i => $row) {
+            $lineNo = $i + 2;
+            $row    = array_pad((array) $row, 5, null);
+
+            $name             = trim((string) ($row[0] ?? ''));
+            $shortName        = trim((string) ($row[1] ?? ''));
+            $acronym          = trim((string) ($row[2] ?? ''));
+            $partnerTypeName  = trim((string) ($row[3] ?? ''));
+            $countryName      = trim((string) ($row[4] ?? ''));
+
+            if ($name === '') {
+                continue;
+            }
+
+            $errors = [];
+
+            if ($acronym !== '' && mb_strlen($acronym) > 3) {
+                $errors[] = "acronym must be 3 characters or fewer ('{$acronym}' has " . mb_strlen($acronym) . ').';
+            }
+
+            $partnerTypeId = null;
+            if ($partnerTypeName !== '') {
+                $partnerTypeId = $partnerTypes[mb_strtolower($partnerTypeName)] ?? null;
+                if ($partnerTypeId === null) {
+                    $errors[] = "Partner type not found: '{$partnerTypeName}'. Check the REF_PartnerTypes sheet.";
+                }
+            }
+
+            $countryId = null;
+            if ($countryName !== '') {
+                $countryId = $countries[mb_strtolower($countryName)] ?? null;
+                if ($countryId === null) {
+                    $errors[] = "Country not found: '{$countryName}'. Check the REF_Countries sheet.";
+                }
+            }
+
+            $action = isset($existingNameSet[mb_strtolower($name)]) ? 'update' : 'insert';
+
+            $fuzzyMatch = null;
+            if ($action === 'insert' && $name !== '') {
+                $nameLower  = mb_strtolower($name);
+                $candidates = $paPrefixIndex[mb_substr($nameLower, 0, 2)] ?? [];
+                foreach ($candidates as $eIdx) {
+                    similar_text($nameLower, $existingPaNamesLower[$eIdx], $pct);
+                    if ($pct >= 80) {
+                        $fuzzyMatch = ['name' => $existingPaNames[$eIdx], 'pct' => round($pct)];
+                        break;
+                    }
+                }
+            }
+
+            $rowData = [
+                'row'                => $lineNo,
+                'name'               => $name,
+                'short_name'         => $shortName !== '' ? $shortName : null,
+                'acronym'            => $acronym !== '' ? $acronym : null,
+                'partner_types_id'   => $partnerTypeId,
+                'country_id'         => $countryId,
+                '_partner_type_name' => $partnerTypeName,
+                '_country_name'      => $countryName,
+                '_action'            => $action,
+                '_fuzzy_match'       => $fuzzyMatch,
+            ];
+
+            if (! empty($errors)) {
+                $rowData['errors'] = $errors;
+                $this->paErrorRows[] = $rowData;
+            } else {
+                $this->paPreviewRows[] = $rowData;
+            }
+        }
+
+        if (! empty($this->paErrorRows)) {
+            $this->paState = 'errors';
+        } elseif (! empty($this->paPreviewRows)) {
+            $this->paState = 'preview';
+        } else {
+            $this->paState     = 'errors';
+            $this->paErrorRows = [['row' => '—', 'name' => '—', 'errors' => ['No data rows found. Make sure you filled the Partners sheet.']]];
+        }
+    }
+
+    public function confirmPartnerImport(): void
+    {
+        set_time_limit(600);
+        if ($this->paState !== 'preview' || empty($this->paPreviewRows)) {
+            return;
+        }
+
+        $inserted = 0;
+        $updated  = 0;
+
+        DB::transaction(function () use (&$inserted, &$updated) {
+            foreach ($this->paPreviewRows as $idx => $row) {
+                if (in_array($idx, $this->paSkippedRows)) {
+                    continue;
+                }
+                $data = [
+                    'short_name'       => $row['short_name'],
+                    'acronym'          => $row['acronym'],
+                    'partner_types_id' => $row['partner_types_id'],
+                    'country_id'       => $row['country_id'],
+                ];
+
+                $existing = Partner::withTrashed()->where('name', $row['name'])->first();
+
+                if ($existing) {
+                    if ($existing->trashed()) {
+                        $existing->restore();
+                    }
+                    $existing->update($data);
+                    $updated++;
+                } else {
+                    Partner::create(array_merge($data, ['name' => $row['name']]));
+                    $inserted++;
+                }
+            }
+        });
+
+        $this->paInsertedCount = $inserted;
+        $this->paUpdatedCount  = $updated;
+        $this->paState         = 'imported';
+
+        $skipped = count($this->paSkippedRows);
+        Notification::make()
+            ->success()
+            ->title('Partners import completed')
+            ->body("{$inserted} inserted · {$updated} updated" . ($skipped > 0 ? " · {$skipped} skipped" : '') . '.')
+            ->send();
+    }
+
+    public function resetPartnerState(): void
+    {
+        $this->paState         = 'idle';
+        $this->paImportFile    = null;
+        $this->paPreviewRows   = [];
+        $this->paErrorRows     = [];
+        $this->paInsertedCount = 0;
+        $this->paUpdatedCount  = 0;
+        $this->paSkippedRows   = [];
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1803,35 +2260,11 @@ class ImportBusinesses extends Page
 
     public function confirmMasterImport(): void
     {
+        set_time_limit(600);
         if ($this->masterState !== 'preview' || ! $this->masterImportFile) {
             return;
         }
 
-        // Re-build lookup maps
-        $reinsurers = Reinsurer::pluck('id', 'name')
-            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
-        $partners = Partner::pluck('id', 'name')
-            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
-        $currencies = Currency::pluck('id', 'acronym')
-            ->mapWithKeys(fn ($id, $a) => [strtoupper(trim($a)) => $id])->toArray();
-        $regions = Region::pluck('id', 'name')
-            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
-        $docTypes = BusinessDocType::pluck('id', 'name')
-            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
-        $deductionsByConcept = Deduction::pluck('id', 'concept')
-            ->mapWithKeys(fn ($id, $c) => [mb_strtolower(trim($c)) => $id])->toArray();
-        $companies = Company::pluck('id', 'name')
-            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
-        $coverages = Coverage::pluck('id', 'name')
-            ->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
-        $allBizCodes  = Business::withTrashed()->pluck('business_code')->flip()->toArray();
-        $allSchemeIds = CostScheme::withTrashed()->pluck('id')->flip()->toArray();
-        $allDocIds    = OperativeDoc::withTrashed()->pluck('id')->flip()->toArray();
-
-        $path = $this->masterImportFile->getRealPath();
-        $data = Excel::toArray(null, $path, null, \Maatwebsite\Excel\Excel::XLSX);
-
-        // Create batch before inserting data so all records reference it
         $batch = ImportBatch::create([
             'imported_by'      => Auth::id(),
             'status'           => 'pending_review',
@@ -1839,19 +2272,51 @@ class ImportBusinesses extends Page
             'imported_at'      => now(),
         ]);
 
-        $stats = [];
+        $this->masterBatchId          = $batch->id;
+        $this->masterSheetIdx         = 0;
+        $this->masterProgress         = 0;
+        $this->masterCurrentSheetName = self::MASTER_SHEET_NAMES[0];
+        $this->masterStats            = [];
+        $this->masterState            = 'importing';
+        $this->dispatch('process-master-next-sheet');
+    }
 
-        DB::transaction(function () use (
-            &$stats, &$allBizCodes, &$allSchemeIds, &$allDocIds,
-            $data, $reinsurers, $partners, $currencies, $regions,
-            $docTypes, $deductionsByConcept, $companies, $coverages,
-            $batch
-        ) {
-            $userId  = Auth::id();
-            $batchId = $batch->id;
+    public function processMasterNextSheet(): void
+    {
+        set_time_limit(600);
+        if ($this->masterState !== 'importing' || ! $this->masterImportFile) {
+            return;
+        }
 
+        $idx = $this->masterSheetIdx;
+        if (! isset(self::MASTER_SHEET_NAMES[$idx])) {
+            return;
+        }
+
+        $this->masterCurrentSheetName = self::MASTER_SHEET_NAMES[$idx];
+
+        // Fresh lookup maps — previous sheets already committed, so these include them
+        $reinsurers          = Reinsurer::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $partners            = Partner::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $currencies          = Currency::pluck('id', 'acronym')->mapWithKeys(fn ($id, $a) => [strtoupper(trim($a)) => $id])->toArray();
+        $regions             = Region::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $docTypes            = BusinessDocType::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $deductionsByConcept = Deduction::pluck('id', 'concept')->mapWithKeys(fn ($id, $c) => [mb_strtolower(trim($c)) => $id])->toArray();
+        $companies           = Company::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $coverages           = Coverage::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $allBizCodes         = Business::withTrashed()->pluck('business_code')->flip()->toArray();
+        $allSchemeIds        = CostScheme::withTrashed()->pluck('id')->flip()->toArray();
+        $allDocIds           = OperativeDoc::withTrashed()->pluck('id')->flip()->toArray();
+
+        $path    = $this->masterImportFile->getRealPath();
+        $data    = Excel::toArray(null, $path, null, \Maatwebsite\Excel\Excel::XLSX);
+        $batchId = $this->masterBatchId;
+        $userId  = Auth::id();
+
+        $ins = $skp = 0;
+
+        if ($idx === 0) {
             // ── Businesses ────────────────────────────────────────────────────
-            $ins = $skp = 0;
             foreach (array_slice($data[0] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 16, null);
                 $bc  = trim((string) ($row[0] ?? ''));
@@ -1877,13 +2342,10 @@ class ImportBusinesses extends Page
                     'created_by_user'  => $userId,
                     'import_batch_id'  => $batchId,
                 ]);
-                $allBizCodes[$bc] = true;
                 $ins++;
             }
-            $stats['Businesses'] = ['inserted' => $ins, 'skipped' => $skp];
-
-            // ── CostSchemes ────────────────────────────────────────────────────
-            $ins = $skp = 0;
+        } elseif ($idx === 1) {
+            // ── CostSchemes ───────────────────────────────────────────────────
             foreach (array_slice($data[1] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 5, null);
                 $sid = trim((string) ($row[0] ?? ''));
@@ -1898,28 +2360,25 @@ class ImportBusinesses extends Page
                     'created_by_user' => $userId,
                     'import_batch_id' => $batchId,
                 ]);
-                $allSchemeIds[$sid] = true;
                 $ins++;
             }
-            $stats['CostSchemes'] = ['inserted' => $ins, 'skipped' => $skp];
-
-            // ── CostNodesx ─────────────────────────────────────────────────────
-            $ins = $skp = 0;
+        } elseif ($idx === 2) {
+            // ── CostNodesx ────────────────────────────────────────────────────
             $existingNodeKeys = CostNodex::withTrashed()
-                ->selectRaw("CONCAT(cscheme_id, '#', \"index\") as nk")
+                ->selectRaw("CONCAT(cscheme_id, '#', `index`) as nk")
                 ->pluck('nk')->flip()->toArray();
             foreach (array_slice($data[2] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 7, null);
                 $sid = trim((string) ($row[0] ?? ''));
                 $psn = trim((string) ($row[5] ?? ''));
                 if ($sid === '' && $row[1] === null && $psn === '') { continue; }
-                $idx = ($row[1] !== null) ? (int) $row[1] : null;
-                $nk  = $sid . '#' . $idx;
+                $nodeIdx = ($row[1] !== null) ? (int) $row[1] : null;
+                $nk      = $sid . '#' . $nodeIdx;
                 if (isset($existingNodeKeys[$nk])) { $skp++; continue; }
                 CostNodex::create([
                     'id'                     => (string) Str::uuid(),
                     'cscheme_id'             => $sid,
-                    'index'                  => $idx,
+                    'index'                  => $nodeIdx,
                     'concept'                => ($c = mb_strtolower(trim((string) ($row[2] ?? '')))) !== '' ? ($deductionsByConcept[$c] ?? null) : null,
                     'value'                  => ($row[3] !== null) ? (float) $row[3] : null,
                     'apply_to_gross'         => in_array(strtolower(trim((string) ($row[4] ?? ''))), ['yes', '1', 'true'], true),
@@ -1927,13 +2386,10 @@ class ImportBusinesses extends Page
                     'partner_destination_id' => $partners[mb_strtolower(trim((string) ($row[6] ?? '')))] ?? null,
                     'import_batch_id'        => $batchId,
                 ]);
-                $existingNodeKeys[$nk] = true;
                 $ins++;
             }
-            $stats['CostNodesx'] = ['inserted' => $ins, 'skipped' => $skp];
-
-            // ── LiabilityStructures ────────────────────────────────────────────
-            $ins = 0;
+        } elseif ($idx === 3) {
+            // ── LiabilityStructures ───────────────────────────────────────────
             foreach (array_slice($data[3] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 9, null);
                 $bc  = trim((string) ($row[0] ?? ''));
@@ -1953,10 +2409,8 @@ class ImportBusinesses extends Page
                 ]);
                 $ins++;
             }
-            $stats['LiabilityStructures'] = ['inserted' => $ins, 'skipped' => 0];
-
-            // ── OperativeDocs ──────────────────────────────────────────────────
-            $ins = $skp = 0;
+        } elseif ($idx === 4) {
+            // ── OperativeDocs ─────────────────────────────────────────────────
             foreach (array_slice($data[4] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 9, null);
                 $id  = trim((string) ($row[0] ?? ''));
@@ -1975,13 +2429,10 @@ class ImportBusinesses extends Page
                     'created_by_user'       => $userId,
                     'import_batch_id'       => $batchId,
                 ]);
-                $allDocIds[$id] = true;
                 $ins++;
             }
-            $stats['OperativeDocs'] = ['inserted' => $ins, 'skipped' => $skp];
-
+        } elseif ($idx === 5) {
             // ── Insureds ──────────────────────────────────────────────────────
-            $ins = 0;
             foreach (array_slice($data[5] ?? [], 1) as $row) {
                 $row  = array_pad((array) $row, 5, null);
                 $odId = trim((string) ($row[0] ?? ''));
@@ -1997,10 +2448,8 @@ class ImportBusinesses extends Page
                 ]);
                 $ins++;
             }
-            $stats['Insureds'] = ['inserted' => $ins, 'skipped' => 0];
-
+        } elseif ($idx === 6) {
             // ── DocSchemes ────────────────────────────────────────────────────
-            $ins = 0;
             foreach (array_slice($data[6] ?? [], 1) as $row) {
                 $row  = array_pad((array) $row, 2, null);
                 $odId = trim((string) ($row[0] ?? ''));
@@ -2013,40 +2462,53 @@ class ImportBusinesses extends Page
                 ]);
                 $ins++;
             }
-            $stats['DocSchemes'] = ['inserted' => $ins, 'skipped' => 0];
-        });
-
-        // Persist summary on the batch record
-        $batch->update(['summary_json' => $stats]);
-
-        $this->masterStats     = $stats;
-        $this->masterBatchCode = $batch->batch_code;
-        $this->masterState     = 'imported';
-
-        $totalIns = array_sum(array_column($stats, 'inserted'));
-        $totalSkp = array_sum(array_column($stats, 'skipped'));
-
-        // Notify reviewer (importer's manager) via bell — email via weekly digest
-        $reviewer = Auth::user()->manager;
-        if ($reviewer) {
-            $reviewer->notify(new BatchImportedNotification($batch, Auth::user()->name));
         }
 
-        Notification::make()
-            ->success()
-            ->title("Import submitted — batch {$batch->batch_code}")
-            ->body("{$totalIns} records inserted · {$totalSkp} skipped · pending manager review")
-            ->send();
+        $this->masterStats[self::MASTER_SHEET_NAMES[$idx]] = ['inserted' => $ins, 'skipped' => $skp];
+        $this->masterSheetIdx++;
+        $totalSheets = count(self::MASTER_SHEET_NAMES);
+        $this->masterProgress = (int) round(($this->masterSheetIdx / $totalSheets) * 100);
+
+        if ($this->masterSheetIdx >= $totalSheets) {
+            // All sheets done — persist summary and notify
+            $batch = ImportBatch::find($this->masterBatchId);
+            $batch->update(['summary_json' => $this->masterStats]);
+
+            $this->masterBatchCode = $batch->batch_code;
+            $this->masterState     = 'imported';
+            $this->masterProgress  = 100;
+
+            $totalIns = array_sum(array_column($this->masterStats, 'inserted'));
+            $totalSkp = array_sum(array_column($this->masterStats, 'skipped'));
+
+            $reviewer = Auth::user()->manager;
+            if ($reviewer) {
+                $reviewer->notify(new BatchImportedNotification($batch, Auth::user()->name));
+            }
+
+            Notification::make()
+                ->success()
+                ->title("Import submitted — batch {$batch->batch_code}")
+                ->body("{$totalIns} records inserted · {$totalSkp} skipped · pending manager review")
+                ->send();
+        } else {
+            $this->masterCurrentSheetName = self::MASTER_SHEET_NAMES[$this->masterSheetIdx];
+            $this->dispatch('process-master-next-sheet');
+        }
     }
 
     public function resetMasterState(): void
     {
-        $this->masterState         = 'idle';
-        $this->masterImportFile    = null;
-        $this->masterBatchCode     = '';
-        $this->masterErrorsBySheet = [];
-        $this->masterPreviewCounts = [];
-        $this->masterStats         = [];
+        $this->masterState            = 'idle';
+        $this->masterImportFile       = null;
+        $this->masterBatchCode        = '';
+        $this->masterBatchId          = 0;
+        $this->masterSheetIdx         = 0;
+        $this->masterProgress         = 0;
+        $this->masterCurrentSheetName = '';
+        $this->masterErrorsBySheet    = [];
+        $this->masterPreviewCounts    = [];
+        $this->masterStats            = [];
     }
 
     private function parseExcelDate(mixed $value): ?string
