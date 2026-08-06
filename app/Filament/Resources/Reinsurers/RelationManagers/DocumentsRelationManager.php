@@ -150,48 +150,6 @@ class DocumentsRelationManager extends RelationManager
             ->toolbarActions([
                 DeleteBulkAction::make(),
             ]);
-
-
-
-
-
-
-                // Nos quedamos aqui en que no se renderiza la columna
-              /*  TextColumn::make('document_path')
-                    ->label('File')
-                    ->icon('heroicon-o-document') // ícono PDF
-                    ->color('danger')
-                    ->url(function ($record) {
-                        /** @var \Illuminate\Filesystem\FilesystemAdapter $s3 
-                        $s3 = Storage::disk('s3');
-
-                        return Str::startsWith(
-                            $record->document_path,
-                            ['http://', 'https://']
-                        )
-                            ? $record->document_path
-                            : $s3->url($record->document_path);
-                    })
-                    ->openUrlInNewTab()
-                    ->tooltip('View PDF')
-                    ->formatStateUsing(fn ($state) => $state ? basename($state) : '—') // 👈 ahora sí funciona
-                    ->searchable()
-                    ->sortable(),
-
-                ])
-                ->defaultSort('stamp_date', 'asc')
-                ->headerActions([
-                    Tables\Actions\CreateAction::make()
-                        ->modalHeading('Add document')
-                        ->label('New Corporate Document'), // ← Cambias el texto aquí
-                ])
-                ->actions([
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ])
-                    ->bulkActions([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]); */
     }
 
     /* ---------- Formulario ---------- */

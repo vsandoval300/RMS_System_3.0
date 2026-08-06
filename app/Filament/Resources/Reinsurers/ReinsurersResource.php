@@ -964,6 +964,7 @@ public static function infolist(Schema $schema): Schema
                     DeleteBulkAction::make(),
                 ]),
             ])
+            ->defaultPaginationPageOption(50)
             ->paginationPageOptions([10, 25, 50, 100, 'all']);
     }
 

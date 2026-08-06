@@ -416,7 +416,7 @@ class BankAccountsResource extends Resource
                     ->label('Currency')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('bank_inter.name')
                     ->label('Intermediary Bank')
@@ -428,7 +428,7 @@ class BankAccountsResource extends Resource
                     ->label('Banks')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('beneficiary_acct_name')
                     ->label('Beneficiary Name')
@@ -441,6 +441,8 @@ class BankAccountsResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable()
+                    //->limit(20)
+                    //->tooltip(fn ($record) => $record->beneficiary_address)
                     ->wrap() // ✅ Permite que se haga multilínea
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
@@ -463,6 +465,8 @@ class BankAccountsResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable()
+                    //->limit(20)
+                    //->tooltip(fn ($record) => $record->ffc_acct_name)
                     ->wrap() // ✅ Permite que se haga multilínea
                     ->extraAttributes([
                         'class' => 'max-w-xl whitespace-normal', // ✅ Deja que el texto se envuelva
@@ -524,7 +528,9 @@ class BankAccountsResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(50)
+            ->paginationPageOptions([5, 10, 25, 50]);
     }
 
     public static function getRelations(): array

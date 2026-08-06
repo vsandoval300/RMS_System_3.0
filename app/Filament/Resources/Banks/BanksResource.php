@@ -307,7 +307,9 @@ class BanksResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(50)
+            ->paginationPageOptions([5, 10, 25, 50]);
     }
 
     public static function getRelations(): array

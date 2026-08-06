@@ -6,11 +6,17 @@ use Filament\Actions\CreateAction;
 use App\Filament\Resources\BankAccounts\BankAccountsResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 use Closure;                                  // ← 1) importa Closure
 
 class ListBankAccounts extends ListRecords
 {
     protected static string $resource = BankAccountsResource::class;
+
+    public function getMaxContentWidth(): Width|string|null
+    {
+        return Width::Full;
+    }
 
     // 2) desactiva el enlace de la fila
     protected function getTableRecordUrlUsing(): ?Closure

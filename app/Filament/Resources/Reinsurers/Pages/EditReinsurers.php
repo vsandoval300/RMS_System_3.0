@@ -77,8 +77,9 @@ class EditReinsurers extends EditRecord
 
     protected function getRedirectUrl(): ?string
     {
+        return null;
         // Después de guardar cambios → vuelve al listado
-        return static::getResource()::getUrl('index');
+        //return static::getResource()::getUrl('index');
         // o: return CostSchemeResource::getUrl('index');
     }
 
