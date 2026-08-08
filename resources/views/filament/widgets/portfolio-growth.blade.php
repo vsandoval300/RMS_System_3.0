@@ -43,7 +43,7 @@
         <div style="display:flex; align-items:center; gap:0.4rem;">
             <label style="font-size:0.95rem; font-weight:500; color:light-dark(#111827,#f3f4f6);">Reinsurer:</label>
             <select
-                wire:model.live="reinsurer"
+                x-on:change="$wire.set('reinsurer', $event.target.value ? parseInt($event.target.value) : null)"
                 style="
                     background: light-dark(#ffffff, #1e2533);
                     border: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
