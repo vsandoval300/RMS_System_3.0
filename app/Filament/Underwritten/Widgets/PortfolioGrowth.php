@@ -12,9 +12,11 @@ class PortfolioGrowth extends Widget
 {
     protected string $view = 'filament.widgets.portfolio-growth';
     protected int|string|array $columnSpan = 'full';
-    protected static bool $isLazy = false;
 
     public ?int $reinsurer = null;
+
+    public function updatedReinsurer(): void {}
+
 
     public function getReinsurers(): array
     {
