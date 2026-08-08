@@ -172,7 +172,7 @@ class ImportBusinesses extends Page
     public string $masterState            = 'idle';
     public mixed  $masterImportFile       = null;
     public string $masterBatchCode        = '';
-    public int    $masterBatchId          = 0;
+    public string $masterBatchId          = '';
     public int    $masterSheetIdx         = 0;
     public int    $masterProgress         = 0;
     public string $masterCurrentSheetName = '';
@@ -879,6 +879,10 @@ class ImportBusinesses extends Page
             ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
             ->toArray();
 
+        $countries = Country::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $name) => [mb_strtolower(trim($name)) => $id])
+            ->toArray();
+
         $existingBusinessCodes = Business::pluck('business_code')
             ->flip()
             ->toArray(); // business_code => true
@@ -900,7 +904,7 @@ class ImportBusinesses extends Page
 
         foreach ($dataRows as $i => $row) {
             $lineNo = $i + 2;
-            $row    = array_pad((array) $row, 9, null);
+            $row    = array_pad((array) $row, 10, null);
 
             $businessCode   = trim((string) ($row[0] ?? ''));
             $coverageName   = trim((string) ($row[1] ?? ''));
@@ -911,6 +915,7 @@ class ImportBusinesses extends Page
             $sublimitDesc   = trim((string) ($row[6] ?? ''));
             $deductibleRaw  = $row[7];
             $deductibleDesc = trim((string) ($row[8] ?? ''));
+            $countryName    = trim((string) ($row[9] ?? ''));
 
             // Skip empty rows
             if ($businessCode === '' && $coverageName === '' && $limitRaw === null) {
@@ -955,6 +960,15 @@ class ImportBusinesses extends Page
             $sublimit    = ($sublimitRaw !== null && $sublimitRaw !== '') ? (float) $sublimitRaw : null;
             $deductible  = ($deductibleRaw !== null && $deductibleRaw !== '') ? (float) $deductibleRaw : null;
 
+            // country_name → country_id (optional)
+            $countryId = null;
+            if ($countryName !== '') {
+                $countryId = $countries[mb_strtolower($countryName)] ?? null;
+                if ($countryId === null) {
+                    $errors[] = "Country not found: '{$countryName}'. Check the REF_Countries sheet.";
+                }
+            }
+
             $rowData = [
                 'row'             => $lineNo,
                 'business_code'   => $businessCode,
@@ -966,7 +980,9 @@ class ImportBusinesses extends Page
                 'sublimit_desc'   => $sublimitDesc !== '' ? $sublimitDesc : null,
                 'deductible'      => $deductible,
                 'deductible_desc' => $deductibleDesc !== '' ? $deductibleDesc : null,
+                'country_id'      => $countryId,
                 '_coverage_name'  => $coverageName,
+                '_country_name'   => $countryName,
             ];
 
             if (! empty($errors)) {
@@ -1008,6 +1024,7 @@ class ImportBusinesses extends Page
                     'sublimit_desc'   => $row['sublimit_desc'],
                     'deductible'      => $row['deductible'],
                     'deductible_desc' => $row['deductible_desc'],
+                    'country_id'      => $row['country_id'] ?? null,
                     // index is auto-assigned by the model's booted() creating hook
                 ]);
                 $inserted++;
@@ -2304,6 +2321,7 @@ class ImportBusinesses extends Page
         $deductionsByConcept = Deduction::pluck('id', 'concept')->mapWithKeys(fn ($id, $c) => [mb_strtolower(trim($c)) => $id])->toArray();
         $companies           = Company::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
         $coverages           = Coverage::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
+        $countries           = Country::pluck('id', 'name')->mapWithKeys(fn ($id, $n) => [mb_strtolower(trim($n)) => $id])->toArray();
         $allBizCodes         = Business::withTrashed()->pluck('business_code')->flip()->toArray();
         $allSchemeIds        = CostScheme::withTrashed()->pluck('id')->flip()->toArray();
         $allDocIds           = OperativeDoc::withTrashed()->pluck('id')->flip()->toArray();
@@ -2365,7 +2383,7 @@ class ImportBusinesses extends Page
         } elseif ($idx === 2) {
             // ── CostNodesx ────────────────────────────────────────────────────
             $existingNodeKeys = CostNodex::withTrashed()
-                ->selectRaw("CONCAT(cscheme_id, '#', `index`) as nk")
+                ->selectRaw("CONCAT(cscheme_id, '#', \"index\") as nk")
                 ->pluck('nk')->flip()->toArray();
             foreach (array_slice($data[2] ?? [], 1) as $row) {
                 $row = array_pad((array) $row, 7, null);
@@ -2391,10 +2409,11 @@ class ImportBusinesses extends Page
         } elseif ($idx === 3) {
             // ── LiabilityStructures ───────────────────────────────────────────
             foreach (array_slice($data[3] ?? [], 1) as $row) {
-                $row = array_pad((array) $row, 9, null);
+                $row = array_pad((array) $row, 10, null);
                 $bc  = trim((string) ($row[0] ?? ''));
                 $cvn = trim((string) ($row[1] ?? ''));
                 if ($bc === '' && $cvn === '') { continue; }
+                $ctn = trim((string) ($row[9] ?? ''));
                 LiabilityStructure::create([
                     'business_code'   => $bc,
                     'coverage_id'     => $coverages[mb_strtolower($cvn)] ?? null,
@@ -2405,6 +2424,7 @@ class ImportBusinesses extends Page
                     'sublimit_desc'   => ($v = trim((string) ($row[6] ?? ''))) !== '' ? $v : null,
                     'deductible'      => ($row[7] !== null && $row[7] !== '') ? (float) $row[7] : null,
                     'deductible_desc' => ($v = trim((string) ($row[8] ?? ''))) !== '' ? $v : null,
+                    'country_id'      => $ctn !== '' ? ($countries[mb_strtolower($ctn)] ?? null) : null,
                     'import_batch_id' => $batchId,
                 ]);
                 $ins++;
@@ -2502,7 +2522,7 @@ class ImportBusinesses extends Page
         $this->masterState            = 'idle';
         $this->masterImportFile       = null;
         $this->masterBatchCode        = '';
-        $this->masterBatchId          = 0;
+        $this->masterBatchId          = '';
         $this->masterSheetIdx         = 0;
         $this->masterProgress         = 0;
         $this->masterCurrentSheetName = '';
@@ -2543,6 +2563,14 @@ class ImportBusinesses extends Page
     public function getTitle(): string
     {
         return 'Import Businesses';
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            \App\Filament\Resources\ImportBatches\ImportBatchResource::getUrl('index') => 'Import Batches',
+            'Import Businesses',
+        ];
     }
 
     public static function canAccess(array $parameters = []): bool

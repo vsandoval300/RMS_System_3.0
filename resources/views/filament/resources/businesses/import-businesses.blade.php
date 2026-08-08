@@ -331,8 +331,7 @@
                         </span>
                         @if($isDone)
                         <span style="margin-left:auto; font-size:0.75rem; color:var(--bc-text-muted); font-variant-numeric:tabular-nums;">
-                            {{ $masterStats[$sName]['inserted'] }} inserted
-                            @if($masterStats[$sName]['skipped'] > 0)· {{ $masterStats[$sName]['skipped'] }} skipped@endif
+                            {{ $masterStats[$sName]['inserted'] }} inserted{{ $masterStats[$sName]['skipped'] > 0 ? ' · ' . $masterStats[$sName]['skipped'] . ' skipped' : '' }}
                         </span>
                         @endif
                     </div>
