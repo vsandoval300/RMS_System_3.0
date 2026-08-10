@@ -195,9 +195,11 @@ class ViewImportBatch extends ViewRecord
 
             Section::make('Import Summary')
                 ->schema([
-                    TextEntry::make('summary_json')
+                    // Use a non-array field as anchor so Filament calls formatStateUsing exactly once.
+                    // (TextEntry over an array cast triggers one render per element in Filament v4.)
+                    TextEntry::make('id')
                         ->label('')
-                        ->formatStateUsing(function (ImportBatch $record) {
+                        ->formatStateUsing(function (ImportBatch $record): \Illuminate\Support\HtmlString | string {
                             if (! $record->summary_json) {
                                 return '—';
                             }

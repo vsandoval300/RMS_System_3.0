@@ -16,10 +16,10 @@
         : (abs($n) >= 1_000 ? number_format($n / 1_000, 1) . 'K' : number_format($n, 0));
 @endphp
 
+<div class="pg-section-wrap">
 <style>
     .pg-section-wrap .fi-section { background: light-dark(#ffffff, #171718) !important; }
 </style>
-<div class="pg-section-wrap">
 <x-filament::section heading="Portfolio Growth">
 
     {{-- ── Filter bar ── --}}
@@ -70,11 +70,12 @@
         $kpiRecY   = $kpi['record_year'];
         $kpiRecP   = $kpi['record_premium'];
         $kpiRecB   = $kpi['record_biz'];
-        $kpiActNow = $kpi['active_now'];
-        $kpiActPrv = $kpi['active_prev'];
-        $kpiActYr  = $kpi['active_year'];
+        $kpiActNow      = $kpi['active_now'];
+        $kpiActPrv      = $kpi['active_prev'];
+        $kpiActYr       = $kpi['active_year'];
+        $kpiActFiltered = $kpi['active_filtered'];
 
-        $kpiActDelta = $kpiActPrv > 0 ? $kpiActNow - $kpiActPrv : null;
+        $kpiActDelta = (!$kpiActFiltered && $kpiActPrv > 0) ? $kpiActNow - $kpiActPrv : null;
         $kpiActDSign = ($kpiActDelta !== null && $kpiActDelta >= 0) ? '+' : '';
 
         $fmtBig = function (float $n): string {
@@ -222,19 +223,30 @@
         {{-- Tile 4: Active Reinsurers --}}
         <div class="pg-tile">
             <div class="pg-tile-accent" style="background: linear-gradient(90deg, #8b5cf6, #6d28d9);"></div>
-            @if($kpiActDelta !== null)
+            @if($kpiActFiltered)
+                <span class="pg-tile-badge" style="background:rgba(139,92,246,0.15); color:#8b5cf6; border:1px solid rgba(139,92,246,0.3);">
+                    1 of {{ $kpiActNow }}
+                </span>
+            @elseif($kpiActDelta !== null)
                 <span class="pg-tile-badge {{ $kpiActDelta >= 0 ? 'up' : 'down' }}">
                     {{ $kpiActDelta >= 0 ? '▲ +' : '▼ -' }}{{ abs($kpiActDelta) }}
                 </span>
             @endif
             <div class="pg-tile-label" style="margin-top:0.35rem;">Active Reinsurers</div>
-            <div class="pg-tile-value">{{ $kpiActNow ?: '—' }}</div>
-            <div class="pg-tile-sub">
-                In {{ $kpiActYr }}
-                @if($kpiActDelta !== null)
-                    · {{ $kpiActDSign }}{{ $kpiActDelta }} vs {{ $kpiActYr - 1 }}
-                @endif
-            </div>
+            @if($kpiActFiltered)
+                <div class="pg-tile-value">
+                    1 <span style="font-size:1rem; font-weight:400; opacity:0.55;">of {{ $kpiActNow }}</span>
+                </div>
+                <div class="pg-tile-sub">In {{ $kpiActYr }} · {{ $kpiActNow }} total in portfolio</div>
+            @else
+                <div class="pg-tile-value">{{ $kpiActNow ?: '—' }}</div>
+                <div class="pg-tile-sub">
+                    In {{ $kpiActYr }}
+                    @if($kpiActDelta !== null)
+                        · {{ $kpiActDSign }}{{ $kpiActDelta }} vs {{ $kpiActYr - 1 }}
+                    @endif
+                </div>
+            @endif
             <canvas class="pg-spark"
                 data-spark="{{ json_encode($kpi['rein_sparkline']) }}"
                 data-color="#8b5cf6"

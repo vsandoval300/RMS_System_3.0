@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\BusinessDocType;
 use App\Models\Company;
+use App\Models\Country;
 use App\Models\Coverage;
 use App\Models\Currency;
 use App\Models\Deduction;
@@ -46,6 +47,7 @@ class MasterImportTemplateExport
             'deductions'   => Deduction::orderBy('concept')->get(['id', 'concept', 'description'])->toArray(),
             'companies'    => Company::orderBy('name')->pluck('name')->toArray(),
             'coverages'    => Coverage::orderBy('name')->pluck('name')->toArray(),
+            'countries'    => Country::orderBy('name')->pluck('name')->toArray(),
         ]);
         $instance->compose();
         return $instance;
@@ -94,11 +96,11 @@ class MasterImportTemplateExport
 
         $this->addDataSheet('LiabilityStructures', [
             'business_code', 'coverage_name', 'cls', 'limit', 'limit_desc',
-            'sublimit', 'sublimit_desc', 'deductible', 'deductible_desc',
+            'sublimit', 'sublimit_desc', 'deductible', 'deductible_desc', 'country_name',
         ], [
             self::CLR_FK, self::CLR_FK, self::CLR_ENM, self::CLR_REQ, self::CLR_REQ,
-            self::CLR_OPT, self::CLR_OPT, self::CLR_OPT, self::CLR_OPT,
-        ], [20, 28, 8, 14, 30, 14, 30, 14, 30]);
+            self::CLR_OPT, self::CLR_OPT, self::CLR_OPT, self::CLR_OPT, self::CLR_FK,
+        ], [20, 28, 8, 14, 30, 14, 30, 14, 30, 28]);
 
         $this->addDataSheet('OperativeDocs', [
             'id', 'business_code', 'doc_type_name', 'description',
@@ -137,6 +139,7 @@ class MasterImportTemplateExport
         $this->addRefSheet('REF_Deductions',          ['Concept (use in CostNodesx · col C)', 'ID', 'Description'], array_map(fn($d) => [$d['concept'], $d['id'], $d['description'] ?? ''], $this->db['deductions']));
         $this->addRefSheet('REF_Companies',           ['Company Name (use in Insureds · col C)'],     array_map(fn($n) => [$n], $this->db['companies']));
         $this->addRefSheet('REF_Coverages',           ['Coverage Name (use in LiabilityStructures · col B and Insureds · col D)'], array_map(fn($n) => [$n], $this->db['coverages']));
+        $this->addRefSheet('REF_Countries',           ['Country Name (use in LiabilityStructures · col J)'], array_map(fn($n) => [$n], $this->db['countries']));
         // ── Cross-sheet Data Validations ──────────────────────────────────────
         $this->addValidations();
 
@@ -261,6 +264,7 @@ class MasterImportTemplateExport
         $this->dv($ls, "A2:A{$r}", "Businesses!\$A\$2:\$A\${$r}");
         $this->dv($ls, "B2:B{$r}", 'REF_Coverages!$A$2:$A$1000');
         $this->dv($ls, "C2:C{$r}", '"Yes,No"');
+        $this->dv($ls, "J2:J{$r}", 'REF_Countries!$A$2:$A$1000');
 
         // OperativeDocs — cross-data + REF
         $this->dv($od, "B2:B{$r}", "Businesses!\$A\$2:\$A\${$r}");
