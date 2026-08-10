@@ -75,7 +75,7 @@
 
     {{-- ── Tab content ──────────────────────────────────────────────────────── --}}
     @if ($activeTab === 'portfolio')
-        @livewire(\App\Filament\Underwritten\Widgets\PortfolioGrowth::class)
+        @livewire(\App\Filament\Underwritten\Widgets\PortfolioGrowth::class, ['lazy' => true])
     @endif
     @if ($activeTab === 'segmentation')
         @livewire(\App\Filament\Underwritten\Widgets\ReinsurerSegmentation::class)
