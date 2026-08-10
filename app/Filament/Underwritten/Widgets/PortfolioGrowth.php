@@ -12,9 +12,11 @@ class PortfolioGrowth extends Widget
 {
     protected string $view = 'filament.widgets.portfolio-growth';
     protected int|string|array $columnSpan = 'full';
-    protected static bool $isLazy = false;
 
     public ?int $reinsurer = null;
+
+    public function updatedReinsurer(): void {}
+
 
     public function getReinsurers(): array
     {
@@ -151,9 +153,10 @@ class PortfolioGrowth extends Widget
             'record_year'    => $recordRow['year'] ?? null,
             'record_premium' => $recordRow['premium'] ?? 0,
             'record_biz'     => $recordBiz,
-            'active_now'     => $activeNow,
-            'active_prev'    => $activePrev,
-            'active_year'    => $currentYear,
+            'active_now'      => $activeNow,
+            'active_prev'     => $activePrev,
+            'active_year'     => $currentYear,
+            'active_filtered' => (bool) $this->reinsurer,
             'prem_sparkline' => $premSparkline,
             'cum_sparkline'  => $cumSparkline,
             'rein_sparkline' => $reinsByYear,

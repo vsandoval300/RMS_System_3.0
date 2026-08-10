@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Business;
+use App\Models\Country;
 use App\Models\Coverage;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -10,6 +11,7 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -20,6 +22,7 @@ class LiabilityStructureTemplateExport implements WithMultipleSheets
     public function __construct(
         private readonly array $businesses,
         private readonly array $coverages,
+        private readonly array $countries,
     ) {}
 
     public function sheets(): array
@@ -28,6 +31,7 @@ class LiabilityStructureTemplateExport implements WithMultipleSheets
             new LiabilityStructuresDataSheet(),
             new LsRefBusinessesSheet($this->businesses),
             new LsRefCoveragesSheet($this->coverages),
+            new LsRefCountriesSheet($this->countries),
             new LsReadmeSheet(),
         ];
     }
@@ -40,6 +44,9 @@ class LiabilityStructureTemplateExport implements WithMultipleSheets
                 ->toArray(),
             coverages:  Coverage::orderBy('name')
                 ->get(['id', 'name', 'acronym', 'description'])
+                ->toArray(),
+            countries:  Country::orderBy('name')
+                ->get(['id', 'name'])
                 ->toArray(),
         );
     }
@@ -67,12 +74,13 @@ class LiabilityStructuresDataSheet implements FromArray, WithHeadings, WithStyle
             'sublimit_desc',  // G  text, optional
             'deductible',     // H  float, optional
             'deductible_desc',// I  text, optional
+            'country_name',   // J  FK → REF_Countries.name, optional
         ];
     }
 
     public function array(): array
     {
-        return array_fill(0, self::EMPTY_ROWS, array_fill(0, 9, null));
+        return array_fill(0, self::EMPTY_ROWS, array_fill(0, 10, null));
     }
 
     public function columnWidths(): array
@@ -82,6 +90,7 @@ class LiabilityStructuresDataSheet implements FromArray, WithHeadings, WithStyle
             'D' => 16, 'E' => 40,
             'F' => 16, 'G' => 40,
             'H' => 16, 'I' => 40,
+            'J' => 28,
         ];
     }
 
@@ -90,7 +99,7 @@ class LiabilityStructuresDataSheet implements FromArray, WithHeadings, WithStyle
         $last = self::EMPTY_ROWS + 1;
 
         $sheet->getRowDimension(1)->setRowHeight(24);
-        $sheet->getStyle('A1:I1')->applyFromArray([
+        $sheet->getStyle('A1:J1')->applyFromArray([
             'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 9],
             'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1e3a5f']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
@@ -166,6 +175,22 @@ class LiabilityStructuresDataSheet implements FromArray, WithHeadings, WithStyle
             'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_HAIR, 'color' => ['rgb' => 'e5e7eb']]],
         ]);
 
+        // J — country_name: blue tint (FK lookup) + dropdown
+        $sheet->getStyle("J2:J{$last}")->applyFromArray([
+            'fill'    => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'eff6ff']],
+            'font'    => ['size' => 8.5],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'bfdbfe']]],
+        ]);
+        $dv = new DataValidation();
+        $dv->setType(DataValidation::TYPE_LIST)
+           ->setFormula1('REF_Countries!$A$2:$A$1000')
+           ->setAllowBlank(true)
+           ->setShowDropDown(false)
+           ->setShowErrorMessage(true)
+           ->setErrorStyle(DataValidation::STYLE_WARNING)
+           ->setError('Please select a valid country from the REF_Countries sheet.');
+        $sheet->setDataValidation("J2:J{$last}", $dv);
+
         $sheet->freezePane('B2');
 
         $sheet->getComment('A1')->getText()->createTextRun(
@@ -180,6 +205,7 @@ class LiabilityStructuresDataSheet implements FromArray, WithHeadings, WithStyle
             "G  sublimit_desc   optional · text\n" .
             "H  deductible      optional · numeric\n" .
             "I  deductible_desc optional · text\n" .
+            "J  country_name    optional · FK → countries. See REF_Countries sheet.\n" .
             "\nNote: index is assigned automatically. Each row creates a new record."
         );
 
@@ -255,7 +281,36 @@ class LsRefCoveragesSheet implements FromArray, WithHeadings, WithStyles, WithTi
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sheet 4 — README
+// Sheet 4 — REF: Countries
+// ─────────────────────────────────────────────────────────────────────────────
+
+class LsRefCountriesSheet implements FromArray, WithHeadings, WithStyles, WithTitle
+{
+    public function __construct(private readonly array $rows) {}
+    public function title(): string { return 'REF_Countries'; }
+    public function headings(): array { return ['ID', 'Name (use in column J)']; }
+    public function array(): array
+    {
+        return array_map(fn ($r) => [$r['id'], $r['name']], $this->rows);
+    }
+    public function styles(Worksheet $sheet): array
+    {
+        $last = max(count($this->rows) + 1, 2);
+        $sheet->getStyle('A1:B1')->applyFromArray([
+            'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 9],
+            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1e3a5f']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+        $sheet->getStyle("A2:A{$last}")->applyFromArray(['font' => ['color' => ['rgb' => '9ca3af'], 'size' => 8.5]]);
+        $sheet->getStyle("B2:B{$last}")->applyFromArray(['font' => ['size' => 8.5, 'bold' => true]]);
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(40);
+        return [];
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sheet 5 — README
 // ─────────────────────────────────────────────────────────────────────────────
 
 class LsReadmeSheet implements FromArray, WithStyles, WithTitle
@@ -287,6 +342,7 @@ class LsReadmeSheet implements FromArray, WithStyles, WithTitle
             ['G', 'sublimit_desc',   'NO',  'Optional text description of the sublimit.'],
             ['H', 'deductible',      'NO',  'Optional numeric deductible value.'],
             ['I', 'deductible_desc', 'NO',  'Optional text description of the deductible.'],
+            ['J', 'country_name',    'NO',  'Optional FK → countries. Must match a Name in REF_Countries. Leave blank if not applicable.'],
             [''],
             ['COLOR CODING'],
             ['• Yellow background = Key FK column (business_code). Must match an existing business.'],
