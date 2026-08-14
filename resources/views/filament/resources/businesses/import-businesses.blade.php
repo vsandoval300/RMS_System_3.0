@@ -314,7 +314,7 @@
                 <div style="display:flex; flex-direction:column; gap:0.45rem;">
                     @foreach(\App\Filament\Resources\Businesses\Pages\ImportBusinesses::MASTER_SHEET_NAMES as $sIdx => $sName)
                     @php
-                        $isDone    = isset($masterStats[$sName]);
+                        $isDone    = ($sIdx < $masterSheetIdx);
                         $isCurrent = ($sIdx === $masterSheetIdx);
                         $isPending = ($sIdx > $masterSheetIdx);
                     @endphp
@@ -332,6 +332,10 @@
                         @if($isDone)
                         <span style="margin-left:auto; font-size:0.75rem; color:var(--bc-text-muted); font-variant-numeric:tabular-nums;">
                             {{ $masterStats[$sName]['inserted'] }} inserted{{ $masterStats[$sName]['skipped'] > 0 ? ' · ' . $masterStats[$sName]['skipped'] . ' skipped' : '' }}
+                        </span>
+                        @elseif($isCurrent && $masterSheetRowTotal > 0)
+                        <span style="margin-left:auto; font-size:0.75rem; color:#41A2C3; font-variant-numeric:tabular-nums;">
+                            {{ $masterRowOffset }} of {{ $masterSheetRowTotal }} ({{ number_format(($masterRowOffset / $masterSheetRowTotal) * 100, 2) }}%)
                         </span>
                         @endif
                     </div>
