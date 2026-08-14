@@ -104,11 +104,11 @@ class MasterImportTemplateExport
 
         $this->addDataSheet('OperativeDocs', [
             'id', 'business_code', 'doc_type_name', 'description',
-            'inception_date', 'expiration_date', 'af_mf', 'roe_fs', 'rep_date',
+            'inception_date', 'expiration_date', 'af_mf', 'roe_fs', 'rep_date', 'document_path',
         ], [
             self::CLR_KEY, self::CLR_FK, self::CLR_FK, self::CLR_REQ,
-            self::CLR_REQ, self::CLR_REQ, self::CLR_REQ, self::CLR_OPT, self::CLR_OPT,
-        ], [22, 20, 24, 40, 16, 16, 12, 12, 16]);
+            self::CLR_REQ, self::CLR_REQ, self::CLR_REQ, self::CLR_OPT, self::CLR_OPT, self::CLR_OPT,
+        ], [22, 20, 24, 40, 16, 16, 12, 12, 16, 40]);
 
         // Date format for OperativeDocs date columns
         $od = $this->spreadsheet->getSheetByName('OperativeDocs');

@@ -69,6 +69,9 @@ class ImportBusinesses extends Page
         'LiabilityStructures', 'OperativeDocs', 'Insureds', 'DocSchemes',
     ];
 
+    // Rows processed per Livewire round-trip while a sheet is importing (drives the live "X of Y" counter).
+    private const MASTER_CHUNK_ROWS = 25;
+
     // ── Step 1 state ───────────────────────────────────────────────────────────
     // idle | errors | preview | imported
     public string $state       = 'idle';
@@ -176,6 +179,8 @@ class ImportBusinesses extends Page
     public int    $masterSheetIdx         = 0;
     public int    $masterProgress         = 0;
     public string $masterCurrentSheetName = '';
+    public int    $masterRowOffset        = 0; // rows processed so far within the current sheet
+    public int    $masterSheetRowTotal    = 0; // total data rows in the current sheet
 
     /** @var array<string, array<int, array<string,mixed>>> grouped by sheet name */
     public array $masterErrorsBySheet   = [];
@@ -1104,7 +1109,7 @@ class ImportBusinesses extends Page
 
         foreach ($dataRows as $i => $row) {
             $lineNo = $i + 2;
-            $row    = array_pad((array) $row, 9, null);
+            $row    = array_pad((array) $row, 10, null);
 
             $id             = trim((string) ($row[0] ?? ''));
             $businessCode   = trim((string) ($row[1] ?? ''));
@@ -1115,6 +1120,7 @@ class ImportBusinesses extends Page
             $afMfRaw        = $row[6];
             $roeFsRaw       = $row[7];
             $repDateRaw     = $row[8];
+            $documentPathRaw = trim((string) ($row[9] ?? ''));
 
             if ($id === '' && $businessCode === '' && $description === '' && $inceptionRaw === null) {
                 continue;
@@ -1166,6 +1172,11 @@ class ImportBusinesses extends Page
             $roeFs   = ($roeFsRaw !== null && $roeFsRaw !== '') ? (float) $roeFsRaw : null;
             $repDate = ($repDateRaw !== null && $repDateRaw !== '') ? $this->parseExcelDate($repDateRaw) : null;
 
+            $documentPath = $documentPathRaw !== '' ? $documentPathRaw : null;
+            if ($documentPath !== null && strlen($documentPath) > 200) {
+                $errors[] = 'document_path must be at most 200 characters (got ' . strlen($documentPath) . ').';
+            }
+
             $isUpdate = isset($existingDocIds[$id]);
 
             $rowData = [
@@ -1179,6 +1190,7 @@ class ImportBusinesses extends Page
                 'af_mf'                 => $afMf,
                 'roe_fs'                => $roeFs,
                 'rep_date'              => $repDate,
+                'document_path'         => $documentPath,
                 '_doc_type_name'        => $docTypeName,
                 '_is_update'            => $isUpdate,
             ];
@@ -1222,6 +1234,7 @@ class ImportBusinesses extends Page
                     'af_mf'                 => $row['af_mf'],
                     'roe_fs'                => $row['roe_fs'],
                     'rep_date'              => $row['rep_date'],
+                    'document_path'         => $row['document_path'],
                 ];
 
                 $existing = OperativeDoc::withTrashed()->find($row['id']);
@@ -2185,7 +2198,7 @@ class ImportBusinesses extends Page
         $rows = array_slice($data[4] ?? [], 1);
         $odErrors = []; $odInsert = 0; $odSkip = 0;
         foreach ($rows as $i => $row) {
-            $row = array_pad((array) $row, 9, null);
+            $row = array_pad((array) $row, 10, null);
             $id  = trim((string) ($row[0] ?? ''));
             $bc  = trim((string) ($row[1] ?? ''));
             $dsc = trim((string) ($row[3] ?? ''));
@@ -2203,6 +2216,7 @@ class ImportBusinesses extends Page
             if ($this->parseExcelDate($row[4]) === null) { $errors[] = 'inception_date required (YYYY-MM-DD).'; }
             if ($this->parseExcelDate($row[5]) === null) { $errors[] = 'expiration_date required (YYYY-MM-DD).'; }
             if (($row[6] ?? null) === null || $row[6] === '') { $errors[] = 'af_mf is required.'; }
+            if (strlen(trim((string) ($row[9] ?? ''))) > 200) { $errors[] = 'document_path max 200 chars.'; }
             if (empty($errors)) {
                 isset($existingDocIds[$id]) ? $odSkip++ : $odInsert++;
                 $allDocIds[$id] = true;
@@ -2293,6 +2307,8 @@ class ImportBusinesses extends Page
         $this->masterSheetIdx         = 0;
         $this->masterProgress         = 0;
         $this->masterCurrentSheetName = self::MASTER_SHEET_NAMES[0];
+        $this->masterRowOffset        = 0;
+        $this->masterSheetRowTotal    = 0;
         $this->masterStats            = [];
         $this->masterState            = 'importing';
         $this->dispatch('process-master-next-sheet');
@@ -2333,9 +2349,14 @@ class ImportBusinesses extends Page
 
         $ins = $skp = 0;
 
+        // Templates pre-style hundreds of blank rows, which Excel::toArray() still returns —
+        // trim to the last row that actually has data so progress reflects real records, not template padding.
+        $totalRowsInSheet = $this->lastFilledRowCount($data[$idx] ?? []);
+        $chunkRows        = array_slice($data[$idx] ?? [], 1 + $this->masterRowOffset, self::MASTER_CHUNK_ROWS);
+
         if ($idx === 0) {
             // ── Businesses ────────────────────────────────────────────────────
-            foreach (array_slice($data[0] ?? [], 1) as $row) {
+            foreach ($chunkRows as $row) {
                 $row = array_pad((array) $row, 16, null);
                 $bc  = trim((string) ($row[0] ?? ''));
                 if ($bc === '') { continue; }
@@ -2364,7 +2385,7 @@ class ImportBusinesses extends Page
             }
         } elseif ($idx === 1) {
             // ── CostSchemes ───────────────────────────────────────────────────
-            foreach (array_slice($data[1] ?? [], 1) as $row) {
+            foreach ($chunkRows as $row) {
                 $row = array_pad((array) $row, 5, null);
                 $sid = trim((string) ($row[0] ?? ''));
                 if ($sid === '') { continue; }
@@ -2385,7 +2406,7 @@ class ImportBusinesses extends Page
             $existingNodeKeys = CostNodex::withTrashed()
                 ->selectRaw("CONCAT(cscheme_id, '#', \"index\") as nk")
                 ->pluck('nk')->flip()->toArray();
-            foreach (array_slice($data[2] ?? [], 1) as $row) {
+            foreach ($chunkRows as $row) {
                 $row = array_pad((array) $row, 7, null);
                 $sid = trim((string) ($row[0] ?? ''));
                 $psn = trim((string) ($row[5] ?? ''));
@@ -2408,7 +2429,7 @@ class ImportBusinesses extends Page
             }
         } elseif ($idx === 3) {
             // ── LiabilityStructures ───────────────────────────────────────────
-            foreach (array_slice($data[3] ?? [], 1) as $row) {
+            foreach ($chunkRows as $row) {
                 $row = array_pad((array) $row, 10, null);
                 $bc  = trim((string) ($row[0] ?? ''));
                 $cvn = trim((string) ($row[1] ?? ''));
@@ -2431,11 +2452,12 @@ class ImportBusinesses extends Page
             }
         } elseif ($idx === 4) {
             // ── OperativeDocs ─────────────────────────────────────────────────
-            foreach (array_slice($data[4] ?? [], 1) as $row) {
-                $row = array_pad((array) $row, 9, null);
+            foreach ($chunkRows as $row) {
+                $row = array_pad((array) $row, 10, null);
                 $id  = trim((string) ($row[0] ?? ''));
                 if ($id === '') { continue; }
                 if (isset($allDocIds[$id])) { $skp++; continue; }
+                $documentPath = trim((string) ($row[9] ?? ''));
                 OperativeDoc::create([
                     'id'                    => $id,
                     'business_code'         => trim((string) ($row[1] ?? '')),
@@ -2446,6 +2468,7 @@ class ImportBusinesses extends Page
                     'af_mf'                 => ($row[6] !== null) ? (float) $row[6] : null,
                     'roe_fs'                => ($row[7] !== null && $row[7] !== '') ? (float) $row[7] : null,
                     'rep_date'              => $this->parseExcelDate($row[8]),
+                    'document_path'         => $documentPath !== '' ? $documentPath : null,
                     'created_by_user'       => $userId,
                     'import_batch_id'       => $batchId,
                 ]);
@@ -2453,7 +2476,7 @@ class ImportBusinesses extends Page
             }
         } elseif ($idx === 5) {
             // ── Insureds ──────────────────────────────────────────────────────
-            foreach (array_slice($data[5] ?? [], 1) as $row) {
+            foreach ($chunkRows as $row) {
                 $row  = array_pad((array) $row, 5, null);
                 $odId = trim((string) ($row[0] ?? ''));
                 $csId = trim((string) ($row[1] ?? ''));
@@ -2470,7 +2493,7 @@ class ImportBusinesses extends Page
             }
         } elseif ($idx === 6) {
             // ── DocSchemes ────────────────────────────────────────────────────
-            foreach (array_slice($data[6] ?? [], 1) as $row) {
+            foreach ($chunkRows as $row) {
                 $row  = array_pad((array) $row, 2, null);
                 $odId = trim((string) ($row[0] ?? ''));
                 $csId = trim((string) ($row[1] ?? ''));
@@ -2484,10 +2507,29 @@ class ImportBusinesses extends Page
             }
         }
 
-        $this->masterStats[self::MASTER_SHEET_NAMES[$idx]] = ['inserted' => $ins, 'skipped' => $skp];
+        $prevStats = $this->masterStats[self::MASTER_SHEET_NAMES[$idx]] ?? ['inserted' => 0, 'skipped' => 0];
+        $this->masterStats[self::MASTER_SHEET_NAMES[$idx]] = [
+            'inserted' => $prevStats['inserted'] + $ins,
+            'skipped'  => $prevStats['skipped'] + $skp,
+        ];
+
+        $this->masterRowOffset    += count($chunkRows);
+        $this->masterSheetRowTotal = $totalRowsInSheet;
+
+        $totalSheets   = count(self::MASTER_SHEET_NAMES);
+        $sheetFraction = $totalRowsInSheet > 0 ? min($this->masterRowOffset / $totalRowsInSheet, 1) : 1;
+        $this->masterProgress = (int) round((($idx + $sheetFraction) / $totalSheets) * 100);
+
+        if ($this->masterRowOffset < $totalRowsInSheet) {
+            // More rows left in the current sheet — process the next chunk
+            $this->dispatch('process-master-next-sheet');
+            return;
+        }
+
+        // Sheet fully processed — advance to the next one
         $this->masterSheetIdx++;
-        $totalSheets = count(self::MASTER_SHEET_NAMES);
-        $this->masterProgress = (int) round(($this->masterSheetIdx / $totalSheets) * 100);
+        $this->masterRowOffset     = 0;
+        $this->masterSheetRowTotal = 0;
 
         if ($this->masterSheetIdx >= $totalSheets) {
             // All sheets done — persist summary and notify
@@ -2517,6 +2559,25 @@ class ImportBusinesses extends Page
         }
     }
 
+    /**
+     * Number of leading data rows (after the header) that actually contain a value.
+     * Import templates pre-style hundreds of blank rows, which Excel::toArray() still
+     * returns as empty arrays — trimming to the last filled row keeps progress counters
+     * ("X of Y") meaningful instead of reporting against template padding.
+     */
+    private function lastFilledRowCount(array $sheetRows): int
+    {
+        for ($i = count($sheetRows) - 1; $i >= 1; $i--) {
+            foreach ((array) $sheetRows[$i] as $cell) {
+                if ($cell !== null && trim((string) $cell) !== '') {
+                    return $i;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     public function resetMasterState(): void
     {
         $this->masterState            = 'idle';
@@ -2526,6 +2587,8 @@ class ImportBusinesses extends Page
         $this->masterSheetIdx         = 0;
         $this->masterProgress         = 0;
         $this->masterCurrentSheetName = '';
+        $this->masterRowOffset        = 0;
+        $this->masterSheetRowTotal    = 0;
         $this->masterErrorsBySheet    = [];
         $this->masterPreviewCounts    = [];
         $this->masterStats            = [];

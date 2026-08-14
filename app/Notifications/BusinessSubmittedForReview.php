@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Business;
+use App\Services\TeamsNotificationService;
 use Filament\Actions\Action as FilamentAction;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -32,39 +33,21 @@ class BusinessSubmittedForReview extends Notification
     public function toDatabase(object $notifiable): array
     {
 
-        // app(\App\Services\TeamsNotificationService::class)
-        // ->businessSubmitted(
-        //     $this->business,
-        //     Auth::user()->name
-        // );
-        // try {
-        //     $response = Http::timeout(10)
-        //         ->connectTimeout(5)
-        //         ->post(env('TEAMS_WEBHOOK_URL'), [
-        //             "type" => "message",
-        //             "attachments" => [
-        //                 [
-        //                     "contentType" => "application/vnd.microsoft.card.adaptive",
-        //                     "content" => [
-        //                         "\$schema" => "http://adaptivecards.io/schemas/adaptive-card.json",
-        //                         "type" => "AdaptiveCard",
-        //                         "version" => "1.4",
-        //                         "body" => [
-        //                             [
-        //                                 "type" => "TextBlock",
-        //                                 "text" => "Prueba desde Laravel"
-        //                             ]
-        //                         ]
-        //                     ]
-        //                 ]
-        //             ]
-        //         ]);
+        $managerEmail = $this->business->user?->manager?->email;
 
-        //     dd($response->status(), $response->body());
-
-        // } catch (ConnectionException $e) {
-        //     dd($e->getMessage());
-        // }
+        if ($managerEmail) {
+            app(TeamsNotificationService::class)->businessSubmitted(
+                recipient: $managerEmail,
+                businessCode: $this->business->business_code,
+                description: $this->business->description,
+                submitterName: $this->submitterName,
+                reviewUrl: route(
+                    'filament.admin.resources.businesses.edit',
+                    $this->business
+                ),
+            );
+        }
+        
         
         return FilamentNotification::make()
             ->title('Business Submitted for Review')

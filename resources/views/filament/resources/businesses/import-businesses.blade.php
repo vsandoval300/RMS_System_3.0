@@ -314,7 +314,7 @@
                 <div style="display:flex; flex-direction:column; gap:0.45rem;">
                     @foreach(\App\Filament\Resources\Businesses\Pages\ImportBusinesses::MASTER_SHEET_NAMES as $sIdx => $sName)
                     @php
-                        $isDone    = isset($masterStats[$sName]);
+                        $isDone    = ($sIdx < $masterSheetIdx);
                         $isCurrent = ($sIdx === $masterSheetIdx);
                         $isPending = ($sIdx > $masterSheetIdx);
                     @endphp
@@ -332,6 +332,10 @@
                         @if($isDone)
                         <span style="margin-left:auto; font-size:0.75rem; color:var(--bc-text-muted); font-variant-numeric:tabular-nums;">
                             {{ $masterStats[$sName]['inserted'] }} inserted{{ $masterStats[$sName]['skipped'] > 0 ? ' · ' . $masterStats[$sName]['skipped'] . ' skipped' : '' }}
+                        </span>
+                        @elseif($isCurrent && $masterSheetRowTotal > 0)
+                        <span style="margin-left:auto; font-size:0.75rem; color:#41A2C3; font-variant-numeric:tabular-nums;">
+                            {{ $masterRowOffset }} of {{ $masterSheetRowTotal }} ({{ number_format(($masterRowOffset / $masterSheetRowTotal) * 100, 2) }}%)
                         </span>
                         @endif
                     </div>
@@ -939,7 +943,7 @@
                 </div>
                 <div class="biz-alert info" style="margin-bottom:0.85rem;">
                     <svg style="flex-shrink:0;width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <span>The template includes one data sheet: <strong>OperativeDocs</strong> (id, business_code, doc type, description, dates, af_mf…). Plus reference sheets REF_Businesses, REF_DocTypes, and README. The <code>id</code> column is the upsert key — existing id → update, new id → insert. The <code>index</code> is assigned automatically.</span>
+                    <span>The template includes one data sheet: <strong>OperativeDocs</strong> (id, business_code, doc type, description, dates, af_mf, roe_fs, rep_date, document_path…). Plus reference sheets REF_Businesses, REF_DocTypes, and README. The <code>id</code> column is the upsert key — existing id → update, new id → insert. The <code>index</code> is assigned automatically. <code>document_path</code> is optional.</span>
                 </div>
                 <button wire:click="downloadOperativeDocTemplate" class="btn-primary">
                     <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11"/></svg>
@@ -1007,7 +1011,7 @@
         <div class="biz-import-body">
             <div class="biz-tbl-wrap">
                 <table class="biz-tbl">
-                    <thead><tr><th>Row</th><th>ID</th><th>Business Code</th><th>Doc Type</th><th>Description</th><th>Inception</th><th>Expiration</th><th>AF/MF</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Row</th><th>ID</th><th>Business Code</th><th>Doc Type</th><th>Description</th><th>Inception</th><th>Expiration</th><th>AF/MF</th><th>Document Path</th><th>Status</th></tr></thead>
                     <tbody>
                         @foreach($odPreviewRows as $row)
                         <tr>
@@ -1019,6 +1023,7 @@
                             <td class="center">{{ $row['inception_date'] }}</td>
                             <td class="center">{{ $row['expiration_date'] }}</td>
                             <td class="right">{{ $row['af_mf'] !== null ? number_format($row['af_mf'], 6) : '—' }}</td>
+                            <td class="mono" style="max-width:16rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ $row['document_path'] }}">{{ $row['document_path'] ?? '—' }}</td>
                             <td>@if($row['_is_update'])<span class="pill update">Update</span>@else<span class="pill new">New</span>@endif</td>
                         </tr>
                         @endforeach
