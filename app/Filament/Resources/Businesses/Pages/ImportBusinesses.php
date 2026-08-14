@@ -1104,7 +1104,7 @@ class ImportBusinesses extends Page
 
         foreach ($dataRows as $i => $row) {
             $lineNo = $i + 2;
-            $row    = array_pad((array) $row, 9, null);
+            $row    = array_pad((array) $row, 10, null);
 
             $id             = trim((string) ($row[0] ?? ''));
             $businessCode   = trim((string) ($row[1] ?? ''));
@@ -1115,6 +1115,7 @@ class ImportBusinesses extends Page
             $afMfRaw        = $row[6];
             $roeFsRaw       = $row[7];
             $repDateRaw     = $row[8];
+            $documentPathRaw = trim((string) ($row[9] ?? ''));
 
             if ($id === '' && $businessCode === '' && $description === '' && $inceptionRaw === null) {
                 continue;
@@ -1166,6 +1167,11 @@ class ImportBusinesses extends Page
             $roeFs   = ($roeFsRaw !== null && $roeFsRaw !== '') ? (float) $roeFsRaw : null;
             $repDate = ($repDateRaw !== null && $repDateRaw !== '') ? $this->parseExcelDate($repDateRaw) : null;
 
+            $documentPath = $documentPathRaw !== '' ? $documentPathRaw : null;
+            if ($documentPath !== null && strlen($documentPath) > 200) {
+                $errors[] = 'document_path must be at most 200 characters (got ' . strlen($documentPath) . ').';
+            }
+
             $isUpdate = isset($existingDocIds[$id]);
 
             $rowData = [
@@ -1179,6 +1185,7 @@ class ImportBusinesses extends Page
                 'af_mf'                 => $afMf,
                 'roe_fs'                => $roeFs,
                 'rep_date'              => $repDate,
+                'document_path'         => $documentPath,
                 '_doc_type_name'        => $docTypeName,
                 '_is_update'            => $isUpdate,
             ];
@@ -1222,6 +1229,7 @@ class ImportBusinesses extends Page
                     'af_mf'                 => $row['af_mf'],
                     'roe_fs'                => $row['roe_fs'],
                     'rep_date'              => $row['rep_date'],
+                    'document_path'         => $row['document_path'],
                 ];
 
                 $existing = OperativeDoc::withTrashed()->find($row['id']);
@@ -2185,7 +2193,7 @@ class ImportBusinesses extends Page
         $rows = array_slice($data[4] ?? [], 1);
         $odErrors = []; $odInsert = 0; $odSkip = 0;
         foreach ($rows as $i => $row) {
-            $row = array_pad((array) $row, 9, null);
+            $row = array_pad((array) $row, 10, null);
             $id  = trim((string) ($row[0] ?? ''));
             $bc  = trim((string) ($row[1] ?? ''));
             $dsc = trim((string) ($row[3] ?? ''));
@@ -2203,6 +2211,7 @@ class ImportBusinesses extends Page
             if ($this->parseExcelDate($row[4]) === null) { $errors[] = 'inception_date required (YYYY-MM-DD).'; }
             if ($this->parseExcelDate($row[5]) === null) { $errors[] = 'expiration_date required (YYYY-MM-DD).'; }
             if (($row[6] ?? null) === null || $row[6] === '') { $errors[] = 'af_mf is required.'; }
+            if (strlen(trim((string) ($row[9] ?? ''))) > 200) { $errors[] = 'document_path max 200 chars.'; }
             if (empty($errors)) {
                 isset($existingDocIds[$id]) ? $odSkip++ : $odInsert++;
                 $allDocIds[$id] = true;
@@ -2432,10 +2441,11 @@ class ImportBusinesses extends Page
         } elseif ($idx === 4) {
             // ── OperativeDocs ─────────────────────────────────────────────────
             foreach (array_slice($data[4] ?? [], 1) as $row) {
-                $row = array_pad((array) $row, 9, null);
+                $row = array_pad((array) $row, 10, null);
                 $id  = trim((string) ($row[0] ?? ''));
                 if ($id === '') { continue; }
                 if (isset($allDocIds[$id])) { $skp++; continue; }
+                $documentPath = trim((string) ($row[9] ?? ''));
                 OperativeDoc::create([
                     'id'                    => $id,
                     'business_code'         => trim((string) ($row[1] ?? '')),
@@ -2446,6 +2456,7 @@ class ImportBusinesses extends Page
                     'af_mf'                 => ($row[6] !== null) ? (float) $row[6] : null,
                     'roe_fs'                => ($row[7] !== null && $row[7] !== '') ? (float) $row[7] : null,
                     'rep_date'              => $this->parseExcelDate($row[8]),
+                    'document_path'         => $documentPath !== '' ? $documentPath : null,
                     'created_by_user'       => $userId,
                     'import_batch_id'       => $batchId,
                 ]);
