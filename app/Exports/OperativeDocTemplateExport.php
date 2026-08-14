@@ -67,12 +67,13 @@ class OperativeDocsDataSheet implements FromArray, WithHeadings, WithStyles, Wit
             'af_mf',           // G  float, required
             'roe_fs',          // H  float, optional
             'rep_date',        // I  date YYYY-MM-DD, optional
+            'document_path',   // J  text, optional — storage path of the document file
         ];
     }
 
     public function array(): array
     {
-        return array_fill(0, self::EMPTY_ROWS, array_fill(0, 9, null));
+        return array_fill(0, self::EMPTY_ROWS, array_fill(0, 10, null));
     }
 
     public function columnWidths(): array
@@ -81,6 +82,7 @@ class OperativeDocsDataSheet implements FromArray, WithHeadings, WithStyles, Wit
             'A' => 22, 'B' => 22, 'C' => 28,
             'D' => 40, 'E' => 18, 'F' => 18,
             'G' => 14, 'H' => 14, 'I' => 18,
+            'J' => 40,
         ];
     }
 
@@ -89,7 +91,7 @@ class OperativeDocsDataSheet implements FromArray, WithHeadings, WithStyles, Wit
         $last = self::EMPTY_ROWS + 1;
 
         $sheet->getRowDimension(1)->setRowHeight(24);
-        $sheet->getStyle('A1:I1')->applyFromArray([
+        $sheet->getStyle('A1:J1')->applyFromArray([
             'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 9],
             'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1e3a5f']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
@@ -167,6 +169,14 @@ class OperativeDocsDataSheet implements FromArray, WithHeadings, WithStyles, Wit
             ->getNumberFormat()
             ->setFormatCode('YYYY-MM-DD');
 
+        // J — document_path: optional text (gray)
+        $sheet->getStyle("J2:J{$last}")->applyFromArray([
+            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'f9fafb']],
+            'font'      => ['size' => 8.5, 'color' => ['rgb' => '6b7280']],
+            'alignment' => ['wrapText' => true],
+            'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_HAIR, 'color' => ['rgb' => 'e5e7eb']]],
+        ]);
+
         $sheet->freezePane('B2');
 
         $sheet->getComment('A1')->getText()->createTextRun(
@@ -181,7 +191,8 @@ class OperativeDocsDataSheet implements FromArray, WithHeadings, WithStyles, Wit
             "G  af_mf            REQUIRED · Adjustment Factor / Market Factor (float).\n" .
             "H  roe_fs           optional · Rate of Exchange (float).\n" .
             "I  rep_date         optional · Reporting date (YYYY-MM-DD).\n" .
-            "\nNote: index is assigned automatically. document_path is not included in this import."
+            "J  document_path    optional · Storage path of the document file (max 200 chars).\n" .
+            "\nNote: index is assigned automatically."
         );
 
         return [];
@@ -271,7 +282,7 @@ class OdReadmeSheet implements FromArray, WithStyles, WithTitle
             ['• business_code must match an existing business in the system (see REF_Businesses sheet).'],
             ['• doc_type_name must match exactly a Name in the REF_DocTypes sheet.'],
             ['• The index field is assigned automatically — do not include it.'],
-            ['• document_path is not included in this import (managed separately through the UI).'],
+            ['• document_path is optional — the storage path of the document file, if already known.'],
             ['• Dates must be entered as YYYY-MM-DD (e.g. 2024-01-15). You may also type the date and let Excel format it.'],
             ['• All rows are validated before import. Any error aborts the entire import.'],
             ['• Empty rows are ignored.'],
@@ -287,6 +298,7 @@ class OdReadmeSheet implements FromArray, WithStyles, WithTitle
             ['G', 'af_mf',            'YES', 'Adjustment Factor / Market Factor. Numeric (e.g. 1.000000).'],
             ['H', 'roe_fs',           'NO',  'Rate of Exchange (optional numeric). Leave empty if not applicable.'],
             ['I', 'rep_date',         'NO',  'Reporting date. Optional, YYYY-MM-DD format.'],
+            ['J', 'document_path',    'NO',  'Storage path of the document file (max 200 chars). Optional.'],
             [''],
             ['COLOR CODING'],
             ['• Yellow background = PK / Upsert key (id). Always required; drives insert vs. update logic.'],
