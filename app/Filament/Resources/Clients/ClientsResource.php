@@ -162,7 +162,7 @@ class ClientsResource extends Resource
 
                     TextInput::make('webpage')
                         ->label(__('Web Page'))
-                        ->required()
+                        ->nullable()
                         ->placeholder('https://www.example.com')
                         ->maxLength(255)
                         ->rule('url'),
