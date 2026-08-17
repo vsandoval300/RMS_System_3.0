@@ -69,6 +69,16 @@ class ReinsurersResource extends Resource
         return Reinsurer::count();
     }
 
+    /**
+     * Percent-encode each path segment (preserving '/' separators) so S3 keys
+     * containing spaces or other special characters resolve to a valid URL.
+     * Legacy files uploaded before filenames were sanitized still have these.
+     */
+    private static function encodeS3Path(string $path): string
+    {
+        return implode('/', array_map('rawurlencode', explode('/', $path)));
+    }
+
     public static function getTableQuery(): Builder
     {
         return Reinsurer::query()->with([
@@ -348,12 +358,13 @@ class ReinsurersResource extends Resource
                                         }
                                         $_path = $record->logo;
                                         if (str_starts_with($_path, 'http://') || str_starts_with($_path, 'https://')) {
-                                            $url = $_path;
+                                            $parsed = parse_url($_path);
+                                            $url    = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? '') . self::encodeS3Path($parsed['path'] ?? '');
                                         } else {
                                             /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
                                             $s3 = Storage::disk('s3');
                                             try {
-                                                $url = $s3->url($_path);
+                                                $url = $s3->url(self::encodeS3Path($_path));
                                             } catch (\Throwable $e) {
                                                 $url = '';
                                             }
@@ -394,7 +405,15 @@ class ReinsurersResource extends Resource
                                     ->visibility('public')
                                     ->image()
                                     ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
-                                    ->preserveFilenames()
+                                    // Sanitize the stored filename (keep it readable, strip spaces/
+                                    // special chars) so the resulting S3 key never needs URL-encoding.
+                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file): string {
+                                        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                                        $ext  = $file->getClientOriginalExtension();
+                                        $safe = Str::slug($name, '-') ?: (string) Str::ulid();
+
+                                        return $safe . '.' . $ext;
+                                    })
                                     ->downloadable()
                                     ->openable()
                                     ->helperText('Upload the reinsurer’s logo (PNG, JPG, or SVG, preferably square).')
@@ -435,12 +454,13 @@ class ReinsurersResource extends Resource
                                         }
                                         $_path = $record->icon;
                                         if (str_starts_with($_path, 'http://') || str_starts_with($_path, 'https://')) {
-                                            $url = $_path;
+                                            $parsed = parse_url($_path);
+                                            $url    = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? '') . self::encodeS3Path($parsed['path'] ?? '');
                                         } else {
                                             /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
                                             $s3 = Storage::disk('s3');
                                             try {
-                                                $url = $s3->url($_path);
+                                                $url = $s3->url(self::encodeS3Path($_path));
                                             } catch (\Throwable $e) {
                                                 $url = '';
                                             }
@@ -481,7 +501,15 @@ class ReinsurersResource extends Resource
                                     ->visibility('public')
                                     ->image()
                                     ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/svg+xml'])
-                                    ->preserveFilenames()
+                                    // Sanitize the stored filename (keep it readable, strip spaces/
+                                    // special chars) so the resulting S3 key never needs URL-encoding.
+                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file): string {
+                                        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                                        $ext  = $file->getClientOriginalExtension();
+                                        $safe = Str::slug($name, '-') ?: (string) Str::ulid();
+
+                                        return $safe . '.' . $ext;
+                                    })
                                     ->downloadable()
                                     ->openable()
                                     ->helperText('Upload the reinsurer’s icon (PNG, JPG, or SVG, preferably square).')
@@ -816,9 +844,12 @@ public static function infolist(Schema $schema): Schema
                             return "<span>{$shortName}</span>";
                         }
 
-                        $iconUrl = Str::startsWith($iconPath, ['http://', 'https://'])
-                            ? $iconPath
-                            : rtrim(config('filesystems.disks.s3.url'), '/') . '/' . ltrim($iconPath, '/');
+                        if (Str::startsWith($iconPath, ['http://', 'https://'])) {
+                            $parsed  = parse_url($iconPath);
+                            $iconUrl = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? '') . self::encodeS3Path($parsed['path'] ?? '');
+                        } else {
+                            $iconUrl = rtrim(config('filesystems.disks.s3.url'), '/') . '/' . self::encodeS3Path(ltrim($iconPath, '/'));
+                        }
 
                         return "<div style='display:flex;align-items:center;gap:8px;'>
                                     <img src='{$iconUrl}'
