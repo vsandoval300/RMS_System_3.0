@@ -1119,9 +1119,15 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 : null
                                                             )
                                                             ->step(0.01)
-                                                            // Si el documento es Endorsement B, al cargar el repeater
-                                                            // el Premium se fuerza a 0.
-                                                            ->afterStateHydrated(function (Get $get, Set $set) {
+                                                            // Al crear un documento Endorsement B, el Premium se
+                                                            // fuerza a 0 para evitar que el usuario capture un valor
+                                                            // distinto. En Edit/View se respeta el valor real de la
+                                                            // BD (para no ocultar anomalías, p. ej. de cargas masivas).
+                                                            ->afterStateHydrated(function (Get $get, Set $set, string $operation) {
+
+                                                                if ($operation !== 'create') {
+                                                                    return;
+                                                                }
 
                                                                 $docType = (int) $get('../../operative_doc_type_id');
 
@@ -1131,8 +1137,15 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 }
                                                             })
 
-                                                            // No permitir editar el Premium para Endorsement B
-                                                            ->readOnly(function (Get $get) {
+                                                            // No permitir editar el Premium para Endorsement B al crearlo.
+                                                            // En Edit se deja editable para poder corregir valores
+                                                            // heredados de cargas masivas (la regla de validación de
+                                                            // abajo sigue exigiendo que el valor final sea 0).
+                                                            ->readOnly(function (Get $get, string $operation) {
+
+                                                                if ($operation !== 'create') {
+                                                                    return false;
+                                                                }
 
                                                                 $docType = (int) $get('../../operative_doc_type_id');
 
