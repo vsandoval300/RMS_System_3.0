@@ -117,7 +117,12 @@ class LiabilityStructuresRelationManager extends RelationManager
                             ->inline()
                             ->default('0')
                             ->formatStateUsing(fn ($state) => $state ? '1' : '0')
-                            ->dehydrateStateUsing(fn ($state) => $state === '1')
+                            // Filament's Radio applies its own OptionStateCast before this
+                            // closure runs, which turns the widget's '1'/'0' string into an
+                            // int (1/0). A strict `$state === '1'` comparison against that
+                            // int never matched, so this field always saved as false
+                            // regardless of the selected option. Compare against both forms.
+                            ->dehydrateStateUsing(fn ($state) => in_array($state, [1, '1'], true))
                             ->required()
                         //])
                         ->columnSpan(3)
