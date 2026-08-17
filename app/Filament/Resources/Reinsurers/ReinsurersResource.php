@@ -358,6 +358,12 @@ class ReinsurersResource extends Resource
                                                 $url = '';
                                             }
                                         }
+                                        // Cache-bust the <img> preview: preserveFilenames() means a
+                                        // replaced file keeps the exact same URL, so without this the
+                                        // browser keeps showing its cached copy of the old image.
+                                        if ($url !== '' && ($cacheBuster = $record?->updated_at?->timestamp)) {
+                                            $url .= (str_contains($url, '?') ? '&' : '?') . 'v=' . $cacheBuster;
+                                        }
                                         $filename = basename($_path);
                                         $relPath  = str_starts_with($_path, 'http') ? ltrim(parse_url($_path, PHP_URL_PATH), '/') : $_path;
                                         try {
@@ -438,6 +444,12 @@ class ReinsurersResource extends Resource
                                             } catch (\Throwable $e) {
                                                 $url = '';
                                             }
+                                        }
+                                        // Cache-bust the <img> preview: preserveFilenames() means a
+                                        // replaced file keeps the exact same URL, so without this the
+                                        // browser keeps showing its cached copy of the old image.
+                                        if ($url !== '' && ($cacheBuster = $record?->updated_at?->timestamp)) {
+                                            $url .= (str_contains($url, '?') ? '&' : '?') . 'v=' . $cacheBuster;
                                         }
                                         $filename = basename($_path);
                                         $relPath  = str_starts_with($_path, 'http') ? ltrim(parse_url($_path, PHP_URL_PATH), '/') : $_path;
