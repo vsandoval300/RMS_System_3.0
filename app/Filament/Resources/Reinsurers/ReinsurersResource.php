@@ -351,8 +351,12 @@ class ReinsurersResource extends Resource
                                             $url = $_path;
                                         } else {
                                             /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
-                                            $s3  = Storage::disk('s3');
-                                            $url = $s3->url($_path);
+                                            $s3 = Storage::disk('s3');
+                                            try {
+                                                $url = $s3->url($_path);
+                                            } catch (\Throwable $e) {
+                                                $url = '';
+                                            }
                                         }
                                         $filename = basename($_path);
                                         $relPath  = str_starts_with($_path, 'http') ? ltrim(parse_url($_path, PHP_URL_PATH), '/') : $_path;
@@ -428,8 +432,12 @@ class ReinsurersResource extends Resource
                                             $url = $_path;
                                         } else {
                                             /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
-                                            $s3  = Storage::disk('s3');
-                                            $url = $s3->url($_path);
+                                            $s3 = Storage::disk('s3');
+                                            try {
+                                                $url = $s3->url($_path);
+                                            } catch (\Throwable $e) {
+                                                $url = '';
+                                            }
                                         }
                                         $filename = basename($_path);
                                         $relPath  = str_starts_with($_path, 'http') ? ltrim(parse_url($_path, PHP_URL_PATH), '/') : $_path;
