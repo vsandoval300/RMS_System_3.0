@@ -76,7 +76,10 @@ class OperativeDocsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return ! auth()->user()?->can('update_business');
+        /** @var \App\Models\User|null $user */
+        $user = Filament::auth()->user();
+
+        return ! $user?->can('update_business');
     }
 
      public static function getCreateFormHeading(): string
@@ -109,7 +112,7 @@ class OperativeDocsRelationManager extends RelationManager
     protected function getModalActivePanel(): string
     {
         // Estado actual del form del modal (Create/Edit)
-        $state = $this->getMountedTableActionForm()?->getRawState() ?? [];
+        $state = $this->getMountedActionSchema(0)?->getRawState() ?? [];
 
         return (string) ($state['active_panel'] ?? 'tabs');
     }
@@ -1119,9 +1122,15 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 : null
                                                             )
                                                             ->step(0.01)
-                                                            // Si el documento es Endorsement B, al cargar el repeater
-                                                            // el Premium se fuerza a 0.
-                                                            ->afterStateHydrated(function (Get $get, Set $set) {
+                                                            // Al crear un documento Endorsement B, el Premium se
+                                                            // fuerza a 0 para evitar que el usuario capture un valor
+                                                            // distinto. En Edit/View se respeta el valor real de la
+                                                            // BD (para no ocultar anomalías, p. ej. de cargas masivas).
+                                                            ->afterStateHydrated(function (Get $get, Set $set, string $operation) {
+
+                                                                if ($operation !== 'create') {
+                                                                    return;
+                                                                }
 
                                                                 $docType = (int) $get('../../operative_doc_type_id');
 
@@ -1131,8 +1140,15 @@ class OperativeDocsRelationManager extends RelationManager
                                                                 }
                                                             })
 
-                                                            // No permitir editar el Premium para Endorsement B
-                                                            ->readOnly(function (Get $get) {
+                                                            // No permitir editar el Premium para Endorsement B al crearlo.
+                                                            // En Edit se deja editable para poder corregir valores
+                                                            // heredados de cargas masivas (la regla de validación de
+                                                            // abajo sigue exigiendo que el valor final sea 0).
+                                                            ->readOnly(function (Get $get, string $operation) {
+
+                                                                if ($operation !== 'create') {
+                                                                    return false;
+                                                                }
 
                                                                 $docType = (int) $get('../../operative_doc_type_id');
 
@@ -2181,13 +2197,16 @@ class OperativeDocsRelationManager extends RelationManager
                     ->label('Clone Document')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
-                    ->visible(fn ($record): bool =>
-                        auth()->user()?->can('update_business') &&
-                        in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8]) &&
-                        ! $this->getOwnerRecord()->operativeDocs()
-                            ->where('operative_doc_type_id', 5)
-                            ->exists()
-                    )
+                    ->visible(function ($record): bool {
+                        /** @var \App\Models\User|null $user */
+                        $user = Filament::auth()->user();
+
+                        return $user?->can('update_business') &&
+                            in_array((int) ($record?->operative_doc_type_id ?? 0), [1, 2, 3, 4, 6, 7, 8]) &&
+                            ! $this->getOwnerRecord()->operativeDocs()
+                                ->where('operative_doc_type_id', 5)
+                                ->exists();
+                    })
                     ->requiresConfirmation()
                     ->modalHeading(fn ($record) => 'Clone — ' . ($record->docType->name ?? 'Document') . ' #' . $record->index)
                     ->modalDescription(fn ($record) => (int) ($record?->operative_doc_type_id ?? 0) === 1
