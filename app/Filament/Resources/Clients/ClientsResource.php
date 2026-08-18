@@ -183,8 +183,8 @@ class ClientsResource extends Resource
                         ->optionsLimit(300)
                         ->placeholder('Choose the reinsurer\'s country')
                         ->required()
-                        ->placeholder('Select a country'),
-                        //->helperText('Choose the reinsurer\'s country.'),
+                        ->placeholder('Select a country')
+                        ->helperText('This refers to the client\'s original/home country.'),
                         
                     Select::make('industries')             // ① nombre del campo (puede ser cualquiera)
                         ->label('Industries')              // ② texto mostrado
