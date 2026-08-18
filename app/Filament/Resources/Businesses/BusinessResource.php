@@ -1062,7 +1062,6 @@ class BusinessResource extends Resource
                                 '365'    => 'Last 12 months',
                                 'custom' => 'Custom',
                             ])
-                            ->default('30')
                             ->placeholder('All time')
                             ->live(),
                         DatePicker::make('from')
