@@ -12,12 +12,20 @@ class EditCostScheme extends EditRecord
 {
     protected static string $resource = CostSchemeResource::class;
 
-    /* protected function getHeaderActions(): array
+    protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Action::make('userGuide')
+                ->label('User Guide')
+                ->icon('heroicon-o-book-open')
+                ->color('gray')
+                ->modalHeading('Placement Schemes — User Guide')
+                ->modalWidth('7xl')
+                ->modalContent(view('filament.resources.cost-schemes.user-guide-modal'))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close'),
         ];
-    } */
+    }
 
     // 👇 Agrega este método
     // 👇 Ajustar la firma a ?string

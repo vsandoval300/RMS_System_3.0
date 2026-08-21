@@ -18,7 +18,16 @@ class ListCostSchemes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            
+            Action::make('userGuide')
+                ->label('User Guide')
+                ->icon('heroicon-o-book-open')
+                ->color('gray')
+                ->modalHeading('Placement Schemes — User Guide')
+                ->modalWidth('7xl')
+                ->modalContent(view('filament.resources.cost-schemes.user-guide-modal'))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close'),
+
             // ✅ Nuevo botón Export (respeta filtros/búsqueda/sort del table)
             Action::make('export')
                 ->label('Export')
