@@ -1,0 +1,771 @@
+<title>Placement Schemes Workflow</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --paper: #f5f5f1;
+    --paper-raised: #fbfbf9;
+    --ink: #1a1d24;
+    --ink-muted: #5b6270;
+    --ink-faint: #8a8f9a;
+    --rule: #dcdad0;
+    --rule-strong: #c7c4b7;
+    --accent: #1f4e79;
+    --accent-strong: #163a5c;
+    --accent-soft: #e8eef3;
+    --amber: #8a5a17;
+    --amber-soft: #f5ecd9;
+    --good: #2f6b4f;
+    --good-soft: #e6f0ea;
+    --warn: #9c4221;
+    --warn-soft: #f6e9e2;
+    --shadow: 0 1px 2px rgba(26,29,36,0.06), 0 8px 24px -12px rgba(26,29,36,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181e;
+      --paper-raised: #1b1f27;
+      --ink: #e8e7e0;
+      --ink-muted: #a2a7b3;
+      --ink-faint: #6b707c;
+      --rule: #2c303a;
+      --rule-strong: #3a3f4b;
+      --accent: #7fabd4;
+      --accent-strong: #a6c6e6;
+      --accent-soft: #1e2b38;
+      --amber: #d9b06b;
+      --amber-soft: #332a17;
+      --good: #7cbf9e;
+      --good-soft: #17261f;
+      --warn: #d98a6a;
+      --warn-soft: #2c1c15;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15181e;
+    --paper-raised: #1b1f27;
+    --ink: #e8e7e0;
+    --ink-muted: #a2a7b3;
+    --ink-faint: #6b707c;
+    --rule: #2c303a;
+    --rule-strong: #3a3f4b;
+    --accent: #7fabd4;
+    --accent-strong: #a6c6e6;
+    --accent-soft: #1e2b38;
+    --amber: #d9b06b;
+    --amber-soft: #332a17;
+    --good: #7cbf9e;
+    --good-soft: #17261f;
+    --warn: #d98a6a;
+    --warn-soft: #2c1c15;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .display {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    text-wrap: balance;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  code, .field, .mono, .kbd {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  a { color: var(--accent); }
+
+  /* ── Shell ───────────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    max-width: 1180px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: 1fr; }
+  }
+
+  /* ── Index rail ──────────────────────────────────────── */
+  .rail {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding: 2.75rem 1.25rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 880px) {
+    .rail {
+      position: static;
+      max-height: none;
+      padding: 1.75rem 1.5rem 0.5rem;
+    }
+  }
+
+  .rail-kicker {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .rail-title {
+    font-size: 1.28rem;
+    margin: 0.35rem 0 0;
+    line-height: 1.25;
+  }
+
+  .rail-sub {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    margin: 0.5rem 0 0;
+  }
+
+  .index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .index a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--ink-muted);
+    padding: 0.55rem 0.6rem;
+    border-radius: 0.35rem;
+    border-left: 2px solid transparent;
+    font-size: 0.92rem;
+    transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+
+  .index a:hover {
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .index-branch {
+    list-style: none;
+    margin: 0.1rem 0 0.3rem 1.62rem;
+    padding-left: 0.85rem;
+    border-left: 1px solid var(--rule-strong);
+    display: flex;
+    flex-direction: column;
+    gap: 0.02rem;
+  }
+
+  .index-branch li { position: relative; }
+
+  .index-branch li::before {
+    content: "";
+    position: absolute;
+    left: -0.85rem;
+    top: 0.92rem;
+    width: 0.65rem;
+    height: 1px;
+    background: var(--rule-strong);
+  }
+
+  .index-branch a {
+    display: block;
+    padding: 0.38rem 0.5rem;
+    font-size: 0.83rem;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-radius: 0.3rem;
+    transition: background-color 120ms ease, color 120ms ease;
+  }
+
+  .index-branch a:hover {
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .index .tab-num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    color: var(--tab-color, var(--accent));
+    border: 1px solid var(--tab-color, var(--accent));
+    border-radius: 3px;
+    width: 1.35rem;
+    height: 1.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .index li[data-tab="structure"]   { --tab-color: var(--accent); }
+  .index li[data-tab="cost-nodes"]  { --tab-color: var(--good); }
+  .index li[data-tab="usage"]       { --tab-color: var(--amber); }
+
+  .rail-note {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
+    line-height: 1.55;
+  }
+
+  /* ── Main column ─────────────────────────────────────── */
+  main {
+    padding: 2.75rem 2rem 6rem 1.5rem;
+    min-width: 0;
+  }
+
+  @media (max-width: 880px) {
+    main { padding: 1rem 1.5rem 5rem; }
+  }
+
+  .page-title {
+    font-size: 2rem;
+    margin: 0 0 0.6rem;
+    line-height: 1.15;
+  }
+
+  .lede {
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0.75rem 0 2.25rem;
+  }
+
+  .prereq {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 0.6rem;
+    padding: 1rem 1.15rem;
+    margin-bottom: 2.75rem;
+    box-shadow: var(--shadow);
+  }
+
+  .prereq-mark {
+    font-family: Iowan Old Style, Georgia, serif;
+    font-style: italic;
+    color: var(--accent);
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .prereq p { margin: 0; font-size: 0.92rem; color: var(--ink-muted); }
+  .prereq strong { color: var(--ink); font-weight: 600; }
+
+  section.tab {
+    padding-top: 3.25rem;
+    border-top: 1px solid var(--rule);
+    margin-top: 3.25rem;
+  }
+  section.tab:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .tab-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tab-color, var(--accent));
+    margin-bottom: 0.6rem;
+  }
+  .tab-eyebrow .swatch {
+    width: 0.55rem; height: 0.55rem; border-radius: 1px;
+    background: var(--tab-color, var(--accent));
+    display: inline-block;
+  }
+
+  section[data-tab="structure"]   { --tab-color: var(--accent); }
+  section[data-tab="cost-nodes"]  { --tab-color: var(--good); }
+  section[data-tab="usage"]       { --tab-color: var(--amber); }
+
+  .tab h2 { font-size: 1.65rem; margin: 0 0 0.4rem; }
+  .tab .tab-dek { color: var(--ink-muted); margin: 0 0 1.9rem; font-size: 0.97rem; }
+
+  /* ── Step blocks ─────────────────────────────────────── */
+  .step {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0,1fr);
+    gap: 0 1rem;
+    margin-bottom: 1.9rem;
+  }
+
+  .step-num {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.15rem;
+    color: var(--tab-color, var(--accent));
+    line-height: 1.5;
+  }
+
+  .step h3 {
+    font-size: 1.06rem;
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+  }
+
+  .step p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+  .step p:last-child { margin-bottom: 0; }
+
+  /* ── Field ledger table ──────────────────────────────── */
+  .ledger-wrap { overflow-x: auto; margin: 0.75rem 0 0; border: 1px solid var(--rule); border-radius: 0.5rem; }
+
+  .diagram-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid var(--rule);
+    border-radius: 0.5rem;
+    background: var(--paper-raised);
+    padding: 1rem 1.1rem 0.4rem;
+  }
+  .diagram-cap {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 0 0.7rem;
+  }
+  .subnote {
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    margin: 0.6rem 0 0;
+    line-height: 1.55;
+  }
+
+  .definition-card {
+    border-left: 3px solid var(--tab-color, var(--accent));
+    background: var(--paper-raised);
+    padding: 1rem 1.25rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 1rem 0 1.75rem;
+  }
+  .definition-card .eyebrow {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tab-color, var(--accent));
+    margin-bottom: 0.45rem;
+  }
+  .definition-card p {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  table.ledger {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    background: var(--paper-raised);
+  }
+
+  table.ledger caption {
+    text-align: left;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0.65rem 0.9rem 0.5rem;
+  }
+
+  table.ledger th {
+    text-align: left;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 0.55rem 0.9rem;
+    white-space: nowrap;
+  }
+
+  table.ledger td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  table.ledger tr:last-child td { border-bottom: none; }
+  table.ledger tr:nth-child(even) td { background: color-mix(in srgb, var(--paper) 55%, transparent); }
+
+  .fname { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.83rem; white-space: nowrap; }
+  .fname .db { display: block; color: var(--ink-faint); font-size: 0.72rem; margin-top: 0.1rem; }
+
+  .req { color: var(--amber); font-weight: 600; font-size: 0.78rem; }
+  .req-star { color: #e5484d; font-weight: 700; margin-left: 0.1rem; }
+  .opt { color: var(--ink-faint); font-size: 0.78rem; }
+
+  /* ── Callouts ────────────────────────────────────────── */
+  .note {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.88rem;
+    margin: 1rem 0;
+    line-height: 1.55;
+  }
+  .note-mark {
+    font-family: Iowan Old Style, Georgia, serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+  .note.depends { background: var(--accent-soft); color: var(--ink); }
+  .note.depends .note-mark { color: var(--accent); }
+  .note.rule    { background: var(--amber-soft); color: var(--ink); }
+  .note.rule .note-mark { color: var(--amber); }
+  .note.tip     { background: var(--good-soft); color: var(--ink); }
+  .note.tip .note-mark { color: var(--good); }
+  .note strong { font-weight: 600; }
+  .note .field { background: color-mix(in srgb, var(--ink) 8%, transparent); padding: 0.05rem 0.3rem; border-radius: 3px; }
+
+  .flow-strip {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 1.25rem 0 1.75rem;
+  }
+  .flow-strip .flow-eyebrow {
+    width: 100%;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.5rem;
+  }
+  .flow-strip .chip {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    white-space: nowrap;
+    border: 1px solid var(--tab-color, var(--accent));
+    color: var(--tab-color, var(--accent));
+    background: color-mix(in srgb, var(--tab-color, var(--accent)) 14%, transparent);
+  }
+  .flow-strip .arrow { color: var(--ink-faint); font-size: 0.85rem; }
+
+  .flow-down {
+    text-align: center;
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ink-faint);
+    margin: -0.6rem 0 0.9rem;
+  }
+
+  .process-complete {
+    text-align: center;
+    padding: 2.25rem 1.5rem 0.5rem;
+    margin: 2rem 0 0.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  .process-complete .check {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--tab-color, var(--accent));
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 auto 1.1rem;
+  }
+  .process-complete .box {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: left;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 0.5rem;
+    padding: 1.15rem 1.35rem;
+  }
+  .process-complete p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+
+  .subhead {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 2.25rem 0 0.3rem;
+  }
+  .subhead h4 {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.15rem;
+    margin: 0;
+    font-weight: 600;
+  }
+  .subhead .sub-letter {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--tab-color, var(--amber));
+    border: 1px solid var(--tab-color, var(--amber));
+    border-radius: 3px;
+    width: 1.2rem; height: 1.2rem;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .subhead-dek { color: var(--ink-muted); font-size: 0.9rem; margin: 0 0 1rem; max-width: 58ch; }
+
+  /* ── Screenshots ─────────────────────────────────────── */
+  figure.screenshot {
+    margin: 1.1rem 0 1.6rem;
+    border: 1px solid var(--rule);
+    border-radius: 0.6rem;
+    background: var(--paper-raised);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  figure.screenshot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid var(--rule);
+  }
+  figure.screenshot figcaption {
+    padding: 0.55rem 0.9rem;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--ink-faint);
+  }
+  figure.screenshot figcaption strong { color: var(--ink-muted); font-weight: 600; }
+
+  .example-placeholder {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-size: 0.85rem;
+    border: 1px dashed var(--rule-strong);
+    border-radius: 0.4rem;
+    padding: 2.5rem 1rem;
+    text-align: center;
+    width: 100%;
+    line-height: 1.6;
+    margin: 1.1rem 0 1.6rem;
+  }
+
+  footer.colophon {
+    max-width: 58ch;
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .index a { transition: none; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="rail">
+    <div>
+      <div class="rail-kicker">RMS Platform · Underwritten</div>
+      <h1 class="rail-title">Placement Schemes</h1>
+      <p class="rail-sub">How premium is split among parties, and how a scheme gets built.</p>
+    </div>
+    <ul class="index">
+      <li data-tab="structure"><a href="#structure"><span class="tab-num">1</span> Structure Details</a></li>
+      <li data-tab="cost-nodes"><a href="#cost-nodes"><span class="tab-num">2</span> Cost Nodes</a></li>
+      <li data-tab="usage">
+        <a href="#usage"><span class="tab-num">3</span> Using Placement Schemes</a>
+        <ul class="index-branch">
+          <li><a href="#creating">Creating a Scheme</a></li>
+          <li><a href="#in-operative-documents">In Operative Documents</a></li>
+        </ul>
+      </li>
+    </ul>
+    <p class="rail-note">Placement Schemes are shared, reusable records — a Business's Operative Document doesn't own one, it points to one.</p>
+  </nav>
+
+  <main>
+    <h2 class="page-title">Placement Schemes</h2>
+    <p class="lede">A <strong>Placement Scheme</strong> defines how the premium on an Operative Document is distributed among the parties involved in a Business — cedants, intermediaries, and reinsurers — through a series of deductions and commissions. This manual covers how a scheme is structured, how its Cost Nodes work, and where it gets used elsewhere in RMS.</p>
+
+    <div class="prereq">
+      <span class="prereq-mark">§</span>
+      <p><strong>Before you start:</strong> a Placement Scheme is a standalone record, independent of any single Business. It's typically created once and then reused — selected, not recreated, whenever it applies to a new Operative Document. Deleting a scheme that's already attached to an Operative Document is blocked until it's detached.</p>
+    </div>
+
+    <!-- ══════════════════ 1 · STRUCTURE DETAILS ══════════════════ -->
+    <section class="tab" id="structure" data-tab="structure">
+      <div class="tab-eyebrow"><span class="swatch"></span>Placement Schemes → Structure Details</div>
+      <h2>1. Structure Details</h2>
+      <div class="definition-card">
+        <span class="eyebrow">Definition</span>
+        <p><strong>Structure Details</strong> establish a Placement Scheme's identity — the reinsurance agreement type it represents, its share of the risk, and a description of its terms. Together with its Cost Nodes, this is the information other records reference when they select this scheme.</p>
+      </div>
+      <p class="tab-dek">Every scheme begins here, whether created from the Placement Schemes list or inline from an Operative Document.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <thead><tr><th>Field</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Structure Agreement<span class="db">agreement_type</span></td><td class="req">Required<span class="req-star">*</span></td><td>Select the reinsurance structure this scheme represents: Quota Share, Surplus, Excess of Loss, or Stop Loss.</td></tr>
+            <tr><td class="fname">Share (%)<span class="db">share</span></td><td class="req">Required<span class="req-star">*</span></td><td>Enter the percentage share this Placement Scheme represents. Displayed and entered as a percentage (0–100); stored internally as a decimal fraction — 100% is saved as <span class="field">1.00</span>.</td></tr>
+            <tr><td class="fname">Daily Index<span class="db">index</span></td><td class="req">Auto</td><td>Displays the sequential number automatically assigned to the scheme among those created the same day. Not editable.</td></tr>
+            <tr><td class="fname">Scheme Id<span class="db">id</span></td><td class="req">Auto</td><td>Displays the identifier automatically assigned in the format <span class="field">SCHE-YYYYMMDD-####</span>. Hidden while creating; shown once the scheme has been saved.</td></tr>
+            <tr><td class="fname">Description<span class="db">description</span></td><td class="req">Required<span class="req-star">*</span></td><td>Enter a description of the scheme's terms. Defaults to <span class="field">Each and every loss, subject to the applicable annual aggregate.</span> on creation if left blank.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="screenshot">
+        <!-- PLACEHOLDER — replace with <img src="data:..."> once the screenshot is saved to docs/manual/images/ -->
+        <div class="example-placeholder">Screenshot placeholder<br>Add the Structure Details section of the form here</div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════ 2 · COST NODES ══════════════════ -->
+    <section class="tab" id="cost-nodes" data-tab="cost-nodes">
+      <div class="tab-eyebrow"><span class="swatch"></span>Placement Schemes → Cost Nodes</div>
+      <h2>2. Cost Nodes</h2>
+      <div class="definition-card">
+        <span class="eyebrow">Definition</span>
+        <p>A <strong>Cost Node</strong> represents a single deduction, commission, or fee within a Placement Scheme, moving a percentage of the premium from one party to another. A scheme's Cost Nodes, taken together, define its full cost structure — the same structure previewed wherever the scheme is selected on an Operative Document.</p>
+      </div>
+      <p class="tab-dek">Add one Cost Node per deduction or commission in the scheme. Rows can be reordered, and a running total is kept automatically.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <thead><tr><th>Field</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Deduction Type<span class="db">concept</span></td><td class="req">Required<span class="req-star">*</span></td><td>Select the type of deduction or commission this Cost Node represents, from the Deductions catalog.</td></tr>
+            <tr><td class="fname">Source<span class="db">partner_source_id</span></td><td class="req">Required<span class="req-star">*</span></td><td>Select the party the value flows from.</td></tr>
+            <tr><td class="fname">Destination<span class="db">partner_destination_id</span></td><td class="req">Required<span class="req-star">*</span></td><td>Select the party the value flows to.</td></tr>
+            <tr><td class="fname">Value (%)<span class="db">value</span></td><td class="req">Required<span class="req-star">*</span></td><td>Enter the percentage value of this deduction. Displayed and entered as a percentage; stored internally as a decimal fraction, the same way as Share.</td></tr>
+            <tr><td class="fname">GRP<span class="db">apply_to_gross</span></td><td class="opt">Optional</td><td>Toggle on if this deduction applies to the gross premium amount rather than a prior net figure. Off by default.</td></tr>
+            <tr><td class="fname">Total deductions</td><td class="req">Auto</td><td>Displays the running sum of every Cost Node's Value in the scheme. Recalculated live as rows are added, removed, or edited — not saved on its own.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note rule">
+        <span class="note-mark">!</span>
+        <div><strong>Exempt deductions:</strong> when Deduction Type is set to <span class="field">exempt</span>, Value is automatically forced to <span class="field">0%</span> and locked — it can't be edited while that Deduction Type is selected.</div>
+      </div>
+
+      <figure class="screenshot">
+        <!-- PLACEHOLDER — replace with <img src="data:..."> once the screenshot is saved to docs/manual/images/ -->
+        <div class="example-placeholder">Screenshot placeholder<br>Add the Cost Nodes section of the form here</div>
+      </figure>
+    </section>
+
+    <!-- ══════════════════ 3 · USING PLACEMENT SCHEMES ══════════════════ -->
+    <section class="tab" id="usage" data-tab="usage">
+      <div class="tab-eyebrow"><span class="swatch"></span>Placement Schemes → Using Placement Schemes</div>
+      <h2>3. Using Placement Schemes</h2>
+      <p class="tab-dek">A Placement Scheme can be created on its own, ahead of time, or inline while setting up an Operative Document — both paths open the exact same form. Once created, it's selected wherever it applies.</p>
+
+      <div class="subhead" id="creating"><span class="sub-letter">A</span><h4>Creating a Scheme</h4></div>
+      <p class="subhead-dek" style="max-width:none;">Both creation paths below use the identical Structure Details and Cost Nodes form described in sections 1 and 2 — only the entry point differs.</p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>From the Placement Schemes list</h3>
+          <p>From <strong>Underwritten → Placement Schemes</strong>, click <strong>+ New Placement Scheme</strong>, top right. Fill in the Structure Details, add the scheme's Cost Nodes, and click <strong>Create</strong> — confirming in the dialog that appears.</p>
+          <figure class="screenshot">
+            <!-- PLACEHOLDER — replace with <img src="data:..."> once the screenshot is saved to docs/manual/images/ -->
+            <div class="example-placeholder">Screenshot placeholder<br>Add the Placement Schemes list with + New Placement Scheme highlighted</div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Inline, from an Operative Document</h3>
+          <p>From the Operative Document's <strong>Placement Schemes</strong> tab, click the <strong>+</strong> button next to the Placement Scheme selector. The same creation form opens in a modal, without leaving the Operative Document setup. On save, the new scheme is created and automatically selected.</p>
+          <figure class="screenshot">
+            <!-- PLACEHOLDER — replace with <img src="data:..."> once the screenshot is saved to docs/manual/images/ -->
+            <div class="example-placeholder">Screenshot placeholder<br>Add the inline Placement Scheme creation modal here</div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="subhead" id="in-operative-documents"><span class="sub-letter">B</span><h4>In Operative Documents</h4></div>
+      <p class="subhead-dek" style="max-width:none;">Once created, a Placement Scheme is selected — not recreated — every time it applies to a new Operative Document.</p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Select an existing scheme</h3>
+          <p>The Placement Scheme selector lists every scheme by <strong>ID</strong>, <strong>Index</strong>, <strong>Share</strong>, and <strong>Structure Agreement</strong> type, for example: <span class="field">SCHE-20260215-0003 · Index: 3 · Share: 70.00% · Type: Quota Share</span>.</p>
+          <figure class="screenshot">
+            <!-- PLACEHOLDER — replace with <img src="data:..."> once the screenshot is saved to docs/manual/images/ -->
+            <div class="example-placeholder">Screenshot placeholder<br>Add the Placement Scheme selector on an Operative Document here</div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Review its Cost Nodes</h3>
+          <p>Selecting a scheme reveals a read-only preview of its Cost Nodes — Concept, Source, Destination, and Value, with a running total — so the cost structure can be verified without leaving the Operative Document.</p>
+          <figure class="screenshot">
+            <!-- PLACEHOLDER — replace with <img src="data:..."> once the screenshot is saved to docs/manual/images/ -->
+            <div class="example-placeholder">Screenshot placeholder<br>Add the read-only Cost Nodes preview here</div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>The Placement Scheme(s) selected here determine which schemes are offered on the <strong>Insured Members</strong> tab. Removing a scheme from this list clears that selection on any Insured Member row that referenced it.</div>
+      </div>
+    </section>
+
+    <div class="process-complete">
+      <div class="check">✓</div>
+      <div class="box">
+        <p>A Placement Scheme, once created, is reusable across as many Operative Documents as apply to it — there's no need to recreate one just because it's used elsewhere. Build the scheme once, get its Structure Details and Cost Nodes right, and select it going forward.</p>
+      </div>
+    </div>
+  </main>
+</div>
