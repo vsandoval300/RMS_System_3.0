@@ -20,6 +20,11 @@ Route::get('/admin/manual/new-business-workflow', function () {
     return response()->file(base_path('docs/manual/new-business-workflow.html'));
 })->name('manual.new-business-workflow')->middleware(['web', 'auth']);
 
+// === Placement Schemes — User Guide manual ===
+Route::get('/admin/manual/placement-schemes', function () {
+    return response()->file(base_path('docs/manual/placement-schemes-workflow.html'));
+})->name('manual.placement-schemes')->middleware(['web', 'auth']);
+
 // === Visor de PDFs para OperativeDocs ===
 Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
     // 1) Tomamos el path y limpiamos espacios
