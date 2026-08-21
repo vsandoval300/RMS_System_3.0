@@ -36,6 +36,16 @@ class EditBusiness extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('userGuide')
+                ->label('User Guide')
+                ->icon('heroicon-o-book-open')
+                ->color('gray')
+                ->modalHeading('New Business Workflow — User Guide')
+                ->modalWidth('7xl')
+                ->modalContent(view('filament.resources.business.user-guide-modal'))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close'),
+
             // ── Subordinate: submit for review ────────────────────────────
             Action::make('submitForReview')
                 ->label('Submit for Review')
