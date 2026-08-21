@@ -7,6 +7,11 @@ use App\Models\OperativeDoc;
 // Redirige raíz a Filament
 Route::redirect('/', '/admin');
 
+// === New Business Workflow — User Guide manual ===
+Route::get('/admin/manual/new-business-workflow', function () {
+    return response()->file(base_path('docs/manual/new-business-workflow.html'));
+})->name('manual.new-business-workflow')->middleware(['web', 'auth']);
+
 // === Visor de PDFs para OperativeDocs ===
 Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
     // 1) Tomamos el path y limpiamos espacios
