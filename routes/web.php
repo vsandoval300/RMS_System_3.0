@@ -7,6 +7,14 @@ use App\Models\OperativeDoc;
 // Redirige raíz a Filament
 Route::redirect('/', '/admin');
 
+// Fallback route named "login" — required because Laravel's default `auth`
+// middleware redirects unauthenticated users to route('login'), but this app
+// only defines Filament's panel-scoped login (admin/login). Without this,
+// any plain route using `->middleware('auth')` throws a 500
+// (RouteNotFoundException) instead of redirecting when the session isn't
+// authenticated.
+Route::get('/login', fn () => redirect('/admin/login'))->name('login');
+
 // === New Business Workflow — User Guide manual ===
 Route::get('/admin/manual/new-business-workflow', function () {
     return response()->file(base_path('docs/manual/new-business-workflow.html'));
