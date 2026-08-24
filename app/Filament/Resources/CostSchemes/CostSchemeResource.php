@@ -240,6 +240,7 @@ class CostSchemeResource extends Resource
                                 ->placeholder('Select partner')
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(300)
                                 ->required()
                                 ->columnSpan(3),
 
@@ -249,6 +250,7 @@ class CostSchemeResource extends Resource
                                 ->placeholder('Select partner')
                                 ->searchable()
                                 ->preload()
+                                ->optionsLimit(300)
                                 ->required()
                                 ->columnSpan(3),
 
@@ -538,6 +540,7 @@ class CostSchemeResource extends Resource
                                         ->placeholder('Select partner')
                                         ->searchable()
                                         ->preload()
+                                        ->optionsLimit(300)
                                         ->required()
                                         ->columnSpan(3),
 
@@ -547,6 +550,7 @@ class CostSchemeResource extends Resource
                                         ->placeholder('Select partner')
                                         ->searchable()
                                         ->preload()
+                                        ->optionsLimit(300)
                                         ->required()
                                         ->columnSpan(3),
 

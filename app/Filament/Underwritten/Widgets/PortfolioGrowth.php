@@ -2,11 +2,13 @@
 
 namespace App\Filament\Underwritten\Widgets;
 
+use App\Exports\PortfolioGrowthByReinsurerExport;
 use App\Models\Business;
 use App\Models\Reinsurer;
 use App\Services\PremiumForPeriodService;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PortfolioGrowth extends Widget
 {
@@ -162,6 +164,14 @@ class PortfolioGrowth extends Widget
             'rein_sparkline' => $reinsByYear,
             'biz_sparkline'  => array_column($bizData, 'total'),
         ];
+    }
+
+    public function export()
+    {
+        $data     = app(PremiumForPeriodService::class)->anualFTSByReinsurer();
+        $filename = 'PortfolioGrowth_ByReinsurer_' . now()->format('Ymd') . '.xlsx';
+
+        return Excel::download(new PortfolioGrowthByReinsurerExport($data), $filename);
     }
 
     public function getPremiumData(): array
