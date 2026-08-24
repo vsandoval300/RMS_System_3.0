@@ -98,6 +98,94 @@ class PremiumForPeriodService
     }
 
 
+    public function anualFTSByReinsurer(): array
+    {
+        $docs = OperativeDoc::query()
+            ->whereYear('rep_date', '>=', 2010)
+            ->with([
+                'business.reinsurer',
+                'schemes.costScheme',
+                'insureds',
+            ])
+            ->whereHas('business', fn($b) => $b->where('approval_status', 'APR'))
+            ->get();
+
+        $rows  = [];
+        $years = [];
+
+        foreach ($docs as $doc) {
+
+            $year = Carbon::parse($doc->rep_date)->year;
+            $years[$year] = true;
+
+            $inception = Carbon::parse($doc->inception_date);
+            $expiration = Carbon::parse($doc->expiration_date);
+
+            $daysInYear = $inception->isLeapYear() ? 366 : 365;
+            $coverageDays = $inception->diffInDays($expiration);
+
+            $fts = 0;
+
+            foreach ($doc->insureds as $insured) {
+
+                $share = optional(
+                    $doc->schemes->firstWhere('costScheme.id', $insured->cscheme_id)
+                )->costScheme->share ?? 0;
+
+                $ftpIndividual = ($daysInYear > 0)
+                    ? ($insured->premium / $daysInYear) * $coverageDays
+                    : 0;
+
+                $fts += $ftpIndividual * $share;
+            }
+
+            $converted = ($doc->roe_fs > 0) ? ($fts / $doc->roe_fs) : 0;
+
+            $reinsurer   = $doc->business->reinsurer;
+            $reinsurerId = $reinsurer->id ?? 0;
+
+            if (!isset($rows[$reinsurerId])) {
+                $rows[$reinsurerId] = [
+                    'id'      => $reinsurerId,
+                    'name'    => $reinsurer->name ?? 'Unassigned',
+                    'amounts' => [],
+                ];
+            }
+
+            $rows[$reinsurerId]['amounts'][$year] = ($rows[$reinsurerId]['amounts'][$year] ?? 0) + $converted;
+        }
+
+        $years = array_keys($years);
+        sort($years);
+
+        uasort($rows, fn($a, $b) => strcmp($a['name'], $b['name']));
+
+        $totals     = array_fill_keys($years, 0.0);
+        $grandTotal = 0.0;
+
+        foreach ($rows as &$row) {
+            $rowTotal = 0.0;
+
+            foreach ($years as $year) {
+                $amount = $row['amounts'][$year] ?? 0.0;
+                $row['amounts'][$year] = $amount;
+                $rowTotal += $amount;
+                $totals[$year] += $amount;
+            }
+
+            $row['total'] = $rowTotal;
+            $grandTotal  += $rowTotal;
+        }
+        unset($row);
+
+        return [
+            'years'       => $years,
+            'rows'        => array_values($rows),
+            'totals'      => $totals,
+            'grand_total' => $grandTotal,
+        ];
+    }
+
     public function monthlyByYear(?int $reinsurerId = null, array $years = []): array
     {
         if (empty($years)) {
