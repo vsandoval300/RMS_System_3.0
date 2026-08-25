@@ -257,7 +257,7 @@ class BusinessResource extends Resource
                                             ->preload(),
 
                                         TextInput::make('source_code')
-                                            ->label('Original ID')
+                                            ->label('Policy Number')
                                             ->placeholder('Enter original id if necessary.')
                                             ->columnSpan(3),
                                     ]),
