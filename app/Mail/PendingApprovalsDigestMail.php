@@ -34,7 +34,7 @@ class PendingApprovalsDigestMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'mail.pending-approvals-digest',
+            markdown: 'mail.pending-approvals-digest',
         );
     }
 }
