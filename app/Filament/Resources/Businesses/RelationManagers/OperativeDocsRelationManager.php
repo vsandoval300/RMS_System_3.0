@@ -1156,15 +1156,21 @@ class OperativeDocsRelationManager extends RelationManager
                                                             })
 
                                                             // Validación de servidor
+                                                            // Reglas de signo/valor de Premium por tipo de documento
+                                                            // (business_doc_types.id):
+                                                            //   1 Slip                         -> > 0
+                                                            //   2 Endorsement A – Complementary -> > 0
+                                                            //   3 Endorsement A – Modificatory  -> ≠ 0 (positivo o negativo)
+                                                            //   4 Endorsement B – No Premium    -> = 0
+                                                            //   5 Endorsement C – Cancellation  -> < 0
+                                                            //   6 Endorsement D – Partial Refund-> < 0
+                                                            //   7 Endorsement E – Reinstatement -> > 0
+                                                            //   8 Endorsement A – Ext./Renewal  -> > 0
                                                             ->rule(function (Get $get) {
 
                                                                 return function (string $attribute, $value, \Closure $fail) use ($get) {
 
                                                                     $docType = (int) $get('../../operative_doc_type_id');
-
-                                                                    if ($docType !== 4) {
-                                                                        return;
-                                                                    }
 
                                                                     $premium = (float) str_replace(
                                                                         [',', '$', ' '],
@@ -1172,8 +1178,34 @@ class OperativeDocsRelationManager extends RelationManager
                                                                         (string) $value
                                                                     );
 
-                                                                    if ($premium > 0) {
-                                                                        $fail('Premium must be equal to 0 for Endorsement B.');
+                                                                    switch ($docType) {
+                                                                        case 4:
+                                                                            if ($premium > 0) {
+                                                                                $fail('Premium must be equal to 0 for Endorsement B.');
+                                                                            }
+                                                                            break;
+
+                                                                        case 3:
+                                                                            if ($premium == 0) {
+                                                                                $fail('Premium must be different from 0 (positive or negative) for this document type.');
+                                                                            }
+                                                                            break;
+
+                                                                        case 5:
+                                                                        case 6:
+                                                                            if ($premium >= 0) {
+                                                                                $fail('Premium must be a negative value for this document type.');
+                                                                            }
+                                                                            break;
+
+                                                                        case 1:
+                                                                        case 2:
+                                                                        case 7:
+                                                                        case 8:
+                                                                            if ($premium <= 0) {
+                                                                                $fail('Premium is required and must be greater than 0 for this document type.');
+                                                                            }
+                                                                            break;
                                                                     }
                                                                 };
                                                             })
