@@ -600,7 +600,7 @@ class BusinessResource extends Resource
                                                             $value = $record->source_code ?: '—';
 
                                                             return new HtmlString(
-                                                                "<strong>Source Id:</strong> {$value}"
+                                                                "<strong>Policy Number:</strong> {$value}"
                                                             );
                                                         })
                                                         ->columnSpan(4),
@@ -842,6 +842,7 @@ class BusinessResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->persistFiltersInSession() 
             ->columns([
 
                 TextColumn::make('row_number')
@@ -1040,7 +1041,6 @@ class BusinessResource extends Resource
 
 
             ])
-
             ->filters([
                 // 🔹 Filtro por Reinsurer
                 SelectFilter::make('reinsurer_id')
