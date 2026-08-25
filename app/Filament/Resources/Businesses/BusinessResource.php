@@ -1041,6 +1041,7 @@ class BusinessResource extends Resource
 
 
             ])
+            ->persistColumnsInSession()
             ->filters([
                 // 🔹 Filtro por Reinsurer
                 SelectFilter::make('reinsurer_id')
