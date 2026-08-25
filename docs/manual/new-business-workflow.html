@@ -757,6 +757,7 @@
         <a href="#documents"><span class="tab-num">3</span> Operative Documents</a>
         <ul class="index-branch">
           <li><a href="#doc-details">Document Details</a></li>
+          <li><a href="#document-type">Document Type</a></li>
           <li><a href="#placement-schemes">Placement Schemes</a></li>
           <li>
             <a href="#insured-members">Insured Members</a>
@@ -1535,7 +1536,82 @@
         <div><strong>Document Type is sequenced:</strong> the first document on a Business is always the <strong>Slip</strong>, and the field locks to it — you can't pick anything else, and you can't create a second Slip once one exists. Every document after that is an Endorsement.</div>
       </div>
 
-      <div class="subhead" id="placement-schemes"><span class="sub-letter">B</span><h4>Placement Schemes</h4></div>
+      <div class="subhead" id="document-type"><span class="sub-letter">B</span><h4>Document Type</h4></div>
+      <p class="subhead-dek" style="max-width:none;">The Document Type defines the purpose and financial effect of an Operative Document throughout the lifecycle of a Business. Each type represents a specific contractual event — such as the initial registration of the contract, a premium adjustment, a cancellation, a partial refund, a reinstatement, or an extension — and determines how premium values must be recorded for its Insured Members. Premium is entered individually by Company and Coverage, and depending on the selected Document Type, the system controls whether those values must be positive, negative, non-zero, or zero. This ensures that the premium movement recorded by each Operative Document is consistent with the nature and intended financial effect of the transaction.</p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Slip</h3>
+          <p>The Slip represents the initial registration of the insurance or reinsurance contract and establishes the original premium associated with the coverage being written.</p>
+          <p>For each Insured Member, the Annual Gross Reinsurance Premium must be entered by Company and Coverage, according to the premium allocation established for the contract. Since the Slip represents the original premium written, only positive premium values greater than zero are permitted.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Endorsement A – Complementary</h3>
+          <p>An Endorsement A – Complementary is used to record an additional premium arising from a change to the original contract without replacing the premium already registered. It therefore complements the existing premium position by adding an incremental amount.</p>
+          <p>For each affected Insured Member, the additional premium must be entered by Company and Coverage. Since this document represents an additional premium charge, only positive premium values greater than zero are permitted. The amounts entered are added to the premium previously registered for the corresponding insured company and coverage.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Endorsement A – Modificatory</h3>
+          <p>An Endorsement A – Modificatory is used when the premium previously established for the contract must be revaluated or replaced, rather than simply increased or refunded. It allows the premium position to be adjusted to reflect revised underwriting, exposure, coverage, or other contractual conditions.</p>
+          <p>Premium adjustments must be entered for each affected Company and Coverage. Depending on the required adjustment, both positive and negative premium values are permitted, but zero values are not allowed. Positive amounts represent an increase, while negative amounts represent a reduction to the previously registered premium.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <h3>Endorsement B – No Premium Change</h3>
+          <p>An Endorsement B – No Premium Change is used to register contractual, administrative, or informational changes that do not modify the premium of the contract. Examples may include changes to wording, insured information, contractual references, or other non-financial terms.</p>
+          <p>Because this document has no financial effect on premium, the premium recorded for each applicable Company and Coverage must be zero. Positive or negative premium values are not permitted.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div>
+          <h3>Endorsement C – Cancellation</h3>
+          <p>An Endorsement C – Cancellation is used to record the complete cancellation or termination of the contract and the corresponding reversal of premium previously registered.</p>
+          <p>The premium reversal must be allocated to the affected Insured Members by Company and Coverage. Because the document represents a return or reversal of previously written premium, only negative premium values are permitted. These amounts reduce the accumulated premium associated with the corresponding insured company and coverage.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div>
+          <h3>Endorsement D – Partial Refund</h3>
+          <p>An Endorsement D – Partial Refund is used to record a partial return of premium resulting from a reduction in coverage, exposure, insured values, coverage period, or other contractual conditions that reduce the premium without fully cancelling the contract.</p>
+          <p>The premium to be refunded must be entered for each affected Company and Coverage. Since the transaction represents a reduction of previously registered premium, only negative premium values are permitted. The amounts entered reduce the accumulated premium while leaving the remaining portion of the contract in force.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">7</div>
+        <div>
+          <h3>Endorsement E – Reinstatement</h3>
+          <p>An Endorsement E – Reinstatement is used to record the reinstatement of coverage following a loss or other event that has reduced or exhausted the available coverage, when such reinstatement requires the payment of an additional premium.</p>
+          <p>The reinstatement premium must be allocated to the applicable Insured Members by Company and Coverage. Because the document generates an additional premium charge, only positive premium values greater than zero are permitted. These amounts increase the accumulated premium associated with the affected coverage.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">8</div>
+        <div>
+          <h3>Endorsement A – Extension / Renewal</h3>
+          <p>An Endorsement A – Extension / Renewal is used when the coverage period of an existing contract is extended or its terms are renewed, generating additional premium for the extended or renewed period.</p>
+          <p>The additional premium must be entered for each applicable Insured Member by Company and Coverage, reflecting the premium attributable to the extension or renewal. Since this document represents additional premium generated by the continuation of coverage, only positive premium values greater than zero are permitted.</p>
+        </div>
+      </div>
+
+      <div class="subhead" id="placement-schemes"><span class="sub-letter">C</span><h4>Placement Schemes</h4></div>
       <div class="definition-card">
         <span class="eyebrow">Definition</span>
         <p><strong>Placement Schemes</strong> define the cost structure that applies to an Operative Document. Each Placement Scheme is based on a <strong>Cost Scheme</strong>, which is composed of one or more <strong>Cost Nodes</strong> representing the different costs, commissions, fees, or other components involved in the Business. By assigning one or more Placement Schemes to an Operative Document, RMS identifies which cost structures are available for the premium associated with that document and its Insured Members.</p>
@@ -1615,7 +1691,7 @@
         </div>
       </div>
 
-      <div class="subhead" id="insured-members"><span class="sub-letter">C</span><h4>Insured Members</h4></div>
+      <div class="subhead" id="insured-members"><span class="sub-letter">D</span><h4>Insured Members</h4></div>
       <div class="definition-card">
         <span class="eyebrow">Definition</span>
         <p><strong>Insured Members</strong> define the insured entities covered under an Operative Document and how their premium is allocated within the Business. For administrative purposes within the platform, an Insured Member represents a logical record composed of four elements: a Company, a Placement Scheme, a Coverage, and an Annual Gross Reinsurance Premium amount. Each unique combination of these elements constitutes a separate Insured Member entry. Together, these entries provide the detailed premium distribution by insured entity and coverage, while linking each premium to the placement structure through which it is handled.</p>
