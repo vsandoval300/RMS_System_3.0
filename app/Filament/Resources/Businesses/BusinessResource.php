@@ -842,7 +842,8 @@ class BusinessResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->persistFiltersInSession() 
+            ->persistFiltersInSession()
+            ->persistColumnsInSession()
             ->columns([
 
                 TextColumn::make('row_number')
@@ -1041,7 +1042,6 @@ class BusinessResource extends Resource
 
 
             ])
-            ->persistColumnsInSession()
             ->filters([
                 // 🔹 Filtro por Reinsurer
                 SelectFilter::make('reinsurer_id')
