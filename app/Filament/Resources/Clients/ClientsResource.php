@@ -82,56 +82,8 @@ class ClientsResource extends Resource
                         ->rules(['regex:/^(?=.*\p{L})[\p{L}\d .]+$/u'])
                         ->validationMessages([
                             'regex' => 'The name must contain letters and may include numbers, spaces, and dots.',
-                        ])
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            $value = (string) $state;
-
-                            // 1) Limpia espacios repetidos y bordes
-                            $value = preg_replace('/\s+/', ' ', trim($value));
-
-                            // 2) Pasa a minúsculas para normalizar y separa en palabras
-                            $lower = mb_strtolower($value, 'UTF-8');
-                            $words = preg_split('/\s/u', $lower, -1, PREG_SPLIT_NO_EMPTY);
-
-                            // 3) Partículas que van en minúsculas (salvo si son la primera palabra)
-                            $particles = ['de','del','la','las','el','los','y','e','o','u','al'];
-
-                            foreach ($words as $i => $w) {
-                                if ($i === 0 || !in_array($w, $particles, true)) {
-                                    // Title-case respetando acentos
-                                    $words[$i] = mb_convert_case($w, MB_CASE_TITLE, 'UTF-8');
-                                } else {
-                                    $words[$i] = $w; // mantener en minúsculas
-                                }
-                            }
-
-                            $result = implode(' ', $words);
-
-                            // 4) Normaliza abreviaturas y razones sociales (orden: de más larga a más corta)
-                            $patterns = [
-                                // S. de R.L. de C.V.
-                                '/\bS\.?\s*DE\s*R\.?\s*L\.?\s*DE\s*C\.?\s*V\.?\b/ui' => 'S. de R.L. de C.V.',
-                                // S. de R.L.
-                                '/\bS\.?\s*DE\s*R\.?\s*L\.?\b/ui'                   => 'S. de R.L.',
-                                // S.A.P.I
-                                '/\bS\.?\s*A\.?\s*P\.?\s*I\.?\b/ui'                 => 'S.A.P.I',
-                                // S.A.
-                                '/\bS\.?\s*A\.?\b/ui'                               => 'S.A.',
-                                // C.V.
-                                '/\bC\.?\s*V\.?\b/ui'                               => 'C.V.',
-                            ];
-                            $result = preg_replace(array_keys($patterns), array_values($patterns), $result);
-
-                            // 5) Ajuste fino: si una partícula quedó justo después de punto (p. ej., "S.A. De"),
-                            //    queremos "de" en minúsculas.
-                            $result = preg_replace_callback(
-                                '/([A-Z]\.)\s+(De|Del|La|Las|El|Los|Y|E|O|U)\b/u',
-                                fn($m) => $m[1] . ' ' . mb_strtolower($m[2], 'UTF-8'),
-                                $result
-                            );
-
-                            $set('name', $result);
-                        }),
+                        ]),
+                        
                         //->helperText('First letter of each word will be capitalised.'),
                         
                     
@@ -144,9 +96,9 @@ class ClientsResource extends Resource
                             modifyRuleUsing: fn (Unique $rule) => $rule->whereNull('deleted_at')
                         )
                         ->live(onBlur: false)
-                        ->maxLength(255)
-                        ->afterStateUpdated(fn ($state, callable $set) =>
-                             $set('short_name', ucwords(strtolower($state)))),
+                        ->maxLength(255),
+                        //->afterStateUpdated(fn ($state, callable $set) =>
+                             //$set('short_name', ucwords(strtolower($state)))),
                         //->helperText('First letter of each word will be capitalised.'),
                        
                     
@@ -155,8 +107,8 @@ class ClientsResource extends Resource
                         ->required()
                         ->placeholder('Enter your company’s main business activity.')
                         ->columnSpan('full')
-                        ->autosize()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state)))),
+                        ->autosize(),
+                        //->afterStateUpdated(fn ($state, callable $set) => $set('description', ucfirst(strtolower($state)))),
                         //->helperText('Please provide a brief description of the sector.'),
                         
 
