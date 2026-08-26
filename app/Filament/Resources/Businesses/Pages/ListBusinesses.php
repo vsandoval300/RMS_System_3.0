@@ -103,12 +103,15 @@ class ListBusinesses extends ListRecords
                     ->required(fn ($get) => $get('report_type') === 'operative_docs')
                     ->visible(fn ($get) => $get('report_type') === 'operative_docs')
                     ->minDate(fn () => static::reportMinDate('inception_date'))
+                    ->default(fn () => static::reportMinDate('inception_date'))
+                    ->helperText(fn () => 'Data available from ' . static::reportMinDate('inception_date')->format('F j, Y') . '.')
                     ->native(false),
 
                 DatePicker::make('to_date')
                     ->label('To date')
                     ->required(fn ($get) => $get('report_type') === 'operative_docs')
                     ->visible(fn ($get) => $get('report_type') === 'operative_docs')
+                    ->default(fn () => now())
                     ->native(false),
 
                 // =========================
@@ -121,6 +124,8 @@ class ListBusinesses extends ListRecords
                     ->required(fn ($get) => $get('report_type') === 'underwritten_report')
                     ->visible(fn ($get) => $get('report_type') === 'underwritten_report')
                     ->minDate(fn () => static::reportMinDate('rep_date'))
+                    ->default(fn () => static::reportMinDate('rep_date'))
+                    ->helperText(fn () => 'Data available from ' . static::reportMinDate('rep_date')->format('F Y') . '.')
                     ->native(false)
                     ->closeOnDateSelection()
                     ->live(),
@@ -131,6 +136,7 @@ class ListBusinesses extends ListRecords
                     ->format('Y-m-01')
                     ->required(fn ($get) => $get('report_type') === 'underwritten_report')
                     ->visible(fn ($get) => $get('report_type') === 'underwritten_report')
+                    ->default(fn () => now())
                     ->native(false)
                     ->closeOnDateSelection()
                     ->live(),
