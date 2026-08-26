@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class NotifyReportReady implements ShouldQueue
@@ -33,6 +34,8 @@ class NotifyReportReady implements ShouldQueue
     public function handle(): void
     {
         $user = User::find($this->userId);
+
+        Cache::forget('report_generating_' . $this->userId);
 
         Notification::make()
             ->title('Report ready')

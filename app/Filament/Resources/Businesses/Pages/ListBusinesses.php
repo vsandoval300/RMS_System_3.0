@@ -8,6 +8,7 @@ use App\Exports\OperativeDocsExport;
 use App\Filament\Resources\Businesses\BusinessResource;
 use App\Filament\Resources\Businesses\Widgets\BusinessByYearChart;
 use App\Filament\Resources\Businesses\Widgets\BusinessStatsOverview;
+use App\Filament\Resources\Businesses\Widgets\ReportGenerationStatus;
 use App\Jobs\GenerateOperativeDocsReport;
 use App\Jobs\GenerateMissingPdfsReport;
 use App\Jobs\NotifyReportReady;
@@ -23,6 +24,7 @@ use Filament\Resources\Pages\ListRecords;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\LazyCollection;
 use Filament\Forms\Components\Hidden;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ListBusinesses extends ListRecords
@@ -191,6 +193,8 @@ class ListBusinesses extends ListRecords
 
                     $filename = sprintf('MissingPDFs_report_(%s).xlsx', $timestamp);
 
+                    Cache::put('report_generating_' . auth()->id(), $reportLabel, now()->addMinutes(30));
+
                     GenerateMissingPdfsReport::dispatch(
                         $dateFrom,
                         $dateTo,
@@ -288,6 +292,8 @@ class ListBusinesses extends ListRecords
                     );
                 }
 
+                Cache::put('report_generating_' . auth()->id(), $reportLabel, now()->addMinutes(30));
+
                 GenerateOperativeDocsReport::dispatch(
                     $dateColumn,
                     $dateStart,
@@ -322,6 +328,7 @@ class ListBusinesses extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
+            ReportGenerationStatus::class,
             BusinessStatsOverview::class,
             BusinessByYearChart::class,
         ];
