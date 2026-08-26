@@ -335,19 +335,23 @@ class ListBusinesses extends ListRecords
     }
 
     /**
-     * Earliest selectable date for an Export Reports date field, floored at
-     * 2010-01-01 (matching the cutoff already used elsewhere for reporting
-     * queries) so stray bad data below that year — e.g. a doc mistakenly
-     * saved with an epoch inception_date — can't drag the picker's minimum
-     * down to something meaningless.
+     * Earliest selectable date for an Export Reports date field: the real
+     * minimum of the column, ignoring anything before 2010-01-01 (matching
+     * the cutoff already used elsewhere for reporting queries) so stray bad
+     * data — e.g. a doc mistakenly saved with an epoch inception_date —
+     * doesn't get counted as the earliest date. The 2010 cutoff is a WHERE
+     * filter on the query itself, not a clamp on the result, so the true
+     * earliest valid date (e.g. Dec 2015) still surfaces correctly instead
+     * of collapsing to the cutoff.
      */
     protected static function reportMinDate(string $column): Carbon
     {
         $floor = Carbon::parse('2010-01-01');
-        $min = OperativeDoc::whereNotNull($column)->min($column);
 
-        return $min && Carbon::parse($min)->greaterThan($floor)
-            ? Carbon::parse($min)
-            : $floor;
+        $min = OperativeDoc::whereNotNull($column)
+            ->where($column, '>=', $floor)
+            ->min($column);
+
+        return $min ? Carbon::parse($min) : $floor;
     }
 }
