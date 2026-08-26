@@ -3,9 +3,10 @@
 namespace App\Exports;
 
 use Carbon\Carbon;
+use Generator;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\{
-    FromCollection,
+    FromGenerator,
     FromQuery,
     WithHeadings,
     WithMapping,
@@ -18,7 +19,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class OperativeDocsExport implements
-    FromCollection,
+    FromGenerator,
     WithHeadings,
     WithMapping,
     ShouldAutoSize,
@@ -29,19 +30,19 @@ class OperativeDocsExport implements
     public $timeout = 1200;
     public $tries = 3;
 
-    protected $rows;
+    protected Generator $rows;
     protected int $rowIndex = 0;
     protected int $maxNodes;
 
-    public function __construct($rows, int $maxNodes)
+    public function __construct(Generator $rows, int $maxNodes)
     {
         $this->rows = $rows;
         $this->maxNodes = $maxNodes;
     }
 
-    public function collection()
+    public function generator(): Generator
     {
-        return $this->rows; // 👈 LazyCollection soportado
+        return $this->rows; // 👈 Streamed row-by-row, never fully materialized in memory
     }
 
     public function headings(): array

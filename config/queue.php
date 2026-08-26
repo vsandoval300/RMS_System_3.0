@@ -39,7 +39,11 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            // Raised from Laravel's 90s default to cover GenerateOperativeDocsReport's
+            // own $timeout (1200s) — a full-history export legitimately runs several
+            // minutes, and 90s let the queue think the worker died and re-dispatch
+            // the same report to a second worker concurrently.
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 1200),
             'after_commit' => false,
         ],
 

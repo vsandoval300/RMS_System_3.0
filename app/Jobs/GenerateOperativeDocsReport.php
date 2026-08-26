@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class GenerateOperativeDocsReport implements ShouldQueue
@@ -114,45 +115,73 @@ class GenerateOperativeDocsReport implements ShouldQueue
                 'p_src.acronym as node_source_acronym',
             ]);
 
-       
-        $rows = $query->cursor();
-
-        $grouped = [];
-        $result = [];
-
-        foreach ($rows as $row) {
-
-            $key = $row->insured_row_id ?? ($row->id . '|no-insured');
-
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [];
-            }
-
-            $grouped[$key][] = $row;
-
-        }
-
-        foreach ($grouped as $rowsGroup) {
-            $result[] = $this->buildRow(collect($rowsGroup));
-        }
-
-        $result = collect($result)
-            ->sortBy(fn ($r) => (string) $r->id)
-            ->sortBy(fn ($r) => (string) ($r->business_code ?? ''))
-            ->values();
-
-        $maxNodes = collect($result)->max(fn ($r) => count($r->nodes_list ?? [])) ?? 0;
+        // Note: the query is already ordered by business_code, then
+        // operative_docs.id, then businessdoc_insureds.id (the grouping
+        // key below), then cost_nodesx.index — so rows belonging to the
+        // same group always arrive contiguously, and the output already
+        // comes out sorted by Business Code / OperativeDoc ID with no
+        // extra PHP-side sort needed.
+        $maxNodes = $this->calculateMaxNodes();
         $path = 'uw-reports/' . $this->filename;
 
         Excel::store(
-            new OperativeDocsExport(collect($result), $maxNodes),
-            $path   
+            new OperativeDocsExport($this->streamRows($query), $maxNodes),
+            $path
         );
 
         NotifyReportReady::dispatch(
             $this->userId,
             $this->filename
         );
+    }
+
+    /**
+     * Widest Cost Scheme (by node count) across the whole catalog, used to
+     * size the Node_N_* column blocks. Computed independently of the
+     * (potentially huge, fanned-out) report query so it stays cheap even
+     * for a full-history date range.
+     */
+    private function calculateMaxNodes(): int
+    {
+        $widest = DB::table('cost_nodesx')
+            ->select('cscheme_id', DB::raw('COUNT(*) as node_count'))
+            ->groupBy('cscheme_id')
+            ->orderByDesc('node_count')
+            ->first();
+
+        return (int) ($widest->node_count ?? 0);
+    }
+
+    /**
+     * Streams the report row-by-row instead of materializing the entire
+     * (fanned-out) result set in memory before writing anything — a full
+     * date-range export can otherwise hold hundreds of thousands of raw
+     * joined rows in PHP at once. Rows for the same insured are grouped
+     * as they arrive, relying on the query's ORDER BY to guarantee they
+     * are contiguous, and each finished group is yielded to the Excel
+     * writer immediately via buildRow() (unchanged calculation logic).
+     */
+    private function streamRows($query): \Generator
+    {
+        $currentKey = null;
+        $currentGroup = [];
+
+        foreach ($query->cursor() as $row) {
+
+            $key = $row->insured_row_id ?? ($row->id . '|no-insured');
+
+            if ($currentKey !== null && $key !== $currentKey) {
+                yield $this->buildRow(collect($currentGroup));
+                $currentGroup = [];
+            }
+
+            $currentKey = $key;
+            $currentGroup[] = $row;
+        }
+
+        if (!empty($currentGroup)) {
+            yield $this->buildRow(collect($currentGroup));
+        }
     }
 
     private function buildRow(Collection $rows)
