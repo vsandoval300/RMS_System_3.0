@@ -137,7 +137,8 @@ class GenerateOperativeDocsReport implements ShouldQueue
         }
 
         $result = collect($result)
-            ->sortByDesc(fn ($r) => $r->rep_date)
+            ->sortBy(fn ($r) => (string) $r->id)
+            ->sortBy(fn ($r) => (string) ($r->business_code ?? ''))
             ->values();
 
         $maxNodes = collect($result)->max(fn ($r) => count($r->nodes_list ?? [])) ?? 0;
