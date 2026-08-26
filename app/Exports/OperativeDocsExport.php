@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Concerns\{
     WithMapping,
     ShouldAutoSize,
     WithColumnFormatting,
+    WithStrictNullComparison,
     WithStyles
 };
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
@@ -22,6 +23,7 @@ class OperativeDocsExport implements
     WithMapping,
     ShouldAutoSize,
     WithColumnFormatting,
+    WithStrictNullComparison,
     WithStyles
 {
     public $timeout = 1200;
