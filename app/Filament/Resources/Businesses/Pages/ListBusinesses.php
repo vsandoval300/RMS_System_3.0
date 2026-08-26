@@ -102,6 +102,7 @@ class ListBusinesses extends ListRecords
                     ->label('From date')
                     ->required(fn ($get) => $get('report_type') === 'operative_docs')
                     ->visible(fn ($get) => $get('report_type') === 'operative_docs')
+                    ->minDate(fn () => static::reportMinDate('inception_date'))
                     ->native(false),
 
                 DatePicker::make('to_date')
@@ -119,6 +120,7 @@ class ListBusinesses extends ListRecords
                     ->format('Y-m-01')         // guarda día 01
                     ->required(fn ($get) => $get('report_type') === 'underwritten_report')
                     ->visible(fn ($get) => $get('report_type') === 'underwritten_report')
+                    ->minDate(fn () => static::reportMinDate('rep_date'))
                     ->native(false)
                     ->closeOnDateSelection()
                     ->live(),
@@ -324,5 +326,22 @@ class ListBusinesses extends ListRecords
         return [
             'tableFilters' => $this->tableFilters,
         ];
+    }
+
+    /**
+     * Earliest selectable date for an Export Reports date field, floored at
+     * 2010-01-01 (matching the cutoff already used elsewhere for reporting
+     * queries) so stray bad data below that year — e.g. a doc mistakenly
+     * saved with an epoch inception_date — can't drag the picker's minimum
+     * down to something meaningless.
+     */
+    protected static function reportMinDate(string $column): Carbon
+    {
+        $floor = Carbon::parse('2010-01-01');
+        $min = OperativeDoc::whereNotNull($column)->min($column);
+
+        return $min && Carbon::parse($min)->greaterThan($floor)
+            ? Carbon::parse($min)
+            : $floor;
     }
 }
