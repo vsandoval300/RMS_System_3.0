@@ -1163,7 +1163,7 @@ class OperativeDocsRelationManager extends RelationManager
                                                             //   3 Endorsement A – Modificatory  -> ≠ 0 (positivo o negativo)
                                                             //   4 Endorsement B – No Premium    -> = 0
                                                             //   5 Endorsement C – Cancellation  -> < 0
-                                                            //   6 Endorsement D – Partial Refund-> < 0
+                                                            //   6 Endorsement D – Partial Refund-> ≠ 0 (positivo o negativo)
                                                             //   7 Endorsement E – Reinstatement -> > 0
                                                             //   8 Endorsement A – Ext./Renewal  -> > 0
                                                             ->rule(function (Get $get) {
@@ -1186,13 +1186,13 @@ class OperativeDocsRelationManager extends RelationManager
                                                                             break;
 
                                                                         case 3:
+                                                                        case 6:
                                                                             if ($premium == 0) {
                                                                                 $fail('Premium must be different from 0 (positive or negative) for this document type.');
                                                                             }
                                                                             break;
 
                                                                         case 5:
-                                                                        case 6:
                                                                             if ($premium >= 0) {
                                                                                 $fail('Premium must be a negative value for this document type.');
                                                                             }
