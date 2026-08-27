@@ -90,6 +90,7 @@ class GenerateOperativeDocsReport implements ShouldQueue
                 'users.initials as created_by_initials',
 
                 'businesses.source_code as business_source_code',
+                'businesses.policy_number as business_policy_number',
                 'businesses.parent_id as business_parent_id',
                 'businesses.renewed_from_id as business_renewed_from_id',
                 'producer_partner.name as producer_name',

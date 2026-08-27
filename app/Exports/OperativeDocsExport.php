@@ -53,7 +53,7 @@ class OperativeDocsExport implements
             'Rep_Date',
 
             'Business Code', 'OperativeDoc ID', 'Document Type',
-            'Source Code', 'Producer', 'Parent', 'Renewed from',
+            'Source Code', 'Policy Number', 'Producer', 'Parent', 'Renewed from',
             'Id_Reinsurer', 'Reinsurer_name', 'Short name', 'Currency', 'roe_fs',
             'Share (%)', 'Created Date', 'Inception Date', 'Expiration Date', 'Coverage Days',
             'Premium Type', 'Claims Type', 'Placement Type',
@@ -173,6 +173,7 @@ class OperativeDocsExport implements
             $doc->docType?->name ?? '-',
 
             $doc->business_source_code ?? '-',
+            $doc->business_policy_number ?? '-',
             $doc->producer_name ?? '-',
             $doc->business_parent_id ?? '-',
             $doc->business_renewed_from_id ?? '-',
