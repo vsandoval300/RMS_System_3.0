@@ -259,12 +259,13 @@ class BusinessResource extends Resource
                                         TextInput::make('source_code')
                                             ->label('Source Id')
                                             ->placeholder('Enter original id if necessary.')
+                                            ->helperText('Contract ID or reference code assigned by the retrocedant, if available.')
                                             ->columnSpan(3),
 
                                         TextInput::make('policy_number')
                                             ->label('Policy Number')
                                             ->placeholder('Enter original policy id if necessary.')
-                                            ->helperText('Enter the original policy number issued by the insurer, if available.')
+                                            ->helperText('Enter the original policy number issued by the original insurer, if available.')
                                             ->columnSpan(3),
                                     ]),
 
