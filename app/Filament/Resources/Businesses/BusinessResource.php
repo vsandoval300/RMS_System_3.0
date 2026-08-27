@@ -257,8 +257,14 @@ class BusinessResource extends Resource
                                             ->preload(),
 
                                         TextInput::make('source_code')
-                                            ->label('Policy Number')
+                                            ->label('Source Id')
                                             ->placeholder('Enter original id if necessary.')
+                                            ->columnSpan(3),
+
+                                        TextInput::make('policy_number')
+                                            ->label('Policy Number')
+                                            ->placeholder('Enter original policy id if necessary.')
+                                            ->helperText('Original policy number used to register the captive.')
                                             ->columnSpan(3),
                                     ]),
 
@@ -600,12 +606,21 @@ class BusinessResource extends Resource
                                                             $value = $record->source_code ?: '—';
 
                                                             return new HtmlString(
-                                                                "<strong>Policy Number:</strong> {$value}"
+                                                                "<strong>Source Id:</strong> {$value}"
                                                             );
                                                         })
                                                         ->columnSpan(4),
 
+                                                    TextEntry::make('policy_number')
+                                                        ->hiddenLabel()
+                                                        ->state(function ($record) {
+                                                            $value = $record->policy_number ?: '—';
 
+                                                            return new HtmlString(
+                                                                "<strong>Policy Number:</strong> {$value}"
+                                                            );
+                                                        })
+                                                        ->columnSpan(4),
 
                                                 ]),
                                         ]),    
