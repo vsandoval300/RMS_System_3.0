@@ -264,7 +264,7 @@ class BusinessResource extends Resource
                                         TextInput::make('policy_number')
                                             ->label('Policy Number')
                                             ->placeholder('Enter original policy id if necessary.')
-                                            ->helperText('Original policy number used to register the captive.')
+                                            ->helperText('Enter the original policy number issued by the insurer, if available.')
                                             ->columnSpan(3),
                                     ]),
 
