@@ -844,6 +844,9 @@ class BusinessResource extends Resource
         return $table
             ->persistFiltersInSession()
             ->persistColumnsInSession()
+            ->persistSearchInSession()
+            ->persistColumnSearchesInSession()
+            ->persistSortInSession()
             ->columns([
 
                 TextColumn::make('row_number')
