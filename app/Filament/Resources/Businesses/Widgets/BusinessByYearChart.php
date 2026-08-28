@@ -30,20 +30,25 @@ class BusinessByYearChart extends ChartWidget
         $filters = $this->tableFilters ?? [];
 
         $reinsurerId = data_get($filters, 'reinsurer_id.value');
-        $from = data_get($filters, 'created_at.from');
-        $until = data_get($filters, 'created_at.until');
+        $interval = data_get($filters, 'date_interval.interval');
+        $from = data_get($filters, 'date_interval.from');
+        $until = data_get($filters, 'date_interval.until');
 
-        $applyFilters = function ($query) use ($reinsurerId, $from, $until) {
+        $applyFilters = function ($query) use ($reinsurerId, $interval, $from, $until) {
             if (filled($reinsurerId)) {
                 $query->where('reinsurer_id', $reinsurerId);
             }
 
-            if (filled($from)) {
-                $query->whereDate('created_at', '>=', $from);
-            }
+            if (filled($interval) && $interval === 'custom') {
+                if (filled($from)) {
+                    $query->whereDate('created_at', '>=', $from);
+                }
 
-            if (filled($until)) {
-                $query->whereDate('created_at', '<=', $until);
+                if (filled($until)) {
+                    $query->whereDate('created_at', '<=', $until);
+                }
+            } elseif (filled($interval)) {
+                $query->where('created_at', '>=', now()->subDays((int) $interval));
             }
 
             return $query;
