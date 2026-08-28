@@ -334,7 +334,7 @@ class ListBusinesses extends ListRecords
         ];
     }
     
-    protected function getHeaderWidgetsData(): array
+    public function getWidgetData(): array
     {
         return [
             'tableFilters' => $this->tableFilters,
