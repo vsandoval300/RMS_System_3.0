@@ -5,9 +5,13 @@ namespace App\Filament\Resources\Businesses\Widgets;
 use App\Enums\BusinessLifecycleStatus;
 use App\Models\Business;
 use Filament\Widgets\ChartWidget;
+use Livewire\Attributes\Reactive;
 
 class BusinessByYearChart extends ChartWidget
 {
+    #[Reactive]
+    public ?array $tableFilters = null;
+
     protected ?string $heading = 'Businesses by Year and Lifecycle Status';
     protected ?string $maxHeight = '320px';
     protected string $view = 'filament.widgets.business-by-year-chart';
@@ -23,13 +27,35 @@ class BusinessByYearChart extends ChartWidget
 
     protected function getData(): array
     {
-        $years = Business::query()
+        $filters = $this->tableFilters ?? [];
+
+        $reinsurerId = data_get($filters, 'reinsurer_id.value');
+        $from = data_get($filters, 'created_at.from');
+        $until = data_get($filters, 'created_at.until');
+
+        $applyFilters = function ($query) use ($reinsurerId, $from, $until) {
+            if (filled($reinsurerId)) {
+                $query->where('reinsurer_id', $reinsurerId);
+            }
+
+            if (filled($from)) {
+                $query->whereDate('created_at', '>=', $from);
+            }
+
+            if (filled($until)) {
+                $query->whereDate('created_at', '<=', $until);
+            }
+
+            return $query;
+        };
+
+        $years = $applyFilters(Business::query())
             ->selectRaw("LEFT(business_code, 4) as yr")
             ->groupByRaw("LEFT(business_code, 4)")
             ->orderByRaw("LEFT(business_code, 4)")
             ->pluck('yr');
 
-        $counts = Business::query()
+        $counts = $applyFilters(Business::query())
             ->selectRaw("LEFT(business_code, 4) as yr, business_lifecycle_status, COUNT(*) as total")
             ->groupByRaw("LEFT(business_code, 4), business_lifecycle_status")
             ->get()

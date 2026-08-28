@@ -20,7 +20,7 @@ class BusinessStatsOverview extends BaseWidget
     {
         $query = Business::query();
 
-        $filters = $this->filters ?? [];
+        $filters = $this->tableFilters ?? [];
 
         //Log::info('Widget filters', $this->tableFilters);
         
