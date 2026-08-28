@@ -9,6 +9,7 @@ use App\Enums\BusinessLifecycleStatus;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon; // ✅ INSERTADO: para manejo de fechas
 
 class Business extends Model
@@ -291,6 +292,36 @@ class Business extends Model
 
         static::restoring(function (Business $business) {
             $business->operativeDocs()->onlyTrashed()->restore();
+        });
+    }
+
+    /**
+     * Mirrors the set of columns/relations marked ->searchable() on the
+     * Businesses list table (BusinessResource::table()), so the dashboard
+     * widgets can be filtered by the same free-text search term the user
+     * types into the table's search box.
+     */
+    public function scopeSearchGlobally(Builder $query, ?string $search): Builder
+    {
+        if (blank($search)) {
+            return $query;
+        }
+
+        $like = "%{$search}%";
+
+        return $query->where(function (Builder $query) use ($like) {
+            $query->whereLike('business_code', $like)
+                ->orWhereLike('reinsurance_type', $like)
+                ->orWhereLike('renewed_from_id', $like)
+                ->orWhereLike('parent_id', $like)
+                ->orWhereLike('premium_type', $like)
+                ->orWhereLike('source_code', $like)
+                ->orWhereLike('business_lifecycle_status', $like)
+                ->orWhereHas('reinsurer', fn (Builder $q) => $q->whereLike('short_name', $like))
+                ->orWhereHas('currency', fn (Builder $q) => $q->whereLike('acronym', $like))
+                ->orWhereHas('user', fn (Builder $q) => $q->whereLike('name', $like))
+                ->orWhereHas('coverages', fn (Builder $q) => $q->whereLike('acronym', $like)
+                    ->orWhereLike('name', $like));
         });
     }
 }

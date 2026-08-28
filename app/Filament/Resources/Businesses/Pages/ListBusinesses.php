@@ -338,6 +338,7 @@ class ListBusinesses extends ListRecords
     {
         return [
             'tableFilters' => $this->tableFilters,
+            'tableSearch'  => $this->tableSearch,
         ];
     }
 

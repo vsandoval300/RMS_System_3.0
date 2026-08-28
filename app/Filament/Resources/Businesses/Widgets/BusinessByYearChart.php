@@ -12,6 +12,9 @@ class BusinessByYearChart extends ChartWidget
     #[Reactive]
     public ?array $tableFilters = null;
 
+    #[Reactive]
+    public ?string $tableSearch = null;
+
     protected ?string $heading = 'Businesses by Year and Lifecycle Status';
     protected ?string $maxHeight = '320px';
     protected string $view = 'filament.widgets.business-by-year-chart';
@@ -54,13 +57,13 @@ class BusinessByYearChart extends ChartWidget
             return $query;
         };
 
-        $years = $applyFilters(Business::query())
+        $years = $applyFilters(Business::query()->searchGlobally($this->tableSearch))
             ->selectRaw("LEFT(business_code, 4) as yr")
             ->groupByRaw("LEFT(business_code, 4)")
             ->orderByRaw("LEFT(business_code, 4)")
             ->pluck('yr');
 
-        $counts = $applyFilters(Business::query())
+        $counts = $applyFilters(Business::query()->searchGlobally($this->tableSearch))
             ->selectRaw("LEFT(business_code, 4) as yr, business_lifecycle_status, COUNT(*) as total")
             ->groupByRaw("LEFT(business_code, 4), business_lifecycle_status")
             ->get()

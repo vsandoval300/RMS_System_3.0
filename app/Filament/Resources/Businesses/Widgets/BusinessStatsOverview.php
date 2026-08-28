@@ -15,10 +15,13 @@ class BusinessStatsOverview extends BaseWidget
 {
     #[Reactive]
     public ?array $tableFilters = null;
-        
+
+    #[Reactive]
+    public ?string $tableSearch = null;
+
     protected function getStats(): array
     {
-        $query = Business::query();
+        $query = Business::query()->searchGlobally($this->tableSearch);
 
         $filters = $this->tableFilters ?? [];
 
