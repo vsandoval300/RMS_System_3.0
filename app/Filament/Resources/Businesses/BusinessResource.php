@@ -1065,7 +1065,11 @@ class BusinessResource extends Resource
                 // 🔹 Filtro por Reinsurer
                 SelectFilter::make('reinsurer_id')
                     ->label('Reinsurer')
-                    ->relationship('reinsurer', 'short_name')
+                    ->relationship(
+                        'reinsurer',
+                        'short_name',
+                        modifyQueryUsing: fn (Builder $query) => $query->whereHas('businesses'),
+                    )
                     ->searchable()
                     ->preload(),
 
