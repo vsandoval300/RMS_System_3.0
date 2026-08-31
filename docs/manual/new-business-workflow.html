@@ -1021,40 +1021,42 @@
     <section class="tab" id="bm-pageactions" data-tab="bm-pageactions">
       <div class="tab-eyebrow"><span class="swatch"></span>Businesses → List</div>
       <h2>5. Page Actions</h2>
-      <p class="tab-dek">Three buttons sit in the page header, above the KPI tiles: <strong>User Guide</strong>, <strong>Export Report</strong>, and <strong>New Business</strong>.</p>
+      <p class="tab-dek">The Page Actions, located in the header of the Businesses List, provide access to general functions that apply to the page rather than to an individual Business record. From here, users can open the User Guide, generate portfolio reports, or start the workflow to create a new Business.</p>
 
       <div class="ledger-wrap">
         <table class="ledger">
           <caption>Header buttons</caption>
           <thead><tr><th>Button</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td class="fname">User Guide</td><td>Opens this manual in a panel, without leaving the Businesses list.</td></tr>
-            <tr><td class="fname">Export Report</td><td>Opens the Export Reports form — see the report types below.</td></tr>
-            <tr><td class="fname">New Business</td><td>Opens the Create Business form. See <a href="#create-new-business">Create New Business</a> for the full step-by-step workflow.</td></tr>
+            <tr><td class="fname">User Guide</td><td>Opens the RMS-Platform User Guide in a side panel, allowing users to consult the documentation without leaving the Businesses List.</td></tr>
+            <tr><td class="fname">Export Report</td><td>Opens the report generation form, where users can select the type of report and the applicable reporting criteria.</td></tr>
+            <tr><td class="fname">New Business</td><td>Starts the workflow to register a new Business in RMS-Platform. See <a href="#create-new-business">Create New Business</a> for the complete step-by-step process.</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p class="tab-dek"><strong>Export Report</strong> generates an Excel report for a selected date range. Reports are built in the background — a banner appears above the KPI tiles while one is generating, and a notification with a download link arrives when it's ready.</p>
+      <h3>Export Reports</h3>
+      <p class="tab-dek">The <strong>Export Report</strong> function allows users to generate Excel reports using information from the Businesses portfolio and their related Operative Documents. Depending on the selected report type, the information can be limited to a specific reporting period and further refined using the available criteria.</p>
+      <p class="tab-dek">Reports are generated in the background, allowing users to continue working in RMS-Platform while the requested file is being prepared. During this process, a status banner is displayed on the Businesses List. Once the report is ready, a notification provides access to the generated file.</p>
 
       <div class="ledger-wrap">
         <table class="ledger">
           <caption>Report types</caption>
           <thead><tr><th>Report Type</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td class="fname">Underwritten – By Inception Date</td><td>Businesses whose operative documents fall within the selected date range, based on their Inception Date.</td></tr>
-            <tr><td class="fname">Underwritten – By Underwriting Month</td><td>Same underlying report, filtered by Underwriting Month (Rep Date) instead — the date pickers switch to a month range.</td></tr>
-            <tr><td class="fname">Missing PDFs – Documents without file</td><td>Lists operative documents with no PDF file uploaded, optionally filtered by date range, reinsurer, and the user who created the document. The date range is optional here — leaving it blank reports across all time.</td></tr>
+            <tr><td class="fname">Underwritten – By Inception Date</td><td>Reports Businesses whose Operative Documents have an Inception Date within the selected date range.</td></tr>
+            <tr><td class="fname">Underwritten – By Underwriting Month</td><td>Reports Businesses according to the Underwriting Month (Rep Date) of their Operative Documents. The reporting period is selected as a range of months.</td></tr>
+            <tr><td class="fname">Missing PDFs – Documents without file</td><td>Identifies Operative Documents that do not have a PDF file attached. Results can optionally be narrowed by date range, Reinsurer, and the user who created the document.</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="note tip">
         <span class="note-mark">✓</span>
-        <div>For the two Underwritten report types, the <strong>From date</strong> field defaults to — and can't be set earlier than — the oldest date actually available in the data, shown in a helper text under the field. <strong>To date</strong> defaults to today.</div>
+        <div><strong>Reporting period:</strong> For both Underwritten reports, the earliest available From date is determined by the oldest applicable record in the database and is displayed below the field. The To date defaults to the current date.</div>
       </div>
 
-      <p class="tab-dek">Both Underwritten reports can also be narrowed to one or more specific <strong>Reinsurer(s)</strong> before generating.</p>
+      <p class="tab-dek">Both Underwritten reports can also be filtered by one or more <strong>Reinsurers</strong> before generation.</p>
     </section>
 
     <!-- ══════════════════ BM-6 · COLUMN GUIDE ══════════════════ -->
