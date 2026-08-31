@@ -219,6 +219,12 @@
     </div>
 
     <div class="tg-row">
+        <div class="tg-col-name">Policy Number <span class="tg-hidden-badge">hidden</span></div>
+        <div class="tg-col-desc" x-show="lang === 'en'">The original policy number issued by the original insurer, if available.</div>
+        <div class="tg-col-desc" x-show="lang === 'es'">El número de póliza original emitido por el asegurador original, si está disponible.</div>
+    </div>
+
+    <div class="tg-row">
         <div class="tg-col-name">Created By <span class="tg-hidden-badge">hidden</span></div>
         <div class="tg-col-desc" x-show="lang === 'en'">The user who registered this business in the system.</div>
         <div class="tg-col-desc" x-show="lang === 'es'">El usuario que registró este negocio en el sistema.</div>

@@ -972,7 +972,13 @@ class BusinessResource extends Resource
                     ->label('Source id')
                     ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),   
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('policy_number')
+                    ->label('Policy Number')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('user.name')
                     ->label('Created by')

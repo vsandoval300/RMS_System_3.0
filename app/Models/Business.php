@@ -316,6 +316,7 @@ class Business extends Model
                 ->orWhereLike('parent_id', $like)
                 ->orWhereLike('premium_type', $like)
                 ->orWhereLike('source_code', $like)
+                ->orWhereLike('policy_number', $like)
                 ->orWhereLike('business_lifecycle_status', $like)
                 ->orWhereHas('reinsurer', fn (Builder $q) => $q->whereLike('short_name', $like))
                 ->orWhereHas('currency', fn (Builder $q) => $q->whereLike('acronym', $like))
