@@ -1615,7 +1615,7 @@ class BusinessResource extends Resource
             ])
             ->headerActions([
                 Action::make('column_guide')
-                    ->label('Column guide')
+                    ->label('Column Guide')
                     ->icon('heroicon-o-question-mark-circle')
                     ->color('gray')
                     ->slideOver()
