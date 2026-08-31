@@ -220,9 +220,10 @@
     flex-shrink: 0;
   }
 
-  .index li[data-tab="business"]  { --tab-color: var(--accent); }
-  .index li[data-tab="liability"] { --tab-color: var(--good); }
-  .index li[data-tab="documents"] { --tab-color: var(--amber); }
+  .index li[data-tab="business"]       { --tab-color: var(--accent); }
+  .index li[data-tab="liability"]      { --tab-color: var(--good); }
+  .index li[data-tab="documents"]      { --tab-color: var(--amber); }
+  .index li[data-tab="setup-complete"] { --tab-color: var(--warn); }
 
   .index li[data-tab="bm-overview"]    { --tab-color: var(--accent); }
   .index li[data-tab="bm-columns"]     { --tab-color: var(--good); }
@@ -349,9 +350,10 @@
     display: inline-block;
   }
 
-  section[data-tab="business"]  { --tab-color: var(--accent); }
-  section[data-tab="liability"] { --tab-color: var(--good); }
-  section[data-tab="documents"] { --tab-color: var(--amber); }
+  section[data-tab="business"]       { --tab-color: var(--accent); }
+  section[data-tab="liability"]      { --tab-color: var(--good); }
+  section[data-tab="documents"]      { --tab-color: var(--amber); }
+  section[data-tab="setup-complete"] { --tab-color: var(--warn); }
 
   .tab h2 { font-size: 1.65rem; margin: 0 0 0.4rem; }
   .tab .tab-dek { color: var(--ink-muted); margin: 0 0 1.9rem; font-size: 0.97rem; }
@@ -841,6 +843,9 @@
             </ul>
           </li>
         </ul>
+      </li>
+      <li data-tab="setup-complete">
+        <a href="#setup-complete"><span class="tab-num">4</span> Complete Business Setup</a>
       </li>
     </ul>
   </nav>
@@ -2189,6 +2194,19 @@
         <div class="box">
           <p>Once the information entered in the Document Details, Placement Schemes, and Insured Members tabs has been reviewed through the Overview, and all data, premium allocations, and calculated results have been confirmed as correct, the Operative Document is ready to be saved. If no further changes are required, return to the editable form and click <strong>Create</strong> to complete the process and register the document in the system.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ SETUP COMPLETE ══════════════════ -->
+    <section class="tab" id="setup-complete" data-tab="setup-complete">
+      <div class="tab-eyebrow"><span class="swatch"></span>Business → Complete Business Setup</div>
+      <h2>4. Complete Business Setup</h2>
+      <p class="tab-dek">Once the Business and its required Operative Documents have been created, the initial Business setup is complete. The Business now forms part of the RMS-Platform portfolio and its information becomes available for ongoing management, consultation, reporting, and subsequent operational processes.</p>
+      <p class="tab-dek">From this point forward, the Business can continue to evolve throughout its lifecycle as new documents, changes, or transactions are recorded, while preserving the structure and information established during its initial setup.</p>
+
+      <div class="note tip">
+        <span class="note-mark">✓</span>
+        <div><strong>Business ready for ongoing management.</strong> The Business setup provides the foundation for the operational and financial processes that follow within RMS-Platform.</div>
       </div>
     </section>
   </main>
