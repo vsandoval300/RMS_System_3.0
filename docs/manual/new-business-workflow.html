@@ -985,25 +985,30 @@
     <section class="tab" id="bm-actions" data-tab="bm-actions">
       <div class="tab-eyebrow"><span class="swatch"></span>Businesses → List</div>
       <h2>4. Business Actions</h2>
-      <p class="tab-dek">Each row has its own <strong>⋮</strong> menu, at the far right, with the actions available for that specific Business. Some actions only appear or become enabled under certain conditions.</p>
+      <p class="tab-dek">Each Business record provides an <strong>Actions</strong> menu (<strong>⋮</strong>) at the end of its row, giving users access to the operations available for that specific Business. The actions displayed may vary depending on the Business status, its current configuration, and the permissions assigned to the user.</p>
 
       <div class="ledger-wrap">
         <table class="ledger">
           <caption>Actions</caption>
           <thead><tr><th>Action</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td class="fname">View</td><td>Opens the Business in read-only mode.</td></tr>
-            <tr><td class="fname">Edit</td><td>Opens the Business for editing — Liability Structures and Operative Documents become available here.</td></tr>
-            <tr><td class="fname">Business Summary</td><td>Opens a summary of the Business's technical results in a modal. Requires the corresponding permission — disabled with an explanatory tooltip otherwise.</td></tr>
-            <tr><td class="fname">Renewal</td><td>Only appears within the 45-day window around the Business's latest expiration date, and only when it has no cancellation document and no existing renewal yet. Opens a form to create the renewal Business, with the new Business Code and Slip dates pre-filled.</td></tr>
-            <tr><td class="fname">Delete</td><td>Soft-deletes the Business. Availability depends on your role's permissions.</td></tr>
+            <tr><td class="fname">View</td><td>Opens the Business in read-only mode, allowing its information to be reviewed without making changes.</td></tr>
+            <tr><td class="fname">Edit</td><td>Opens the Business for editing and provides access to its general information, Liability Structures, and Operative Documents.</td></tr>
+            <tr><td class="fname">Business Summary</td><td>Opens a summary of the Business's technical and financial results. This action is available only to users with the required permission.</td></tr>
+            <tr><td class="fname">Renewal</td><td>Available when the Business meets the conditions for renewal. Opens a pre-filled form to create the renewal Business using information from the existing record.</td></tr>
+            <tr><td class="fname">Delete</td><td>Soft-deletes the Business record. This action is available only to users with the required permission.</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="note depends">
         <span class="note-mark">＋</span>
-        <div>Selecting rows via their checkboxes enables a <strong>bulk Delete</strong> action from the table toolbar, for removing several Businesses at once.</div>
+        <div><strong>Renewal availability:</strong> The Renewal action becomes available only when the Business meets the applicable renewal conditions, including its proximity to expiration and the absence of conditions that prevent a new renewal from being created.</div>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>Selecting multiple Businesses using the row checkboxes enables the <strong>Bulk Delete</strong> action in the table toolbar, allowing several records to be deleted in a single operation. Availability of this action depends on the user's permissions.</div>
       </div>
     </section>
 
