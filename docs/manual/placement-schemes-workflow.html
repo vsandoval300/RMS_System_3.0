@@ -580,9 +580,9 @@
     gap: 1.25rem;
     margin: 0 0 1.6rem;
   }
-  .two-col > div { display: flex; flex-direction: column; }
-  .two-col figure.screenshot { margin: 0; display: flex; flex-direction: column; flex: 1; }
-  .two-col figure.screenshot img { flex: 1; width: 100%; height: 100%; object-fit: contain; background: var(--paper); }
+  .two-col > div { display: flex; flex-direction: column; min-height: 0; }
+  .two-col figure.screenshot { margin: 0; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .two-col figure.screenshot img { flex: 1; width: 100%; height: 100%; min-height: 0; object-fit: contain; background: var(--paper); }
   .two-col .col-head {
     display: flex;
     align-items: center;
