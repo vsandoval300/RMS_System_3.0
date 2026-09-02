@@ -819,16 +819,20 @@
       <li data-tab="documents">
         <a href="#documents"><span class="tab-num">3</span> Operative Documents</a>
         <ul class="index-branch">
-          <li><a href="#doc-details"><span class="sub-letter">3.1</span>Document Details</a></li>
-          <li><a href="#document-type"><span class="sub-letter">3.2</span>Document Type</a></li>
-          <li><a href="#placement-schemes"><span class="sub-letter">3.3</span>Placement Schemes</a></li>
           <li>
-            <a href="#insured-members"><span class="sub-letter">3.4</span>Insured Members</a>
+            <a href="#doc-details"><span class="sub-letter">3.1</span>Document Details</a>
             <ul class="index-branch">
-              <li><a href="#insured-examples"><span class="sub-letter">3.4.1</span>Examples</a></li>
+              <li><a href="#document-type"><span class="sub-letter">3.1.1</span>Document Type</a></li>
             </ul>
           </li>
-          <li><a href="#document-actions"><span class="sub-letter">3.5</span>Document Actions</a></li>
+          <li><a href="#placement-schemes"><span class="sub-letter">3.2</span>Placement Schemes</a></li>
+          <li>
+            <a href="#insured-members"><span class="sub-letter">3.3</span>Insured Members</a>
+            <ul class="index-branch">
+              <li><a href="#insured-examples"><span class="sub-letter">3.3.1</span>Examples</a></li>
+            </ul>
+          </li>
+          <li><a href="#document-actions"><span class="sub-letter">3.4</span>Document Actions</a></li>
         </ul>
       </li>
       <li data-tab="setup-complete">
@@ -1854,7 +1858,7 @@
         <div><strong>Document Type is sequenced:</strong> the first document on a Business is always the <strong>Slip</strong>, and the field locks to it — you can't pick anything else, and you can't create a second Slip once one exists. Every document after that is an Endorsement.</div>
       </div>
 
-      <div class="subhead" id="document-type"><span class="sub-letter">3.2</span><h4>Document Type</h4></div>
+      <div class="subhead" id="document-type"><span class="sub-letter">3.1.1</span><h4>Document Type</h4></div>
       <p class="subhead-dek" style="max-width:none;">The Document Type defines the purpose and financial effect of an Operative Document throughout the lifecycle of a Business. Each type represents a specific contractual event — such as the initial registration of the contract, a premium adjustment, a cancellation, a partial refund, a reinstatement, or an extension — and determines how premium values must be recorded for its Insured Members. Premium is entered individually by Company and Coverage, and depending on the selected Document Type, the system controls whether those values must be positive, negative, non-zero, or zero. This ensures that the premium movement recorded by each Operative Document is consistent with the nature and intended financial effect of the transaction.</p>
 
       <div class="step">
@@ -1953,7 +1957,7 @@
         </div>
       </div>
 
-      <div class="subhead" id="placement-schemes"><span class="sub-letter">3.3</span><h4>Placement Schemes</h4></div>
+      <div class="subhead" id="placement-schemes"><span class="sub-letter">3.2</span><h4>Placement Schemes</h4></div>
       <div class="definition-card">
         <span class="eyebrow">Definition</span>
         <p><strong>Placement Schemes</strong> define the cost structure that applies to an Operative Document. Each Placement Scheme is based on a <strong>Cost Scheme</strong>, which is composed of one or more <strong>Cost Nodes</strong> representing the different costs, commissions, fees, or other components involved in the Business. By assigning one or more Placement Schemes to an Operative Document, RMS identifies which cost structures are available for the premium associated with that document and its Insured Members.</p>
@@ -2033,7 +2037,7 @@
         </div>
       </div>
 
-      <div class="subhead" id="insured-members"><span class="sub-letter">3.4</span><h4>Insured Members</h4></div>
+      <div class="subhead" id="insured-members"><span class="sub-letter">3.3</span><h4>Insured Members</h4></div>
       <div class="definition-card">
         <span class="eyebrow">Definition</span>
         <p><strong>Insured Members</strong> define the insured entities covered under an Operative Document and how their premium is allocated within the Business. For administrative purposes within the platform, an Insured Member represents a logical record composed of four elements: a Company, a Placement Scheme, a Coverage, and an Annual Gross Reinsurance Premium amount. Each unique combination of these elements constitutes a separate Insured Member entry. Together, these entries provide the detailed premium distribution by insured entity and coverage, while linking each premium to the placement structure through which it is handled.</p>
@@ -2091,7 +2095,7 @@
       </div>
 
       <div class="examples-zone">
-      <div class="subhead" id="insured-examples"><span class="sub-letter">3.4.1</span><h4>Examples</h4></div>
+      <div class="subhead" id="insured-examples"><span class="sub-letter">3.3.1</span><h4>Examples</h4></div>
       <p class="tab-dek">The example below shows how insured member terms as they appear in the contract translate into the Insured Member entry.</p>
 
       <p class="example-title">Example 1 — Single Company, Single Coverage</p>
@@ -2176,7 +2180,7 @@
         <figcaption>The <strong>Overview</strong> screen.</figcaption>
       </figure>
 
-      <div class="subhead" id="document-actions" style="margin-top:4.5rem;"><span class="sub-letter">3.5</span><h4>Document Actions</h4></div>
+      <div class="subhead" id="document-actions" style="margin-top:4.5rem;"><span class="sub-letter">3.4</span><h4>Document Actions</h4></div>
       <p class="subhead-dek" style="max-width:none;">Each Operative Document provides an <strong>Actions</strong> menu (<strong>⋮</strong>), which contains the operations that can be performed on that specific document. While some actions are available for all documents, others may appear or become available depending on the document type, its current conditions, and the permissions assigned to the user. The following table provides a quick overview of each action.</p>
 
       <div class="ledger-wrap">
