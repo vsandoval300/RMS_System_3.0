@@ -807,6 +807,7 @@
               <li><a href="#insured-examples">Examples</a></li>
             </ul>
           </li>
+          <li><a href="#document-actions">Document Actions</a></li>
         </ul>
       </li>
       <li data-tab="setup-complete">
@@ -2154,6 +2155,34 @@
         <figcaption>The <strong>Overview</strong> screen.</figcaption>
       </figure>
 
+      <h3 id="document-actions">Document Actions</h3>
+      <p class="tab-dek">Each Operative Document row provides an <strong>Actions</strong> menu (<strong>⋮</strong>), giving users access to the operations available for that specific document. The actions displayed may vary depending on the document's type and the permissions assigned to the user.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Actions</caption>
+          <thead><tr><th>Action</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">View</td><td>Opens the document in read-only mode, allowing its information to be reviewed without making changes.</td></tr>
+            <tr><td class="fname">Edit</td><td>Opens the document for editing. While the Overview screen is active, Save and Cancel are disabled — return to Document Details to continue.</td></tr>
+            <tr><td class="fname">Summary</td><td>Opens a printable summary of the document's technical results. This action is available only to users with the required permission.</td></tr>
+            <tr><td class="fname">Clone Document</td><td>Creates a copy of the document, ready to be adjusted. Instalments are not copied. This action is available only to users with the required permission.</td></tr>
+            <tr><td class="fname">Add Instalment</td><td>Opens the form to register a new instalment for this document. This action is available only to users with the required permission.</td></tr>
+            <tr><td class="fname">View Instalments</td><td>Opens the instalments list filtered by this document. This action is available only to users with the required permission.</td></tr>
+            <tr><td class="fname">Delete</td><td>Soft-deletes the document. Availability depends on the user's permissions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div><strong>Clone Document availability:</strong> Cloning a Slip creates the copy as an <strong>Endorsement B – No Premium Change</strong>, with insured premiums set to zero; cloning any other document type keeps that same type. In both cases, the document type and all other fields can still be adjusted afterward. This action is not available for <strong>Endorsement C – Cancellation</strong> documents, nor when the Business already has one.</div>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div><strong>Add Instalment availability:</strong> This action does not appear on <strong>Endorsement B – No Premium Change</strong> documents, since they do not affect the premium.</div>
+      </div>
     </section>
 
     <!-- ══════════════════ SETUP COMPLETE ══════════════════ -->
