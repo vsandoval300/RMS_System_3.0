@@ -1,0 +1,966 @@
+<title>Premium Payment Tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --paper: #f5f5f1;
+    --paper-raised: #fbfbf9;
+    --ink: #1a1d24;
+    --ink-muted: #5b6270;
+    --ink-faint: #8a8f9a;
+    --rule: #dcdad0;
+    --rule-strong: #c7c4b7;
+    --accent: #1f4e79;
+    --accent-strong: #163a5c;
+    --accent-soft: #e8eef3;
+    --amber: #8a5a17;
+    --amber-soft: #f5ecd9;
+    --good: #2f6b4f;
+    --good-soft: #e6f0ea;
+    --warn: #9c4221;
+    --warn-soft: #f6e9e2;
+    --shadow: 0 1px 2px rgba(26,29,36,0.06), 0 8px 24px -12px rgba(26,29,36,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181e;
+      --paper-raised: #1b1f27;
+      --ink: #e8e7e0;
+      --ink-muted: #a2a7b3;
+      --ink-faint: #6b707c;
+      --rule: #2c303a;
+      --rule-strong: #3a3f4b;
+      --accent: #7fabd4;
+      --accent-strong: #a6c6e6;
+      --accent-soft: #1e2b38;
+      --amber: #d9b06b;
+      --amber-soft: #332a17;
+      --good: #7cbf9e;
+      --good-soft: #17261f;
+      --warn: #d98a6a;
+      --warn-soft: #2c1c15;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15181e;
+    --paper-raised: #1b1f27;
+    --ink: #e8e7e0;
+    --ink-muted: #a2a7b3;
+    --ink-faint: #6b707c;
+    --rule: #2c303a;
+    --rule-strong: #3a3f4b;
+    --accent: #7fabd4;
+    --accent-strong: #a6c6e6;
+    --accent-soft: #1e2b38;
+    --amber: #d9b06b;
+    --amber-soft: #332a17;
+    --good: #7cbf9e;
+    --good-soft: #17261f;
+    --warn: #d98a6a;
+    --warn-soft: #2c1c15;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .display {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    text-wrap: balance;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  code, .field, .mono, .kbd {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  a { color: var(--accent); }
+
+  /* ── Shell ───────────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    max-width: 1220px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: 1fr; }
+  }
+
+  /* ── Index rail ──────────────────────────────────────── */
+  .rail {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding: 2.75rem 1.25rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 880px) {
+    .rail {
+      position: static;
+      max-height: none;
+      padding: 1.75rem 1.5rem 0.5rem;
+    }
+  }
+
+  .rail-kicker {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .rail-title {
+    font-size: 1.28rem;
+    margin: 0.35rem 0 0;
+    line-height: 1.25;
+  }
+
+  .rail-sub {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    margin: 0.5rem 0 0;
+  }
+
+  .index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .index a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--ink-muted);
+    padding: 0.55rem 0.6rem;
+    border-radius: 0.35rem;
+    border-left: 2px solid transparent;
+    font-size: 0.92rem;
+    transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+
+  .index a:hover {
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .index-branch {
+    list-style: none;
+    margin: 0.1rem 0 0.3rem 1.62rem;
+    padding-left: 0.85rem;
+    border-left: 1px solid var(--rule-strong);
+    display: flex;
+    flex-direction: column;
+    gap: 0.02rem;
+  }
+
+  .index-branch li { position: relative; }
+
+  .index-branch li::before {
+    content: "";
+    position: absolute;
+    left: -0.85rem;
+    top: 0.92rem;
+    width: 0.65rem;
+    height: 1px;
+    background: var(--rule-strong);
+  }
+
+  .index-branch a {
+    display: block;
+    padding: 0.38rem 0.5rem;
+    font-size: 0.83rem;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-radius: 0.3rem;
+    transition: background-color 120ms ease, color 120ms ease;
+  }
+
+  .index-branch a:hover {
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .index .tab-num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    color: var(--tab-color, var(--accent));
+    border: 1px solid var(--tab-color, var(--accent));
+    border-radius: 3px;
+    width: 1.35rem;
+    height: 1.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .index li[data-tab="pp-overview"]     { --tab-color: var(--accent); }
+  .index li[data-tab="pp-columns"]      { --tab-color: var(--good); }
+  .index li[data-tab="pp-filters"]      { --tab-color: var(--amber); }
+  .index li[data-tab="pp-actions"]      { --tab-color: var(--warn); }
+  .index li[data-tab="pp-pageactions"]  { --tab-color: var(--accent); }
+  .index li[data-tab="pp-columnguide"]  { --tab-color: var(--good); }
+  .index li[data-tab="pp-create"]       { --tab-color: var(--amber); }
+  .index li[data-tab="pp-lifecycle"]    { --tab-color: var(--warn); }
+  .index li[data-tab="pp-view"]         { --tab-color: var(--accent); }
+  .index li[data-tab="pp-edit"]         { --tab-color: var(--good); }
+
+  .index-group-label {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 0.98rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    padding: 1.1rem 0.6rem 0.6rem;
+    margin-top: 0.4rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .index-group-label:first-child {
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  .index-group-label a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .index-group-label a:hover { color: var(--accent); }
+
+  .rail-note {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
+    line-height: 1.55;
+  }
+
+  /* ── Main column ─────────────────────────────────────── */
+  main {
+    padding: 2.75rem 2rem 6rem 1.5rem;
+    min-width: 0;
+  }
+
+  @media (max-width: 880px) {
+    main { padding: 1rem 1.5rem 5rem; }
+  }
+
+  .page-title {
+    font-size: 2rem;
+    margin: 0 0 0.6rem;
+    line-height: 1.15;
+  }
+
+  .lede {
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0.75rem 0 2.25rem;
+  }
+
+  .prereq {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 0.6rem;
+    padding: 1rem 1.15rem;
+    margin-bottom: 2.75rem;
+    box-shadow: var(--shadow);
+  }
+
+  .prereq-mark {
+    font-family: Iowan Old Style, Georgia, serif;
+    font-style: italic;
+    color: var(--accent);
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .prereq p { margin: 0; font-size: 0.92rem; color: var(--ink-muted); }
+  .prereq strong { color: var(--ink); font-weight: 600; }
+
+  section.tab {
+    padding-top: 3.25rem;
+    border-top: 1px solid var(--rule);
+    margin-top: 3.25rem;
+  }
+  section.tab:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .tab-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tab-color, var(--accent));
+    margin-bottom: 0.6rem;
+  }
+  .tab-eyebrow .swatch {
+    width: 0.55rem; height: 0.55rem; border-radius: 1px;
+    background: var(--tab-color, var(--accent));
+    display: inline-block;
+  }
+
+  section[data-tab="pp-overview"]    { --tab-color: var(--accent); }
+  section[data-tab="pp-columns"]     { --tab-color: var(--good); }
+  section[data-tab="pp-filters"]     { --tab-color: var(--amber); }
+  section[data-tab="pp-actions"]     { --tab-color: var(--warn); }
+  section[data-tab="pp-pageactions"] { --tab-color: var(--accent); }
+  section[data-tab="pp-columnguide"] { --tab-color: var(--good); }
+  section[data-tab="pp-create"]      { --tab-color: var(--amber); }
+  section[data-tab="pp-lifecycle"]   { --tab-color: var(--warn); }
+  section[data-tab="pp-view"]        { --tab-color: var(--accent); }
+  section[data-tab="pp-edit"]        { --tab-color: var(--good); }
+
+  .tab h2 { font-size: 1.65rem; margin: 0 0 0.4rem; }
+  .tab .tab-dek { color: var(--ink-muted); margin: 0 0 1.9rem; font-size: 0.97rem; }
+
+  /* ── Step blocks ─────────────────────────────────────── */
+  .step {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0,1fr);
+    gap: 0 1rem;
+    margin-bottom: 1.9rem;
+  }
+
+  .step-num {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.15rem;
+    color: var(--tab-color, var(--accent));
+    line-height: 1.5;
+  }
+
+  .step h3 {
+    font-size: 1.06rem;
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+  }
+
+  .step p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+  .step p:last-child { margin-bottom: 0; }
+
+  /* ── Field ledger table ──────────────────────────────── */
+  .ledger-wrap { overflow-x: auto; margin: 0.75rem 0 0; border: 1px solid var(--rule); border-radius: 0.5rem; }
+
+  .subnote {
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    margin: 0.6rem 0 0;
+    line-height: 1.55;
+  }
+
+  .definition-card {
+    border-left: 3px solid var(--tab-color, var(--accent));
+    background: var(--paper-raised);
+    padding: 1rem 1.25rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 1rem 0 1.75rem;
+  }
+  .definition-card .eyebrow {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tab-color, var(--accent));
+    margin-bottom: 0.45rem;
+  }
+  .definition-card p {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  table.ledger {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    background: var(--paper-raised);
+  }
+
+  table.ledger caption {
+    text-align: left;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0.65rem 0.9rem 0.5rem;
+  }
+
+  table.ledger th {
+    text-align: left;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 0.55rem 0.9rem;
+    white-space: nowrap;
+  }
+
+  table.ledger td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  table.ledger tr:last-child td { border-bottom: none; }
+  table.ledger tr:nth-child(even) td { background: color-mix(in srgb, var(--paper) 55%, transparent); }
+
+  .fname { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.83rem; white-space: nowrap; }
+  .fname .db { display: block; color: var(--ink-faint); font-size: 0.72rem; margin-top: 0.1rem; }
+  .act-icon { display: inline-flex; vertical-align: -3px; margin-right: 0.45rem; color: var(--ink-muted); }
+
+  .req { color: var(--amber); font-weight: 600; font-size: 0.78rem; }
+  .req-star { color: #e5484d; font-weight: 700; margin-left: 0.1rem; }
+  .opt { color: var(--ink-faint); font-size: 0.78rem; }
+
+  /* ── Callouts ────────────────────────────────────────── */
+  .note {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.88rem;
+    margin: 1rem 0;
+    line-height: 1.55;
+  }
+  .note-mark {
+    font-family: Iowan Old Style, Georgia, serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+  .note.depends { background: var(--accent-soft); color: var(--ink); }
+  .note.depends .note-mark { color: var(--accent); }
+  .note.rule    { background: var(--amber-soft); color: var(--ink); }
+  .note.rule .note-mark { color: var(--amber); }
+  .note.tip     { background: var(--good-soft); color: var(--ink); }
+  .note.tip .note-mark { color: var(--good); }
+  .note strong { font-weight: 600; }
+  .note .field { background: color-mix(in srgb, var(--ink) 8%, transparent); padding: 0.05rem 0.3rem; border-radius: 3px; }
+
+  .color-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+  }
+
+  .subhead {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 2.25rem 0 0.3rem;
+  }
+  .subhead h4 {
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.15rem;
+    margin: 0;
+    font-weight: 600;
+  }
+  .sub-letter {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    color: var(--tab-color, var(--amber));
+    border: 1px solid var(--tab-color, var(--amber));
+    border-radius: 3px;
+    min-width: 1.2rem; height: 1.2rem;
+    padding: 0 0.22rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .index-branch .sub-letter {
+    min-width: 1.1rem; height: 1.1rem;
+    font-size: 0.63rem;
+    padding: 0 0.18rem;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  .subhead-dek { color: var(--ink-muted); font-size: 0.9rem; margin: 0 0 1rem; max-width: 58ch; }
+
+  .example {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 0.4rem;
+    padding: 0.65rem 0.85rem;
+    display: inline-block;
+    margin: 0.4rem 0 0;
+  }
+  .example .stamp { color: var(--accent); }
+
+  /* ── Progress dots (mirrors the in-app Progress column) ─ */
+  .dots-demo {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    margin: 0.5rem 0;
+  }
+  .dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; border: 2px solid; }
+  .dot.completed { background: #22c55e; border-color: #16a34a; }
+  .dot.inprocess { background: #f59e0b; border-color: #d97706; }
+  .dot.pending   { background: transparent; border-color: #9ca3af; }
+  .dots-demo .chev { color: var(--ink-faint); }
+
+  /* ── Screenshots ─────────────────────────────────────── */
+  figure.screenshot {
+    margin: 1.1rem 0 1.6rem;
+    border: 1px solid var(--rule);
+    border-radius: 0.6rem;
+    background: var(--paper-raised);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  figure.screenshot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid var(--rule);
+  }
+  figure.screenshot figcaption {
+    padding: 0.55rem 0.9rem;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--ink-faint);
+  }
+  figure.screenshot figcaption strong { color: var(--ink-muted); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .index a { transition: none; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="rail">
+    <div>
+      <div class="rail-kicker">RMS Platform · Transactions</div>
+      <h1 class="rail-title">Premium Payment Tracker</h1>
+      <p class="rail-sub">Track, create, and settle the financial instalments tied to each Operative Document, from initial registration through completion.</p>
+    </div>
+    <ul class="index">
+      <li class="index-group-label"><a href="#premium-payments">Premium Payments</a></li>
+      <li data-tab="pp-overview">
+        <a href="#pp-overview"><span class="tab-num">1</span> Overview</a>
+      </li>
+      <li data-tab="pp-columns">
+        <a href="#pp-columns"><span class="tab-num">2</span> Premium Payments List</a>
+      </li>
+      <li data-tab="pp-filters">
+        <a href="#pp-filters"><span class="tab-num">3</span> Search, Filter, and Grouping</a>
+      </li>
+      <li data-tab="pp-actions">
+        <a href="#pp-actions"><span class="tab-num">4</span> Payment Actions</a>
+        <ul class="index-branch">
+          <li><a href="#pp-lifecycle-preview"><span class="sub-letter">4.1</span>Lifecycle Preview</a></li>
+        </ul>
+      </li>
+      <li data-tab="pp-pageactions">
+        <a href="#pp-pageactions"><span class="tab-num">5</span> Page Actions</a>
+      </li>
+      <li data-tab="pp-columnguide">
+        <a href="#pp-columnguide"><span class="tab-num">6</span> Column Guide</a>
+      </li>
+
+      <li class="index-group-label"><a href="#transaction-detail">Transaction Detail &amp; Lifecycle</a></li>
+      <li data-tab="pp-create">
+        <a href="#pp-create"><span class="tab-num">1</span> Creating a Transaction</a>
+        <ul class="index-branch">
+          <li><a href="#pp-instalments-batch"><span class="sub-letter">1.1</span>Instalments Batch</a></li>
+        </ul>
+      </li>
+      <li data-tab="pp-lifecycle">
+        <a href="#pp-lifecycle"><span class="tab-num">2</span> Transaction Lifecycle</a>
+      </li>
+      <li data-tab="pp-view">
+        <a href="#pp-view"><span class="tab-num">3</span> Viewing a Transaction</a>
+        <ul class="index-branch">
+          <li><a href="#pp-logs-tab"><span class="sub-letter">3.1</span>Lifecycle Premium Payment</a></li>
+          <li><a href="#pp-supports-tab"><span class="sub-letter">3.2</span>Premium Payment Support</a></li>
+          <li><a href="#pp-recalc-tab"><span class="sub-letter">3.3</span>Bordereaux Adjustments</a></li>
+        </ul>
+      </li>
+      <li data-tab="pp-edit">
+        <a href="#pp-edit"><span class="tab-num">4</span> Editing a Transaction</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main>
+    <h2 class="page-title" id="premium-payments">Premium Payments</h2>
+    <p class="lede">The <strong>Premium Payment Tracker</strong> is the main entry point for managing Transactions — the financial instalments generated for each Operative Document. A Transaction is also referred to as a <strong>Premium Payment</strong> or an <strong>Instalment</strong> throughout RMS-Platform; the three terms describe the same record. From this view, users can review the status of every instalment across the portfolio, filter and group them, generate reports, and drill into the ledger of a single instalment.</p>
+
+    <!-- ══════════════════ PP-1 · OVERVIEW ══════════════════ -->
+    <section class="tab" id="pp-overview" data-tab="pp-overview">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>1. Overview</h2>
+      <p class="tab-dek">The top of the Premium Payment Tracker shows four indicators that summarize the current state of every Transaction registered in RMS-Platform.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Overview tiles</caption>
+          <thead><tr><th>Tile</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Total Transactions</td><td>Total number of Transactions in the database, regardless of status.</td></tr>
+            <tr><td class="fname">Pending</td><td>Transactions whose lifecycle status is <strong>Pending</strong> — no ledger line has been marked as sent or received yet.</td></tr>
+            <tr><td class="fname">In Process</td><td>Transactions with at least one ledger line marked as sent or received, but not yet fully settled.</td></tr>
+            <tr><td class="fname">Completed</td><td>Transactions whose final ledger line has been marked as received.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>These counts reflect the <strong>entire</strong> Transactions table and are not affected by the filters, search term, or grouping currently applied to the list below.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ PP-2 · PREMIUM PAYMENTS LIST ══════════════════ -->
+    <section class="tab" id="pp-columns" data-tab="pp-columns">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>2. Premium Payments List</h2>
+      <p class="tab-dek">Each row in the list represents one Transaction (instalment) belonging to an Operative Document. The table is ordered by Business and then by Document, so every instalment of the same document appears together.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Visible columns</caption>
+          <thead><tr><th>Column</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">#</td><td>Running row number across the current page.</td></tr>
+            <tr><td class="fname">Reinsurer</td><td>Short name of the Reinsurer on the Business the Transaction's Operative Document belongs to.</td></tr>
+            <tr><td class="fname">Document</td><td>Operative Document the instalment belongs to.</td></tr>
+            <tr><td class="fname">Index</td><td>Position of this instalment among the Operative Document's Transactions, shown as <strong>"n of total"</strong>.</td></tr>
+            <tr><td class="fname">Proportion</td><td>Percentage of the total premium this instalment represents.</td></tr>
+            <tr><td class="fname">Exch rate</td><td>Exchange rate applied to convert the instalment into US Dollars.</td></tr>
+            <tr><td class="fname">Due date</td><td>Date the instalment is due. Shown in red with a warning icon, plus a "+N / −N days" note, when the date has passed and the instalment is not yet Completed.</td></tr>
+            <tr><td class="fname">Type</td><td>Transaction Type description.</td></tr>
+            <tr><td class="fname">Net amount</td><td>Net amount of the instalment's last settlement leg (the final row of its ledger).</td></tr>
+            <tr><td class="fname">Status</td><td>Lifecycle status badge: <strong>Pending</strong>, <strong>In process</strong>, or <strong>Completed</strong>.</td></tr>
+            <tr><td class="fname">Progress</td><td>A row of dots — one per ledger line — showing how far the instalment's settlement has advanced, followed by a percentage. See <a href="#pp-lifecycle">Transaction Lifecycle</a>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="subhead-dek" style="max-width:none;">A few additional columns exist but are hidden by default and can be turned on from the column toggle: <strong>Id transaction</strong>, <strong>Remittance</strong>, <strong>Created at</strong>, <strong>Updated at</strong>, and <strong>Deleted at</strong>. See <a href="#pp-columnguide">6. Column Guide</a> for the complete reference.</p>
+    </section>
+
+    <!-- ══════════════════ PP-3 · SEARCH, FILTER, AND GROUPING ══════════════════ -->
+    <section class="tab" id="pp-filters" data-tab="pp-filters">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>3. Search, Filter, and Grouping</h2>
+      <p class="tab-dek">The list can be narrowed down using the search box, four dedicated filters, and a grouping option, all available from the table's toolbar.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Filters</caption>
+          <thead><tr><th>Filter</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Reinsurer</td><td>Limits the list to instalments whose Operative Document's Business belongs to the selected Reinsurer.</td></tr>
+            <tr><td class="fname">Status</td><td>Limits the list to instalments in the selected lifecycle status (Pending, In process, or Completed).</td></tr>
+            <tr><td class="fname">Type</td><td>Limits the list to instalments of the selected Transaction Type.</td></tr>
+            <tr><td class="fname">Document</td><td>Limits the list to instalments belonging to a specific Operative Document.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="subhead-dek" style="max-width:none;">The table can also be <strong>grouped by Reinsurer</strong> using the "Group by" control at the top-left of the table, which clusters every instalment under its Business's Reinsurer.</p>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>Opening the Premium Payment Tracker from an Operative Document's <strong>View Instalments</strong> action automatically applies the <strong>Document</strong> filter for that document.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ PP-4 · PAYMENT ACTIONS ══════════════════ -->
+    <section class="tab" id="pp-actions" data-tab="pp-actions">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>4. Payment Actions</h2>
+      <p class="tab-dek">Each row provides an <strong>Actions</strong> menu (<strong>⋮</strong>), which concentrates the operations available for that instalment.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Row actions</caption>
+          <thead><tr><th>Action</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Lifecycle</td><td>Opens a read-only preview of the instalment's full settlement ledger. See <a href="#pp-lifecycle-preview">4.1 Lifecycle Preview</a>.</td></tr>
+            <tr><td class="fname">View</td><td>Opens the instalment's detail page. See <a href="#pp-view">3. Viewing a Transaction</a>.</td></tr>
+            <tr><td class="fname">Edit</td><td>Opens the instalment's edit page. See <a href="#pp-edit">4. Editing a Transaction</a>.</td></tr>
+            <tr><td class="fname">Delete</td><td>Soft-deletes the instalment. A <strong>Delete selected</strong> bulk action is also available after selecting multiple rows with the checkboxes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subhead" id="pp-lifecycle-preview"><span class="sub-letter">4.1</span><h4>Lifecycle Preview</h4></div>
+      <p class="subhead-dek" style="max-width:none;">Selecting <strong>Lifecycle</strong> opens a quick, read-only view of every settlement leg (ledger line) generated for the instalment — the same underlying records shown in full, and editable, from the <a href="#pp-logs-tab">Lifecycle Premium Payment</a> tab of the instalment's View page. It is intended as a fast way to check the state of a payment without leaving the list.</p>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>The Lifecycle preview is <strong>read-only</strong>. To edit a settlement leg — set its Sent or Received date, adjust its amounts, or attach evidence — open the instalment's View page and use the <a href="#pp-logs-tab">Lifecycle Premium Payment</a> tab instead.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ PP-5 · PAGE ACTIONS ══════════════════ -->
+    <section class="tab" id="pp-pageactions" data-tab="pp-pageactions">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>5. Page Actions</h2>
+      <p class="tab-dek">The Page Actions, located in the header of the Premium Payment Tracker, provide access to general functions that apply to the page rather than to an individual instalment.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Header buttons</caption>
+          <thead><tr><th>Button</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Export Report</td><td>Opens a form to generate an Excel report of Transactions, optionally narrowed by Reinsurer and Status.</td></tr>
+            <tr><td class="fname">User Manual</td><td>Opens the module's reference documentation in a side panel.</td></tr>
+            <tr><td class="fname">New Transaction</td><td>Starts the workflow to register a new Transaction. See <a href="#pp-create">1. Creating a Transaction</a>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subhead" id="pp-export-reports" style="margin-top:2.25rem;"><span class="sub-letter">5.1</span><h4>Export Report</h4></div>
+      <p class="subhead-dek" style="max-width:none;">The <strong>Export Report</strong> function generates an Excel file listing Transactions with their Reinsurer, Document, Index, Proportion, Exchange Rate, Due Date, Remittance, Type, Net Amount, and Status. The report can optionally be limited to a single Reinsurer and a single lifecycle Status before it is generated.</p>
+
+      <div class="subhead" id="pp-new-transaction" style="margin-top:2.25rem;"><span class="sub-letter">5.2</span><h4>New Transaction</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>New Transaction</strong> opens the form described in <a href="#pp-create"><strong>1. Creating a Transaction</strong></a>, where one or more instalments can be registered for a chosen Operative Document.</p>
+    </section>
+
+    <!-- ══════════════════ PP-6 · COLUMN GUIDE ══════════════════ -->
+    <section class="tab" id="pp-columnguide" data-tab="pp-columnguide">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>6. Column Guide</h2>
+      <p class="tab-dek">In addition to the columns visible by default (see <a href="#pp-columns">2. Premium Payments List</a>), the following columns can be turned on from the table's column toggle.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Hidden by default</caption>
+          <thead><tr><th>Column</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Id transaction</td><td>Internal identifier (UUID) of the Transaction record. Copyable.</td></tr>
+            <tr><td class="fname">Remittance</td><td>Remittance code associated with the instalment, when one has been assigned.</td></tr>
+            <tr><td class="fname">Created at</td><td>Date and time the Transaction record was created.</td></tr>
+            <tr><td class="fname">Updated at</td><td>Date and time the Transaction record was last updated.</td></tr>
+            <tr><td class="fname">Deleted at</td><td>Date and time the Transaction record was deleted, for soft-deleted instalments.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════ TRANSACTION DETAIL & LIFECYCLE ══════════════════ -->
+    <h2 class="page-title" id="transaction-detail" style="margin-top:4.5rem;">Transaction Detail &amp; Lifecycle</h2>
+    <p class="lede">Beyond the list, each Transaction has its own creation flow, a settlement lifecycle made up of ledger lines, and a detail page where that lifecycle is reviewed and managed. This section documents that workflow end to end.</p>
+
+    <!-- ══════════════════ TD-1 · CREATING A TRANSACTION ══════════════════ -->
+    <section class="tab" id="pp-create" data-tab="pp-create">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → New Transaction</div>
+      <h2>1. Creating a Transaction</h2>
+      <p class="tab-dek">Creating a Transaction is a <strong>batch</strong> process: the user selects the Operative Document the instalment(s) belong to and the number of instalments to create, and RMS-Platform builds one sub-form per instalment.</p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Select the Document</h3>
+          <p>Choosing the Operative Document loads its defaults: the next available index, its default Cost Scheme, and its exchange rate. The exchange rate is locked to <strong>1</strong> when the Business's currency is already US Dollars; otherwise it is taken from the Document's Rate of Exchange (ROE FS).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Set the number of instalments</h3>
+          <p>Using the stepper, the user chooses how many instalments to create at once. RMS-Platform then renders one "Transaction Information" block per instalment, described in <a href="#pp-instalments-batch">1.1 Instalments Batch</a>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Complete each instalment and create</h3>
+          <p>Once every instalment's fields are filled, submitting the form creates all the Transactions together, along with the settlement ledger lines each one requires.</p>
+        </div>
+      </div>
+
+      <div class="subhead" id="pp-instalments-batch"><span class="sub-letter">1.1</span><h4>Instalments Batch</h4></div>
+      <p class="subhead-dek" style="max-width:none;">Each instalment in the batch has its own "Transaction Information" block with the following fields.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Instalment fields</caption>
+          <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Index</td><td><span class="opt">Automatic</span></td><td>Sequential position of the instalment among the Document's Transactions. Cannot be edited.</td></tr>
+            <tr><td class="fname">Id transaction</td><td><span class="opt">Automatic</span></td><td>Pre-generated identifier for the instalment. Cannot be edited.</td></tr>
+            <tr><td class="fname">Due Date</td><td><span class="req">Required<span class="req-star">*</span></span></td><td>Date the instalment is due. Changing it recalculates the settlement preview below.</td></tr>
+            <tr><td class="fname">Proportion</td><td><span class="req">Required<span class="req-star">*</span></span></td><td>Percentage of the total premium this instalment represents (0–100).</td></tr>
+            <tr><td class="fname">Exchange Rate</td><td><span class="req">Required<span class="req-star">*</span></span></td><td>Rate applied to convert the instalment to US Dollars. Disabled when the Business's currency is already US Dollars.</td></tr>
+            <tr><td class="fname">Cost Scheme</td><td><span class="req">Required<span class="req-star">*</span></span></td><td>Placement Scheme the instalment's premium flows through. If the Document has more than one scheme, an "All" option combines them.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="subhead-dek" style="max-width:none;">Below the fields, a live <strong>Transaction Lifecycle</strong> preview shows the settlement ledger lines that will be generated for that instalment — the same calculation engine used to build the final records once the form is submitted.</p>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>Once a Transaction exists, the <strong>Operative Document</strong> it belongs to can no longer be changed from the Edit form — only its Due Date, Exchange Rate, and the settlement ledger itself can be adjusted afterward.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ TD-2 · TRANSACTION LIFECYCLE ══════════════════ -->
+    <section class="tab" id="pp-lifecycle" data-tab="pp-lifecycle">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → Transaction</div>
+      <h2>2. Transaction Lifecycle</h2>
+      <p class="tab-dek">Every Transaction is settled through one or more ledger lines (its "logs"), each representing a leg of the premium flow between two parties. The Transaction's own status and progress are derived entirely from the status of these lines.</p>
+
+      <div class="definition-card">
+        <span class="eyebrow">Definition</span>
+        <p>A ledger line's status is set automatically from its dates: filling in a <strong>Received date</strong> marks it <strong>Completed</strong>; filling in only a <strong>Sent date</strong> marks it <strong>In process</strong>; with neither date set, it remains <strong>Pending</strong>. There is no separate button to change a line's status — it always follows from its Sent/Received dates.</p>
+      </div>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Transaction status rules</caption>
+          <thead><tr><th>Status</th><th>When it applies</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Pending</td><td>The Transaction has no ledger lines, or none of them have progressed past Pending.</td></tr>
+            <tr><td class="fname">In process</td><td>At least one ledger line is In process or Completed, but the <strong>last</strong> line in the chain is not yet Completed.</td></tr>
+            <tr><td class="fname">Completed</td><td>The <strong>last</strong> ledger line in the chain has been marked Completed.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="subhead-dek" style="max-width:none;">The <strong>Progress</strong> column shown in the list represents this same information visually: one dot per ledger line, in the order they settle, followed by the overall completion percentage.</p>
+
+      <div class="dots-demo">
+        <span class="dot completed"></span><span class="chev">›</span>
+        <span class="dot completed"></span><span class="chev">›</span>
+        <span class="dot inprocess"></span><span class="chev">›</span>
+        <span class="dot pending"></span>
+        <span style="margin-left:0.5rem;">67%</span>
+      </div>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Progress dot legend</caption>
+          <thead><tr><th>Dot</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><span class="dot completed" style="vertical-align:-2px;"></span></td><td>The ledger line is Completed.</td></tr>
+            <tr><td><span class="dot inprocess" style="vertical-align:-2px;"></span></td><td>The ledger line is In process.</td></tr>
+            <tr><td><span class="dot pending" style="vertical-align:-2px;"></span></td><td>The ledger line is Pending.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>The number of dots varies per instalment: it always equals the number of ledger lines that instalment's Cost Scheme generates, which depends on how many parties and deductions are involved in the premium flow.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ TD-3 · VIEWING A TRANSACTION ══════════════════ -->
+    <section class="tab" id="pp-view" data-tab="pp-view">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → View</div>
+      <h2>3. Viewing a Transaction</h2>
+      <p class="tab-dek">The View page shows the instalment's core details — Index, Id, Document, Status, Exchange Rate, Due Date, Type, Proportion, and Remittance Code — along with its lifecycle progress bar, followed by up to three tabs.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Tabs</caption>
+          <thead><tr><th>Tab</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Lifecycle Premium Payment</td><td>The instalment's full, editable settlement ledger. See <a href="#pp-logs-tab">3.1</a>.</td></tr>
+            <tr><td class="fname">Premium Payment Support</td><td>Supporting files and notes attached to the instalment. See <a href="#pp-supports-tab">3.2</a>.</td></tr>
+            <tr><td class="fname">Bordereaux Adjustments</td><td>History of premium recalculations. Only shown when the Business's Premium Type is Estimated or Declared. See <a href="#pp-recalc-tab">3.3</a>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>The View page also provides an <strong>Audit info</strong> button, showing a chronological log of changes made to the Transaction record.</div>
+      </div>
+
+      <div class="subhead" id="pp-logs-tab"><span class="sub-letter">3.1</span><h4>Lifecycle Premium Payment</h4></div>
+      <p class="subhead-dek" style="max-width:none;">This tab lists every ledger line generated for the instalment: its Deduction concept, Source and Destination parties, Due Date, Sent and Received dates, Premium, Discount, Banking Fee, Net Amount, an Evidence indicator, and its Status. Selecting <strong>Edit</strong> on a line opens its settlement details, where the Sent date, Received date, Gross Amount, and Banking Fee can be adjusted and a supporting PDF can be attached as evidence.</p>
+
+      <div class="note rule">
+        <span class="note-mark">✓</span>
+        <div>Ledger lines are generated by the system and cannot be created or deleted manually from this tab — only their settlement details can be edited.</div>
+      </div>
+
+      <div class="subhead" id="pp-supports-tab"><span class="sub-letter">3.2</span><h4>Premium Payment Support</h4></div>
+      <p class="subhead-dek" style="max-width:none;">This tab holds general supporting documentation for the instalment — for example, remittance confirmations or correspondence — each entry made up of a description and an attached file. Files can be previewed inline (PDFs, images, and Office documents) or downloaded.</p>
+
+      <div class="subhead" id="pp-recalc-tab"><span class="sub-letter">3.3</span><h4>Bordereaux Adjustments</h4></div>
+      <p class="subhead-dek" style="max-width:none;">For Businesses with an Estimated or Declared Premium Type, this tab keeps a read-only history of every Bordereaux adjustment applied to the instalment: its reference, reported premium and claims, previous and new amounts, supporting evidence, and who applied it. New records are created from the Edit page's <strong>Apply Bordereaux</strong> action, described in <a href="#pp-edit">4. Editing a Transaction</a>.</p>
+    </section>
+
+    <!-- ══════════════════ TD-4 · EDITING A TRANSACTION ══════════════════ -->
+    <section class="tab" id="pp-edit" data-tab="pp-edit">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → Edit</div>
+      <h2>4. Editing a Transaction</h2>
+      <p class="tab-dek">The Edit page reuses the instalment's core fields — Due Date, Exchange Rate — together with its live lifecycle status and progress bar, and adds two additional actions for adjusting the instalment after it has been created.</p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Edit page actions</caption>
+          <thead><tr><th>Action</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Apply Bordereaux</td><td>Records a new reported premium/claims figure from a bordereaux and updates the instalment's amount and ledger accordingly. Only available when the Business's Premium Type is Estimated or Declared.</td></tr>
+            <tr><td class="fname">Recalculate Lifecycle</td><td>Rebuilds the instalment's settlement ledger from its current field values, preserving any settlement progress (Sent/Received dates, status, evidence) already recorded on lines that still apply.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subhead" id="pp-apply-bordereaux" style="margin-top:2.25rem;"><span class="sub-letter">4.1</span><h4>Apply Bordereaux</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>Apply Bordereaux</strong> is used when actual bordereaux figures arrive for a Business with Estimated or Declared premium. The user enters the Bordereaux Reference, the Reported Premium, and the Reported Claims; RMS-Platform proposes the resulting Net Amount (Premium minus Claims), which can be adjusted, and evidence files and notes can be attached. Confirming the action logs the adjustment in <a href="#pp-recalc-tab">Bordereaux Adjustments</a>, updates the instalment's amount, and regenerates its settlement ledger to match — while keeping each line's existing Sent/Received progress and evidence wherever it still applies.</p>
+
+      <div class="subhead" id="pp-recalculate-lifecycle" style="margin-top:2.25rem;"><span class="sub-letter">4.2</span><h4>Recalculate Lifecycle</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>Recalculate Lifecycle</strong> rebuilds the instalment's settlement ledger from its current Proportion, Exchange Rate, Due Date, and Cost Scheme, without changing the reported premium itself. It is useful after correcting one of these fields directly, so the ledger lines stay consistent with the instalment's data. Lines that no longer apply after the recalculation are removed; the rest keep their recorded Sent/Received dates, status, evidence, and any manually adjusted Banking Fee.</p>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div>Changing the <strong>Exchange Rate</strong> and saving also triggers this same recalculation automatically, in addition to using the button directly.</div>
+      </div>
+    </section>
+  </main>
+</div>
