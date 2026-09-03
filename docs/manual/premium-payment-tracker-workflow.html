@@ -664,7 +664,7 @@
     <section class="tab" id="pp-columns" data-tab="pp-columns">
       <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
       <h2>2. Premium Payments List</h2>
-      <p class="tab-dek">Each row in the list represents one Transaction (instalment) belonging to an Operative Document. The table is ordered by Business and then by Document, so every instalment of the same document appears together.</p>
+      <p class="tab-dek">Each row in the list represents a Transaction (Instalment) associated with an Operative Document. By default, the table is ordered by Business and then by Document, keeping all Instalments associated with the same Operative Document grouped together.</p>
 
       <div class="ledger-wrap">
         <table class="ledger">
@@ -672,21 +672,21 @@
           <thead><tr><th>Column</th><th>Description</th></tr></thead>
           <tbody>
             <tr><td class="fname">#</td><td>Running row number across the current page.</td></tr>
-            <tr><td class="fname">Reinsurer</td><td>Short name of the Reinsurer on the Business the Transaction's Operative Document belongs to.</td></tr>
-            <tr><td class="fname">Document</td><td>Operative Document the instalment belongs to.</td></tr>
-            <tr><td class="fname">Index</td><td>Position of this instalment among the Operative Document's Transactions, shown as <strong>"n of total"</strong>.</td></tr>
+            <tr><td class="fname">Reinsurer</td><td>Short name of the Reinsurer associated with the Business to which the Operative Document belongs.</td></tr>
+            <tr><td class="fname">Document</td><td>Operative Document the Instalment belongs to.</td></tr>
+            <tr><td class="fname">Index</td><td>Position of the Instalment within the Operative Document's payment schedule, shown as <strong>"n of total"</strong>.</td></tr>
             <tr><td class="fname">Proportion</td><td>Percentage of the total premium this instalment represents.</td></tr>
             <tr><td class="fname">Exch rate</td><td>Exchange rate applied to convert the instalment into US Dollars.</td></tr>
-            <tr><td class="fname">Due date</td><td>Date the instalment is due. Shown in red with a warning icon, plus a "+N / −N days" note, when the date has passed and the instalment is not yet Completed.</td></tr>
+            <tr><td class="fname">Due date</td><td>Date on which the Instalment is due. A "+N / −N days" indicator shows the number of days remaining until or elapsed since the due date. Overdue dates for Instalments not yet Completed are highlighted in red with a warning icon.</td></tr>
             <tr><td class="fname">Type</td><td>Transaction Type description.</td></tr>
-            <tr><td class="fname">Net amount</td><td>Net amount of the instalment's last settlement leg (the final row of its ledger).</td></tr>
+            <tr><td class="fname">Net amount</td><td>Net amount of the Instalment's final settlement leg (the last row of its ledger).</td></tr>
             <tr><td class="fname">Status</td><td>Lifecycle status badge: <strong>Pending</strong>, <strong>In process</strong>, or <strong>Completed</strong>.</td></tr>
-            <tr><td class="fname">Progress</td><td>A row of dots — one per ledger line — showing how far the instalment's settlement has advanced, followed by a percentage. See <a href="#pp-lifecycle">Transaction Lifecycle</a>.</td></tr>
+            <tr><td class="fname">Progress</td><td>Visual indicator showing the Instalment's settlement progress, with one dot for each ledger line and a percentage indicating overall completion. See <a href="#pp-lifecycle">Transaction Lifecycle</a>.</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p class="subhead-dek" style="max-width:none;">A few additional columns exist but are hidden by default and can be turned on from the column toggle: <strong>Id transaction</strong>, <strong>Remittance</strong>, <strong>Created at</strong>, <strong>Updated at</strong>, and <strong>Deleted at</strong>. See <a href="#pp-columnguide">6. Column Guide</a> for the complete reference.</p>
+      <p class="subhead-dek" style="max-width:none;">Additional columns are available but hidden by default and can be displayed using the column toggle: <strong>Id transaction</strong>, <strong>Remittance</strong>, <strong>Created at</strong>, <strong>Updated at</strong>, and <strong>Deleted at</strong>. See <a href="#pp-columnguide">6. Column Guide</a> for the complete reference.</p>
     </section>
 
     <!-- ══════════════════ PP-3 · SEARCH, FILTER, AND GROUPING ══════════════════ -->
