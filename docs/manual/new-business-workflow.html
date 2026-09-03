@@ -359,6 +359,7 @@
   section[data-tab="documents"]      { --tab-color: var(--amber); }
   section[data-tab="setup-complete"] { --tab-color: var(--warn); }
   section[data-tab="bm-actions"]     { --tab-color: var(--warn); }
+  section[data-tab="bm-pageactions"] { --tab-color: var(--accent); }
 
   .tab h2 { font-size: 1.65rem; margin: 0 0 0.4rem; }
   .tab .tab-dek { color: var(--ink-muted); margin: 0 0 1.9rem; font-size: 0.97rem; }
@@ -796,6 +797,11 @@
       </li>
       <li data-tab="bm-pageactions">
         <a href="#bm-pageactions"><span class="tab-num">5</span> Page Actions</a>
+        <ul class="index-branch">
+          <li><a href="#bm-user-guide"><span class="sub-letter">5.1</span>User Guide</a></li>
+          <li><a href="#bm-export-reports"><span class="sub-letter">5.2</span>Export Reports</a></li>
+          <li><a href="#bm-new-business"><span class="sub-letter">5.3</span>New Business</a></li>
+        </ul>
       </li>
       <li data-tab="bm-columnguide">
         <a href="#bm-columnguide"><span class="tab-num">6</span> Column Guide</a>
@@ -1196,7 +1202,10 @@
         </table>
       </div>
 
-      <h3>Export Reports</h3>
+      <div class="subhead" id="bm-user-guide" style="margin-top:2.25rem;"><span class="sub-letter">5.1</span><h4>User Guide</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>User Guide</strong> opens this manual directly from the Businesses List, in a side panel that overlays the page without navigating away. Users can consult the documentation while keeping their current filters, search terms, and table state intact.</p>
+
+      <div class="subhead" id="bm-export-reports" style="margin-top:2.25rem;"><span class="sub-letter">5.2</span><h4>Export Reports</h4></div>
       <p class="tab-dek">The <strong>Export Report</strong> function allows users to generate Excel reports using information from the Businesses portfolio and their related Operative Documents. Depending on the selected report type, the information can be limited to a specific reporting period and further refined using the available criteria.</p>
       <p class="tab-dek">Reports are generated in the background, allowing users to continue working in RMS-Platform while the requested file is being prepared. During this process, a status banner is displayed on the Businesses List. Once the report is ready, a notification provides access to the generated file.</p>
 
@@ -1223,6 +1232,9 @@
       </div>
 
       <p class="tab-dek">Both Underwritten reports can also be filtered by one or more <strong>Reinsurers</strong> before generation.</p>
+
+      <div class="subhead" id="bm-new-business" style="margin-top:2.25rem;"><span class="sub-letter">5.3</span><h4>New Business</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>New Business</strong> starts the workflow to register a new Business in RMS-Platform, taking the user directly to the form described in <a href="#business">1. Business Details</a>.</p>
     </section>
 
     <!-- ══════════════════ BM-6 · COLUMN GUIDE ══════════════════ -->
