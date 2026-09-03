@@ -358,6 +358,7 @@
   section[data-tab="liability"]      { --tab-color: var(--good); }
   section[data-tab="documents"]      { --tab-color: var(--amber); }
   section[data-tab="setup-complete"] { --tab-color: var(--warn); }
+  section[data-tab="bm-actions"]     { --tab-color: var(--warn); }
 
   .tab h2 { font-size: 1.65rem; margin: 0 0 0.4rem; }
   .tab .tab-dek { color: var(--ink-muted); margin: 0 0 1.9rem; font-size: 0.97rem; }
@@ -788,6 +789,9 @@
       </li>
       <li data-tab="bm-actions">
         <a href="#bm-actions"><span class="tab-num">4</span> Business Actions</a>
+        <ul class="index-branch">
+          <li><a href="#bm-renewal"><span class="sub-letter">4.1</span>Renewal</a></li>
+        </ul>
       </li>
       <li data-tab="bm-pageactions">
         <a href="#bm-pageactions"><span class="tab-num">5</span> Page Actions</a>
@@ -1008,7 +1012,11 @@
         </table>
       </div>
 
-      <p class="tab-dek">When confirmed, the <strong>Renewal</strong> action creates a new Business record linked to the original through <strong>Renewed From</strong>, copying its core details and Liability Structures. If the original has a Slip document, the new Business also receives a new Slip — with its Placement Schemes and Insured Members copied over — whose inception date defaults to the original Slip's expiration date and covers the same number of days as the original period; both dates can still be adjusted before confirming. The new Business Code is generated automatically and cannot be edited. Endorsements and Instalments are not carried over, and the renewal is created as a standalone Business, independent of any treaty the original may belong to. Once created, the user is taken directly to the new Business's record.</p>
+      <div class="subhead" id="bm-renewal" style="margin-top:2.25rem;"><span class="sub-letter">4.1</span><h4>Renewal</h4></div>
+      <p class="subhead-dek" style="max-width:none;">When confirmed, the <strong>Renewal</strong> action creates a new Business record linked to the original through <strong>Renewed From</strong>, carrying over its core details and Liability Structures.</p>
+      <p class="subhead-dek" style="max-width:none;">If the original Business has a Slip document, a new Slip is also created for the renewed Business, with its <strong>Placement Schemes</strong> and <strong>Insured Members</strong> copied from the original. By default, the new Slip's inception date is set to the original Slip's expiration date, while its expiration date is calculated to preserve the same coverage period as the original Slip. Both dates can still be adjusted before confirming the renewal.</p>
+      <p class="subhead-dek" style="max-width:none;">The new <strong>Business Code</strong> is generated automatically and cannot be edited. <strong>Endorsements</strong> and <strong>Instalments</strong> are not carried over, and the renewed Business is created as a standalone record, independent of any treaty to which the original Business may belong.</p>
+      <p class="subhead-dek" style="max-width:none;">Once the renewal is created, the user is taken directly to the new Business record.</p>
 
       <figure class="diagram-wrap">
         <div class="diagram-cap">What carries over when renewing a Business</div>
