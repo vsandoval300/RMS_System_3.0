@@ -639,24 +639,24 @@
     <section class="tab" id="pp-overview" data-tab="pp-overview">
       <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
       <h2>1. Overview</h2>
-      <p class="tab-dek">The top of the Premium Payment Tracker shows four indicators that summarize the current state of every Transaction registered in RMS-Platform.</p>
+      <p class="tab-dek">The top of the Premium Payment Tracker displays four overview indicators that provide a consolidated view of the current status of all Transactions registered in RMS-Platform.</p>
 
       <div class="ledger-wrap">
         <table class="ledger">
           <caption>Overview tiles</caption>
           <thead><tr><th>Tile</th><th>Description</th></tr></thead>
           <tbody>
-            <tr><td class="fname">Total Transactions</td><td>Total number of Transactions in the database, regardless of status.</td></tr>
-            <tr><td class="fname">Pending</td><td>Transactions whose lifecycle status is <strong>Pending</strong> — no ledger line has been marked as sent or received yet.</td></tr>
-            <tr><td class="fname">In Process</td><td>Transactions with at least one ledger line marked as sent or received, but not yet fully settled.</td></tr>
-            <tr><td class="fname">Completed</td><td>Transactions whose final ledger line has been marked as received.</td></tr>
+            <tr><td class="fname">Total Transactions</td><td>Total number of Transactions registered in RMS-Platform, regardless of their lifecycle status.</td></tr>
+            <tr><td class="fname">Pending</td><td>Transactions for which no ledger line has yet been marked as sent or received.</td></tr>
+            <tr><td class="fname">In Process</td><td>Transactions with at least one ledger line marked as sent or received, but whose payment lifecycle has not yet been completed.</td></tr>
+            <tr><td class="fname">Completed</td><td>Transactions whose final ledger line has been marked as received, completing the payment lifecycle.</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="note depends">
         <span class="note-mark">＋</span>
-        <div>These counts reflect the <strong>entire</strong> Transactions table and are not affected by the filters, search term, or grouping currently applied to the list below.</div>
+        <div>These counts reflect the <strong>entire</strong> Transactions portfolio and are not affected by any filters, search terms, or grouping applied to the list below.</div>
       </div>
     </section>
 
