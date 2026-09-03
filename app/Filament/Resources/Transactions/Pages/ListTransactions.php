@@ -10,7 +10,6 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Reinsurer;
 use App\Filament\Resources\Transactions\Widgets\TransactionStatsOverview;
@@ -100,20 +99,8 @@ class ListTransactions extends ListRecords
                 ->label('User Manual')
                 ->icon('heroicon-o-book-open')
                 ->color('gray')
-                ->modalHeading('Instalments — User Manual')
-                ->modalContent(function () {
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-                    $disk = Storage::disk('s3');
-                    $url  = $disk->temporaryUrl(
-                        'user_manual/Installments_Module_Reference_v1.pdf',
-                        now()->addMinutes(30),
-                        [
-                            'ResponseContentType'        => 'application/pdf',
-                            'ResponseContentDisposition' => 'inline; filename="Instalments_User_Manual.pdf"',
-                        ]
-                    );
-                    return view('filament.components.pdf-viewer', compact('url'));
-                })
+                ->modalHeading('Premium Payment Tracker — User Manual')
+                ->modalContent(fn () => view('filament.resources.transaction.user-manual-modal'))
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Close'),

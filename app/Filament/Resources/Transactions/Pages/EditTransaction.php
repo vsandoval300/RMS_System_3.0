@@ -16,7 +16,6 @@ use App\Models\TransactionRecalculation;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -447,20 +446,8 @@ class EditTransaction extends EditRecord
                 ->label('User Manual')
                 ->icon('heroicon-o-book-open')
                 ->color('gray')
-                ->modalHeading('Instalments — User Manual')
-                ->modalContent(function () {
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-                    $disk = Storage::disk('s3');
-                    $url  = $disk->temporaryUrl(
-                        'user_manual/Installments_Module_Reference_v1.pdf',
-                        now()->addMinutes(30),
-                        [
-                            'ResponseContentType'        => 'application/pdf',
-                            'ResponseContentDisposition' => 'inline; filename="Instalments_User_Manual.pdf"',
-                        ]
-                    );
-                    return view('filament.components.pdf-viewer', compact('url'));
-                })
+                ->modalHeading('Premium Payment Tracker — User Manual')
+                ->modalContent(fn () => view('filament.resources.transaction.user-manual-modal'))
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Close'),

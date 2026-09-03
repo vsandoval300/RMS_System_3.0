@@ -25,6 +25,11 @@ Route::get('/admin/manual/placement-schemes', function () {
     return response()->file(base_path('docs/manual/placement-schemes-workflow.html'));
 })->name('manual.placement-schemes')->middleware(['web', 'auth']);
 
+// === Premium Payment Tracker — User Manual ===
+Route::get('/admin/manual/premium-payment-tracker', function () {
+    return response()->file(base_path('docs/manual/premium-payment-tracker-workflow.html'));
+})->name('manual.premium-payment-tracker')->middleware(['web', 'auth']);
+
 // === Visor de PDFs para OperativeDocs ===
 Route::get('/pdf-viewer/{operativeDoc}', function (OperativeDoc $operativeDoc) {
     // 1) Tomamos el path y limpiamos espacios
