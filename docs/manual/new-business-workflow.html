@@ -2223,6 +2223,75 @@
 
       <p class="subhead-dek" style="max-width:none;"><strong>Availability and behavior:</strong> This action is available for Slip and Endorsement documents, except <strong>Endorsement C – Cancellation</strong>, and only when the Business does not already have a Cancellation document. Cloning a Slip creates the new document as an <strong>Endorsement B – No Premium Change</strong>, with insured premiums set to zero; cloning any other eligible document preserves its original document type. In both cases, the document type and all other copied information can be adjusted afterward.</p>
 
+      <figure class="diagram-wrap">
+        <div class="diagram-cap">What carries over when cloning a document</div>
+        <svg viewBox="0 0 900 320" style="max-width:100%;height:auto;color:var(--ink);" font-family="-apple-system, Segoe UI, sans-serif" role="img" aria-label="Cloning an Operative Document copies its Placement Schemes and Insured Members to the new document, but does not copy its PDF file or Instalments, which stop at the original.">
+          <defs>
+            <marker id="cloneArrowGood" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#559478" />
+            </marker>
+          </defs>
+
+          <text x="450" y="24" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor">Clone Document</text>
+
+          <g fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5">
+            <rect x="30" y="40" width="290" height="250" rx="10" />
+            <rect x="580" y="40" width="290" height="250" rx="10" />
+          </g>
+
+          <g fill="currentColor" fill-opacity="0.05">
+            <rect x="30" y="40" width="290" height="42" rx="10" />
+            <rect x="580" y="40" width="290" height="42" rx="10" />
+          </g>
+          <g font-size="15" font-weight="600" fill="currentColor">
+            <text x="50" y="66">Original Document</text>
+            <text x="600" y="66">Cloned Document</text>
+          </g>
+
+          <g stroke="currentColor" stroke-opacity="0.18" stroke-width="1">
+            <line x1="30" y1="82" x2="320" y2="82" />
+            <line x1="30" y1="134" x2="320" y2="134" />
+            <line x1="30" y1="186" x2="320" y2="186" />
+            <line x1="30" y1="238" x2="320" y2="238" />
+            <line x1="580" y1="82" x2="870" y2="82" />
+            <line x1="580" y1="134" x2="870" y2="134" />
+            <line x1="580" y1="186" x2="870" y2="186" />
+            <line x1="580" y1="238" x2="870" y2="238" />
+          </g>
+
+          <g font-size="14.5" fill="currentColor">
+            <text x="50" y="112">Placement Schemes</text>
+            <text x="50" y="164">Insured Members</text>
+            <text x="50" y="216">PDF File</text>
+            <text x="50" y="268">Instalments</text>
+
+            <text x="600" y="112">Placement Schemes</text>
+            <text x="600" y="164">Insured Members</text>
+            <text x="600" y="216" fill-opacity="0.4">PDF File</text>
+            <text x="600" y="268" fill-opacity="0.4">Instalments</text>
+          </g>
+
+          <g stroke="#559478" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <g transform="translate(828,102)"><path d="M0,5 L4,9 L11,0" /></g>
+            <g transform="translate(828,154)"><path d="M0,5 L4,9 L11,0" /></g>
+          </g>
+
+          <g fill="none" stroke="#559478" stroke-width="1.75">
+            <line x1="320" y1="108" x2="580" y2="108" marker-end="url(#cloneArrowGood)" />
+            <line x1="320" y1="160" x2="580" y2="160" marker-end="url(#cloneArrowGood)" />
+          </g>
+          <g fill="none" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" stroke-dasharray="4 4">
+            <line x1="320" y1="212" x2="488" y2="212" />
+            <line x1="320" y1="264" x2="488" y2="264" />
+          </g>
+          <g stroke="currentColor" stroke-opacity="0.4" stroke-width="1.8" stroke-linecap="round">
+            <g transform="translate(494,207)"><line x1="0" y1="0" x2="10" y2="10" /><line x1="10" y1="0" x2="0" y2="10" /></g>
+            <g transform="translate(494,259)"><line x1="0" y1="0" x2="10" y2="10" /><line x1="10" y1="0" x2="0" y2="10" /></g>
+          </g>
+        </svg>
+        <figcaption class="subnote">Placement Schemes and Insured Members carry over to the cloned document; the original PDF file and Instalments do not — the cloned document starts without either.</figcaption>
+      </figure>
+
       <div class="subhead" id="add-instalment" style="margin-top:2.25rem;"><span class="sub-letter">3.4.2</span><h4>Add Instalment</h4></div>
       <p class="subhead-dek" style="max-width:none;">The <strong>Add Instalment</strong> action provides a direct way to register a new instalment for the selected Operative Document. When the action is selected, RMS opens the Transaction creation form with the corresponding document already assigned, eliminating the need to search for and select it manually. From there, the user can complete the required transaction information and create the instalment as part of the document's payment schedule.</p>
 
