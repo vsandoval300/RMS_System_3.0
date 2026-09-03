@@ -1002,13 +1002,13 @@
       <div class="ledger-wrap">
         <table class="ledger">
           <caption>Actions</caption>
-          <thead><tr><th>Action</th><th>Notes</th></tr></thead>
+          <thead><tr><th>Action</th><th>Description</th></tr></thead>
           <tbody>
             <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 10S4.5 4 10 4s8.5 6 8.5 6-3 6-8.5 6-8.5-6-8.5-6Z"/><circle cx="10" cy="10" r="2.4"/></svg></span>View</td><td>Opens the Business in read-only mode, allowing its information to be reviewed without making changes.</td></tr>
             <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H4a1.5 1.5 0 0 0-1.5 1.5v10A1.5 1.5 0 0 0 4 17h10a1.5 1.5 0 0 0 1.5-1.5V11"/><path d="M15.5 3.5a1.7 1.7 0 0 1 2.4 2.4L10 13.8l-3 .7.7-3Z"/></svg></span>Edit</td><td>Opens the Business for editing and provides access to its general information, Liability Structures, and Operative Documents.</td></tr>
             <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="1.5"/><rect x="6" y="4.5" width="8" height="3" rx="0.5"/><g fill="currentColor" stroke="none"><circle cx="6.7" cy="10.5" r="0.9"/><circle cx="10" cy="10.5" r="0.9"/><circle cx="13.3" cy="10.5" r="0.9"/><circle cx="6.7" cy="13.5" r="0.9"/><circle cx="10" cy="13.5" r="0.9"/><circle cx="13.3" cy="13.5" r="0.9"/></g></svg></span>Business Summary</td><td>Opens a summary of the Business's technical and financial results. This action is available only to users with the required permission.</td></tr>
             <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a6 6 0 0 1 10.2-4.2M16 10a6 6 0 0 1-10.2 4.2"/><path d="M14.2 3.5v2.3h-2.3"/><path d="M5.8 16.5v-2.3h2.3"/></svg></span>Renewal</td><td>Available when the Business meets the conditions for renewal. Opens a pre-filled form to create the renewal Business using information from the existing record.</td></tr>
-            <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12"/><path d="M8 6V4.5A1 1 0 0 1 9 3.5h2A1 1 0 0 1 12 4.5V6"/><path d="M5.5 6l.6 9.5A1.5 1.5 0 0 0 7.6 17h4.8a1.5 1.5 0 0 0 1.5-1.5L14.5 6"/><path d="M8.3 9v5M11.7 9v5"/></svg></span>Delete</td><td>Soft-deletes the Business record. This action is available only to users with the required permission.</td></tr>
+            <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12"/><path d="M8 6V4.5A1 1 0 0 1 9 3.5h2A1 1 0 0 1 12 4.5V6"/><path d="M5.5 6l.6 9.5A1.5 1.5 0 0 0 7.6 17h4.8a1.5 1.5 0 0 0 1.5-1.5L14.5 6"/><path d="M8.3 9v5M11.7 9v5"/></svg></span>Delete</td><td>Businesses can be deleted individually using the Delete action or in groups by selecting multiple records with the row checkboxes and using Bulk Delete from the table toolbar. In both cases, the selected Business records are soft-deleted rather than permanently removed from the system. These actions are available only to users with the required permissions.</td></tr>
           </tbody>
         </table>
       </div>
@@ -1176,10 +1176,6 @@
         <div><strong>Renewal availability:</strong> The Renewal action becomes available only when the Business meets the applicable renewal conditions, including its proximity to expiration and the absence of conditions that prevent a new renewal from being created.</div>
       </div>
 
-      <div class="note depends">
-        <span class="note-mark">＋</span>
-        <div>Selecting multiple Businesses using the row checkboxes enables the <strong>Bulk Delete</strong> action in the table toolbar, allowing several records to be deleted in a single operation. Availability of this action depends on the user's permissions.</div>
-      </div>
     </section>
 
     <!-- ══════════════════ BM-5 · EXPORT REPORT ══════════════════ -->
