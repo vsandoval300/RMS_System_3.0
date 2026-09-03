@@ -980,8 +980,11 @@ public static function infolist(Schema $schema): Schema
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('operative_docs.business_id') 
+            ->defaultSort('operative_docs.business_id')
             ->defaultSort('transactions.op_document_id')
+            ->persistSortInSession()
+            ->persistSearchInSession()
+            ->persistFiltersInSession()
             ->groups([
                 Group::make('operativeDoc.business.reinsurer.name')
                     ->label('Reinsurer'),

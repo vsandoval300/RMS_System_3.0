@@ -24,7 +24,14 @@ class ListTransactions extends ListRecords
 
         if ($docId = request()->query('op_document_id')) {
             $this->tableFilters = ['op_document_id' => ['value' => $docId]];
+        } elseif (blank($this->tableGrouping) && session()->has('transactions_table_grouping')) {
+            $this->tableGrouping = session('transactions_table_grouping');
         }
+    }
+
+    public function updatedTableGrouping(): void
+    {
+        session(['transactions_table_grouping' => $this->tableGrouping]);
     }
 
     protected function getHeaderActions(): array
