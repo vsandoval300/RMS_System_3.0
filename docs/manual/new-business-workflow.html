@@ -790,7 +790,8 @@
       <li data-tab="bm-actions">
         <a href="#bm-actions"><span class="tab-num">4</span> Business Actions</a>
         <ul class="index-branch">
-          <li><a href="#bm-renewal"><span class="sub-letter">4.1</span>Renewal</a></li>
+          <li><a href="#bm-business-summary"><span class="sub-letter">4.1</span>Business Summary</a></li>
+          <li><a href="#bm-renewal"><span class="sub-letter">4.2</span>Renewal</a></li>
         </ul>
       </li>
       <li data-tab="bm-pageactions">
@@ -1012,7 +1013,64 @@
         </table>
       </div>
 
-      <div class="subhead" id="bm-renewal" style="margin-top:2.25rem;"><span class="sub-letter">4.1</span><h4>Renewal</h4></div>
+      <div class="subhead" id="bm-business-summary" style="margin-top:2.25rem;"><span class="sub-letter">4.1</span><h4>Business Summary</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>Business Summary</strong> opens a consolidated, read-only report of the Business's technical and financial results. It combines the individual summary of every Operative Document belonging to the Business — the same breakdown available from each document's own <strong>Summary</strong> action — into a single view, alongside the Business's general details (Reinsurer, Currency, Reinsurance Type, Premium Type, Lifecycle, Approval, and Producer) and a <strong>Consolidated Totals</strong> section showing the combined Gross Underwritten Premium, Deductions, and Net Underwritten Premium across all documents, in both the original currency and US Dollars. The report can also be downloaded as a PDF.</p>
+
+      <figure class="diagram-wrap">
+        <div class="diagram-cap">How Business Summary is built</div>
+        <svg viewBox="0 0 900 320" style="max-width:100%;height:auto;color:var(--ink);" font-family="-apple-system, Segoe UI, sans-serif" role="img" aria-label="Business Summary combines every Operative Document's own summary into one consolidated report, with combined totals for Gross Premium, Deductions, and Net Underwritten Premium.">
+          <defs>
+            <marker id="summaryArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+          </defs>
+
+          <text x="450" y="24" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor">Business Summary</text>
+
+          <g fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5">
+            <rect x="30" y="50" width="250" height="64" rx="8" />
+            <rect x="30" y="134" width="250" height="64" rx="8" />
+            <rect x="30" y="218" width="250" height="64" rx="8" />
+          </g>
+          <g font-size="14" font-weight="600" fill="currentColor">
+            <text x="50" y="78">Document 01</text>
+            <text x="50" y="162">Document 02</text>
+            <text x="50" y="246">Document 03</text>
+          </g>
+          <g font-size="12.5" fill="currentColor" fill-opacity="0.6">
+            <text x="50" y="98">Individual Summary</text>
+            <text x="50" y="182">Individual Summary</text>
+            <text x="50" y="266">Individual Summary</text>
+          </g>
+
+          <g fill="none" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.5">
+            <path d="M280,82 L520,166" />
+            <path d="M280,166 L520,166" />
+            <path d="M280,250 L520,166" />
+          </g>
+          <circle cx="520" cy="166" r="15" fill="var(--paper-raised)" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.5" />
+          <text x="520" y="171" text-anchor="middle" font-size="15" font-weight="600" fill="currentColor">&#931;</text>
+          <path d="M535,166 L558,166" fill="none" stroke="currentColor" stroke-width="1.75" marker-end="url(#summaryArrow)" />
+
+          <g fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5">
+            <rect x="560" y="50" width="310" height="232" rx="10" />
+          </g>
+          <g fill="currentColor" fill-opacity="0.05">
+            <rect x="560" y="50" width="310" height="42" rx="10" />
+          </g>
+          <text x="580" y="76" font-size="15" font-weight="600" fill="currentColor">Consolidated Totals</text>
+
+          <g font-size="13.5" fill="currentColor">
+            <text x="580" y="130">Total Gross Premium (FTS)</text>
+            <text x="580" y="172">Total Deductions</text>
+          </g>
+          <line x1="580" y1="196" x2="850" y2="196" stroke="currentColor" stroke-opacity="0.25" stroke-width="1" />
+          <text x="580" y="228" font-size="15" font-weight="700" fill="#559478">Net Underwritten Premium</text>
+        </svg>
+        <figcaption class="subnote">Business Summary combines every Operative Document's own summary into one consolidated report, with combined totals for Gross Premium, Deductions, and Net Underwritten Premium.</figcaption>
+      </figure>
+
+      <div class="subhead" id="bm-renewal" style="margin-top:2.25rem;"><span class="sub-letter">4.2</span><h4>Renewal</h4></div>
       <p class="subhead-dek" style="max-width:none;">When confirmed, the <strong>Renewal</strong> action creates a new Business record linked to the original through <strong>Renewed From</strong>, carrying over its core details and Liability Structures.</p>
       <p class="subhead-dek" style="max-width:none;">If the original Business has a Slip document, a new Slip is also created for the renewed Business, with its <strong>Placement Schemes</strong> and <strong>Insured Members</strong> copied from the original. By default, the new Slip's inception date is set to the original Slip's expiration date, while its expiration date is calculated to preserve the same coverage period as the original Slip. Both dates can still be adjusted before confirming the renewal.</p>
       <p class="subhead-dek" style="max-width:none;">The new <strong>Business Code</strong> is generated automatically and cannot be edited. <strong>Endorsements</strong> and <strong>Instalments</strong> are not carried over, and the renewed Business is created as a standalone record, independent of any treaty to which the original Business may belong.</p>
