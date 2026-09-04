@@ -225,7 +225,6 @@
   .index li[data-tab="pp-filters"]      { --tab-color: var(--amber); }
   .index li[data-tab="pp-actions"]      { --tab-color: var(--warn); }
   .index li[data-tab="pp-pageactions"]  { --tab-color: var(--accent); }
-  .index li[data-tab="pp-columnguide"]  { --tab-color: var(--good); }
   .index li[data-tab="pp-create"]       { --tab-color: var(--amber); }
   .index li[data-tab="pp-lifecycle"]    { --tab-color: var(--warn); }
   .index li[data-tab="pp-view"]         { --tab-color: var(--accent); }
@@ -336,7 +335,6 @@
   section[data-tab="pp-filters"]     { --tab-color: var(--amber); }
   section[data-tab="pp-actions"]     { --tab-color: var(--warn); }
   section[data-tab="pp-pageactions"] { --tab-color: var(--accent); }
-  section[data-tab="pp-columnguide"] { --tab-color: var(--good); }
   section[data-tab="pp-create"]      { --tab-color: var(--amber); }
   section[data-tab="pp-lifecycle"]   { --tab-color: var(--warn); }
   section[data-tab="pp-view"]        { --tab-color: var(--accent); }
@@ -598,9 +596,6 @@
       <li data-tab="pp-pageactions">
         <a href="#pp-pageactions"><span class="tab-num">5</span> Page Actions</a>
       </li>
-      <li data-tab="pp-columnguide">
-        <a href="#pp-columnguide"><span class="tab-num">6</span> Column Guide</a>
-      </li>
 
       <li class="index-group-label"><a href="#transaction-detail">Transaction Detail &amp; Lifecycle</a></li>
       <li data-tab="pp-create">
@@ -674,8 +669,8 @@
 
       <div class="ledger-wrap">
         <table class="ledger">
-          <caption>Visible columns</caption>
-          <thead><tr><th>Column</th><th>Description</th></tr></thead>
+          <caption>Always visible</caption>
+          <thead><tr><th>Column</th><th>Notes</th></tr></thead>
           <tbody>
             <tr><td class="fname">#</td><td>Running row number across the current page.</td></tr>
             <tr><td class="fname">Reinsurer</td><td>Short name of the Reinsurer associated with the Business to which the Operative Document belongs.</td></tr>
@@ -692,7 +687,19 @@
         </table>
       </div>
 
-      <p class="subhead-dek" style="max-width:none;">Additional columns are available but hidden by default and can be displayed using the column toggle: <strong>Id transaction</strong>, <strong>Remittance</strong>, <strong>Created at</strong>, <strong>Updated at</strong>, and <strong>Deleted at</strong>. See <a href="#pp-columnguide">6. Column Guide</a> for the complete reference.</p>
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption>Optional columns — hidden by default <span class="opt">These columns can be displayed as needed using the Column Selector.</span></caption>
+          <thead><tr><th>Column</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="fname">Id transaction</td><td>Internal identifier (UUID) of the Transaction record. Copyable.</td></tr>
+            <tr><td class="fname">Remittance</td><td>Remittance code associated with the Instalment, when one has been assigned.</td></tr>
+            <tr><td class="fname">Created at</td><td>Date and time the Transaction record was created.</td></tr>
+            <tr><td class="fname">Updated at</td><td>Date and time the Transaction record was last updated.</td></tr>
+            <tr><td class="fname">Deleted at</td><td>Date and time the Transaction record was deleted, for soft-deleted Instalments.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <!-- ══════════════════ PP-3 · SEARCH, FILTER, AND GROUPING ══════════════════ -->
@@ -775,27 +782,6 @@
 
       <div class="subhead" id="pp-new-transaction" style="margin-top:2.25rem;"><span class="sub-letter">5.2</span><h4>New Transaction</h4></div>
       <p class="subhead-dek" style="max-width:none;"><strong>New Transaction</strong> opens the form described in <a href="#pp-create"><strong>1. Creating a Transaction</strong></a>, where one or more instalments can be registered for a chosen Operative Document.</p>
-    </section>
-
-    <!-- ══════════════════ PP-6 · COLUMN GUIDE ══════════════════ -->
-    <section class="tab" id="pp-columnguide" data-tab="pp-columnguide">
-      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
-      <h2>6. Column Guide</h2>
-      <p class="tab-dek">In addition to the columns visible by default (see <a href="#pp-columns">2. Premium Payments List</a>), the following columns can be turned on from the table's column toggle.</p>
-
-      <div class="ledger-wrap">
-        <table class="ledger">
-          <caption>Hidden by default</caption>
-          <thead><tr><th>Column</th><th>Description</th></tr></thead>
-          <tbody>
-            <tr><td class="fname">Id transaction</td><td>Internal identifier (UUID) of the Transaction record. Copyable.</td></tr>
-            <tr><td class="fname">Remittance</td><td>Remittance code associated with the instalment, when one has been assigned.</td></tr>
-            <tr><td class="fname">Created at</td><td>Date and time the Transaction record was created.</td></tr>
-            <tr><td class="fname">Updated at</td><td>Date and time the Transaction record was last updated.</td></tr>
-            <tr><td class="fname">Deleted at</td><td>Date and time the Transaction record was deleted, for soft-deleted instalments.</td></tr>
-          </tbody>
-        </table>
-      </div>
     </section>
 
     <!-- ══════════════════ TRANSACTION DETAIL & LIFECYCLE ══════════════════ -->
