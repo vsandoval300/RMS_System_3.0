@@ -225,6 +225,7 @@
   .index li[data-tab="pp-filters"]      { --tab-color: var(--amber); }
   .index li[data-tab="pp-actions"]      { --tab-color: var(--warn); }
   .index li[data-tab="pp-pageactions"]  { --tab-color: var(--accent); }
+  .index li[data-tab="pp-columnguide"]  { --tab-color: var(--good); }
   .index li[data-tab="pp-create"]       { --tab-color: var(--amber); }
   .index li[data-tab="pp-lifecycle"]    { --tab-color: var(--warn); }
   .index li[data-tab="pp-view"]         { --tab-color: var(--accent); }
@@ -335,6 +336,7 @@
   section[data-tab="pp-filters"]     { --tab-color: var(--amber); }
   section[data-tab="pp-actions"]     { --tab-color: var(--warn); }
   section[data-tab="pp-pageactions"] { --tab-color: var(--accent); }
+  section[data-tab="pp-columnguide"] { --tab-color: var(--good); }
   section[data-tab="pp-create"]      { --tab-color: var(--amber); }
   section[data-tab="pp-lifecycle"]   { --tab-color: var(--warn); }
   section[data-tab="pp-view"]        { --tab-color: var(--accent); }
@@ -601,6 +603,9 @@
           <li><a href="#pp-new-transaction"><span class="sub-letter">5.3</span>New Transaction</a></li>
         </ul>
       </li>
+      <li data-tab="pp-columnguide">
+        <a href="#pp-columnguide"><span class="tab-num">6</span> Column Guide</a>
+      </li>
 
       <li class="index-group-label"><a href="#transaction-detail">Transaction Detail &amp; Lifecycle</a></li>
       <li data-tab="pp-create">
@@ -813,6 +818,19 @@
 
       <div class="subhead" id="pp-new-transaction" style="margin-top:2.25rem;"><span class="sub-letter">5.3</span><h4>New Transaction</h4></div>
       <p class="subhead-dek" style="max-width:none;"><strong>New Transaction</strong> opens the form described in <a href="#pp-create"><strong>1. Creating a Premium Payment</strong></a>, where one or more instalments can be created and registered for a selected Operative Document.</p>
+    </section>
+
+    <!-- ══════════════════ PP-6 · COLUMN GUIDE ══════════════════ -->
+    <section class="tab" id="pp-columnguide" data-tab="pp-columnguide">
+      <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → List</div>
+      <h2>6. Column Guide</h2>
+      <p class="tab-dek">The <strong>Column Guide</strong> provides an in-app reference for understanding the information displayed in the Premium Payments List. Available directly from the table toolbar, it opens a side panel containing a description of each column, including both the columns displayed by default and those available through the Column Selector.</p>
+      <p class="tab-dek">The guide can be viewed in English or Spanish, allowing users to quickly check the meaning and purpose of a column without leaving the Premium Payment Tracker.</p>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div><strong>For more detail:</strong> The descriptions available in the Column Guide correspond to the columns documented in <a href="#pp-columns">2. Premium Payments List</a>. Use the in-app guide for quick reference while working, and this manual for more detailed information and context.</div>
+      </div>
     </section>
 
     <!-- ══════════════════ TRANSACTION DETAIL & LIFECYCLE ══════════════════ -->

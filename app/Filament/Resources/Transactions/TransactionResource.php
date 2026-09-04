@@ -1072,6 +1072,17 @@ public static function infolist(Schema $schema): Schema
                     DeleteAction::make(),
                 ]),
             ])
+            ->headerActions([
+                Action::make('column_guide')
+                    ->label('Column Guide')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->color('gray')
+                    ->slideOver()
+                    ->modalHeading('Understanding This Table')
+                    ->modalContent(view('filament.resources.transaction.table-column-guide'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
