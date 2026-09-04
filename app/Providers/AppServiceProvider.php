@@ -14,6 +14,9 @@ use App\Http\Responses\CustomLoginResponse;
 use App\Mail\Graph\GraphTransport;
 use App\Services\MicrosoftGraph\GraphTransportFactory;
 use Illuminate\Mail\MailManager;
+use Illuminate\Support\Facades\Event;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Microsoft\Provider as MicrosoftProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -66,6 +69,13 @@ class AppServiceProvider extends ServiceProvider
             return app(GraphTransportFactory::class)
                 ->create();
 
+        });
+
+        Event::listen(function (SocialiteWasCalled $event) {
+            $event->extendSocialite(
+                'microsoft',
+                MicrosoftProvider::class
+            );
         });
     }
 }

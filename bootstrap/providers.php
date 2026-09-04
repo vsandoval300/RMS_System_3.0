@@ -7,4 +7,5 @@ return [
     App\Providers\Filament\UnderwrittenPanelProvider::class,
     App\Providers\Filament\UserPanelProvider::class,
     App\Providers\Filament\UserStatisticPanelProvider::class,
+    \SocialiteProviders\Manager\ServiceProvider::class,
 ];

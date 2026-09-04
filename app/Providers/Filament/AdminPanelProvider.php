@@ -44,7 +44,9 @@ class AdminPanelProvider extends PanelProvider
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
-            fn (): string => view('filament.components.login-version')->render(),
+            fn (): string => 
+                
+                view('filament.components.login-version')->render(),
         );
 
         FilamentView::registerRenderHook(
@@ -137,7 +139,7 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('web')   // o 'filament' si decidiste usar ese guard
            ->databaseNotifications()
 
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
             /* ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ]) */

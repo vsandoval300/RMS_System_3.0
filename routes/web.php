@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Models\OperativeDoc;
+use App\Http\Controllers\Auth\MicrosoftController;
 
 // Redirige raíz a Filament
 Route::redirect('/', '/admin');
@@ -126,3 +127,9 @@ Route::get('/admin/operative-doc/{docId}/overview.pdf', function (string $docId)
         ['Content-Type' => 'application/pdf']
     );
 })->name('operative-doc.overview.pdf')->middleware(['web', 'auth']);
+
+Route::get('/auth/microsoft', [MicrosoftController::class, 'redirect'])
+    ->name('auth.microsoft');
+
+Route::get('/auth/microsoft/callback', [MicrosoftController::class, 'callback'])
+    ->name('auth.microsoft.callback');

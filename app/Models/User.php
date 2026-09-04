@@ -32,6 +32,8 @@ class User extends Authenticatable implements FilamentUser
         'department_id',
         'position_id',
         'manager_id',
+        'entra_tenant_id',
+        'entra_object_id'
     ];
 
 
