@@ -595,11 +595,16 @@
       </li>
       <li data-tab="pp-pageactions">
         <a href="#pp-pageactions"><span class="tab-num">5</span> Page Actions</a>
+        <ul class="index-branch">
+          <li><a href="#pp-user-guide"><span class="sub-letter">5.1</span>User Guide</a></li>
+          <li><a href="#pp-export-reports"><span class="sub-letter">5.2</span>Export Report</a></li>
+          <li><a href="#pp-new-transaction"><span class="sub-letter">5.3</span>New Premium Payment</a></li>
+        </ul>
       </li>
 
       <li class="index-group-label"><a href="#transaction-detail">Transaction Detail &amp; Lifecycle</a></li>
       <li data-tab="pp-create">
-        <a href="#pp-create"><span class="tab-num">1</span> Creating a Transaction</a>
+        <a href="#pp-create"><span class="tab-num">1</span> Creating a Premium Payment</a>
         <ul class="index-branch">
           <li><a href="#pp-instalments-batch"><span class="sub-letter">1.1</span>Instalments Batch</a></li>
         </ul>
@@ -794,16 +799,20 @@
           <tbody>
             <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5.5c-1.5-1-3.5-1.3-5-1v10c1.5-.3 3.5 0 5 1c1.5-1 3.5-1.3 5-1v-10c-1.5-.3-3.5 0-5 1Z"/><path d="M10 5.5v10"/></svg></span>User Guide</td><td>Opens the module's reference documentation in a side panel.</td></tr>
             <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5"/><path d="M4 13.5v2A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg></span>Export Report</td><td>Opens a form to generate an Excel report of Transactions, optionally narrowed by Reinsurer and Status.</td></tr>
-            <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5v10M5 10h10"/></svg></span>New Transaction</td><td>Starts the workflow to register a new Transaction. See <a href="#pp-create">1. Creating a Transaction</a>.</td></tr>
+            <tr><td class="fname"><span class="act-icon"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5v10M5 10h10"/></svg></span>New Transaction</td><td>Starts the workflow to register a new Transaction. See <a href="#pp-create">1. Creating a Premium Payment</a>.</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="subhead" id="pp-export-reports" style="margin-top:2.25rem;"><span class="sub-letter">5.1</span><h4>Export Report</h4></div>
-      <p class="subhead-dek" style="max-width:none;">The <strong>Export Report</strong> function generates an Excel file listing Transactions with their Reinsurer, Document, Index, Proportion, Exchange Rate, Due Date, Remittance, Type, Net Amount, and Status. The report can optionally be limited to a single Reinsurer and a single lifecycle Status before it is generated.</p>
+      <div class="subhead" id="pp-user-guide" style="margin-top:2.25rem;"><span class="sub-letter">5.1</span><h4>User Guide</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>User Guide</strong> provides direct access to this manual from the Premium Payment Tracker, opening it in a side panel that overlays the page without navigating away. This allows users to consult the documentation while keeping their current filters, search terms, sorting, and table state intact.</p>
 
-      <div class="subhead" id="pp-new-transaction" style="margin-top:2.25rem;"><span class="sub-letter">5.2</span><h4>New Transaction</h4></div>
-      <p class="subhead-dek" style="max-width:none;"><strong>New Transaction</strong> opens the form described in <a href="#pp-create"><strong>1. Creating a Transaction</strong></a>, where one or more instalments can be registered for a chosen Operative Document.</p>
+      <div class="subhead" id="pp-export-reports" style="margin-top:2.25rem;"><span class="sub-letter">5.2</span><h4>Export Report</h4></div>
+      <p class="subhead-dek" style="max-width:none;">The <strong>Export Report</strong> function generates an Excel file containing the Premium Payments (Instalments) recorded in the tracker, including their Reinsurer, Document, Index, Proportion, Exchange Rate, Due Date, Remittance, Type, Net Amount, and Status.</p>
+      <p class="subhead-dek" style="max-width:none;">Before generating the report, users can optionally filter the exported data by a specific Reinsurer and lifecycle Status, allowing the report to focus on the portion of the portfolio relevant to their analysis.</p>
+
+      <div class="subhead" id="pp-new-transaction" style="margin-top:2.25rem;"><span class="sub-letter">5.3</span><h4>New Premium Payment</h4></div>
+      <p class="subhead-dek" style="max-width:none;"><strong>New Premium Payment</strong> opens the form described in <a href="#pp-create"><strong>1. Creating a Premium Payment</strong></a>, where one or more instalments can be created and registered for a selected Operative Document.</p>
     </section>
 
     <!-- ══════════════════ TRANSACTION DETAIL & LIFECYCLE ══════════════════ -->
@@ -813,8 +822,8 @@
     <!-- ══════════════════ TD-1 · CREATING A TRANSACTION ══════════════════ -->
     <section class="tab" id="pp-create" data-tab="pp-create">
       <div class="tab-eyebrow"><span class="swatch"></span>Premium Payment Tracker → New Transaction</div>
-      <h2>1. Creating a Transaction</h2>
-      <p class="tab-dek">Creating a Transaction is a <strong>batch</strong> process: the user selects the Operative Document the instalment(s) belong to and the number of instalments to create, and RMS-Platform builds one sub-form per instalment.</p>
+      <h2>1. Creating a Premium Payment</h2>
+      <p class="tab-dek">Creating a Premium Payment is a <strong>batch</strong> process: the user selects the Operative Document the instalment(s) belong to and the number of instalments to create, and RMS-Platform builds one sub-form per instalment.</p>
 
       <div class="step">
         <div class="step-num">1</div>
