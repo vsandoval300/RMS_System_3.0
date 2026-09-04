@@ -277,6 +277,28 @@
     line-height: 1.15;
   }
 
+  .part-break {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    margin: 4.5rem 0 3.25rem;
+  }
+
+  .part-break::before,
+  .part-break::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule-strong);
+  }
+
+  .part-break-mark {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.95rem;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+
   .lede {
     color: var(--ink-muted);
     font-size: 1.02rem;
@@ -843,8 +865,10 @@
       </div>
     </section>
 
+    <div class="part-break"><span class="part-break-mark">◆</span></div>
+
     <!-- ══════════════════ TRANSACTION DETAIL & LIFECYCLE ══════════════════ -->
-    <h2 class="page-title" id="transaction-detail" style="margin-top:4.5rem;">Transaction Detail &amp; Lifecycle</h2>
+    <h2 class="page-title" id="transaction-detail">Transaction Detail &amp; Lifecycle</h2>
     <p class="lede">Beyond the list, each Transaction has its own creation flow, a settlement lifecycle made up of ledger lines, and a detail page where that lifecycle is reviewed and managed. This section documents that workflow end to end.</p>
 
     <!-- ══════════════════ TD-1 · CREATING A TRANSACTION ══════════════════ -->
