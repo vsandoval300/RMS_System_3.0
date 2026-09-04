@@ -442,11 +442,11 @@ class EditTransaction extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('userManual')
-                ->label('User Manual')
+            Action::make('userGuide')
+                ->label('User Guide')
                 ->icon('heroicon-o-book-open')
                 ->color('gray')
-                ->modalHeading('Premium Payment Tracker — User Manual')
+                ->modalHeading('Premium Payment Tracker — User Guide')
                 ->modalContent(fn () => view('filament.resources.transaction.user-manual-modal'))
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)

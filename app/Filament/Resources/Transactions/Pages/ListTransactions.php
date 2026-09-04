@@ -37,6 +37,16 @@ class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('userGuide')
+                ->label('User Guide')
+                ->icon('heroicon-o-book-open')
+                ->color('gray')
+                ->modalHeading('Premium Payment Tracker — User Guide')
+                ->modalContent(fn () => view('filament.resources.transaction.user-manual-modal'))
+                ->modalWidth('7xl')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close'),
+
             Action::make('export')
                 ->label('Export Report')
                 ->icon('heroicon-o-arrow-down-tray')
@@ -101,16 +111,6 @@ class ListTransactions extends ListRecords
                         $filename
                     );
                 }),
-
-            Action::make('userManual')
-                ->label('User Manual')
-                ->icon('heroicon-o-book-open')
-                ->color('gray')
-                ->modalHeading('Premium Payment Tracker — User Manual')
-                ->modalContent(fn () => view('filament.resources.transaction.user-manual-modal'))
-                ->modalWidth('7xl')
-                ->modalSubmitAction(false)
-                ->modalCancelActionLabel('Close'),
 
             CreateAction::make()
                 ->label('New Transaction')
