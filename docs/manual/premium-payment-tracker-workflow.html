@@ -878,27 +878,50 @@
       <p class="tab-dek">A Premium Payment represents an instalment of the premium associated with an Operative Document and defines when that portion of the premium is due and the proportion of the total premium it represents. Once created, each instalment is tracked throughout its lifecycle in the Premium Payment Tracker, from its initial pending status through the settlement legs generated according to the applicable Placement Scheme.</p>
       <p class="tab-dek">Premium Payments are created as a <strong>batch</strong> process. The user first selects the Operative Document and specifies the number of instalments to be created. RMS-Platform then generates a separate subform for each instalment, allowing its payment terms to be entered individually while keeping all instalments associated with the same Operative Document.</p>
 
+      <h3>Creating Instalments</h3>
+      <p class="tab-dek">To create one or more instalments, click <strong>New Premium Payment</strong> from the Premium Payment Tracker. This opens the Create Premium Payment form, where the Operative Document and the number of instalments to be created are defined before entering the details of each payment.</p>
+
       <div class="step">
         <div class="step-num">1</div>
         <div>
-          <h3>Select the Document</h3>
-          <p>Choosing the Operative Document loads its defaults: the next available index, its default Cost Scheme, and its exchange rate. The exchange rate is locked to <strong>1</strong> when the Business's currency is already US Dollars; otherwise it is taken from the Document's Rate of Exchange (ROE FS).</p>
+          <h3>Select the Operative Document</h3>
+          <p>From the <strong>Document</strong> field, select the Operative Document to which the instalments will belong. The selected document provides the context for the payments being created and determines the applicable Placement Scheme information used in their calculation.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">2</div>
         <div>
-          <h3>Set the number of instalments</h3>
-          <p>Using the stepper, the user chooses how many instalments to create at once. RMS-Platform then renders one "Transaction Information" block per instalment, described in <a href="#pp-instalments-batch">1.1 Instalments Batch</a>.</p>
+          <h3>Specify the Number of Instalments</h3>
+          <p>Use the <strong>Instalments</strong> field to specify how many payments will be created for the selected Operative Document. The number can be adjusted using the <strong>+</strong> and <strong>−</strong> controls.</p>
+          <p>RMS automatically generates a separate subform for each instalment. For example, selecting <strong>2</strong> creates two instalment sections, allowing the payment terms and corresponding information to be entered independently for each one.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">3</div>
         <div>
-          <h3>Complete each instalment and create</h3>
-          <p>Once every instalment's fields are filled, submitting the form creates all the Transactions together, along with the settlement ledger lines each one requires.</p>
+          <h3>Complete Each Instalment</h3>
+          <p>For each generated instalment, enter its <strong>Due Date</strong> and <strong>Proportion</strong>, representing the percentage of the document's premium allocated to that payment. The <strong>Exchange Rate</strong> and applicable <strong>Cost Scheme</strong> are also displayed and can be completed or adjusted as required.</p>
+          <p>The combined proportions of all instalments created for the same Operative Document should not exceed 100% of the premium. This allows the document's total premium to be distributed across one or multiple scheduled payments.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <h3>Review the Transaction Lifecycle Preview</h3>
+          <p>As the required information is entered, the <strong>Transaction Lifecycle</strong> section automatically displays a preview of the settlement legs that will be generated for the instalment according to the applicable Cost Scheme.</p>
+          <p>The preview shows how the instalment amount flows through the corresponding cost nodes, including the parties involved, applicable commissions and deductions, and the resulting net amounts. This provides an opportunity to review the expected settlement structure before the instalment is created.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div>
+          <h3>Create the Instalments</h3>
+          <p>Once the information for all instalments has been completed and reviewed, click <strong>Create</strong> to register them in the Premium Payment Tracker.</p>
+          <p>If additional instalments need to be entered for the same Operative Document, <strong>Save &amp; Create Another</strong> can be used instead. This saves the current instalments and starts a new entry while retaining the selected document, making it easier to continue building its payment schedule.</p>
         </div>
       </div>
 
