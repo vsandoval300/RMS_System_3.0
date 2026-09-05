@@ -394,6 +394,24 @@
   /* ── Field ledger table ──────────────────────────────── */
   .ledger-wrap { overflow-x: auto; margin: 0.75rem 0 0; border: 1px solid var(--rule); border-radius: 0.5rem; }
 
+  .diagram-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid var(--rule);
+    border-radius: 0.5rem;
+    background: var(--paper-raised);
+    padding: 1rem 1.1rem 0.4rem;
+  }
+  .diagram-wrap pre.mermaid { margin: 0; min-width: 480px; }
+  .diagram-cap {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 0 0.7rem;
+  }
+
   .subnote {
     font-size: 0.82rem;
     color: var(--ink-faint);
@@ -870,6 +888,79 @@
     <!-- ══════════════════ TRANSACTION DETAIL & LIFECYCLE ══════════════════ -->
     <h2 class="page-title" id="transaction-detail">Transaction Detail &amp; Lifecycle</h2>
     <p class="lede">Beyond the Premium Payments List, each Premium Payment follows its own operational lifecycle — from the creation of its instalment and the generation of the corresponding settlement legs, through to their review, management, and completion. This section covers that process end to end, including how Premium Payments are created, how their settlement lifecycle is generated, and how each instalment and its supporting information can be reviewed and managed from its detail page.</p>
+
+    <div class="prereq">
+      <span class="prereq-mark">§</span>
+      <p><strong>Before you start:</strong> make sure you have identified the Operative Document and the payment terms needed to create its Premium Payments. The specific fields and options for each stage are outlined in the following sections as you progress through the workflow.</p>
+    </div>
+
+    <figure class="diagram-wrap">
+      <div class="diagram-cap">The four stages of the Transaction Detail &amp; Lifecycle workflow</div>
+      <svg viewBox="0 0 950 220" style="max-width:100%;height:auto;color:var(--ink);" font-family="-apple-system, Segoe UI, sans-serif" role="img" aria-label="A Premium Payment moves through four stages: 1. Creating a Premium Payment, registering one or more instalments for an Operative Document; 2. Transaction Lifecycle, where settlement legs progress from Pending to Completed; 3. Viewing a Transaction, reviewing its ledger, support, and audit information; and 4. Editing a Transaction, applying a Bordereaux adjustment or recalculating its lifecycle.">
+        <defs>
+          <marker id="ppStageArrowAmber" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b8862f" /></marker>
+          <marker id="ppStageArrowRust" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9c4221" /></marker>
+          <marker id="ppStageArrowBlue" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2f6fb3" /></marker>
+        </defs>
+
+        <rect x="10" y="15" width="930" height="190" rx="14" fill="none" stroke="currentColor" stroke-width="1.25" stroke-dasharray="5 4" opacity="0.4" />
+        <text x="30" y="39" font-size="11.5" font-weight="700" letter-spacing="0.08em" fill="currentColor" opacity="0.55" font-family="ui-monospace, SF Mono, Menlo, monospace">PREMIUM PAYMENT</text>
+
+        <polyline points="235,115 250,115" fill="none" stroke="#b8862f" stroke-width="1.75" marker-end="url(#ppStageArrowAmber)" />
+        <polyline points="465,115 480,115" fill="none" stroke="#9c4221" stroke-width="1.75" marker-end="url(#ppStageArrowRust)" />
+        <polyline points="695,115 710,115" fill="none" stroke="#2f6fb3" stroke-width="1.75" marker-end="url(#ppStageArrowBlue)" />
+
+        <!-- Stage 1 — Creating a Premium Payment -->
+        <g>
+          <rect x="20" y="55" width="215" height="120" rx="10" fill="rgba(184,134,47,0.16)" stroke="#b8862f" stroke-width="1.75" />
+          <g transform="translate(36,71)" stroke="#b8862f" stroke-width="1.6" fill="none">
+            <rect x="1" y="1" width="18" height="18" rx="4" />
+            <path d="M10 5v10M5 10h10" />
+          </g>
+          <text x="76" y="77" font-size="12.5" font-weight="700" fill="currentColor">1. Create Payment</text>
+          <text x="76" y="97" font-size="10.5" fill="currentColor" opacity="0.65">Register one or more</text>
+          <text x="76" y="113" font-size="10.5" fill="currentColor" opacity="0.65">instalments for a document.</text>
+        </g>
+
+        <!-- Stage 2 — Transaction Lifecycle -->
+        <g>
+          <rect x="250" y="55" width="215" height="120" rx="10" fill="rgba(156,66,33,0.14)" stroke="#9c4221" stroke-width="1.75" />
+          <g transform="translate(266,71)" stroke="#9c4221" stroke-width="1.6" fill="none">
+            <path d="M4 10a6 6 0 0 1 10.2-4.2M16 10a6 6 0 0 1-10.2 4.2"/>
+            <path d="M14.2 3.5v2.3h-2.3"/>
+            <path d="M5.8 16.5v-2.3h2.3"/>
+          </g>
+          <text x="306" y="77" font-size="12.5" font-weight="700" fill="currentColor">2. Lifecycle</text>
+          <text x="306" y="97" font-size="10.5" fill="currentColor" opacity="0.65">Settlement legs move from</text>
+          <text x="306" y="113" font-size="10.5" fill="currentColor" opacity="0.65">Pending to Completed.</text>
+        </g>
+
+        <!-- Stage 3 — Viewing a Transaction -->
+        <g>
+          <rect x="480" y="55" width="215" height="120" rx="10" fill="rgba(47,111,179,0.1)" stroke="#2f6fb3" stroke-width="1.75" />
+          <g transform="translate(496,71)" stroke="#2f6fb3" stroke-width="1.6" fill="none">
+            <path d="M1.5 9S4.5 3 10 3s8.5 6 8.5 6-3 6-8.5 6-8.5-6-8.5-6Z"/>
+            <circle cx="10" cy="9" r="2.4"/>
+          </g>
+          <text x="536" y="77" font-size="12.5" font-weight="700" fill="currentColor">3. View</text>
+          <text x="536" y="97" font-size="10.5" fill="currentColor" opacity="0.65">Review ledger, support,</text>
+          <text x="536" y="113" font-size="10.5" fill="currentColor" opacity="0.65">and audit information.</text>
+        </g>
+
+        <!-- Stage 4 — Editing a Transaction -->
+        <g>
+          <rect x="710" y="55" width="215" height="120" rx="10" fill="rgba(63,158,92,0.12)" stroke="#3f9e5c" stroke-width="1.75" />
+          <g transform="translate(726,68)" stroke="#3f9e5c" stroke-width="1.6" fill="none">
+            <path d="M8 4H4a1.5 1.5 0 0 0-1.5 1.5v10A1.5 1.5 0 0 0 4 17h10a1.5 1.5 0 0 0 1.5-1.5V11"/>
+            <path d="M15.5 3.5a1.7 1.7 0 0 1 2.4 2.4L10 13.8l-3 .7.7-3Z"/>
+          </g>
+          <text x="766" y="77" font-size="12.5" font-weight="700" fill="currentColor">4. Edit</text>
+          <text x="766" y="97" font-size="10.5" fill="currentColor" opacity="0.65">Apply Bordereaux or</text>
+          <text x="766" y="113" font-size="10.5" fill="currentColor" opacity="0.65">recalculate the lifecycle.</text>
+        </g>
+      </svg>
+      <figcaption class="subnote">Each stage builds on the information created before it — Transaction Lifecycle, Viewing, and Editing all depend on at least one Premium Payment having been created.</figcaption>
+    </figure>
 
     <!-- ══════════════════ TD-1 · CREATING A TRANSACTION ══════════════════ -->
     <section class="tab" id="pp-create" data-tab="pp-create">
