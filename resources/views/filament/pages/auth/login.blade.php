@@ -31,14 +31,13 @@
                 Sign in with Microsoft
             </span>
         </a>
-
-        {{-- Version --}}
-        <!-- <div class="mt-10 w-full border-t border-gray-200 pt-6 text-center dark:border-gray-700">
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-                Version 4.0.0
-            </span>
-        </div> -->
-
+    </div>
+    
+    {{-- Version --}}
+    <div class="mt-10 w-full border-t border-gray-200 pt-6 text-center dark:border-gray-700">
+        <span class="text-sm text-gray-500 dark:text-gray-400 mx-auto flex w-fit items-center justify-center gap-2">
+            Version 4.0.0
+        </span>
     </div>
 
 </x-filament-panels::page.simple>
