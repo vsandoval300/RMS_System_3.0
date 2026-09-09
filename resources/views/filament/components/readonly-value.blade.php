@@ -1,5 +1,5 @@
 @props(['value' => null])
 
 <x-filament::input.wrapper disabled>
-    <span class="fi-input">{{ $value ?? '—' }}</span>
+    <input type="text" class="fi-input" value="{{ $value ?? '—' }}" disabled readonly tabindex="-1" />
 </x-filament::input.wrapper>
