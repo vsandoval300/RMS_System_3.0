@@ -64,17 +64,17 @@ class LogsRelationManager extends RelationManager
                 ->schema([
                     Placeholder::make('index')
                         ->label('Index')
-                        ->content(fn ($record) => $record?->index)
+                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->index]))
                         ->columnSpan(1),
 
                     Placeholder::make('transaction_id')
                         ->label('Transaction Id')
-                        ->content(fn ($record) => $record?->transaction_id)
+                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->transaction_id]))
                         ->columnSpan(3),
 
                     Placeholder::make('deduction_type')
                         ->label('Deduction Type')
-                        ->content(fn ($record) => $record?->deduction?->concept ?? '—')
+                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->deduction?->concept]))
                         ->columnSpan(2),
 
                     Placeholder::make('settlement_flow')
@@ -82,7 +82,9 @@ class LogsRelationManager extends RelationManager
                         ->content(function ($record) {
                             $clean = fn (?string $name) => $name ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $name)) : '—';
 
-                            return $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name);
+                            return view('filament.components.readonly-value', [
+                                'value' => $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name),
+                            ]);
                         })
                         ->columnSpan(2),
                 ]),
@@ -144,11 +146,11 @@ class LogsRelationManager extends RelationManager
 
                     Placeholder::make('exch_rate')
                         ->label('Exchange Rate')
-                        ->content(fn ($record) => $record?->exch_rate),
+                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->exch_rate])),
 
                     Placeholder::make('status')
                         ->label('Status')
-                        ->content(fn ($record) => $record?->status),
+                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->status])),
                 ]),
 
             Section::make('Financial Details')
