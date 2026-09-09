@@ -78,7 +78,7 @@ class LogsRelationManager extends RelationManager
                         ->columnSpan(2),
 
                     Placeholder::make('settlement_flow')
-                        ->label('Settlement Flow')
+                        ->label('Payment Flow')
                         ->content(function ($record) {
                             $clean = fn (?string $name) => $name ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $name)) : '—';
 
@@ -87,7 +87,7 @@ class LogsRelationManager extends RelationManager
                         ->columnSpan(2),
                 ]),
 
-            Section::make('Settlement Details')
+            Section::make('Stage Details')
                 ->icon('heroicon-o-calendar-days')
                 ->columnSpanFull()
                 ->extraAttributes(['class' => 'pp-log-section'])
@@ -372,7 +372,7 @@ class LogsRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading(new \Illuminate\Support\HtmlString('<span style="font-size:1.375rem;font-weight:700;">Edit Settlement Stage</span>'))
+                    ->modalHeading(new \Illuminate\Support\HtmlString('<span style="font-size:1.375rem;font-weight:700;">Edit Premium Payment Stage</span>'))
                     ->mutateRecordDataUsing(function (array $data, $record): array {
                         $prevLog = TransactionLog::query()
                             ->where('transaction_id', $record->transaction_id)
