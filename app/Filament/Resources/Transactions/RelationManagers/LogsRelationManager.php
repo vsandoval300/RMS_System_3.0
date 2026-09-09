@@ -14,7 +14,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Placeholder;
 use Filament\Support\RawJs;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -59,52 +59,33 @@ class LogsRelationManager extends RelationManager
             Section::make('General Information')
                 ->icon('heroicon-o-information-circle')
                 ->columnSpanFull()
-                ->columns(6)
+                ->columns(4)
                 ->schema([
-                    TextInput::make('index')
-                        ->numeric()
-                        ->disabled()            // ✅ siempre
-                        ->dehydrated(false)
-                        ->columnSpan(1),
+                    Placeholder::make('index')
+                        ->label('Index')
+                        ->content(fn ($record) => $record?->index),
 
-                    TextInput::make('transaction_id')
+                    Placeholder::make('transaction_id')
                         ->label('Transaction Id')
-                        ->disabled()            // ✅ siempre
-                        ->dehydrated(false)
-                        ->columnSpan(3),
+                        ->content(fn ($record) => $record?->transaction_id),
 
-                    Select::make('deduction_type')
-                        ->label('Deduction type')
-                        ->relationship('deduction', 'concept')
-                        ->searchable()
-                        ->preload()
-                        ->disabled()
-                        ->dehydrated(false)
-                        ->columnSpan(2),
+                    Placeholder::make('deduction_type')
+                        ->label('Deduction Type')
+                        ->content(fn ($record) => $record?->deduction?->concept ?? '—'),
 
-                    Select::make('from_entity')
-                        ->label('From entity')
-                        ->relationship('fromPartner', 'short_name')
-                        ->searchable()
-                        ->preload()
-                        ->disabled()
-                        ->dehydrated(false)
-                        ->columnSpan(3),
+                    Placeholder::make('settlement_flow')
+                        ->label('Settlement Flow')
+                        ->content(function ($record) {
+                            $clean = fn (?string $name) => $name ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $name)) : '—';
 
-                    Select::make('to_entity')
-                        ->label('To entity')
-                        ->relationship('toPartner', 'short_name')
-                        ->searchable()
-                        ->preload()
-                        ->disabled()
-                        ->dehydrated(false)
-                        ->columnSpan(3),
+                            return $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name);
+                        }),
                 ]),
 
-            Section::make('Timeline')
+            Section::make('Settlement Details')
                 ->icon('heroicon-o-calendar-days')
                 ->columnSpanFull()
-                ->columns(3)
+                ->columns(5)
                 ->schema([
                     Hidden::make('prev_received_date')->dehydrated(false),
 
@@ -114,6 +95,7 @@ class LogsRelationManager extends RelationManager
                         ->live(),
 
                     DatePicker::make('sent_date')
+                        ->label('Sent Date')
                         ->live()
                         ->disabled(fn (Get $get) => blank($get('due_date')))
                         ->helperText(fn (Get $get) => blank($get('due_date')) ? 'Set Due Date first.' : null)
@@ -136,6 +118,7 @@ class LogsRelationManager extends RelationManager
                         ]),
 
                     DatePicker::make('received_date')
+                        ->label('Received Date')
                         ->disabled(fn (Get $get) => blank($get('due_date')))
                         ->helperText(fn (Get $get) => blank($get('due_date')) ? 'Set Due Date first.' : null)
                         ->minDate(fn (Get $get) => collect([$get('due_date'), $get('sent_date')])->filter()->max() ?: null)
@@ -152,18 +135,14 @@ class LogsRelationManager extends RelationManager
                                 }
                             },
                         ]),
-                ]),
 
-            Section::make('Status')
-                ->icon('heroicon-o-signal')
-                ->columnSpanFull()
-                ->columns(2)
-                ->schema([
-                    TextInput::make('exch_rate')->numeric()->readOnly()->dehydrated(false),
-                    TextInput::make('status')
-                        ->maxLength(30)
-                        ->disabled()
-                        ->dehydrated(false),
+                    Placeholder::make('exch_rate')
+                        ->label('Exchange Rate')
+                        ->content(fn ($record) => $record?->exch_rate),
+
+                    Placeholder::make('status')
+                        ->label('Status')
+                        ->content(fn ($record) => $record?->status),
                 ]),
 
             Section::make('Financial Details')
@@ -172,7 +151,7 @@ class LogsRelationManager extends RelationManager
                 ->columns(5)
                 ->schema([
                     TextInput::make('gross_amount')
-                        ->label('Gross amount')
+                        ->label('Gross Amount')
                         ->required()
                         ->mask(RawJs::make('$money($input, ".", ",", 2)'))
                         ->dehydrateStateUsing(fn ($state) =>
@@ -180,17 +159,17 @@ class LogsRelationManager extends RelationManager
                         ),
 
                     TextInput::make('gross_amount_calc')
-                        ->label('Gross amount calc')
+                        ->label('Calculated Gross Amount')
                         ->disabled()
                         ->dehydrated(false),
 
                     TextInput::make('commission_discount')
-                        ->label('Commission discount')
+                        ->label('Commission Discount')
                         ->disabled()
                         ->dehydrated(false),
 
                     TextInput::make('banking_fee')
-                        ->label('Banking fee')
+                        ->label('Banking Fee')
                         ->required()
                         ->mask(RawJs::make('$money($input, ".", ",", 2)'))
                         ->live(onBlur: true)
@@ -205,7 +184,7 @@ class LogsRelationManager extends RelationManager
                         ),
 
                     TextInput::make('net_amount')
-                        ->label('Net amount')
+                        ->label('Net Amount')
                         ->disabled()
                         ->dehydrated(false)
                         ->mask(RawJs::make('$money($input, ".", ",", 2)')),
@@ -214,7 +193,6 @@ class LogsRelationManager extends RelationManager
             Section::make('Evidence')
                 ->icon('heroicon-o-paper-clip')
                 ->columnSpanFull()
-                ->description('Upload a PDF evidence file for this log row (optional).')
                 ->schema([
                     FileUpload::make('evidence_path')
                         ->label('Evidence (PDF)')
