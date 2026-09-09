@@ -22,8 +22,9 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Blade;
 use App\Models\TransactionLog;
-use Illuminate\Support\Facades\Storage;   
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
@@ -53,6 +54,14 @@ class LogsRelationManager extends RelationManager
         return false;
     }
 
+    protected static function readonlyBox(mixed $value): HtmlString
+    {
+        return new HtmlString(Blade::render(
+            '<x-filament::input.wrapper disabled><span class="fi-input">{{ $value }}</span></x-filament::input.wrapper>',
+            ['value' => $value ?? '—'],
+        ));
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -64,17 +73,17 @@ class LogsRelationManager extends RelationManager
                 ->schema([
                     Placeholder::make('index')
                         ->label('Index')
-                        ->content(fn ($record) => $record?->index)
+                        ->content(fn ($record) => static::readonlyBox($record?->index))
                         ->columnSpan(1),
 
                     Placeholder::make('transaction_id')
                         ->label('Transaction Id')
-                        ->content(fn ($record) => $record?->transaction_id)
+                        ->content(fn ($record) => static::readonlyBox($record?->transaction_id))
                         ->columnSpan(3),
 
                     Placeholder::make('deduction_type')
                         ->label('Deduction Type')
-                        ->content(fn ($record) => $record?->deduction?->concept ?? '—')
+                        ->content(fn ($record) => static::readonlyBox($record?->deduction?->concept))
                         ->columnSpan(2),
 
                     Placeholder::make('settlement_flow')
@@ -82,7 +91,7 @@ class LogsRelationManager extends RelationManager
                         ->content(function ($record) {
                             $clean = fn (?string $name) => $name ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $name)) : '—';
 
-                            return $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name);
+                            return static::readonlyBox($clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name));
                         })
                         ->columnSpan(2),
                 ]),
@@ -144,11 +153,11 @@ class LogsRelationManager extends RelationManager
 
                     Placeholder::make('exch_rate')
                         ->label('Exchange Rate')
-                        ->content(fn ($record) => $record?->exch_rate),
+                        ->content(fn ($record) => static::readonlyBox($record?->exch_rate)),
 
                     Placeholder::make('status')
                         ->label('Status')
-                        ->content(fn ($record) => $record?->status),
+                        ->content(fn ($record) => static::readonlyBox($record?->status)),
                 ]),
 
             Section::make('Financial Details')
