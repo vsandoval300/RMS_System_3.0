@@ -38,6 +38,10 @@ class AdminPanelProvider extends PanelProvider
                         font-size: 0.75rem;
                         line-height: 1.3;
                     }
+
+                    .pp-log-section .fi-section-header {
+                        background-color: light-dark(#f9fafb, rgba(255, 255, 255, 0.05));
+                    }
                 </style>
             ',
         );

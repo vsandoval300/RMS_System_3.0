@@ -59,6 +59,7 @@ class LogsRelationManager extends RelationManager
             Section::make('General Information')
                 ->icon('heroicon-o-information-circle')
                 ->columnSpanFull()
+                ->extraAttributes(['class' => 'pp-log-section'])
                 ->columns(8)
                 ->schema([
                     Placeholder::make('index')
@@ -89,6 +90,7 @@ class LogsRelationManager extends RelationManager
             Section::make('Settlement Details')
                 ->icon('heroicon-o-calendar-days')
                 ->columnSpanFull()
+                ->extraAttributes(['class' => 'pp-log-section'])
                 ->columns(5)
                 ->schema([
                     Hidden::make('prev_received_date')->dehydrated(false),
@@ -152,6 +154,7 @@ class LogsRelationManager extends RelationManager
             Section::make('Financial Details')
                 ->icon('heroicon-o-banknotes')
                 ->columnSpanFull()
+                ->extraAttributes(['class' => 'pp-log-section'])
                 ->columns(5)
                 ->schema([
                     TextInput::make('gross_amount')
@@ -197,6 +200,7 @@ class LogsRelationManager extends RelationManager
             Section::make('Evidence')
                 ->icon('heroicon-o-paper-clip')
                 ->columnSpanFull()
+                ->extraAttributes(['class' => 'pp-log-section'])
                 ->schema([
                     FileUpload::make('evidence_path')
                         ->label('Evidence (PDF)')
