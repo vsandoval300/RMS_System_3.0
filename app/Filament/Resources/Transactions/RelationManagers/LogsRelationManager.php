@@ -59,19 +59,22 @@ class LogsRelationManager extends RelationManager
             Section::make('General Information')
                 ->icon('heroicon-o-information-circle')
                 ->columnSpanFull()
-                ->columns(4)
+                ->columns(8)
                 ->schema([
                     Placeholder::make('index')
                         ->label('Index')
-                        ->content(fn ($record) => $record?->index),
+                        ->content(fn ($record) => $record?->index)
+                        ->columnSpan(1),
 
                     Placeholder::make('transaction_id')
                         ->label('Transaction Id')
-                        ->content(fn ($record) => $record?->transaction_id),
+                        ->content(fn ($record) => $record?->transaction_id)
+                        ->columnSpan(3),
 
                     Placeholder::make('deduction_type')
                         ->label('Deduction Type')
-                        ->content(fn ($record) => $record?->deduction?->concept ?? '—'),
+                        ->content(fn ($record) => $record?->deduction?->concept ?? '—')
+                        ->columnSpan(2),
 
                     Placeholder::make('settlement_flow')
                         ->label('Settlement Flow')
@@ -79,7 +82,8 @@ class LogsRelationManager extends RelationManager
                             $clean = fn (?string $name) => $name ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $name)) : '—';
 
                             return $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name);
-                        }),
+                        })
+                        ->columnSpan(2),
                 ]),
 
             Section::make('Settlement Details')
