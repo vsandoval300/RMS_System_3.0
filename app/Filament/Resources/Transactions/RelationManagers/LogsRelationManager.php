@@ -104,15 +104,14 @@ class LogsRelationManager extends RelationManager
             Section::make('Timeline')
                 ->icon('heroicon-o-calendar-days')
                 ->columnSpanFull()
-                ->columns(2)
+                ->columns(3)
                 ->schema([
                     Hidden::make('prev_received_date')->dehydrated(false),
 
                     DatePicker::make('due_date')
                         ->label('Due Date')
                         ->nullable()
-                        ->live()
-                        ->columnSpanFull(),
+                        ->live(),
 
                     DatePicker::make('sent_date')
                         ->live()
