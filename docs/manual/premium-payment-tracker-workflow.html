@@ -91,7 +91,7 @@
   /* ── Shell ───────────────────────────────────────────── */
   .shell {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: 330px minmax(0, 1fr);
     max-width: 1220px;
     margin: 0 auto;
     align-items: start;
@@ -633,7 +633,12 @@
             <a href="#pp-view"><span class="sub-letter">4.2</span>View</a>
             <ul class="index-branch">
               <li><a href="#pp-payment-info"><span class="sub-letter">4.2.1</span>Premium Payment Information</a></li>
-              <li><a href="#pp-logs-tab"><span class="sub-letter">4.2.2</span>Lifecycle Premium Payment</a></li>
+              <li>
+                <a href="#pp-logs-tab"><span class="sub-letter">4.2.2</span>Lifecycle Premium Payment</a>
+                <ul class="index-branch">
+                  <li><a href="#pp-edit-settlement-stage"><span class="sub-letter">4.2.2.1</span>Edit Premium Payment Stage</a></li>
+                </ul>
+              </li>
             </ul>
           </li>
           <li>
@@ -1012,6 +1017,9 @@
         <span class="note-mark">✓</span>
         <div>Ledger lines are generated automatically by the system and cannot be created or deleted manually from this tab. Only their settlement details can be edited.</div>
       </div>
+
+      <div class="subhead" id="pp-edit-settlement-stage" style="margin-top:2.25rem;"><span class="sub-letter">4.2.2.1</span><h4>Edit Premium Payment Stage</h4></div>
+      <p class="subhead-dek" style="max-width:none;">The Edit Premium Payment Stage form is used to update a ledger line's settlement progress. It organizes the line's data into four sections: General Information, showing read-only context such as the Index, Transaction Id, Deduction Type, and Payment Flow; Stage Details, where the Due Date can be set and, once defined, the Sent Date and Received Date can be recorded to advance the line's Status; Financial Details, where the Gross Amount and Banking Fee can be edited — adjusting the Banking Fee automatically recalculates the Net Amount from the line's Calculated Gross Amount and Commission Discount; and Evidence, where a supporting PDF can be attached.</p>
 
       <div class="subhead" id="pp-supports-tab"><h4>Premium Payment Support</h4></div>
       <p class="subhead-dek" style="max-width:none;">This tab contains general supporting documentation associated with the Premium Payment, such as remittance confirmations, correspondence, or other relevant evidence. Each support record includes a description and an attached file.</p>
