@@ -14,7 +14,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Placeholder;
 use Filament\Support\RawJs;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -62,29 +61,33 @@ class LogsRelationManager extends RelationManager
                 ->extraAttributes(['class' => 'pp-log-section'])
                 ->columns(8)
                 ->schema([
-                    Placeholder::make('index')
+                    TextInput::make('index')
                         ->label('Index')
-                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->index]))
+                        ->disabled()
+                        ->dehydrated(false)
                         ->columnSpan(1),
 
-                    Placeholder::make('transaction_id')
+                    TextInput::make('transaction_id')
                         ->label('Transaction Id')
-                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->transaction_id]))
+                        ->disabled()
+                        ->dehydrated(false)
                         ->columnSpan(3),
 
-                    Placeholder::make('deduction_type')
+                    TextInput::make('deduction_type')
                         ->label('Deduction Type')
-                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->deduction?->concept]))
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->formatStateUsing(fn ($record) => $record?->deduction?->concept)
                         ->columnSpan(2),
 
-                    Placeholder::make('settlement_flow')
+                    TextInput::make('settlement_flow')
                         ->label('Payment Flow')
-                        ->content(function ($record) {
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->formatStateUsing(function ($record) {
                             $clean = fn (?string $name) => $name ? trim(preg_replace('/\s*-\s*\[.*?\]$/', '', $name)) : '—';
 
-                            return view('filament.components.readonly-value', [
-                                'value' => $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name),
-                            ]);
+                            return $clean($record?->fromPartner?->short_name) . ' → ' . $clean($record?->toPartner?->short_name);
                         })
                         ->columnSpan(2),
                 ]),
@@ -144,13 +147,15 @@ class LogsRelationManager extends RelationManager
                             },
                         ]),
 
-                    Placeholder::make('exch_rate')
+                    TextInput::make('exch_rate')
                         ->label('Exchange Rate')
-                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->exch_rate])),
+                        ->disabled()
+                        ->dehydrated(false),
 
-                    Placeholder::make('status')
+                    TextInput::make('status')
                         ->label('Status')
-                        ->content(fn ($record) => view('filament.components.readonly-value', ['value' => $record?->status])),
+                        ->disabled()
+                        ->dehydrated(false),
                 ]),
 
             Section::make('Financial Details')
