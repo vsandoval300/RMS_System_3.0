@@ -1201,10 +1201,55 @@
       </div>
 
       <div class="subhead" id="pp-apply-bordereaux" style="margin-top:2.25rem;"><span class="sub-letter">4.3.1</span><h4>Apply Bordereaux</h4></div>
-      <p class="subhead-dek" style="max-width:none;"><strong>Apply Bordereaux</strong> is used when actual bordereaux figures arrive for a Business with Estimated or Declared premium. The user enters the Bordereaux Reference, the Reported Premium, and the Reported Claims; RMS-Platform proposes the resulting Net Amount (Premium minus Claims), which can be adjusted, and evidence files and notes can be attached. Confirming the action logs the adjustment in <a href="#pp-recalc-tab">Bordereaux Adjustments</a>, updates the instalment's amount, and regenerates its settlement ledger to match — while keeping each line's existing Sent/Received progress and evidence wherever it still applies.</p>
+
+      <div class="step" id="pp-bordereaux-step-1">
+        <div class="step-num">Step 1</div>
+        <div>
+          <h3>Identify the Premium Payment to Adjust</h3>
+          <p>For Businesses with an Estimated or Declared Premium Type, Premium Payments are initially created based on the estimated premium recorded for the corresponding Operative Document. To apply a subsequent Bordereau adjustment, locate the Premium Payments associated with the document using the available search and filtering tools in the Premium Payment Tracker.</p>
+        </div>
+      </div>
+
+      <div class="step" id="pp-bordereaux-step-2">
+        <div class="step-num">Step 2</div>
+        <div>
+          <h3>Open the Premium Payment for Editing</h3>
+          <p>Once the relevant Premium Payment has been identified, open its actions menu (⋮) and select <strong>Edit</strong>. This opens the Premium Payment record, where its current information and Lifecycle Stages can be reviewed before applying the Bordereau adjustment.</p>
+        </div>
+      </div>
+
+      <div class="step" id="pp-bordereaux-step-3">
+        <div class="step-num">Step 3</div>
+        <div>
+          <h3>Apply the Bordereau</h3>
+          <p>Before proceeding, verify that the received Bordereau has been reviewed and that the reported premium and claims information is correct. From the Edit Premium Payment Record page, click <strong>Apply Bordereaux</strong> to begin the adjustment.</p>
+        </div>
+      </div>
+
+      <div class="step" id="pp-bordereaux-step-4">
+        <div class="step-num">Step 4</div>
+        <div>
+          <h3>Enter the Bordereau Information</h3>
+          <p>The Apply Bordereaux Adjustment form is displayed. Enter the Bordereau reference, reported premium, and reported claims. The Net Amount to Receive is calculated from the reported amounts and can be adjusted manually when required. Attach the received Bordereau as supporting evidence and use the Notes field to record any relevant information regarding the declaration or adjustment.</p>
+        </div>
+      </div>
+
+      <div class="step" id="pp-bordereaux-step-5">
+        <div class="step-num">Step 5</div>
+        <div>
+          <h3>Apply the Adjustment and Recalculate the Lifecycle</h3>
+          <p>Once the information has been reviewed, click <strong>Apply &amp; Recalculate</strong>. The Premium Payment is updated based on the new amount reported through the Bordereau, and its applicable Lifecycle Stages are recalculated accordingly. Any existing lifecycle progress that remains applicable is preserved.</p>
+          <p>The Bordereau adjustment is also retained as part of the Premium Payment's adjustment history, together with its reference, reported premium and claims, previous and updated amounts, supporting evidence, and adjustment information.</p>
+        </div>
+      </div>
+
+      <div class="note depends">
+        <span class="note-mark">＋</span>
+        <div><strong>Recalculate Lifecycle</strong> recalculates the Premium Payment's Lifecycle Stages using its current values. If a Bordereaux adjustment has already been applied, the latest adjusted amount is used as the calculation base; otherwise, the Business's original estimated premium is used.</div>
+      </div>
 
       <div class="subhead" id="pp-recalculate-lifecycle" style="margin-top:2.25rem;"><span class="sub-letter">4.3.2</span><h4>Recalculate Lifecycle</h4></div>
-      <p class="subhead-dek" style="max-width:none;"><strong>Recalculate Lifecycle</strong> rebuilds the instalment's settlement ledger from its current Proportion, Exchange Rate, Due Date, and Cost Scheme, without changing the reported premium itself. It is useful after correcting one of these fields directly, so the ledger lines stay consistent with the instalment's data. Lines that no longer apply after the recalculation are removed; the rest keep their recorded Sent/Received dates, status, evidence, and any manually adjusted Banking Fee.</p>
+      <p class="subhead-dek" style="max-width:none;"><strong>Recalculate Lifecycle</strong> rebuilds the Premium Payment's settlement ledger from its current Proportion, Exchange Rate, Due Date, and Cost Scheme. If one or more Bordereaux adjustments have already been applied, the latest adjusted amount is used as the calculation base instead of the Business's original estimated premium. This is useful after correcting one of these fields directly, so the ledger lines stay consistent with the Premium Payment's current data. Lines that no longer apply after the recalculation are removed; the rest keep their recorded Sent/Received dates, status, evidence, and any manually adjusted Banking Fee.</p>
 
       <div class="note depends">
         <span class="note-mark">＋</span>
