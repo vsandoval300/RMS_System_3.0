@@ -90,6 +90,8 @@ class EditTransaction extends EditRecord
                 'document_id'    => $transaction->op_document_id,
             ]);
 
+            $hasBordereauxAdjustment = $transaction->recalculations()->exists();
+
             $rows = app(TransactionLogsPreviewService::class)->build(
                 opDocumentId: (string) $transaction->op_document_id,
                 typeId: (int) $transaction->transaction_type_id,
@@ -97,6 +99,7 @@ class EditTransaction extends EditRecord
                 exchRate: (float) $transaction->exch_rate,
                 remittanceCode: $transaction->remmitance_code,
                 dueDate: $transaction->due_date,
+                overrideBasePremium: $hasBordereauxAdjustment ? (float) $transaction->amount : null,
             );
 
             Log::info('Preview rows generated', [
