@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Transactions\Pages;
 
 use App\Exports\TransactionsReportExport;
+use App\Filament\Resources\Transactions\Pages\Concerns\RestoresGroupingFromSession;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionStatus;
 use Carbon\Carbon;
@@ -16,23 +17,9 @@ use App\Filament\Resources\Transactions\Widgets\TransactionStatsOverview;
 
 class ListTransactions extends ListRecords
 {
+    use RestoresGroupingFromSession;
+
     protected static string $resource = TransactionResource::class;
-
-    public function mount(): void
-    {
-        parent::mount();
-
-        if ($docId = request()->query('op_document_id')) {
-            $this->tableFilters = ['op_document_id' => ['value' => $docId]];
-        } elseif (blank($this->tableGrouping) && session()->has('transactions_table_grouping')) {
-            $this->tableGrouping = session('transactions_table_grouping');
-        }
-    }
-
-    public function updatedTableGrouping(): void
-    {
-        session(['transactions_table_grouping' => $this->tableGrouping]);
-    }
 
     protected function getHeaderActions(): array
     {

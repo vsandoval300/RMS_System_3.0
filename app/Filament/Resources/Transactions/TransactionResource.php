@@ -1038,7 +1038,8 @@ public static function infolist(Schema $schema): Schema
                             ->pluck('id', 'id')
                     )
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->default(fn () => request()->query('op_document_id')),
             ])
             
             ->recordActions([
